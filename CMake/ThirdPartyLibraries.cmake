@@ -1,0 +1,17 @@
+include_guard()
+
+hunter_add_package(Crc32c)
+hunter_add_package(double-conversion)
+hunter_add_package(GTest)
+hunter_add_package(RapidJSON)
+hunter_add_package(spdlog)
+hunter_add_package(tinyxml2)
+hunter_add_package(ZLIB)
+
+find_package(Crc32c CONFIG REQUIRED)
+find_package(double-conversion CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(tinyxml2 CONFIG REQUIRED)
+find_package(ZLIB CONFIG REQUIRED)

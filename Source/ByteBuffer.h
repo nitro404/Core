@@ -1,0 +1,159 @@
+#ifndef _BYTE_BUFFER_H_
+#define _BYTE_BUFFER_H_
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+class ByteBuffer {
+public:
+	enum class Endianness {
+		BigEndian,
+		LittleEndian
+	};
+
+	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);
+	ByteBuffer(size_t initialCapacity, Endianness endianness = DEFAULT_ENDIANNESS);
+	ByteBuffer(const uint8_t * data, size_t size, Endianness endianness = DEFAULT_ENDIANNESS);
+	ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness = DEFAULT_ENDIANNESS);
+	ByteBuffer(const ByteBuffer & buffer);
+	const ByteBuffer & operator = (const ByteBuffer & buffer);
+	virtual ~ByteBuffer();
+
+	const std::vector<uint8_t> & getData() const;
+	const uint8_t * getRawData() const;
+	bool isEmpty() const;
+	bool isFull() const;
+	size_t getSize() const;
+	size_t getCapacity() const;
+	void resize(size_t size, uint8_t value = 0);
+	bool reserve(size_t capacity);
+	void shrinkToFit();
+	Endianness getEndianness() const;
+	void setEndianness(Endianness endianness);
+	void fill(uint8_t value, size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
+	void reverse(size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
+	void clear();
+
+	size_t getReadOffset() const;
+	void setReadOffset(size_t offset) const;
+	bool skipReadBytes(size_t numberOfBytes) const;
+	size_t getRemainingBytes() const;
+	bool isEndOfBuffer() const;
+	void resetReadOffset() const;
+
+	size_t getWriteOffset() const;
+	void setWriteOffset(size_t offset) const;
+	void resetWriteOffset() const;
+	bool skipWriteBytes(size_t numberOfBytes) const;
+
+	int8_t getByte(size_t offset, bool * error = nullptr) const;
+	uint8_t getUnsignedByte(size_t offset, bool * error = nullptr) const;
+	int16_t getShort(size_t offset, bool * error = nullptr) const;
+	uint16_t getUnsignedShort(size_t offset, bool * error = nullptr) const;
+	int32_t getInteger(size_t offset, bool * error = nullptr) const;
+	uint32_t getUnsignedInteger(size_t offset, bool * error = nullptr) const;
+	int64_t getLong(size_t offset, bool * error = nullptr) const;
+	uint64_t getUnsignedLong(size_t offset, bool * error = nullptr) const;
+	float getFloat(size_t offset, bool * error = nullptr) const;
+	double getDouble(size_t offset, bool * error = nullptr) const;
+	std::string getString(size_t length, size_t offset, bool * error = nullptr) const;
+	std::string getCString(size_t offset, bool * error = nullptr) const;
+	std::vector<uint8_t> getBytes(size_t numberOfBytes, size_t offset, bool * error = nullptr);
+
+	int8_t readByte(bool * error = nullptr) const;
+	uint8_t readUnsignedByte(bool * error = nullptr) const;
+	int16_t readShort(bool * error = nullptr) const;
+	uint16_t readUnsignedShort(bool * error = nullptr) const;
+	int32_t readInteger(bool * error = nullptr) const;
+	uint32_t readUnsignedInteger(bool * error = nullptr) const;
+	int64_t readLong(bool * error = nullptr) const;
+	uint64_t readUnsignedLong(bool * error = nullptr) const;
+	float readFloat(bool * error = nullptr) const;
+	double readDouble(bool * error = nullptr) const;
+	std::string readString(size_t length, bool * error = nullptr) const;
+	std::string readCString(bool * error = nullptr) const;
+	std::vector<uint8_t> readBytes(size_t numberOfBytes, bool * error = nullptr);
+
+	bool putByte(int8_t value, size_t offset);
+	bool putUnsignedByte(uint8_t value, size_t offset);
+	bool putShort(int16_t value, size_t offset);
+	bool putUnsignedShort(uint16_t value, size_t offset);
+	bool putInteger(int32_t value, size_t offset);
+	bool putUnsignedInteger(uint32_t value, size_t offset);
+	bool putLong(int64_t value, size_t offset);
+	bool putUnsignedLong(uint64_t value, size_t offset);
+	bool putFloat(float value, size_t offset);
+	bool putDouble(double value, size_t offset);
+	bool putString(std::string & value, size_t offset);
+	bool putCString(std::string & value, size_t offset);
+	bool putBytes(const uint8_t * data, size_t size, size_t offset);
+	bool putBytes(const std::vector<uint8_t> data, size_t offset);
+	bool putBytes(const ByteBuffer & buffer, size_t offset);
+
+	bool insertByte(int8_t value, size_t offset);
+	bool insertUnsignedByte(uint8_t value, size_t offset);
+	bool insertShort(int16_t value, size_t offset);
+	bool insertUnsignedShort(uint16_t value, size_t offset);
+	bool insertInteger(int32_t value, size_t offset);
+	bool insertUnsignedInteger(uint32_t value, size_t offset);
+	bool insertLong(int64_t value, size_t offset);
+	bool insertUnsignedLong(uint64_t value, size_t offset);
+	bool insertFloat(float value, size_t offset);
+	bool insertDouble(double value, size_t offset);
+	bool insertString(std::string & value, size_t offset);
+	bool insertCString(std::string & value, size_t offset);
+	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
+	bool insertBytes(const std::vector<uint8_t> data, size_t offset);
+	bool insertBytes(const ByteBuffer & buffer, size_t offset);
+
+	bool writeByte(int8_t value);
+	bool writeUnsignedByte(uint8_t value);
+	bool writeShort(int16_t value);
+	bool writeUnsignedShort(uint16_t value);
+	bool writeInteger(int32_t value);
+	bool writeUnsignedInteger(uint32_t value);
+	bool writeLong(int64_t value);
+	bool writeUnsignedLong(uint64_t value);
+	bool writeFloat(float value);
+	bool writeDouble(double value);
+	bool writeString(std::string & value);
+	bool writeCString(std::string & value);
+	bool writeBytes(const uint8_t * data, size_t size);
+	bool writeBytes(const std::vector<uint8_t> data);
+	bool writeBytes(const ByteBuffer & buffer);
+
+	ByteBuffer clone() const;
+	ByteBuffer copyOfRange(size_t start, size_t end) const;
+	std::string toBinary() const;
+	std::string toHexadecimal(bool uppercase = true) const;
+	std::string toBase64() const;
+
+	static ByteBuffer fromBinary(const std::string & binary, bool * error = nullptr);
+	static ByteBuffer fromHexadecimal(const std::string & hexadecimal, bool * error = nullptr);
+	static ByteBuffer fromBase64(const std::string & base64, bool * error = nullptr);
+	static const ByteBuffer & emptyByteBuffer();
+
+	ByteBuffer operator + (const ByteBuffer & buffer) const;
+	ByteBuffer operator + (const std::vector<uint8_t> & buffer) const;
+	void operator += (const ByteBuffer & buffer);
+	void operator += (const std::vector<uint8_t> & data);
+	uint8_t operator [] (size_t index) const;
+
+	bool operator == (const ByteBuffer & byteBuffer);
+	bool operator != (const ByteBuffer & byteBuffer);
+
+	static Endianness DEFAULT_ENDIANNESS;
+	static size_t DEFAULT_INITIAL_CAPACITY;
+
+private:
+	bool checkOverflow(size_t baseSize, size_t additionalBytes) const;
+	bool autoResize(size_t baseSize, size_t additionalBytes);
+
+	std::vector<uint8_t> m_data;
+	Endianness m_endianness;
+	mutable size_t m_readOffset;
+	mutable size_t m_writeOffset;
+};
+
+#endif // _BYTE_BUFFER_H_

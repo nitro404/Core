@@ -1,0 +1,25 @@
+set(SOURCE_FILES
+	ByteBuffer.cpp
+	Colour.cpp
+	Dimension.cpp
+	Point.cpp
+	Rectangle.cpp
+	Math/ExtendedMath.cpp
+	Math/Matrix2x2.cpp
+	Math/Matrix3x3.cpp
+	Math/Matrix4x4.cpp
+	Math/Vector2.cpp
+	Math/Vector3.cpp
+	Math/Vector4.cpp
+	Platform/DeviceInformationBridge.cpp
+	Platform/PlatformBridgeFactory.cpp
+	Platform/PlatformBridgeLocator.cpp
+	Utilities/NumberUtilities.cpp
+	Utilities/StringUtilities.cpp
+	Utilities/Utilities.cpp
+)
+
+set(SOURCE_FILES_WINDOWS
+	Platform/Windows/DeviceInformationBridgeWindows.cpp
+	Platform/Windows/WindowsUtilities.cpp
+)
