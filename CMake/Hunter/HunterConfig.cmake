@@ -6,6 +6,15 @@ hunter_config(CryptoPP
 	SHA1 "20a451fd89437f65ecadfc7cf5ed75064441835b"
 )
 
+hunter_config(CURL
+	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-7.81.0.5.zip"
+	VERSION "7.81.0.5"
+	SHA1 "d189d374e97a02f4fb2ad59af6ce11e691c61330"
+	CMAKE_ARGS
+		CURL_USE_OPENSSL=ON
+		BUILD_SHARED_LIBS=OFF
+)
+
 hunter_config(double-conversion
 	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.1.5.zip"
 	VERSION "3.1.5"

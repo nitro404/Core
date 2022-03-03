@@ -19,11 +19,11 @@ static std::string transformStringCase(const std::string & string, const std::st
 	std::string tokenizedString(string);
 
 	while(true) {
-		if(i < tokenizedString.length() - 2 && Utilities::isAlphaNumericLowerCase(tokenizedString[i]) && Utilities::isUpperCase(tokenizedString[i + 1])) {
+		if(i < tokenizedString.length() - 2 && Utilities::isAlphaNumericLowerCase(tokenizedString[i]) && std::isupper(tokenizedString[i + 1])) {
 			tokenizedString.insert(tokenizedString.begin() + i + 1, '\0');
 		}
 
-		if(tokenizedString.length() >= 3 && i < tokenizedString.length() - 3 && Utilities::isUpperCase(tokenizedString[i]) && Utilities::isUpperCase(tokenizedString[i + 1]) && Utilities::isLowerCase(tokenizedString[i + 2])) {
+		if(tokenizedString.length() >= 3 && i < tokenizedString.length() - 3 && std::isupper(tokenizedString[i]) && std::isupper(tokenizedString[i + 1]) && std::islower(tokenizedString[i + 2])) {
 			tokenizedString.insert(tokenizedString.begin() + i + 1, '\0');
 		}
 
@@ -41,7 +41,7 @@ static std::string transformStringCase(const std::string & string, const std::st
 		tokenizedString.end(),
 		sanitizedString.begin(),
 		[] (char c) {
-			if(!Utilities::isAlphaNumeric(c)) {
+			if(!std::isalnum(c)) {
 				return '\0';
 			}
 
@@ -119,28 +119,14 @@ static std::string transformStringCase(const std::string & string, const std::st
 	return formattedString.str();
 }
 
-bool Utilities::isNumeric(char c) {
-	return c >= '0' && c <= '9';
-}
-
-bool Utilities::isUpperCase(char c) {
-	return c >= 'A' && c <= 'Z';
-}
-
-bool Utilities::isLowerCase(char c) {
-	return c >= 'a' && c <= 'z';
-}
-
-bool Utilities::isAlphaNumeric(char c) {
-	return isNumeric(c) || isUpperCase(c) || isLowerCase(c);
-}
+extern const std::string Utilities::emptyString;
 
 bool Utilities::isAlphaNumericUpperCase(char c) {
-	return isNumeric(c) || isUpperCase(c);
+	return std::isdigit(c) || std::isupper(c);
 }
 
 bool Utilities::isAlphaNumericLowerCase(char c) {
-	return isNumeric(c) || isLowerCase(c);
+	return std::isdigit(c) || std::islower(c);
 }
 
 size_t Utilities::stringLength(const char * s) {
@@ -427,7 +413,7 @@ std::string Utilities::toPascalCase(const std::string & string) {
 
 			formattedToken.reserve(token.length() + 1);
 
-			if(tokenIndex != 0 && Utilities::isNumeric(token[0])) {
+			if(tokenIndex != 0 && std::isdigit(token[0])) {
 				formattedToken += '_';
 			}
 

@@ -164,6 +164,7 @@ public:
 	ByteBuffer clone() const;
 	ByteBuffer copyOfRange(size_t start, size_t end) const;
 	std::string toString() const;
+	std::string_view toStringView() const;
 	std::string toBinary() const;
 	std::string toHexadecimal(bool uppercase = false) const;
 	std::string toBase64() const;

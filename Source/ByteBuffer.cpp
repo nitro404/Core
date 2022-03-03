@@ -1447,6 +1447,10 @@ std::string ByteBuffer::toString() const {
 	return std::string(reinterpret_cast<const char *>(m_data.data()), m_data.size());
 }
 
+std::string_view ByteBuffer::toStringView() const {
+	return std::string_view(reinterpret_cast<const char *>(m_data.data()), m_data.size());
+}
+
 std::string ByteBuffer::toBinary() const {
 	std::stringstream binaryStream;
 

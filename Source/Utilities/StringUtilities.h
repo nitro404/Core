@@ -9,10 +9,7 @@
 
 namespace Utilities {
 
-	bool isNumeric(char c);
-	bool isUpperCase(char c);
-	bool isLowerCase(char c);
-	bool isAlphaNumeric(char c);
+	const std::string emptyString;
 	bool isAlphaNumericUpperCase(char c);
 	bool isAlphaNumericLowerCase(char c);
 	size_t stringLength(const char * s);

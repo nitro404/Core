@@ -13,6 +13,13 @@ set(SOURCE_FILES
 	Math/Vector2.cpp
 	Math/Vector3.cpp
 	Math/Vector4.cpp
+	Network/HTTPHeaders.cpp
+	Network/HTTPRequest.cpp
+	Network/HTTPResponse.cpp
+	Network/HTTPService.cpp
+	Network/HTTPTimeout.cpp
+	Network/HTTPTransfer.cpp
+	Network/HTTPUtilities.cpp
 	Platform/DeviceInformationBridge.cpp
 	Platform/PlatformBridgeFactory.cpp
 	Platform/PlatformBridgeLocator.cpp
@@ -32,6 +39,7 @@ set(SOURCE_FILES_WINDOWS
 
 source_group(Source                    REGULAR_EXPRESSION ".*\\.(h|cpp)")
 source_group(Source\\Math              REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
+source_group(Source\\Network           REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
 source_group(Source\\Platform          REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
 source_group(Source\\Platform\\Windows REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
 source_group(Source\\Utilities         REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")

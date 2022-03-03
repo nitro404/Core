@@ -38,6 +38,7 @@ target_link_libraries(
 	${PROJECT_NAME}
 		PUBLIC
 			cryptopp-static
+			CURL::libcurl
 			double-conversion::double-conversion
 			fmt::fmt
 			GTest::gtest
