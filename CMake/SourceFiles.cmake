@@ -17,6 +17,7 @@ set(SOURCE_FILES
 	Platform/PlatformBridgeLocator.cpp
 	Utilities/FileUtilities.cpp
 	Utilities/NumberUtilities.cpp
+	Utilities/RapidJSONUtilities.cpp
 	Utilities/StringUtilities.cpp
 	Utilities/Utilities.cpp
 )
