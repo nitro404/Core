@@ -1,6 +1,7 @@
 set(SOURCE_FILES
 	ByteBuffer.cpp
 	Colour.cpp
+	Date.cpp
 	Dimension.cpp
 	Endianness.cpp
 	Point.cpp
