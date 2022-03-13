@@ -14,6 +14,7 @@ set(SOURCE_FILES
 	Platform/DeviceInformationBridge.cpp
 	Platform/PlatformBridgeFactory.cpp
 	Platform/PlatformBridgeLocator.cpp
+	Utilities/FileUtilities.cpp
 	Utilities/NumberUtilities.cpp
 	Utilities/StringUtilities.cpp
 	Utilities/Utilities.cpp
@@ -23,3 +24,9 @@ set(SOURCE_FILES_WINDOWS
 	Platform/Windows/DeviceInformationBridgeWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
 )
+
+source_group(Source                    REGULAR_EXPRESSION ".*\\.(h|cpp)")
+source_group(Source\\Math              REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
+source_group(Source\\Platform          REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
+source_group(Source\\Platform\\Windows REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
+source_group(Source\\Utilities         REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")

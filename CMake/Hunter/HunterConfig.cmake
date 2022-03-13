@@ -59,3 +59,5 @@ hunter_config(ZLIB
 	VERSION "1.2.11.1"
 	SHA1 "974d834f2e00dc647703c25f14617379986abd02"
 )
+
+include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)

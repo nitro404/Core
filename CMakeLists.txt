@@ -16,7 +16,7 @@ if(NOT (CMAKE_GENERATOR MATCHES "Visual Studio") AND NOT CMAKE_BUILD_TYPE)
 	message(FATAL_ERROR "Must set 'CMAKE_BUILD_TYPE' for single configuration generators.")
 endif()
 
-include(SourceList.cmake)
+include(SourceFiles)
 
 list(APPEND SOURCE_FILES ${SOURCE_FILES_${PLATFORM_UPPER}})
 
