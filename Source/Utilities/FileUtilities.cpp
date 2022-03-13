@@ -198,3 +198,30 @@ std::string Utilities::getSafeDirectoryName(const std::string & value) {
 
 	return safeDirectoryName.substr(0, lastPeriodIndex);
 }
+
+std::optional<std::string> Utilities::getFileSHA1Hash(const std::string & filePath) {
+	std::ifstream inputFileStream(filePath, std::ios::binary | std::ios::ate);
+
+	if(!inputFileStream.is_open()) {
+		fmt::print("Failed to open file '{}' for hashing.\n", filePath);
+		return {};
+	}
+
+	std::streampos fileEnd = inputFileStream.tellg();
+	inputFileStream.seekg(0, std::ios::beg);
+	size_t fileSize = std::size_t(fileEnd - inputFileStream.tellg());
+
+	if(fileSize == 0) {
+		fmt::print("File '{}' is empty, skipping hashing.\n", filePath);
+		return {};
+	}
+
+	ByteBuffer fileData(fileSize);
+
+	if(!inputFileStream.read(reinterpret_cast<char *>(fileData.getRawData()), fileData.getSize())) {
+		fmt::print("Failed to read file '{}' is empty, skipping hashing.\n", filePath);
+		return {};
+	}
+
+	return fileData.getSHA1();
+}

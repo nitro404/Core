@@ -18,6 +18,7 @@ namespace Utilities {
 	std::string truncateFileName(const std::string & filePath, size_t maxLength);
 	std::string joinPaths(const std::string & leftPath, const std::string & rightPath, char separator = '/');
 	std::string getSafeDirectoryName(const std::string &value);
+	std::optional<std::string> getFileSHA1Hash(const std::string & filePath);
 
 }
 

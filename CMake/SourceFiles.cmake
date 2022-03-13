@@ -2,6 +2,7 @@ set(SOURCE_FILES
 	ByteBuffer.cpp
 	Colour.cpp
 	Dimension.cpp
+	Endianness.cpp
 	Point.cpp
 	Rectangle.cpp
 	Math/ExtendedMath.cpp
