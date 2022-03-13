@@ -1,9 +1,8 @@
 #include "Matrix3x3.h"
 
-#include "Utilities/StringUtilities.h"
 #include "Vector3.h"
 
-#include <regex>
+#include <fmt/core.h>
 
 const Matrix3x3 Matrix3x3::Zero(
 	0.0f, 0.0f, 0.0f,
@@ -324,50 +323,5 @@ Matrix3x3 Matrix3x3::inverse() const {
 }
 
 std::string Matrix3x3::toString() const {
-	return std::to_string(m11) + ", " + std::to_string(m12) + ", " + std::to_string(m13) + ", " +
-		   std::to_string(m21) + ", " + std::to_string(m22) + ", " + std::to_string(m23) + ", " +
-		   std::to_string(m31) + ", " + std::to_string(m32) + ", " + std::to_string(m33);
-}
-
-Matrix3x3 Matrix3x3::parseFrom(const std::string & data, bool * error) {
-	static const std::regex      nonFloatRegExp("[^-0-9.]+");
-	static const std::regex  nonFloatTrimRegExp("(^[^-0-9.]+)|([^-0-9.]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonFloatTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonFloatRegExp, " ");
-
-	size_t index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	Matrix3x3 newMatrix;
-	for(size_t i = 0; i < formattedData.length(); i++) {
-		if(formattedData[i] == ' ' || i == formattedData.length() - 1) {
-			if(index > 8) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-
-			start = end + 1;
-			end = i == formattedData.length() - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			newMatrix.m[index++] = Utilities::parseFloat(part, &success);
-
-			if(!success) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-		}
-	}
-
-	if(index != 9) {
-		if(error != nullptr) { *error = true; }
-		return Zero;
-	}
-
-	return newMatrix;
+	return fmt::format("{}, {}, {}, {}, {}, {}, {}, {}, {}", m11, m12, m13, m21, m22, m23, m31, m32, m33);
 }

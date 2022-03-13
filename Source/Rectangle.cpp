@@ -3,9 +3,8 @@
 #include "Dimension.h"
 #include "Math/Vector2.h"
 #include "Point.h"
-#include "Utilities/StringUtilities.h"
 
-#include <regex>
+#include <fmt/core.h>
 
 const Rect Rect::Zero(0, 0, 0, 0);
 
@@ -214,55 +213,7 @@ Rect Rect::unioned(const Rect & rectangle) const {
 }
 
 std::string Rect::toString() const {
-	return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(w) + ", " + std::to_string(h);
-}
-
-Rect Rect::parseFrom(const std::string & data, bool * error) {
-	static const std::regex     nonIntegerRegExp("[^-0-9]+");
-	static const std::regex nonIntegerTrimRegExp("(^[^-0-9]+)|([^-0-9]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonIntegerTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonIntegerRegExp, " ");
-
-	size_t index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	Rect newRectangle;
-	for(size_t i = 0; i < formattedData.length(); i++) {
-		if(formattedData[i] == ' ' || i == formattedData.length() - 1) {
-			if(index > 3) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-
-			start = end + 1;
-			end = i == formattedData.length() - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			if(index < 2) {
-				newRectangle.p[index++] = Utilities::parseInteger(part, &success);
-			}
-			else {
-				newRectangle.d[index++] = Utilities::parseInteger(part, &success);
-			}
-
-			if(!success) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-		}
-	}
-
-	if(index != 4) {
-		if(error != nullptr) { *error = true; }
-		return Zero;
-	}
-
-	return newRectangle;
+	return fmt::format("{}, {}, {}, {}", x, y, w, h);
 }
 
 bool Rect::operator == (const Rect & rectangle) const {

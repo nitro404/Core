@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-class Colour {
+class Colour final {
 public:
 	enum class ByteOrder {
 		RGBA,
@@ -43,8 +43,6 @@ public:
 	static Colour lerp  (const Colour & c, const Colour & d, float amount);
 
 	std::string toString() const;
-
-	static Colour parseFrom(const std::string & data, bool * error = nullptr);
 
 	uint8_t operator [] (size_t index) const;
 

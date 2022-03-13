@@ -3,7 +3,7 @@
 
 #include <string>
 
-class Matrix3x3 {
+class Matrix3x3 final {
 public:
 	Matrix3x3              (float matrix11 = 1.0f, float matrix12 = 0.0f, float matrix13 = 0.0f,
                             float matrix21 = 0.0f, float matrix22 = 1.0f, float matrix23 = 0.0f,
@@ -11,7 +11,7 @@ public:
 	Matrix3x3              (const float matrix[9]);
 	Matrix3x3              (const Matrix3x3 & matrix);
 	Matrix3x3 & operator = (const Matrix3x3 & matrix);
-	virtual ~Matrix3x3     ();
+	~Matrix3x3             ();
 
 	Matrix3x3 operator   + (float c)                  const;
 	Matrix3x3 operator   + (const Matrix3x3 & matrix) const;
@@ -59,8 +59,6 @@ public:
 	Matrix3x3 inverse() const;
 
 	std::string toString() const;
-
-	static Matrix3x3 parseFrom(const std::string & data, bool * error = nullptr);
 
 	static const Matrix3x3 Zero;
 	static const Matrix3x3 One;

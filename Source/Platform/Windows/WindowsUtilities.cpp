@@ -66,57 +66,105 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 
 	RegCloseKey(hkey);
 
+	if(error != nullptr) {
+		*error = false;
+	}
+
 	return Utilities::wideStringToString(value);
 }
 
+std::optional<std::string> WindowsUtilities::getRegistryEntry(const std::string & key, const std::string & entryName) {
+	bool error = false;
+
+	std::string registryEntry(WindowsUtilities::getRegistryEntry(key, entryName, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return registryEntry;
+}
+
 std::any WindowsUtilities::variantToAny(VARIANT variant, bool * error) {
+	std::any any;
+
 	switch(variant.vt) {
-		case VT_BOOL:
-			return static_cast<bool>(variant.boolVal);
+		case VT_BOOL: {
+			any = static_cast<bool>(variant.boolVal);
+			break;
+		}
 
-		case VT_I1:
-			return static_cast<int8_t>(variant.bVal);
+		case VT_I1: {
+			any = static_cast<int8_t>(variant.bVal);
+			break;
+		}
 
-		case VT_UI1:
-			return static_cast<uint8_t>(variant.bVal);
+		case VT_UI1: {
+			any = static_cast<uint8_t>(variant.bVal);
+			break;
+		}
 
-		case VT_I2:
-			return static_cast<int16_t>(variant.iVal);
+		case VT_I2: {
+			any = static_cast<int16_t>(variant.iVal);
+			break;
+		}
 
-		case VT_UI2:
-			return static_cast<uint16_t>(variant.uiVal);
+		case VT_UI2: {
+			any = static_cast<uint16_t>(variant.uiVal);
+			break;
+		}
 
 		case VT_INT:
-		case VT_I4:
-			return static_cast<int32_t>(variant.intVal);
+		case VT_I4: {
+			any = static_cast<int32_t>(variant.intVal);
+			break;
+		}
 
 		case VT_UINT:
-		case VT_UI4:
-			return static_cast<uint32_t>(variant.uintVal);
+		case VT_UI4: {
+			any = static_cast<uint32_t>(variant.uintVal);
+			break;
+		}
 
-		case VT_I8:
-			return static_cast<int64_t>(variant.llVal);
+		case VT_I8: {
+			any = static_cast<int64_t>(variant.llVal);
+			break;
+		}
 
-		case VT_UI8:
-			return static_cast<uint64_t>(variant.ullVal);
+		case VT_UI8: {
+			any = static_cast<uint64_t>(variant.ullVal);
+			break;
+		}
 
-		case VT_R4:
-			return static_cast<float>(variant.fltVal);
+		case VT_R4: {
+			any = static_cast<float>(variant.fltVal);
+			break;
+		}
 
-		case VT_R8:
-			return static_cast<double>(variant.dblVal);
+		case VT_R8: {
+			any = static_cast<double>(variant.dblVal);
+			break;
+		}
 
-		case VT_CY:
-			return variant.cyVal;
+		case VT_CY: {
+			any = variant.cyVal;
+			break;
+		}
 
-		case VT_DATE:
-			return variant.date;
+		case VT_DATE: {
+			any = variant.date;
+			break;
+		}
 
-		case VT_BSTR:
-			return Utilities::wideStringToString(std::wstring(variant.bstrVal, SysStringLen(variant.bstrVal)));
+		case VT_BSTR: {
+			any = Utilities::wideStringToString(std::wstring(variant.bstrVal, SysStringLen(variant.bstrVal)));
+			break;
+		}
 
-		case VT_DECIMAL:
-			return *variant.pdecVal;
+		case VT_DECIMAL: {
+			any = *variant.pdecVal;
+			break;
+		}
 
 		case VT_VARIANT:
 		case VT_UNKNOWN:
@@ -150,15 +198,20 @@ std::any WindowsUtilities::variantToAny(VARIANT variant, bool * error) {
 		case VT_ARRAY:
 		case VT_BYREF:
 		case VT_RESERVED:
-		case VT_ILLEGAL:
+		case VT_ILLEGAL: {
 			if(error != nullptr) {
 				*error = true;
 			}
 
-			break;
+			return {};
+		}
 	}
 
-	return {};
+	if(error != nullptr) {
+		*error = false;
+	}
+
+	return any;
 }
 
 std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames, bool * error) {
@@ -349,10 +402,26 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 
 	CoUninitialize();
 
+	if(error != nullptr) {
+		*error = false;
+	}
+
 	return results;
 }
 
-std::any WindowsUtilities::getWindowsManagementInstrumentationEntry(const std::string& providerClassName, const std::string& propertyName, bool* error) {
+std::optional<std::vector<std::map<std::string, std::any>>> WindowsUtilities::getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames) {
+	bool error = false;
+
+	std::vector<std::map<std::string, std::any>> windowsManagementInstrumentationEntries(WindowsUtilities::getWindowsManagementInstrumentationEntries(providerClassName, propertyNames, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return windowsManagementInstrumentationEntries;
+}
+
+std::any WindowsUtilities::getWindowsManagementInstrumentationEntry(const std::string & providerClassName, const std::string & propertyName, bool * error) {
 	std::vector<std::map<std::string, std::any>> results = WindowsUtilities::getWindowsManagementInstrumentationEntries(providerClassName, std::vector { propertyName }, error);
 
 	if (results.empty()) {

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-class PlatformBridgeLocator {
+class PlatformBridgeLocator final {
 public:
 	static void setDeviceInformationBridge(std::unique_ptr<DeviceInformationBridge> bridge);
 	static DeviceInformationBridge * getDeviceInformationBridge();

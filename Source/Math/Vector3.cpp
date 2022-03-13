@@ -1,10 +1,9 @@
 #include "Vector3.h"
 
-#include "Utilities/StringUtilities.h"
 #include "Vector2.h"
 #include "Vector4.h"
 
-#include <regex>
+#include <fmt/core.h>
 
 const Vector3 Vector3::Zero    ( 0.0f,  0.0f,  0.0f);
 const Vector3 Vector3::One     ( 1.0f,  1.0f,  1.0f);
@@ -85,48 +84,5 @@ void Vector3::normalize       ()                        { float l = length(); if
 Vector3 Vector3::normalized   ()                  const { float l = length(); if(l == 0.0f) { return Zero; } else { return Vector3(x / l, y / l, z / l); } }
 
 std::string Vector3::toString() const {
-	return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
-}
-
-Vector3 Vector3::parseFrom(const std::string & data, bool * error) {
-	static const std::regex     nonFloatRegExp("[^-0-9.]+");
-	static const std::regex nonFloatTrimRegExp("(^[^-0-9.]+)|([^-0-9.]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonFloatTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonFloatRegExp, " ");
-
-	size_t index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	Vector3 newVector;
-	for(int i = 0; i < formattedData.length();i++) {
-		if(formattedData[i] == ' ' || i == formattedData.length() - 1) {
-			if(index > 2) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-
-			start = end + 1;
-			end = i == formattedData.length() - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			newVector.v[index++] = Utilities::parseFloat(part, &success);
-
-			if(!success) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-		}
-	}
-
-	if(index != 3) {
-		if(error != nullptr) { *error = true; }
-		return Zero;
-	}
-
-	return newVector;
+	return fmt::format("{}, {}, {}", x, y, z);
 }

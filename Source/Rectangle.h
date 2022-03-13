@@ -8,7 +8,7 @@ class Point;
 class Dimension;
 class Vector2;
 
-class Rect {
+class Rect final {
 public:
 	Rect(int32_t xPos = 0, int32_t yPos = 0, uint32_t width = 0, uint32_t height = 0);
 	Rect(const int32_t p[2], const uint32_t d[2]);
@@ -49,8 +49,6 @@ public:
 	Rect unioned(const Rect & rectangle) const;
 
 	std::string toString() const;
-
-	static Rect parseFrom(const std::string & data, bool * error = nullptr);
 
 	bool operator == (const Rect & rectangle) const;
 	bool operator != (const Rect & rectangle) const;

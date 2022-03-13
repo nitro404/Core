@@ -3,7 +3,7 @@
 
 #include "Platform/DeviceInformationBridge.h"
 
-class DeviceInformationBridgeWindows : public DeviceInformationBridge {
+class DeviceInformationBridgeWindows final : public DeviceInformationBridge {
 public:
 	DeviceInformationBridgeWindows();
 	virtual ~DeviceInformationBridgeWindows();

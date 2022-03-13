@@ -6,7 +6,7 @@
 class Vector2;
 class Vector4;
 
-class Vector3 {
+class Vector3 final {
 public:
 	Vector3              (float a = 0.0f, float b = 0.0f, float c = 0.0f);
 	Vector3              (const float v[3]);
@@ -16,7 +16,7 @@ public:
 	Vector3 & operator = (const Vector2 & v);
 	Vector3 & operator = (const Vector3 & v);
 	Vector3 & operator = (const Vector4 & v);
-	virtual ~Vector3     ();
+	~Vector3             ();
 
 	Vector3 operator   + (float c)           const;
 	Vector3 operator   + (const Vector2 & v) const;
@@ -78,8 +78,6 @@ public:
 	Vector3 normalized   ()                  const;
 
 	std::string toString() const;
-
-	static Vector3 parseFrom(const std::string & data, bool * error = nullptr);
 
 	static const Vector3 Zero;
 	static const Vector3 One;

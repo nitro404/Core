@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-class Dimension {
+class Dimension final {
 public:
 	Dimension(uint32_t w = 0, uint32_t h = 0);
 	Dimension(const uint32_t d[2]);
@@ -27,8 +27,6 @@ public:
 	static Dimension unpack(uint64_t packedDimension);
 
 	std::string toString() const;
-
-	static Dimension parseFrom(const std::string & data, bool * error = nullptr);
 
 	uint32_t operator [] (size_t index) const;
 

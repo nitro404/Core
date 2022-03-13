@@ -6,12 +6,11 @@ set(CORE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "" FORCE)
 set(_SOURCE_DIRECTORY "Source")
 
 include(Modules/Debug)
-
-include(Hunter/HunterInit.cmake)
+include(Hunter/HunterInit)
 
 project(Core LANGUAGES C CXX)
 
-include(ThirdPartyLibraries.cmake)
+include(ThirdPartyLibraries)
 
 if(NOT (CMAKE_GENERATOR MATCHES "Visual Studio") AND NOT CMAKE_BUILD_TYPE)
 	message(FATAL_ERROR "Must set 'CMAKE_BUILD_TYPE' for single configuration generators.")
@@ -38,9 +37,12 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(
 	${PROJECT_NAME}
 		PUBLIC
-			Crc32c::crc32c
+			cryptopp-static
 			double-conversion::double-conversion
+			fmt::fmt
 			GTest::gtest
+			libzip::zip
+			magic_enum::magic_enum
 			RapidJSON::rapidjson
 			spdlog::spdlog
 			tinyxml2::tinyxml2

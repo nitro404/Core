@@ -1,9 +1,8 @@
 #include "Colour.h"
 
 #include "Math/ExtendedMath.h"
-#include "Utilities/StringUtilities.h"
 
-#include <regex>
+#include <fmt/core.h>
 
 const Colour::ByteOrder Colour::DEFAULT_BYTE_ORDER = Colour::ByteOrder::RGBA;
 
@@ -225,33 +224,37 @@ void Colour::setColour(const uint8_t colour[4]) {
 
 void Colour::setColour(uint32_t packedColour, ByteOrder byteOrder) {
 	switch(byteOrder) {
-		case Colour::ByteOrder::RGBA:
+		case Colour::ByteOrder::RGBA: {
 			r = static_cast<uint8_t>((packedColour >> 24) & 0xff);
 			g = static_cast<uint8_t>((packedColour >> 16) & 0xff);
 			b = static_cast<uint8_t>((packedColour >>  8) & 0xff);
 			a = static_cast<uint8_t>((packedColour      ) & 0xff);
 			break;
+		}
 
-		case Colour::ByteOrder::BGRA:
+		case Colour::ByteOrder::BGRA: {
 			b = static_cast<uint8_t>((packedColour >> 24) & 0xff);
 			g = static_cast<uint8_t>((packedColour >> 16) & 0xff);
 			r = static_cast<uint8_t>((packedColour >>  8) & 0xff);
 			a = static_cast<uint8_t>((packedColour      ) & 0xff);
 			break;
+		}
 
-		case Colour::ByteOrder::ARGB:
+		case Colour::ByteOrder::ARGB: {
 			a = static_cast<uint8_t>((packedColour >> 24) & 0xff);
 			r = static_cast<uint8_t>((packedColour >> 16) & 0xff);
 			g = static_cast<uint8_t>((packedColour >>  8) & 0xff);
 			b = static_cast<uint8_t>((packedColour      ) & 0xff);
 			break;
+		}
 
-		case Colour::ByteOrder::ABGR:
+		case Colour::ByteOrder::ABGR: {
 			a = static_cast<uint8_t>((packedColour >> 24) & 0xff);
 			b = static_cast<uint8_t>((packedColour >> 16) & 0xff);
 			g = static_cast<uint8_t>((packedColour >>  8) & 0xff);
 			r = static_cast<uint8_t>((packedColour      ) & 0xff);
 			break;
+		}
 	}
 }
 
@@ -355,57 +358,11 @@ Colour Colour::lerp(const Colour & c, const Colour & d, float amount) {
 }
 
 std::string Colour::toString() const {
-	return std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b) + ", " + std::to_string(a);
-}
-
-Colour Colour::parseFrom(const std::string & data, bool * error) {
-	static const std::regex     nonIntegerRegExp("[^0-9]+");
-	static const std::regex nonIntegerTrimRegExp("(^[^0-9]+)|([^0-9]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonIntegerTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonIntegerRegExp, " ");
-
-	int index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	int value = 0;
-	Colour newColour;
-	for(int i=0;i<static_cast<int>(formattedData.length());i++) {
-		if(formattedData[i] == ' ' || i == static_cast<int>(formattedData.length()) - 1) {
-			if(index > 3) {
-				if(error != nullptr) { *error = true; }
-				return Transparent;
-			}
-
-			start = end + 1;
-			end = i == static_cast<int>(formattedData.length()) - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			value = Utilities::parseInteger(part, &success);
-
-			if(!success || value < 0 || value > 255) {
-				if(error != nullptr) { *error = true; }
-				return Transparent;
-			}
-
-			newColour.c[index++] = static_cast<uint8_t>(value);
-		}
-	}
-
-	if(index < 2) {
-		if(error != nullptr) { *error = true; }
-		return Transparent;
-	}
-
-	return newColour;
+	return fmt::format("{}, {}, {}, {}", r, g, b, a);
 }
 
 uint8_t Colour::operator [] (size_t index) const {
-	if(index < 0 || index > 3) {
+	if(index > 3) {
 		return 0;
 	}
 

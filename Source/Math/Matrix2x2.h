@@ -5,14 +5,14 @@
 
 class Vector2;
 
-class Matrix2x2 {
+class Matrix2x2 final {
 public:
 	Matrix2x2              (float matrix11 = 1.0f, float matrix12 = 0.0f,
                             float matrix21 = 0.0f, float matrix22 = 1.0f);
 	Matrix2x2              (const float matrix[4]);
 	Matrix2x2              (const Matrix2x2 & matrix);
 	Matrix2x2 & operator = (const Matrix2x2 & matrix);
-	virtual ~Matrix2x2     ();
+	~Matrix2x2             ();
 
 	Matrix2x2 operator   + (float c)                  const;
 	Matrix2x2 operator   + (const Matrix2x2 & matrix) const;
@@ -73,8 +73,6 @@ public:
 	Matrix2x2 inverse() const;
 
 	std::string toString() const;
-
-	static Matrix2x2 parseFrom(const std::string & data, bool * error = nullptr);
 
 	static const Matrix2x2 Zero;
 	static const Matrix2x2 One;

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-class Point {
+class Point final {
 public:
 	Point(int32_t x = 0, int32_t y = 0);
 	Point(const int32_t p[2]);
@@ -24,8 +24,6 @@ public:
 	float distanceBetween(const Point & point) const;
 
 	std::string toString() const;
-
-	static Point parseFrom(const std::string & data, bool * error = nullptr);
 
 	bool operator == (const Point & point) const;
 	bool operator != (const Point & point) const;

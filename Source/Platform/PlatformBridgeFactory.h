@@ -3,7 +3,7 @@
 
 #include "DeviceInformationBridge.h"
 
-class PlatformBridgeFactory {
+class PlatformBridgeFactory final {
 public:
 	static DeviceInformationBridge * createDeviceInformationBridge();
 

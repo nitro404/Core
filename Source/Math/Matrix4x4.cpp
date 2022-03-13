@@ -1,10 +1,9 @@
 #include "Matrix4x4.h"
 
-#include "Utilities/StringUtilities.h"
 #include "Vector3.h"
 #include "Vector4.h"
 
-#include <regex>
+#include <fmt/core.h>
 
 const Matrix4x4 Matrix4x4::Zero(
 	0.0f, 0.0f, 0.0f, 0.0f,
@@ -405,7 +404,7 @@ void Matrix4x4::invert() {
 				   m41 * m14 * m22;
 
 	inverse[14] = -m11 * m22 * m43 +
-				   m11 * m23 * m42 + 
+				   m11 * m23 * m42 +
 				   m21 * m12 * m43 -
 				   m21 * m13 * m42 -
 				   m41 * m12 * m23 +
@@ -538,7 +537,7 @@ Matrix4x4 Matrix4x4::inverse() const {
 				   m41 * m14 * m22;
 
 	inverse[14] = -m11 * m22 * m43 +
-				   m11 * m23 * m42 + 
+				   m11 * m23 * m42 +
 				   m21 * m12 * m43 -
 				   m21 * m13 * m42 -
 				   m41 * m12 * m23 +
@@ -590,51 +589,5 @@ Matrix4x4 Matrix4x4::inverse() const {
 }
 
 std::string Matrix4x4::toString() const {
-	return std::to_string(m11) + ", " + std::to_string(m12) + ", " + std::to_string(m13) + ", " + std::to_string(m14) + ", " +
-		   std::to_string(m21) + ", " + std::to_string(m22) + ", " + std::to_string(m23) + ", " + std::to_string(m24) + ", " +
-		   std::to_string(m31) + ", " + std::to_string(m32) + ", " + std::to_string(m33) + ", " + std::to_string(m34) + ", " +
-		   std::to_string(m41) + ", " + std::to_string(m42) + ", " + std::to_string(m43) + ", " + std::to_string(m44);
-}
-
-Matrix4x4 Matrix4x4::parseFrom(const std::string & data, bool * error) {
-	static const std::regex      nonFloatRegExp("[^-0-9.]+");
-	static const std::regex  nonFloatTrimRegExp("(^[^-0-9.]+)|([^-0-9.]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonFloatTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonFloatRegExp, " ");
-
-	size_t index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	Matrix4x4 newMatrix;
-	for(size_t i = 0; i < formattedData.length(); i++) {
-		if(formattedData[i] == ' ' || i == formattedData.length() - 1) {
-			if(index > 15) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-
-			start = end + 1;
-			end = i == formattedData.length() - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			newMatrix.m[index++] = Utilities::parseFloat(part, &success);
-
-			if(!success) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-		}
-	}
-
-	if(index != 16) {
-		if(error != nullptr) { *error = true; }
-		return Zero;
-	}
-
-	return newMatrix;
+	return fmt::format("{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}", m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
 }

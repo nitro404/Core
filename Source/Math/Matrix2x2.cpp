@@ -1,11 +1,11 @@
 #include "Matrix2x2.h"
 
 #include "ExtendedMath.h"
-#include "Utilities/StringUtilities.h"
 #include "Vector2.h"
 
+#include <fmt/core.h>
+
 #include <cmath>
-#include <regex>
 
 const Matrix2x2 Matrix2x2::Zero(
 	0.0f, 0.0f,
@@ -342,49 +342,5 @@ Matrix2x2 Matrix2x2::inverse() const {
 }
 
 std::string Matrix2x2::toString() const {
-	return std::to_string(m11) + ", " + std::to_string(m12) + ", " +
-		   std::to_string(m21) + ", " + std::to_string(m22);
-}
-
-Matrix2x2 Matrix2x2::parseFrom(const std::string & data, bool * error) {
-	static const std::regex      nonFloatRegExp("[^-0-9.]+");
-	static const std::regex  nonFloatTrimRegExp("(^[^-0-9.]+)|([^-0-9.]+$)");
-
-	std::string trimmedData;
-	std::regex_replace(std::back_inserter(trimmedData), data.begin(), data.end(), nonFloatTrimRegExp, "");
-
-	std::string formattedData;
-	std::regex_replace(std::back_inserter(formattedData), trimmedData.begin(), trimmedData.end(), nonFloatRegExp, " ");
-
-	size_t index = 0, start = -1, end = -1;
-	std::string part;
-	bool success = false;
-	Matrix2x2 newMatrix;
-	for(size_t i = 0; i < formattedData.length(); i++) {
-		if(formattedData[i] == ' ' || i == formattedData.length() - 1) {
-			if(index > 3) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-
-			start = end + 1;
-			end = i == formattedData.length() - 1 ? i + 1 : i;
-
-			part = Utilities::substring(formattedData, start, end);
-
-			newMatrix.m[index++] = Utilities::parseFloat(part, &success);
-
-			if(!success) {
-				if(error != nullptr) { *error = true; }
-				return Zero;
-			}
-		}
-	}
-
-	if(index != 4) {
-		if(error != nullptr) { *error = true; }
-		return Zero;
-	}
-
-	return newMatrix;
+	return fmt::format("{}, {}, {}, {}", m11, m12, m21, m22);
 }

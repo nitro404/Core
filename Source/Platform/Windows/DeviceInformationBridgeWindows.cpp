@@ -9,9 +9,9 @@ static const std::string OPERATING_SYSTEM_PROVIDER_CLASS_NAME("Win32_OperatingSy
 static const std::string SYSTEM_ENCLOSURE_PROVIDER_CLASS_NAME("Win32_SystemEnclosure");
 static const std::string NETWORK_ADAPTER_PROVIDER_CLASS_NAME("Win32_NetworkAdapter");
 
-DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() = default;
+DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
 
-DeviceInformationBridgeWindows::~DeviceInformationBridgeWindows() = default;
+DeviceInformationBridgeWindows::~DeviceInformationBridgeWindows() { }
 
 std::string DeviceInformationBridgeWindows::getHostName() {
 	static std::string hostName;
@@ -159,10 +159,15 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 		ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME
 	};
 
-	std::vector<DeviceInformationBridge::NetworkAdapterInformation> networkAdapterInfoCollection;
-	std::vector<std::map<std::string, std::any>> networkData = WindowsUtilities::getWindowsManagementInstrumentationEntries(NETWORK_ADAPTER_PROVIDER_CLASS_NAME, networkAdapterPropertyNames);
+	std::optional<std::vector<std::map<std::string, std::any>>> networkData = WindowsUtilities::getWindowsManagementInstrumentationEntries(NETWORK_ADAPTER_PROVIDER_CLASS_NAME, networkAdapterPropertyNames);
 
-	for(std::vector<std::map<std::string, std::any>>::const_iterator i = networkData.begin(); i != networkData.end(); ++i) {
+	if(!networkData.has_value()) {
+		return {};
+	}
+
+	std::vector<DeviceInformationBridge::NetworkAdapterInformation> networkAdapterInfoCollection;
+
+	for(std::vector<std::map<std::string, std::any>>::const_iterator i = networkData->begin(); i != networkData->end(); ++i) {
 		const std::map<std::string, std::any> networkAdapterData = *i;
 
 		std::map<std::string, std::any>::const_iterator physicalAdapter(networkAdapterData.find(ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME));

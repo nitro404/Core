@@ -1,8 +1,6 @@
 #ifndef _DEVICE_INFORMATION_BRIDGE_H_
 #define _DEVICE_INFORMATION_BRIDGE_H_
 
-#include "Singleton.h"
-
 #include <string>
 #include <vector>
 
@@ -16,12 +14,10 @@ public:
 	struct NetworkAdapterInformation {
 		std::string id;
 		std::string name;
-		NetworkConnectionType type;
+		NetworkConnectionType type = NetworkConnectionType::Wired;
 		std::string manufacturer;
 		std::string macAddress;
 		std::string serviceName;
-
-		NetworkAdapterInformation();
 	};
 
 	DeviceInformationBridge();

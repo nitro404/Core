@@ -3,7 +3,7 @@
 
 #include <string>
 
-class Matrix4x4 {
+class Matrix4x4 final {
 public:
 	Matrix4x4              (float matrix11 = 1.0f, float matrix12 = 0.0f, float matrix13 = 0.0f, float matrix14 = 0.0f,
                             float matrix21 = 0.0f, float matrix22 = 1.0f, float matrix23 = 0.0f, float matrix24 = 0.0f,
@@ -12,7 +12,7 @@ public:
 	Matrix4x4              (const float matrix[16]);
 	Matrix4x4              (const Matrix4x4 & matrix);
 	Matrix4x4 & operator = (const Matrix4x4 & matrix);
-	virtual ~Matrix4x4     ();
+	~Matrix4x4             ();
 
 	Matrix4x4 operator   + (float c)                  const;
 	Matrix4x4 operator   + (const Matrix4x4 & matrix) const;
@@ -61,8 +61,6 @@ public:
 	Matrix4x4 inverse() const;
 
 	std::string toString() const;
-
-	static Matrix4x4 parseFrom(const std::string & data, bool * error = nullptr);
 
 	static const Matrix4x4 Zero;
 	static const Matrix4x4 One;

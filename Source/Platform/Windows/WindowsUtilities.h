@@ -6,6 +6,7 @@
 #include <any>
 #include <comdef.h>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 #include <Wbemidl.h>
@@ -13,10 +14,12 @@
 namespace WindowsUtilities {
 
 	std::string getErrorMessage(HRESULT result);
-	std::string getRegistryEntry(const std::string & key, const std::string & entryName, bool * error = nullptr);
+	std::string getRegistryEntry(const std::string & key, const std::string & entryName, bool * error);
+	std::optional<std::string> getRegistryEntry(const std::string & key, const std::string & entryName);
 	std::any variantToAny(VARIANT variant, bool * error = nullptr);
-	std::vector<std::map<std::string, std::any>> getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames, bool * error = nullptr);
-	std::any getWindowsManagementInstrumentationEntry(const std::string& providerClassName, const std::string& propertyName, bool* error = nullptr);
+	std::vector<std::map<std::string, std::any>> getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames, bool * error);
+	std::optional<std::vector<std::map<std::string, std::any>>> getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames);
+	std::any getWindowsManagementInstrumentationEntry(const std::string & providerClassName, const std::string & propertyName, bool * error = nullptr);
 
 }
 
