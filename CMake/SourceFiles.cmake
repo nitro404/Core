@@ -19,12 +19,14 @@ set(SOURCE_FILES
 	Utilities/NumberUtilities.cpp
 	Utilities/RapidJSONUtilities.cpp
 	Utilities/StringUtilities.cpp
+	Utilities/TimeUtilities.cpp
 	Utilities/Utilities.cpp
 )
 
 set(SOURCE_FILES_WINDOWS
 	Platform/Windows/DeviceInformationBridgeWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
+	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 
 source_group(Source                    REGULAR_EXPRESSION ".*\\.(h|cpp)")
