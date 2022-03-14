@@ -315,7 +315,16 @@ bool HTTPResponse::hasETag() const {
 std::string HTTPResponse::getETag() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return getHeaderValue(HTTPHeaders::ETAG_HEADER_NAME);
+	std::string unformattedETag(getHeaderValue(HTTPHeaders::ETAG_HEADER_NAME));
+
+	size_t eTagStartIndex = unformattedETag.find_first_not_of("\"");
+	size_t eTagEndIndex = unformattedETag.find_last_not_of("\"");
+
+	if(eTagStartIndex == std::string::npos || eTagEndIndex == std::string::npos) {
+		return {};
+	}
+
+	return std::string(unformattedETag.data() + eTagStartIndex, eTagEndIndex - eTagStartIndex + 1);
 }
 
 std::future<std::shared_ptr<HTTPResponse>> HTTPResponse::getFuture() const {
