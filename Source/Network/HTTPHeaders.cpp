@@ -2,6 +2,8 @@
 
 #include "Utilities/StringUtilities.h"
 
+#include <fmt/core.h>
+
 const HTTPHeaders::HeaderCase HTTPHeaders::DEFAULT_HEADER_CASE = HeaderCase::OriginalCase;
 const std::string HTTPHeaders::CONTENT_TYPE_HEADER_NAME("Content-Type");
 const std::string HTTPHeaders::CONTENT_LENGTH_HEADER_NAME("Content-Length");
@@ -13,6 +15,8 @@ const std::string HTTPHeaders::EXPIRES_HEADER_NAME("Expires");
 const std::string HTTPHeaders::USER_AGENT_HEADER_NAME("User-Agent");
 const std::string HTTPHeaders::AUTHORIZATION_HEADER_NAME("Authorization");
 const std::string HTTPHeaders::ETAG_HEADER_NAME("ETag");
+const std::string HTTPHeaders::IF_NONE_MATCH_HEADER_NAME("If-None-Match");
+const std::string HTTPHeaders::IF_MATCH_HEADER_NAME("If-Match");
 const std::string HTTPHeaders::APPLICATION_JSON_CONTENT_TYPE("application/json");
 const std::string HTTPHeaders::APPLICATION_XML_CONTENT_TYPE("application/xml");
 const std::string HTTPHeaders::TEXT_XML_CONTENT_TYPE("application/xml");
@@ -326,6 +330,25 @@ bool HTTPHeaders::setHeaderCase(HeaderCase headerCase) {
 	m_headers = std::move(updatedHeaders);
 
 	return true;
+}
+
+std::string HTTPHeaders::formatETagValue(const std::string & eTag) {
+	return fmt::format("\"{}\"", eTag);
+}
+
+std::string HTTPHeaders::extractETagValue(const std::string & rawETag) {
+	if(rawETag.empty()) {
+		return {};
+	}
+
+	size_t eTagStartIndex = rawETag.find_first_not_of("\"");
+	size_t eTagEndIndex = rawETag.find_last_not_of("\"");
+
+	if(eTagStartIndex == std::string::npos || eTagEndIndex == std::string::npos) {
+		return {};
+	}
+
+	return std::string(rawETag.data() + eTagStartIndex, eTagEndIndex - eTagStartIndex + 1);
 }
 
 std::string HTTPHeaders::createBasicAuthenticationToken(const std::string & userName, const std::string & password) {

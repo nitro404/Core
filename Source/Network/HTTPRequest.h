@@ -56,6 +56,14 @@ public:
 	bool setAcceptedEncodingTypes(EncodingTypes encodingTypes);
 	bool clearAcceptedEncodingTypes();
 	static std::string getEncodingTypeName(EncodingTypes encodingType);
+	bool hasIfNoneMatchETag() const;
+	std::string getIfNoneMatchETag() const;
+	bool setIfNoneMatchETag(const std::string & eTag);
+	bool clearIfNoneMatchETag();
+	bool hasIfMatchETag() const;
+	std::string getIfMatchETag() const;
+	bool setIfMatchETag(const std::string & eTag);
+	bool clearIfMatchETag();
 	bool isRequestInitiated() const;
 	std::optional<std::chrono::time_point<std::chrono::system_clock>> getRequestInitiatedTimePoint() const;
 	bool isTransferStarted() const;

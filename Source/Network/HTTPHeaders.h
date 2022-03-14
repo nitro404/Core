@@ -62,6 +62,8 @@ public:
 	HeaderCase getHeaderCase() const;
 	bool setHeaderCase(HeaderCase headerCase);
 
+	static std::string formatETagValue(const std::string & eTag);
+	static std::string extractETagValue(const std::string & rawETag);
 	static std::string createBasicAuthenticationToken(const std::string & userName, const std::string & password);
 
 	bool operator == (const HTTPHeaders & headers) const;
@@ -78,6 +80,8 @@ public:
 	static const std::string USER_AGENT_HEADER_NAME;
 	static const std::string AUTHORIZATION_HEADER_NAME;
 	static const std::string ETAG_HEADER_NAME;
+	static const std::string IF_NONE_MATCH_HEADER_NAME;
+	static const std::string IF_MATCH_HEADER_NAME;
 	static const std::string APPLICATION_JSON_CONTENT_TYPE;
 	static const std::string APPLICATION_XML_CONTENT_TYPE;
 	static const std::string TEXT_XML_CONTENT_TYPE;

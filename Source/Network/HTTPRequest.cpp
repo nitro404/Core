@@ -200,6 +200,54 @@ std::string HTTPRequest::getEncodingTypeName(EncodingTypes encodingType) {
 	return {};
 }
 
+bool HTTPRequest::hasIfNoneMatchETag() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return hasHeader(HTTPHeaders::IF_NONE_MATCH_HEADER_NAME);
+}
+
+std::string HTTPRequest::getIfNoneMatchETag() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return HTTPHeaders::extractETagValue(getHeaderValue(HTTPHeaders::IF_NONE_MATCH_HEADER_NAME));
+}
+
+bool HTTPRequest::setIfNoneMatchETag(const std::string & eTag) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return setHeader(HTTPHeaders::IF_NONE_MATCH_HEADER_NAME, HTTPHeaders::formatETagValue(eTag));
+}
+
+bool HTTPRequest::clearIfNoneMatchETag() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return removeHeader(HTTPHeaders::IF_NONE_MATCH_HEADER_NAME);
+}
+
+bool HTTPRequest::hasIfMatchETag() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return hasHeader(HTTPHeaders::IF_MATCH_HEADER_NAME);
+}
+
+std::string HTTPRequest::getIfMatchETag() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return HTTPHeaders::extractETagValue(getHeaderValue(HTTPHeaders::IF_MATCH_HEADER_NAME));
+}
+
+bool HTTPRequest::setIfMatchETag(const std::string & eTag) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return setHeader(HTTPHeaders::IF_MATCH_HEADER_NAME, HTTPHeaders::formatETagValue(eTag));
+}
+
+bool HTTPRequest::clearIfMatchETag() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return removeHeader(HTTPHeaders::IF_MATCH_HEADER_NAME);
+}
+
 bool HTTPRequest::isRequestInitiated() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 

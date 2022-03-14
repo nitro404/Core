@@ -3,7 +3,6 @@
 
 #include "BitmaskOperators.h"
 #include "HTTPTransfer.h"
-#include "HTTPStatusCode.h"
 
 #include <chrono>
 #include <future>

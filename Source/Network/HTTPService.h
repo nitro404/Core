@@ -4,6 +4,7 @@
 #include "HTTPConfiguration.h"
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
+#include "HTTPStatusCode.h"
 #include "HTTPTimeout.h"
 #include "HTTPUtilities.h"
 
