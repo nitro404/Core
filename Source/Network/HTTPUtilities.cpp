@@ -1,6 +1,22 @@
 #include "HTTPUtilities.h"
 
+#include "HTTPStatusCode.h"
+#include "Utilities/StringUtilities.h"
+
 #include <fmt/core.h>
+#include <magic_enum.hpp>
+
+#include <optional>
+
+std::string HTTPUtilities::getStatusCodeName(uint16_t statusCode) {
+	std::optional<HTTPStatusCode> optionalStatusCode(magic_enum::enum_cast<HTTPStatusCode>(statusCode));
+
+	if(!optionalStatusCode.has_value()) {
+		return Utilities::emptyString;
+	}
+
+	return Utilities::toCapitalCase(std::string(magic_enum::enum_name(optionalStatusCode.value())));
+}
 
 bool HTTPUtilities::isSuccess(CURLcode code, const std::string & errorMessage) {
 	if(code != CURLE_OK) {

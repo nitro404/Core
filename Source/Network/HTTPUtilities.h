@@ -4,8 +4,10 @@
 #define NOMINMAX
 #include <curl/curl.h>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace HTTPUtilities {
 
@@ -14,6 +16,7 @@ namespace HTTPUtilities {
 	using CURLSharedHandle = std::unique_ptr<CURLSH, std::function<void (CURLSH *)>>;
 	using CURLStringList = std::unique_ptr<curl_slist, std::function<void (curl_slist *)>>;
 
+	std::string getStatusCodeName(uint16_t statusCode);
 	bool isSuccess(CURLcode code, const std::string & errorMessage = {});
 	bool isSuccess(CURLMcode code, const std::string & errorMessage = {});
 	bool isSuccess(CURLSHcode code, const std::string & errorMessage = {});
