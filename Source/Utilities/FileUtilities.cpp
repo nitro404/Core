@@ -12,7 +12,6 @@
 #include <filesystem>
 #include <fstream>
 #include <regex>
-#include <sstream>
 
 #if _WIN32
 
@@ -33,7 +32,6 @@ std::string Utilities::getFileName(const std::string & filePath) {
 
 	return filePath.substr(index + 1, filePath.length() - (index + 1));
 }
-
 
 std::string Utilities::getFilePath(const std::string & filePath) {
 	size_t index = std::string(filePath).find_last_of('/\\');
@@ -119,36 +117,6 @@ std::string Utilities::truncateFileName(const std::string & filePath, size_t max
 	}
 
 	return fileName.substr(0, maxLength - extension.length() - (extension.length() > 0 ? 1 : 0)) + (extension.length() > 0 ? "." + extension : "");
-}
-
-std::string Utilities::joinPaths(const std::string & leftPath, const std::string & rightPath, char separator) {
-	static const std::regex leftPathFormatRegExp("[ \t]*[/\\\\]+[ \t]*$");
-	static const std::regex rightPathFormatRegExp("^[ \t]*[/\\\\]+[ \t]*");
-	static const std::regex separatorRegExp("[/\\\\]");
-
-	std::string formattedLeftPath;
-	std::string formattedRightPath;
-	std::regex_replace(std::back_inserter(formattedLeftPath), leftPath.begin(), leftPath.end(), leftPathFormatRegExp, "");
-	std::regex_replace(std::back_inserter(formattedRightPath), rightPath.begin(), rightPath.end(), rightPathFormatRegExp, "");
-	std::stringstream joinedPathsStream;
-
-	if(!formattedLeftPath.empty()) {
-		joinedPathsStream << formattedLeftPath;
-
-		if(!formattedRightPath.empty()) {
-			joinedPathsStream << "/";
-		}
-	}
-
-	if(!formattedRightPath.empty()) {
-		joinedPathsStream << formattedRightPath;
-	}
-
-	std::string joinedPaths(joinedPathsStream.str());
-	std::string formattedJoinedPaths;
-	std::regex_replace(std::back_inserter(formattedJoinedPaths), joinedPaths.begin(), joinedPaths.end(), separatorRegExp, std::string(1, separator));
-
-	return formattedJoinedPaths;
 }
 
 std::string Utilities::getSafeDirectoryName(const std::string & value) {
