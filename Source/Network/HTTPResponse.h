@@ -43,6 +43,8 @@ public:
 	virtual ~HTTPResponse();
 
 	size_t getSize() const;
+	bool isSuccessStatusCode() const;
+	bool isFailureStatusCode() const;
 	uint16_t getStatusCode() const;
 	void setStatusCode(uint16_t statusCode);
 	State getState() const;

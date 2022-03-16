@@ -98,6 +98,18 @@ size_t HTTPResponse::getSize() const {
 	return m_totalRawHeadersSize + m_body.getSize();
 }
 
+bool HTTPResponse::isSuccessStatusCode() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_statusCode < 400;
+}
+
+bool HTTPResponse::isFailureStatusCode() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_statusCode >= 400;
+}
+
 uint16_t HTTPResponse::getStatusCode() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
