@@ -627,7 +627,7 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 			std::string header(fmt::format("{}: {}", i->first, i->second));
 
 			if(!HTTPUtilities::appendToCURLStringList(m_rawHTTPHeaderList, header)) {
-				fmt::print("Failed to append header '{}' to cURL string list for cURL request #{}.", header, m_id);
+				fmt::print("Failed to append header '{}' to cURL string list for cURL request #{}.\n", header, m_id);
 				return false;
 			}
 		}

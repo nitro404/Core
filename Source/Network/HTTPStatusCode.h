@@ -1,7 +1,9 @@
 #ifndef _HTTP_STATUS_CODE_H_
 #define _HTTP_STATUS_CODE_H_
 
-enum class HTTPStatusCode {
+#include <magic_enum.hpp>
+
+enum class HTTPStatusCode : uint16_t {
 	None = 0,
 	Continue = 100,
 	SwitchingProtocols = 101,
@@ -98,6 +100,12 @@ enum class HTTPStatusCode {
 	SiteIsFrozen = 530,
 	NetworkReadTimeoutError = 598,
 	NetworkConnectTimeoutError = 599
+};
+
+template <>
+struct magic_enum::customize::enum_range<HTTPStatusCode> {
+	static constexpr int min = 0;
+	static constexpr int max = 600;
 };
 
 #endif // _HTTP_STATUS_CODE_H_
