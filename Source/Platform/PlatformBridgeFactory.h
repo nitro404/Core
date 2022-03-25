@@ -9,6 +9,10 @@ public:
 
 private:
 	PlatformBridgeFactory() = delete;
+	PlatformBridgeFactory(const PlatformBridgeFactory &) = delete;
+	PlatformBridgeFactory(PlatformBridgeFactory &&) noexcept = delete;
+	const PlatformBridgeFactory & operator = (const PlatformBridgeFactory &) = delete;
+	const PlatformBridgeFactory & operator = (PlatformBridgeFactory &&) noexcept = delete;
 };
 
 #endif // _PLATFORM_BRIDGE_FACTORY_H_

@@ -18,6 +18,12 @@ public:
 	virtual std::string getOperatingSystemArchitecture() override;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
+
+private:
+	DeviceInformationBridgeWindows(const DeviceInformationBridgeWindows &) = delete;
+	DeviceInformationBridgeWindows(DeviceInformationBridgeWindows &&) noexcept = delete;
+	const DeviceInformationBridgeWindows & operator = (const DeviceInformationBridgeWindows &) = delete;
+	const DeviceInformationBridgeWindows & operator = (DeviceInformationBridgeWindows &&) noexcept = delete;
 };
 
 #endif // _DEVICE_INFORMATION_BRIDGE_WINDOWS_H_

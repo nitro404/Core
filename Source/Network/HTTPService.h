@@ -82,6 +82,11 @@ private:
 	std::map<CURL *, std::shared_ptr<HTTPRequest>> m_activeRequests;
 	mutable std::recursive_mutex m_mutex;
 	mutable std::condition_variable_any m_waitCondition;
+
+	HTTPService(const HTTPService &) = delete;
+	HTTPService(HTTPService &&) noexcept = delete;
+	const HTTPService & operator = (const HTTPService &) = delete;
+	const HTTPService & operator = (HTTPService &&) noexcept = delete;
 };
 
 #endif // _HTTP_SERVICE_H_

@@ -35,6 +35,12 @@ public:
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
 
 	static const std::string UNKNOWN_VALUE;
+
+private:
+	DeviceInformationBridge(const DeviceInformationBridge &) = delete;
+	DeviceInformationBridge(DeviceInformationBridge &&) noexcept = delete;
+	const DeviceInformationBridge & operator = (const DeviceInformationBridge &) = delete;
+	const DeviceInformationBridge & operator = (DeviceInformationBridge &&) noexcept = delete;
 };
 
 #endif // _DEVICE_INFORMATION_BRIDGE_H_
