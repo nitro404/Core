@@ -1,7 +1,8 @@
 #include "TimeUtilities.h"
 
-#include <chrono>
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 
 #if !defined(WINDOWS)
 
@@ -63,4 +64,14 @@ std::optional<std::tm> Utilities::getUTCTime() {
 	}
 
 	return utcTime;
+}
+
+std::string Utilities::timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint) {
+	std::time_t dateTime = std::chrono::system_clock::to_time_t(timePoint);
+	std::tm localTime = *std::localtime(&dateTime);
+
+	std::stringstream timePointStringStream;
+	timePointStringStream << std::put_time(&localTime, "%B %e, %Y %X");
+
+	return timePointStringStream.str();
 }
