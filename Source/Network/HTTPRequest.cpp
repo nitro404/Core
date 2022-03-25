@@ -614,7 +614,7 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 			bool ignoreHeader = false;
 
 			for(const std::string & ignoredHeader : IGNORED_HEADERS) {
-				if(Utilities::compareStringsIgnoreCase(i->first, ignoredHeader) == 0) {
+				if(Utilities::areStringsEqualIgnoreCase(i->first, ignoredHeader)) {
 					ignoreHeader = true;
 					break;
 				}

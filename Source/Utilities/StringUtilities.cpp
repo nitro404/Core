@@ -10,9 +10,9 @@
 #include <sstream>
 #include <string>
 
-static std::string transformStringCase(const std::string & string, const std::string & delimiter, std::function<std::string(const std::string &, size_t, size_t)> tokenTransformation) {
+static std::string transformStringCase(std::string_view string, std::string_view delimiter, std::function<std::string(std::string_view, size_t, size_t)> tokenTransformation) {
 	if(string.length() <= 1) {
-		return string;
+		return std::string(string);
 	}
 
 	size_t i = string.length() - 1;
@@ -208,13 +208,13 @@ char * Utilities::trimCopyString(const char * data) {
 	return newData;
 }
 
-std::string Utilities::trimString(const std::string & data, bool trimWhiteSpace, bool trimNewLines) {
+std::string Utilities::trimString(std::string_view data, bool trimWhiteSpace, bool trimNewLines) {
 	if(data.empty()) {
 		return std::string();
 	}
 
 	if(trimWhiteSpace == false && trimNewLines == false) {
-		return data;
+		return std::string(data);
 	}
 
 	std::string whiteSpace;
@@ -243,7 +243,7 @@ std::string Utilities::trimString(const std::string & data, bool trimWhiteSpace,
 		return std::string();
 	}
 
-	return data.substr(start, end - start + 1);
+	return std::string(data.data() + start, end - start + 1);
 }
 
 char * Utilities::substring(const char * data, size_t start, size_t length) {
@@ -271,7 +271,7 @@ char * Utilities::substring(const char * data, size_t start, size_t length) {
 	return newString;
 }
 
-std::string Utilities::reverseString(const std::string & data) {
+std::string Utilities::reverseString(std::string_view data) {
 	std::string reversed(data);
 
 	for(size_t i = 0; i < reversed.length() / 2; i++) {
@@ -281,14 +281,14 @@ std::string Utilities::reverseString(const std::string & data) {
 	return reversed;
 }
 
-std::string replaceAll(const std::string & value, const std::string & match, const std::string & replacement) {
+std::string Utilities::replaceAll(std::string_view value, std::string_view match, std::string_view replacement) {
 	std::string replacedString;
 	replacedString.reserve(value.length());
 
 	size_t lastIndex = 0;
 	size_t matchIndex = std::numeric_limits<size_t>::max();
 
-	while((matchIndex = value.find(match, lastIndex))) {
+	while((matchIndex = value.find(match, lastIndex) != std::string::npos)) {
 		replacedString.append(value, lastIndex, matchIndex - lastIndex);
 		replacedString.append(replacement);
 
@@ -325,7 +325,7 @@ std::wstring Utilities::stringToWideString(const std::string & string) {
 	return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(string);
 }
 
-std::string Utilities::toCamelCase(const std::string & string) {
+std::string Utilities::toCamelCase(std::string_view string) {
 	std::string camelCase(Utilities::toPascalCase(string));
 
 	if(camelCase.size() >= 1) {
@@ -335,47 +335,47 @@ std::string Utilities::toCamelCase(const std::string & string) {
 	return camelCase;
 }
 
-std::string Utilities::toCapitalCase(const std::string & string) {
+std::string Utilities::toCapitalCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		" ",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toPascalCase(token);
 		}
 	);
 }
 
-std::string Utilities::toConstantCase(const std::string & string) {
+std::string Utilities::toConstantCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"_",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toUpperCase(token);
 		}
 	);
 }
 
-std::string Utilities::toDotCase(const std::string & string) {
+std::string Utilities::toDotCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		".",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toLowerCase(token);
 		}
 	);
 }
 
-std::string Utilities::toHeaderCase(const std::string & string) {
+std::string Utilities::toHeaderCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"-",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toPascalCase(token);
 		}
 	);
 }
 
-std::string Utilities::toLowerCase(const std::string & string) {
+std::string Utilities::toLowerCase(std::string_view string) {
 	std::string lower(string.length(), '\0');
 
 	std::transform(
@@ -390,21 +390,21 @@ std::string Utilities::toLowerCase(const std::string & string) {
 	return lower;
 }
 
-std::string Utilities::toParamCase(const std::string & string) {
+std::string Utilities::toParamCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"-",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toLowerCase(token);
 		}
 	);
 }
 
-std::string Utilities::toPascalCase(const std::string & string) {
+std::string Utilities::toPascalCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			std::string formattedToken;
 
 			if(token.empty()) {
@@ -428,27 +428,27 @@ std::string Utilities::toPascalCase(const std::string & string) {
 	);
 }
 
-std::string Utilities::toPathCase(const std::string & string) {
+std::string Utilities::toPathCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"/",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toLowerCase(token);
 		}
 	);
 }
 
-std::string Utilities::toSnakeCase(const std::string & string) {
+std::string Utilities::toSnakeCase(std::string_view string) {
 	return transformStringCase(
 		string,
 		"_",
-		[] (const std::string & token, size_t tokenIndex, size_t numberOfTokens) {
+		[] (std::string_view token, size_t tokenIndex, size_t numberOfTokens) {
 			return Utilities::toLowerCase(token);
 		}
 	);
 }
 
-std::string Utilities::toSpongeCase(const std::string & string) {
+std::string Utilities::toSpongeCase(std::string_view string) {
 	std::string sponge(string.length(), '\0');
 
 	std::transform(
@@ -468,7 +468,7 @@ std::string Utilities::toSpongeCase(const std::string & string) {
 	return sponge;
 }
 
-std::string Utilities::toUpperCase(const std::string & string) {
+std::string Utilities::toUpperCase(std::string_view string) {
 	std::string upper(string.length(), '\0');
 
 	std::transform(
@@ -483,7 +483,7 @@ std::string Utilities::toUpperCase(const std::string & string) {
 	return upper;
 }
 
-std::string Utilities::swapCase(const std::string & string) {
+std::string Utilities::swapCase(std::string_view string) {
 	std::string swapped(string.length(), '\0');
 
 	std::transform(
@@ -498,30 +498,77 @@ std::string Utilities::swapCase(const std::string & string) {
 				return std::toupper(c);
 			}
 
-			return static_cast<int>(c);
+			return static_cast<int32_t>(c);
 		}
 	);
 
 	return swapped;
 }
 
-int Utilities::compareStrings(const std::string & s1, const std::string & s2, bool caseSensitive) {
-	if(caseSensitive) {
-		return strcmp(s1.c_str(), s2.c_str());
+bool Utilities::areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive) {
+	if(s1.length() != s2.length()) {
+		return false;
 	}
 
-#if _WIN32
-	return _stricmp(s1.c_str(), s2.c_str());
-#else
-	return strcasecmp(s1, s2);
-#endif // _WIN32
+	return Utilities::compareStrings(s1, s2) == 0;
 }
 
-int Utilities::compareStringsIgnoreCase(const std::string & s1, const std::string & s2) {
+int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive) {
+	char a = '\0';
+	char b = '\0';
+	size_t index = 0;
+
+	while(true) {
+		if(index >= s1.length()) {
+			if(index < s2.length()) {
+				return s1.length() - s2.length();
+			}
+			else {
+				return 0;
+			}
+		}
+
+		if(index >= s2.length()) {
+			if(index < s1.length()) {
+				return s1.length() - s2.length();
+			}
+			else {
+				return 0;
+			}
+		}
+
+		if(caseSensitive) {
+			a = s1[index];
+			b = s2[index];
+		}
+		else {
+			a = std::tolower(s1[index]);
+			b = std::tolower(s2[index]);
+		}
+
+		index++;
+
+		if(a == b) {
+			continue;
+		}
+
+		return a - b;
+	}
+}
+
+bool Utilities::areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2) {
+	if(s1.length() != s2.length()) {
+		return false;
+	}
+
+	return Utilities::compareStrings(s1, s2, false) == 0;
+}
+
+int32_t Utilities::compareStringsIgnoreCase(std::string_view s1, std::string_view s2) {
 	return Utilities::compareStrings(s1, s2, false);
 }
 
-bool Utilities::isComment(const std::string & data, const std::string & comment) {
+bool Utilities::isComment(std::string_view data, std::string_view comment) {
 	if(comment.empty()) {
 		return false;
 	}
@@ -609,7 +656,7 @@ bool Utilities::isMACAddress(const std::string & data) {
 	return std::regex_match(data, MAC_ADDRESS_REGEX);
 }
 
-std::string Utilities::getVariableID(const std::string & data) {
+std::string Utilities::getVariableID(std::string_view data) {
 	if(data.empty()) {
 		return std::string();
 	}
@@ -625,7 +672,7 @@ std::string Utilities::getVariableID(const std::string & data) {
 	return separatorIndex == std::string::npos ? std::string() : Utilities::trimString(formattedData.substr(0, separatorIndex));
 }
 
-std::string Utilities::getVariableValue(const std::string & data) {
+std::string Utilities::getVariableValue(std::string_view data) {
 	if(data.empty()) {
 		return std::string();
 	}
@@ -671,7 +718,7 @@ bool Utilities::isValidRealNumber(const std::string & data) {
 	return std::regex_match(data, REAL_NUMBER_REGEX);
 }
 
-bool Utilities::parseBoolean(const std::string & data, bool * error) {
+bool Utilities::parseBoolean(std::string_view data, bool * error) {
 	if(data.empty()) {
 		if(error != nullptr) {
 			*error = true;
@@ -680,7 +727,7 @@ bool Utilities::parseBoolean(const std::string & data, bool * error) {
 		return false;
 	}
 
-	std::string trimmedData(Utilities::trimString(data));
+	std::string_view trimmedData(Utilities::trimString(data));
 
 	if(trimmedData.empty()) {
 		if(error != nullptr) {
@@ -711,18 +758,18 @@ bool Utilities::parseBoolean(const std::string & data, bool * error) {
 		}
 	}
 	else {
-		if(Utilities::compareStringsIgnoreCase(trimmedData, "true") == 0 ||
-		   Utilities::compareStringsIgnoreCase(trimmedData, "on") == 0 ||
-		   Utilities::compareStringsIgnoreCase(trimmedData, "yes") == 0) {
+		if(Utilities::areStringsEqualIgnoreCase(trimmedData, "true") ||
+		   Utilities::areStringsEqualIgnoreCase(trimmedData, "on") ||
+		   Utilities::areStringsEqualIgnoreCase(trimmedData, "yes")) {
 			if(error != nullptr) {
 				*error = false;
 			}
 
 			return true;
 		}
-		else if(Utilities::compareStringsIgnoreCase(trimmedData, "false") == 0 ||
-				Utilities::compareStringsIgnoreCase(trimmedData, "off") == 0 ||
-				Utilities::compareStringsIgnoreCase(trimmedData, "no") == 0) {
+		else if(Utilities::areStringsEqualIgnoreCase(trimmedData, "false") ||
+				Utilities::areStringsEqualIgnoreCase(trimmedData, "off") ||
+				Utilities::areStringsEqualIgnoreCase(trimmedData, "no")) {
 			if(error != nullptr) {
 				*error = false;
 			}
@@ -738,7 +785,7 @@ bool Utilities::parseBoolean(const std::string & data, bool * error) {
 	return false;
 }
 
-std::optional<bool> Utilities::parseBoolean(const std::string & data) {
+std::optional<bool> Utilities::parseBoolean(std::string_view data) {
 	bool error = false;
 
 	bool value = Utilities::parseBoolean(data, &error);

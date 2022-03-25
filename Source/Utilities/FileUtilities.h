@@ -5,24 +5,33 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace Utilities {
 
 	extern const char newLine[];
 
-	std::string getFileName(const std::string & filePath);
-	std::string getFilePath(const std::string & filePath);
-	std::string getFileExtension(const std::string & filePath);
-	std::string getFileNameNoExtension(const std::string & filePath);
-	bool hasFileExtension(const std::string & filePath, const std::string & extension);
-	std::string replaceFileExtension(const std::string & filePath, const std::string & extension);
-	std::string reverseFileExtension(const std::string & filePath);
-	std::string truncateFileName(const std::string & filePath, size_t maxLength);
+	bool startsWithPathSeparator(std::string_view filePath);
+	bool endsWithPathSeparator(std::string_view filePath);
+	std::string_view getFileName(std::string_view filePath);
+	std::string_view getFilePath(std::string_view filePath);
+	std::string_view trimLeadingPathSeparator(std::string_view filePath);
+	std::string_view trimTrailingPathSeparator(std::string_view filePath);
+	std::string_view trimPathSeparators(std::string_view filePath);
+	std::string addLeadingPathSeparator(std::string_view filePath, char pathSeparator = '/');
+	std::string addTrailingPathSeparator(std::string_view filePath, char pathSeparator = '/');
+	std::string_view getFileExtension(std::string_view filePath);
+	std::string_view getFileNameNoExtension(std::string_view filePath);
+	bool hasFileExtension(std::string_view filePath, std::string_view extension, bool caseSensitive = false);
+	std::string replaceFileExtension(std::string_view filePath, std::string_view extension);
+	std::string reverseFileExtension(std::string_view filePath);
+	std::string truncateFileName(std::string_view filePath, size_t maxLength);
 	template <typename ...Arguments, typename = typename std::enable_if<sizeof...(Arguments) >= 2>::type>
 	std::string joinPaths(Arguments &&... arguments);
 	template <typename ...Arguments, typename = typename std::enable_if<sizeof...(Arguments) >= 2>::type>
 	std::string joinPaths(char separator, Arguments &&... arguments);
-	std::string getSafeDirectoryName(const std::string &value);
+	std::vector<std::string_view> splitPath(std::string_view path);
+	std::string getSafeDirectoryName(std::string_view value);
 	std::optional<std::string> getFileSHA1Hash(const std::string & filePath);
 
 }

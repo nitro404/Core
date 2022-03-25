@@ -138,7 +138,7 @@ bool HTTPHeaders::setHeader(const std::string & headerName, const std::string & 
 bool HTTPHeaders::isJSON() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return Utilities::compareStringsIgnoreCase(getContentMediaType(), APPLICATION_JSON_CONTENT_TYPE) == 0;
+	return Utilities::areStringsEqualIgnoreCase(getContentMediaType(), APPLICATION_JSON_CONTENT_TYPE);
 }
 
 bool HTTPHeaders::isXML() const {
@@ -146,8 +146,8 @@ bool HTTPHeaders::isXML() const {
 
 	std::string contentMediaType(getContentMediaType());
 
-	return Utilities::compareStringsIgnoreCase(contentMediaType, APPLICATION_XML_CONTENT_TYPE) == 0 ||
-		   Utilities::compareStringsIgnoreCase(contentMediaType, TEXT_XML_CONTENT_TYPE) == 0;
+	return Utilities::areStringsEqualIgnoreCase(contentMediaType, APPLICATION_XML_CONTENT_TYPE) ||
+		   Utilities::areStringsEqualIgnoreCase(contentMediaType, TEXT_XML_CONTENT_TYPE);
 }
 
 std::string HTTPHeaders::getRawContentType() const {

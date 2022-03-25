@@ -23,67 +23,142 @@ const char Utilities::newLine[] = "\n";
 
 #endif // _WIN32
 
-std::string Utilities::getFileName(const std::string & filePath) {
-	size_t index = std::string(filePath).find_last_of('/\\');
+bool Utilities::startsWithPathSeparator(std::string_view filePath) {
+	if(filePath.empty()) {
+		return false;
+	}
+
+	char startCharacter = filePath[0];
+
+	return startCharacter == '/' || startCharacter == '\\';
+}
+
+bool Utilities::endsWithPathSeparator(std::string_view filePath) {
+	if(filePath.empty()) {
+		return false;
+	}
+
+	char endCharacter = filePath[filePath.length() - 1];
+
+	return endCharacter == '/' || endCharacter == '\\';
+}
+
+std::string_view Utilities::getFileName(std::string_view filePath) {
+	size_t index = filePath.find_last_of("/\\");
 
 	if(index == std::string::npos) {
 		return filePath;
 	}
 
-	return filePath.substr(index + 1, filePath.length() - (index + 1));
+	return std::string_view(filePath.data() + index + 1, filePath.length() - (index + 1));
 }
 
-std::string Utilities::getFilePath(const std::string & filePath) {
-	size_t index = std::string(filePath).find_last_of('/\\');
+std::string_view Utilities::getFilePath(std::string_view filePath) {
+	size_t index = filePath.find_last_of("/\\");
 
 	if(index == std::string::npos) {
 		return filePath;
 	}
 
-	return filePath.substr(0, index);
+	return std::string_view(filePath.data(), index);
 }
 
-std::string Utilities::getFileExtension(const std::string & filePath) {
-	size_t index = std::string(filePath).find_last_of('.');
+std::string_view Utilities::trimLeadingPathSeparator(std::string_view filePath) {
+	size_t pathStartIndex = filePath.find_first_not_of("/\\");
 
-	if(index == std::string::npos) {
-		return std::string();
+	if(pathStartIndex == std::string::npos) {
+		return filePath;
 	}
 
-	return filePath.substr(index + 1, filePath.length() - (index + 1));
+	return std::string_view(filePath.data() + pathStartIndex, filePath.length() - pathStartIndex);
 }
 
-std::string Utilities::getFileNameNoExtension(const std::string & filePath) {
-	size_t index = std::string(filePath).find_last_of('.');
+std::string_view Utilities::trimTrailingPathSeparator(std::string_view filePath) {
+	size_t pathEndIndex = filePath.find_last_not_of("/\\");
+
+	if(pathEndIndex == std::string::npos) {
+		return filePath;
+	}
+
+	return std::string_view(filePath.data(), pathEndIndex + 1);
+}
+
+std::string_view Utilities::trimPathSeparators(std::string_view filePath) {
+	size_t pathStartIndex = filePath.find_first_not_of("/\\");
+	size_t pathEndIndex = filePath.find_last_not_of("/\\");
+
+	if(pathStartIndex == std::string::npos || pathEndIndex == std::string::npos) {
+		return filePath;
+	}
+
+	return std::string_view(filePath.data() + pathStartIndex, pathEndIndex - pathStartIndex + 1);
+}
+
+std::string Utilities::addLeadingPathSeparator(std::string_view filePath, char pathSeparator) {
+	if(filePath.empty()) {
+		return {};
+	}
+
+	if(Utilities::startsWithPathSeparator(filePath)) {
+		return std::string(filePath);
+	}
+
+	return pathSeparator + std::string(filePath);
+}
+
+std::string Utilities::addTrailingPathSeparator(std::string_view filePath, char pathSeparator) {
+	if(filePath.empty()) {
+		return {};
+	}
+
+	if(Utilities::endsWithPathSeparator(filePath)) {
+		return std::string(filePath);
+	}
+
+	return std::string(filePath) + pathSeparator;
+}
+
+std::string_view Utilities::getFileExtension(std::string_view filePath) {
+	size_t index = filePath.find_last_of(".");
+
+	if(index == std::string::npos) {
+		return std::string_view();
+	}
+
+	return std::string_view(filePath.data() + index + 1, filePath.length() - (index + 1));
+}
+
+std::string_view Utilities::getFileNameNoExtension(std::string_view filePath) {
+	size_t index = filePath.find_last_of(".");
 
 	if(index == std::string::npos) {
 		return filePath;
 	}
 
-	return filePath.substr(0, index);
+	return std::string_view(filePath.data(), index);
 }
 
-bool Utilities::hasFileExtension(const std::string & filePath, const std::string & extension) {
+bool Utilities::hasFileExtension(std::string_view filePath, std::string_view extension, bool caseSensitive) {
 	if(filePath.empty() || extension.empty()) {
 		return false;
 	}
 
-	return Utilities::compareStringsIgnoreCase(Utilities::getFileExtension(filePath), extension) == 0;
+	return Utilities::areStringsEqual(Utilities::getFileExtension(filePath), extension, caseSensitive);
 }
 
-std::string Utilities::replaceFileExtension(const std::string & filePath, const std::string & extension) {
+std::string Utilities::replaceFileExtension(std::string_view filePath, std::string_view extension) {
 	if(Utilities::getFileExtension(filePath).empty()) {
-		return filePath;
+		return std::string(filePath);
 	}
 
-	return Utilities::getFileNameNoExtension(filePath) + "." + extension;
+	return std::string(Utilities::getFileNameNoExtension(filePath)) + "." + std::string(extension);
 }
 
-std::string Utilities::reverseFileExtension(const std::string & filePath) {
+std::string Utilities::reverseFileExtension(std::string_view filePath) {
 	return Utilities::replaceFileExtension(filePath, Utilities::reverseString(Utilities::getFileExtension(filePath)));
 }
 
-std::string Utilities::truncateFileName(const std::string & filePath, size_t maxLength) {
+std::string Utilities::truncateFileName(std::string_view filePath, size_t maxLength) {
 	if(filePath.empty()) {
 		return std::string();
 	}
@@ -119,7 +194,50 @@ std::string Utilities::truncateFileName(const std::string & filePath, size_t max
 	return fileName.substr(0, maxLength - extension.length() - (extension.length() > 0 ? 1 : 0)) + (extension.length() > 0 ? "." + extension : "");
 }
 
-std::string Utilities::getSafeDirectoryName(const std::string & value) {
+std::vector<std::string_view> Utilities::splitPath(std::string_view path) {
+	if(path.empty()) {
+		return {};
+	}
+
+	size_t previousPathSeparatorIndex = std::string::npos;
+	size_t currentPathSeparatorIndex = 0;
+	std::string_view pathPart;
+	std::vector<std::string_view> pathParts;
+
+	while(true) {
+		currentPathSeparatorIndex = path.find_first_of("/\\", previousPathSeparatorIndex == std::string::npos ? 0 : previousPathSeparatorIndex + 1);
+
+		if(currentPathSeparatorIndex == std::string::npos) {
+			pathPart = std::string_view(path.data() + (previousPathSeparatorIndex == std::string::npos ? 0 : previousPathSeparatorIndex), path.length() - (previousPathSeparatorIndex == std::string::npos ? 0 : previousPathSeparatorIndex));
+
+			size_t pathPartEndIndex = pathPart.find_last_not_of("/\\");
+
+			if(pathPartEndIndex == std::string::npos) {
+				break;
+			}
+
+			pathPart = std::string_view(pathPart.data(), pathPartEndIndex);
+
+			if(!pathPart.empty()) {
+				pathParts.emplace_back(pathPart);
+			}
+
+			break;
+		}
+
+		pathPart = std::string_view(path.data() + (previousPathSeparatorIndex == std::string::npos ? 0 : previousPathSeparatorIndex + 1), currentPathSeparatorIndex - (previousPathSeparatorIndex == std::string::npos ? 0 : previousPathSeparatorIndex + 1));
+
+		if(!pathPart.empty()) {
+			pathParts.emplace_back(pathPart);
+		}
+
+		previousPathSeparatorIndex = currentPathSeparatorIndex;
+	}
+
+	return pathParts;
+}
+
+std::string Utilities::getSafeDirectoryName(std::string_view value) {
 	static const std::map<char, std::string> INVALID_CHARACTER_SUBSTITUTIONS = {
 		{ '<', "" },
 		{ '>', "" },

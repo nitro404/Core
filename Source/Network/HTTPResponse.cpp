@@ -452,7 +452,7 @@ size_t HTTPResponse::receiveHeader(const char * data, size_t size, size_t number
 		response->m_lastReceivedHeaderName = headerName;
 
 		// update body capacity based on content-length header when received
-		if(Utilities::compareStringsIgnoreCase(headerName, HTTPHeaders::CONTENT_LENGTH_HEADER_NAME) == 0) {
+		if(Utilities::areStringsEqualIgnoreCase(headerName, HTTPHeaders::CONTENT_LENGTH_HEADER_NAME)) {
 			std::optional<uint64_t> optionalContentLength(Utilities::parseUnsignedLong(headerValue));
 
 			if(!optionalContentLength.has_value()) {
