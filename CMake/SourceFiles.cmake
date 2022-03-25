@@ -29,6 +29,10 @@ set(SOURCE_FILES
 	Utilities/StringUtilities.cpp
 	Utilities/TimeUtilities.cpp
 	Utilities/Utilities.cpp
+	Zip/ZipArchive.cpp
+	Zip/ZipArchiveEntry.cpp
+	Zip/ZipArchiveSourceBuffer.cpp
+	Zip/ZipUtilities.cpp
 )
 
 set(SOURCE_FILES_WINDOWS
@@ -43,3 +47,4 @@ source_group(Source\\Network           REGULAR_EXPRESSION "Network/.*\\.(h|cpp)"
 source_group(Source\\Platform          REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
 source_group(Source\\Platform\\Windows REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
 source_group(Source\\Utilities         REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
+source_group(Source\\Zip               REGULAR_EXPRESSION "Zip/.*\\.(h|cpp)")
