@@ -727,7 +727,7 @@ bool Utilities::parseBoolean(std::string_view data, bool * error) {
 		return false;
 	}
 
-	std::string_view trimmedData(Utilities::trimString(data));
+	std::string trimmedData(Utilities::trimString(data));
 
 	if(trimmedData.empty()) {
 		if(error != nullptr) {
