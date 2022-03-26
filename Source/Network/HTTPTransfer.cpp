@@ -12,18 +12,19 @@ static uint64_t s_transferIDCounter = 1;
 HTTPTransfer::HTTPTransfer(HTTPService * service)
 	: HTTPHeaders()
 	, m_id(s_transferIDCounter++)
+	, m_body(std::make_unique<ByteBuffer>())
 	, m_service(service) { }
 
 HTTPTransfer::HTTPTransfer(HTTPTransfer && transfer) noexcept
 	: HTTPHeaders(transfer)
 	, m_id(transfer.m_id)
-	, m_body(transfer.m_body)
+	, m_body(std::move(transfer.m_body))
 	, m_service(transfer.m_service) { }
 
 HTTPTransfer::HTTPTransfer(const HTTPTransfer & transfer)
 	: HTTPHeaders(transfer)
 	, m_id(s_transferIDCounter++)
-	, m_body(std::move(transfer.m_body))
+	, m_body(std::make_unique<ByteBuffer>(*transfer.m_body))
 	, m_service(transfer.m_service) { }
 
 HTTPTransfer & HTTPTransfer::operator = (HTTPTransfer && transfer) noexcept {
@@ -47,7 +48,7 @@ HTTPTransfer & HTTPTransfer::operator = (const HTTPTransfer & transfer) {
 
 	HTTPHeaders::operator = (transfer);
 
-	m_body = transfer.m_body;
+	m_body = std::make_unique<ByteBuffer>(*transfer.m_body);
 	m_service = transfer.m_service;
 
 	return *this;
@@ -61,22 +62,32 @@ uint64_t HTTPTransfer::getID() const {
 	return m_id;
 }
 
-const ByteBuffer & HTTPTransfer::getBody() const {
+const ByteBuffer * HTTPTransfer::getBody() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_body;
+	return m_body.get();
 }
 
-ByteBuffer & HTTPTransfer::getBody() {
+ByteBuffer * HTTPTransfer::getBody() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_body;
+	return m_body.get();
+}
+
+std::unique_ptr<ByteBuffer> HTTPTransfer::transferBody() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	std::unique_ptr<ByteBuffer> body(std::move(m_body));
+
+	m_body = std::make_unique<ByteBuffer>();
+
+	return body;
 }
 
 std::string HTTPTransfer::getBodyAsString() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_body.toString();
+	return m_body->toString();
 }
 
 std::unique_ptr<rapidjson::Document> HTTPTransfer::getBodyAsJSON() const {
@@ -84,7 +95,7 @@ std::unique_ptr<rapidjson::Document> HTTPTransfer::getBodyAsJSON() const {
 
 	std::unique_ptr<rapidjson::Document> jsonDocument(std::make_unique<rapidjson::Document>());
 
-	if(jsonDocument->Parse(reinterpret_cast<const char *>(m_body.getRawData()), m_body.getSize()).HasParseError()) {
+	if(jsonDocument->Parse(reinterpret_cast<const char *>(m_body->getRawData()), m_body->getSize()).HasParseError()) {
 		return nullptr;
 	}
 
@@ -96,7 +107,7 @@ std::unique_ptr<tinyxml2::XMLDocument> HTTPTransfer::getBodyAsXML() const {
 
 	std::unique_ptr<tinyxml2::XMLDocument> xmlDocument(std::make_unique<tinyxml2::XMLDocument>());
 
-	if(xmlDocument->Parse(reinterpret_cast<const char *>(m_body.getRawData()), m_body.getSize()) != tinyxml2::XML_SUCCESS) {
+	if(xmlDocument->Parse(reinterpret_cast<const char *>(m_body->getRawData()), m_body->getSize()) != tinyxml2::XML_SUCCESS) {
 		return nullptr;
 	}
 
@@ -110,7 +121,7 @@ bool HTTPTransfer::setBody(const uint8_t * data, size_t size) {
 		return false;
 	}
 
-	m_body.setData(data, size);
+	m_body->setData(data, size);
 
 	return true;
 }
@@ -122,7 +133,7 @@ bool HTTPTransfer::setBody(const std::vector<uint8_t> & data) {
 		return false;
 	}
 
-	m_body.setData(data);
+	m_body->setData(data);
 
 	return true;
 }
@@ -134,7 +145,7 @@ bool HTTPTransfer::setBody(const std::string & value) {
 		return false;
 	}
 
-	m_body.setData(value);
+	m_body->setData(value);
 
 	return true;
 }
@@ -146,7 +157,7 @@ bool HTTPTransfer::setBody(const ByteBuffer & data) {
 		return false;
 	}
 
-	m_body.setData(data);
+	m_body->setData(data);
 
 	return true;
 }
@@ -161,7 +172,7 @@ bool HTTPTransfer::setBody(const rapidjson::Document & jsonDocument, bool update
 	rapidjson::StringBuffer jsonBuffer;
 	rapidjson::Writer<rapidjson::StringBuffer> jsonWriter(jsonBuffer);
 	jsonDocument.Accept(jsonWriter);
-	m_body = jsonBuffer.GetString();
+	m_body->setData(jsonBuffer.GetString());
 
 	if(updateContentType) {
 		setContentType(APPLICATION_JSON_CONTENT_TYPE);
@@ -179,7 +190,7 @@ bool HTTPTransfer::setBody(const tinyxml2::XMLDocument & xmlDocument, bool updat
 
 	tinyxml2::XMLPrinter printer;
 	xmlDocument.Print(&printer);
-	m_body = printer.CStr();
+	m_body->setData(printer.CStr());
 
 	if(updateContentType) {
 		setContentType(APPLICATION_XML_CONTENT_TYPE);

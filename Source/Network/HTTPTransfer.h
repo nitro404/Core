@@ -27,8 +27,9 @@ public:
 	virtual ~HTTPTransfer();
 
 	uint64_t getID() const;
-	const ByteBuffer & getBody() const;
-	ByteBuffer & getBody();
+	const ByteBuffer * getBody() const;
+	ByteBuffer * getBody();
+	std::unique_ptr<ByteBuffer> transferBody();
 	std::string getBodyAsString() const;
 	std::unique_ptr<rapidjson::Document> getBodyAsJSON() const;
 	std::unique_ptr<tinyxml2::XMLDocument> getBodyAsXML() const;
@@ -47,7 +48,7 @@ protected:
 	void clearService();
 
 	uint64_t m_id;
-	ByteBuffer m_body;
+	std::unique_ptr<ByteBuffer> m_body;
 	HTTPService * m_service;
 };
 

@@ -597,11 +597,11 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 
 	// set request body
 	if(hasBody) {
-		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_POSTFIELDSIZE, m_body.getSize()), fmt::format("Failed to set cURL request #{} body size to {}.", m_id, m_body.getSize()))) {
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_POSTFIELDSIZE, m_body->getSize()), fmt::format("Failed to set cURL request #{} body size to {}.", m_id, m_body->getSize()))) {
 			return false;
 		}
 
-		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_POSTFIELDS, m_body.isEmpty() ? nullptr : m_body.getRawData()), fmt::format("Failed to set cURL request #{} body data.", m_id))) {
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_POSTFIELDS, m_body->isEmpty() ? nullptr : m_body->getRawData()), fmt::format("Failed to set cURL request #{} body data.", m_id))) {
 			return false;
 		}
 	}

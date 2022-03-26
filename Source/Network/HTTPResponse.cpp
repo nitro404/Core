@@ -95,7 +95,7 @@ HTTPResponse::~HTTPResponse() {
 size_t HTTPResponse::getSize() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_totalRawHeadersSize + m_body.getSize();
+	return m_totalRawHeadersSize + m_body->getSize();
 }
 
 bool HTTPResponse::isSuccessStatusCode() const {
@@ -461,8 +461,8 @@ size_t HTTPResponse::receiveHeader(const char * data, size_t size, size_t number
 			}
 
 			if(response->getRequest()->getMethod() != HTTPRequest::Method::Head &&
-			   optionalContentLength.value() > response->getBody().getCapacity()) {
-				response->getBody().reserve(optionalContentLength.value());
+			   optionalContentLength.value() > response->getBody()->getCapacity()) {
+				response->getBody()->reserve(optionalContentLength.value());
 			}
 		}
 	}
@@ -628,7 +628,7 @@ bool HTTPResponse::appendData(const char * data, size_t size) {
 		return false;
 	}
 
-	m_body.writeBytes(reinterpret_cast<const uint8_t *>(data), size);
+	m_body->writeBytes(reinterpret_cast<const uint8_t *>(data), size);
 
 	return true;
 }
@@ -692,8 +692,8 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 
 	if(m_request->getMethod() != HTTPRequest::Method::Head &&
 	   contentLength.has_value() &&
-	   m_body.getSize() != contentLength.value()) {
-		onTransferError(fmt::format("Response size {} does not match '{}' header value of: {}.", m_body.getSize(), HTTPHeaders::CONTENT_LENGTH_HEADER_NAME, contentLength.value()));
+	   m_body->getSize() != contentLength.value()) {
+		onTransferError(fmt::format("Response size {} does not match '{}' header value of: {}.", m_body->getSize(), HTTPHeaders::CONTENT_LENGTH_HEADER_NAME, contentLength.value()));
 	}
 	else {
 		setState(State::Completed);
