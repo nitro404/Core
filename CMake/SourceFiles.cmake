@@ -1,4 +1,6 @@
 set(SOURCE_FILES
+	Arguments/ArgumentCollection.cpp
+	Arguments/ArgumentParser.cpp
 	ByteBuffer.cpp
 	Colour.cpp
 	Date.cpp
@@ -42,6 +44,7 @@ set(SOURCE_FILES_WINDOWS
 )
 
 source_group(Source                    REGULAR_EXPRESSION ".*\\.(h|cpp)")
+source_group(Source\\Arguments         REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
 source_group(Source\\Math              REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
 source_group(Source\\Network           REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
 source_group(Source\\Platform          REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
