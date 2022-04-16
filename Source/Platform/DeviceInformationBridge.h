@@ -1,6 +1,7 @@
 #ifndef _DEVICE_INFORMATION_BRIDGE_H_
 #define _DEVICE_INFORMATION_BRIDGE_H_
 
+#include "Dimension.h"
 #include <string>
 #include <vector>
 
@@ -35,6 +36,7 @@ public:
 	virtual std::string getProcessorName() = 0;
 	virtual std::string getMotherboardName() = 0;
 	virtual std::vector<std::string> getGraphicsCardNames() = 0;
+	virtual Dimension getScreenResolution() = 0;
 	virtual std::string getTimeZone() = 0;
 	virtual std::string getLocale() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;

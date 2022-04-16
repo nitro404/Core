@@ -7,6 +7,7 @@
 #include <powerbase.h>
 #include <timezoneapi.h>
 #include <winnls.h>
+#include <wtypes.h>
 
 #pragma comment(lib, "Powrprof.lib")
 
@@ -206,6 +207,14 @@ std::vector<std::string> DeviceInformationBridgeWindows::getGraphicsCardNames() 
 	}
 
 	return s_graphicsCardNames.value();
+}
+
+Dimension DeviceInformationBridgeWindows::getScreenResolution() {
+	RECT desktopRectangle;
+	const HWND desktopWindowHandle = GetDesktopWindow();
+	GetWindowRect(desktopWindowHandle, &desktopRectangle);
+
+	return Dimension(desktopRectangle.right, desktopRectangle.bottom);
 }
 
 std::string DeviceInformationBridgeWindows::getTimeZone() {
