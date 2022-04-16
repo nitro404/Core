@@ -2,10 +2,12 @@
 #define _DEVICE_INFORMATION_BRIDGE_H_
 
 #include "Dimension.h"
+#include "Singleton/Singleton.h"
+
 #include <string>
 #include <vector>
 
-class DeviceInformationBridge {
+class DeviceInformationBridge : public Singleton<DeviceInformationBridge> {
 public:
 	// SMBIOS Reference Specification 7.18.2
 	enum class MemoryType : uint8_t {
@@ -71,7 +73,6 @@ public:
 		bool connected = false;
 	};
 
-	DeviceInformationBridge();
 	virtual ~DeviceInformationBridge();
 
 	virtual std::string getHostName() = 0;
@@ -98,6 +99,8 @@ public:
 
 	static std::string getMemoryTypeName(MemoryType memoryType);
 
+protected:
+	DeviceInformationBridge();
 
 private:
 	DeviceInformationBridge(const DeviceInformationBridge &) = delete;

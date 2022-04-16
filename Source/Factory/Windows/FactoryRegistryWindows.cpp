@@ -1,3 +1,9 @@
 #include "Factory/FactoryRegistry.h"
 
-void FactoryRegistry::assignPlatformFactories() { }
+#include "Platform/Windows/DeviceInformationBridgeWindows.h"
+
+void FactoryRegistry::assignPlatformFactories() {
+	setFactory<DeviceInformationBridge>([]() {
+		return std::make_unique<DeviceInformationBridgeWindows>();
+	});
+}

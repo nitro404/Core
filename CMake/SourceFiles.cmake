@@ -27,8 +27,6 @@ set(SOURCE_FILES
 	Network/HTTPTransfer.cpp
 	Network/HTTPUtilities.cpp
 	Platform/DeviceInformationBridge.cpp
-	Platform/PlatformBridgeFactory.cpp
-	Platform/PlatformBridgeLocator.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
 	Singleton/SingletonManager.cpp
