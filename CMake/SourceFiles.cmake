@@ -7,6 +7,8 @@ set(SOURCE_FILES
 	Date.cpp
 	Dimension.cpp
 	Endianness.cpp
+	Factory/Factory.cpp
+	Factory/FactoryRegistry.cpp
 	Point.cpp
 	Rectangle.cpp
 	Math/ExtendedMath.cpp
@@ -41,6 +43,7 @@ set(SOURCE_FILES
 )
 
 set(SOURCE_FILES_WINDOWS
+	Factory/Windows/FactoryRegistryWindows.cpp
 	Platform/Windows/DeviceInformationBridgeWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
 	Utilities/Windows/TimeUtilitiesWindows.cpp
@@ -49,6 +52,8 @@ set(SOURCE_FILES_WINDOWS
 source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
 source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
 source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
+source_group(Source\\Factory            REGULAR_EXPRESSION "Factory/.*\\.(h|cpp)")
+source_group(Source\\Factory\\Windows   REGULAR_EXPRESSION "Factory/Windows/.*\\.(h|cpp)")
 source_group(Source\\Math               REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
 source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
 source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
