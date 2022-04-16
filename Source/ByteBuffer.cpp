@@ -82,7 +82,7 @@ ByteBuffer & ByteBuffer::operator = (const std::vector<uint8_t> & data) {
 }
 
 ByteBuffer & ByteBuffer::operator = (const std::string & data) {
-	m_data.assign(reinterpret_cast<uint8_t>(data.data()), reinterpret_cast<uint8_t>(data.data() + data.length()));
+	m_data.assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -132,7 +132,7 @@ void ByteBuffer::setData(const uint8_t * data, size_t size) {
 		m_data.clear();
 	}
 	else {
-		m_data.assign(reinterpret_cast<uint8_t>(data), reinterpret_cast<uint8_t>(data + size));
+		m_data.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + size));
 	}
 
 	m_readOffset = 0;
@@ -146,7 +146,7 @@ void ByteBuffer::setData(const std::vector<uint8_t> & data) {
 }
 
 void ByteBuffer::setData(const std::string & data) {
-	m_data.assign(reinterpret_cast<uint8_t>(data.data()), reinterpret_cast<uint8_t>(data.data() + data.length()));
+	m_data.assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
