@@ -166,13 +166,16 @@ std::any WindowsUtilities::variantToAny(VARIANT variant, bool * error) {
 			break;
 		}
 
-		case VT_VARIANT:
-		case VT_UNKNOWN:
 		case VT_EMPTY:
 		case VT_NULL:
+		case VT_VOID: {
+			break;
+		}
+
+		case VT_VARIANT:
+		case VT_UNKNOWN:
 		case VT_DISPATCH:
 		case VT_ERROR:
-		case VT_VOID:
 		case VT_HRESULT:
 		case VT_PTR:
 		case VT_SAFEARRAY:
@@ -244,8 +247,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 			EOAC_NONE,                   // Additional capabilities
 			nullptr);                    // Reserved
 
-		if(FAILED(result) && result != RPC_E_TOO_LATE)
-		{
+		if(FAILED(result) && result != RPC_E_TOO_LATE) {
 			printf("Failed to initialize security: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
 
 			CoUninitialize();

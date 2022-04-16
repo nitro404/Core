@@ -3,13 +3,14 @@
 
 #define _WIN32_DCOM
 
-#include <any>
 #include <comdef.h>
+#include <Wbemidl.h>
+
+#include <any>
 #include <map>
 #include <optional>
 #include <string>
 #include <vector>
-#include <Wbemidl.h>
 
 namespace WindowsUtilities {
 
