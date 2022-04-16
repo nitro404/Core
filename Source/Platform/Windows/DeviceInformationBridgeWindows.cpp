@@ -15,6 +15,7 @@ static const std::string SYSTEM_ENCLOSURE_PROVIDER_CLASS_NAME("Win32_SystemEnclo
 static const std::string NETWORK_ADAPTER_PROVIDER_CLASS_NAME("Win32_NetworkAdapter");
 static const std::string BASE_BOARD_PROVIDER_CLASS_NAME("Win32_BaseBoard");
 static const std::string PROCESSOR_PROVIDER_CLASS_NAME("Win32_Processor");
+static const std::string VIDEO_CONTROLLER_PROVIDER_CLASS_NAME("Win32_VideoController");
 
 DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
 
@@ -179,6 +180,30 @@ std::string DeviceInformationBridgeWindows::getMotherboardName() {
 	}
 
 	return s_motherboardName;
+}
+
+std::vector<std::string> DeviceInformationBridgeWindows::getGraphicsCardNames() {
+	static const std::string NAME_PROPERTY_NAME("Name");
+	static const std::vector<std::string> VIDEO_CONTROLLER_PROPERTY_NAMES = {
+		NAME_PROPERTY_NAME
+	};
+
+	static std::optional<std::vector<std::string>> s_graphicsCardNames;
+
+	if(!s_graphicsCardNames.has_value()) {
+		std::vector<std::string> graphicsCardNames;
+		std::optional<std::vector<std::map<std::string, std::any>>> optionalGraphicsCardInfo(WindowsUtilities::getWindowsManagementInstrumentationEntries(VIDEO_CONTROLLER_PROVIDER_CLASS_NAME, VIDEO_CONTROLLER_PROPERTY_NAMES));
+
+		if(optionalGraphicsCardInfo.has_value()) {
+			for(std::vector<std::map<std::string, std::any>>::const_iterator i = optionalGraphicsCardInfo->cbegin(); i != optionalGraphicsCardInfo->cend(); ++i) {
+				graphicsCardNames.emplace_back(std::any_cast<std::string>(i->at(NAME_PROPERTY_NAME)));
+			}
+		}
+
+		s_graphicsCardNames = std::move(graphicsCardNames);
+	}
+
+	return s_graphicsCardNames.value();
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {
