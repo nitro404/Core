@@ -3,6 +3,7 @@
 
 #include "Endianness.h"
 
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -14,11 +15,15 @@ public:
 	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(size_t initialCapacity, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const uint8_t * data, size_t size, Endianness endianness = DEFAULT_ENDIANNESS);
+	template <size_t N>
+	ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const std::string & data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(ByteBuffer && buffer) noexcept;
 	ByteBuffer(const ByteBuffer & buffer);
 	ByteBuffer & operator = (const char * data);
+	template <size_t N>
+	ByteBuffer & operator = (const std::array<uint8_t, N> & data);
 	ByteBuffer & operator = (const std::vector<uint8_t> & data);
 	ByteBuffer & operator = (const std::string & data);
 	ByteBuffer & operator = (ByteBuffer && buffer) noexcept;
@@ -30,6 +35,8 @@ public:
 	const uint8_t * getRawData() const;
 	uint8_t * getRawData();
 	void setData(const uint8_t * data, size_t size);
+	template <size_t N>
+	void setData(const std::array<uint8_t, N> & data);
 	void setData(const std::vector<uint8_t> & data);
 	void setData(const std::string & data);
 	void setData(const ByteBuffer & buffer);
@@ -110,6 +117,10 @@ public:
 	std::optional<std::string> readString(size_t length) const;
 	std::string readCString(bool * error) const;
 	std::optional<std::string> readCString() const;
+	template <size_t N>
+	std::array<uint8_t, N> readBytes(bool * error) const;
+	template <size_t N>
+	std::optional<std::array<uint8_t, N>> readBytes() const;
 	std::vector<uint8_t> readBytes(size_t numberOfBytes, bool * error) const;
 	std::optional<std::vector<uint8_t>> readBytes(size_t numberOfBytes) const;
 
