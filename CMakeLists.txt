@@ -47,6 +47,8 @@ target_link_libraries(
 		PUBLIC
 			cryptopp-static
 			CURL::libcurl
+			date::date
+			date::date-tz
 			double-conversion::double-conversion
 			fmt::fmt
 			GTest::gtest

@@ -15,6 +15,16 @@ hunter_config(CURL
 		BUILD_SHARED_LIBS=OFF
 )
 
+hunter_config(date
+	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.1.1.zip"
+	VERSION "3.0.1.1"
+	SHA1 "18061fdb7b6ddcc09aff2c28a5cc6ff0d4cd651f"
+	CMAKE_ARGS
+		BUILD_TZ_LIB=ON
+		USE_SYSTEM_TZ_DB=OFF
+		MANUAL_TZ_DB=ON
+)
+
 hunter_config(double-conversion
 	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.1.5.zip"
 	VERSION "3.1.5"
