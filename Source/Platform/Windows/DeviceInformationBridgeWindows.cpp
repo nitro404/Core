@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 #include <powerbase.h>
+#include <sysinfoapi.h>
 #include <timezoneapi.h>
 #include <winnls.h>
 #include <wtypes.h>
@@ -207,6 +208,24 @@ std::vector<std::string> DeviceInformationBridgeWindows::getGraphicsCardNames() 
 	}
 
 	return s_graphicsCardNames.value();
+}
+
+DeviceInformationBridge::MemoryStatus DeviceInformationBridgeWindows::getMemoryStatus() {
+	std::optional<MemoryStatus> totalSystemMemory;
+
+	if(!totalSystemMemory.has_value()) {
+		MEMORYSTATUSEX memoryStatus;
+		memoryStatus.dwLength = sizeof(memoryStatus);
+
+		if(GlobalMemoryStatusEx(&memoryStatus)) {
+			totalSystemMemory = {
+				memoryStatus.ullTotalPhys - memoryStatus.ullAvailPhys,
+				memoryStatus.ullTotalPhys
+			};
+		}
+	}
+
+	return totalSystemMemory.value();
 }
 
 Dimension DeviceInformationBridgeWindows::getScreenResolution() {

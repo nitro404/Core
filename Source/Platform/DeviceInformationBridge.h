@@ -12,6 +12,11 @@ public:
 		Wireless
 	};
 
+	struct MemoryStatus {
+		uint64_t used;
+		uint64_t total;
+	};
+
 	struct NetworkAdapterInformation {
 		std::string id;
 		std::string name;
@@ -36,6 +41,7 @@ public:
 	virtual std::string getProcessorName() = 0;
 	virtual std::string getMotherboardName() = 0;
 	virtual std::vector<std::string> getGraphicsCardNames() = 0;
+	virtual MemoryStatus getMemoryStatus() = 0;
 	virtual Dimension getScreenResolution() = 0;
 	virtual std::string getTimeZone() = 0;
 	virtual std::string getLocale() = 0;
