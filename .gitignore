@@ -1,0 +1,12 @@
+Build/*
+Test/*
+.vs
+Core.h
+*.ncb
+*.sdf
+*.suo
+*.vcproj.*
+*.vcxproj.user
+*.opensdf
+*.EXE
+*.orig
