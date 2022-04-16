@@ -3,6 +3,7 @@
 #include "Application/ComponentRegistry.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Location/FreeGeoIPGeoLocationService.h"
+#include "Analytics/Segment/SegmentAnalyticsCURL.h"
 
 static std::unique_ptr<FactoryRegistry> s_factoryRegistryInstance;
 
@@ -32,6 +33,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<GeoLocationService>([]() {
 		return std::make_unique<FreeGeoIPGeoLocationService>();
+	});
+
+	setFactory<SegmentAnalytics>([]() {
+		return std::make_unique<SegmentAnalyticsCURL>();
 	});
 }
 

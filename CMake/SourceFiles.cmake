@@ -1,4 +1,10 @@
 set(SOURCE_FILES
+	Analytics/Segment/SegmentAnalyticEvent.cpp
+	Analytics/Segment/SegmentAnalytics.cpp
+	Analytics/Segment/SegmentAnalyticsDataStorage.cpp
+	Analytics/Segment/SegmentAnalyticsCURL.cpp
+	Analytics/Segment/SegmentAnalyticsCURLEventTransfer.cpp
+	Analytics/Segment/SegmentAnalyticsCURLFailedEvent.cpp
 	Application/Application.cpp
 	Application/ComponentRegistry.cpp
 	Arguments/ArgumentCollection.cpp
@@ -54,6 +60,8 @@ set(SOURCE_FILES_WINDOWS
 )
 
 source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
+source_group(Source\\Analytics          REGULAR_EXPRESSION "Analytics/.*\\.(h|cpp)")
+source_group(Source\\Analytics\\Segment REGULAR_EXPRESSION "Analytics/Segment/.*\\.(h|cpp)")
 source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
 source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
 source_group(Source\\Factory            REGULAR_EXPRESSION "Factory/.*\\.(h|cpp)")
