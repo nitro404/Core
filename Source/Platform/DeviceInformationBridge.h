@@ -36,6 +36,7 @@ public:
 	virtual std::string getMotherboardName() = 0;
 	virtual std::vector<std::string> getGraphicsCardNames() = 0;
 	virtual std::string getTimeZone() = 0;
+	virtual std::string getLocale() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
 

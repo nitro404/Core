@@ -21,6 +21,7 @@ public:
 	virtual std::string getMotherboardName() override;
 	virtual std::vector<std::string> getGraphicsCardNames() override;
 	virtual std::string getTimeZone() override;
+	virtual std::string getLocale() override;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
 

@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 #include <powerbase.h>
 #include <timezoneapi.h>
+#include <winnls.h>
 
 #pragma comment(lib, "Powrprof.lib")
 
@@ -215,6 +216,17 @@ std::string DeviceInformationBridgeWindows::getTimeZone() {
 	}
 
 	return Utilities::wideStringToString(dynamicTimeZoneInfo.StandardName);
+}
+
+std::string DeviceInformationBridgeWindows::getLocale() {
+	LCID localeIdentifier = GetThreadLocale();
+	wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
+
+	if(LCIDToLocaleName(localeIdentifier, localeName, LOCALE_NAME_MAX_LENGTH, 0) == 0) {
+		return {};
+	}
+
+	return Utilities::wideStringToString(localeName);
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {
