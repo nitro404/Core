@@ -30,6 +30,7 @@ set(SOURCE_FILES
 	Platform/PlatformBridgeLocator.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
+	Singleton/SingletonManager.cpp
 	Utilities/FileUtilities.cpp
 	Utilities/NumberUtilities.cpp
 	Utilities/RapidJSONUtilities.cpp
@@ -59,5 +60,6 @@ source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)
 source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
 source_group(Source\\Platform\\Windows  REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
 source_group(Source\\Script             REGULAR_EXPRESSION "Script/.*\\.(h|cpp)")
+source_group(Source\\Singleton          REGULAR_EXPRESSION "Singleton/.*\\.(h|cpp)")
 source_group(Source\\Utilities          REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
 source_group(Source\\Zip                REGULAR_EXPRESSION "Zip/.*\\.(h|cpp)")
