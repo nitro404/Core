@@ -27,6 +27,7 @@ public:
 	virtual std::string getLocale() override;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
+	virtual NetworkConnectionStatus getNetworkConnectionStatus() override;
 
 private:
 	enum class WindowsMemoryType : uint8_t {

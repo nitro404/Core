@@ -6,6 +6,7 @@
 #include <fmt/core.h>
 #include <magic_enum.hpp>
 
+#include <netlistmgr.h>
 #include <powerbase.h>
 #include <sysinfoapi.h>
 #include <timezoneapi.h>
@@ -444,6 +445,53 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 	}
 
 	return networkAdapterInfoCollection;
+}
+
+DeviceInformationBridge::NetworkConnectionStatus DeviceInformationBridgeWindows::getNetworkConnectionStatus() {
+	NetworkConnectionStatus networkConnectionStatus = NetworkConnectionStatus::Unknown;
+
+	try {
+		if(SUCCEEDED(CoInitialize(nullptr))) {
+			INetworkListManager * networkListManager;
+
+			if(SUCCEEDED(CoCreateInstance(CLSID_NetworkListManager, nullptr, CLSCTX_ALL, __uuidof(INetworkListManager), reinterpret_cast<LPVOID *>(&networkListManager)))) {
+				NLM_CONNECTIVITY nlmConnectivity = NLM_CONNECTIVITY::NLM_CONNECTIVITY_DISCONNECTED;
+				VARIANT_BOOL internetConnected = VARIANT_FALSE;
+
+				if(SUCCEEDED(networkListManager->get_IsConnectedToInternet(&internetConnected))) {
+					if(internetConnected == VARIANT_TRUE) {
+						networkConnectionStatus = NetworkConnectionStatus::Internet;
+					}
+					else {
+						networkConnectionStatus = NetworkConnectionStatus::Disconnected;
+					}
+				}
+
+				if(!internetConnected) {
+					std::vector<DeviceInformationBridge::NetworkAdapterInformation> networkAdapterInfo(getNetworkAdapterInformation());
+
+					for(std::vector<DeviceInformationBridge::NetworkAdapterInformation>::const_iterator i = networkAdapterInfo.cbegin(); i != networkAdapterInfo.end(); ++i) {
+						if(!i->connected) {
+							continue;
+						}
+
+						networkConnectionStatus = NetworkConnectionStatus::Local;
+
+						break;
+					}
+				}
+
+				networkListManager->Release();
+			}
+		}
+
+		CoUninitialize();
+	}
+	catch(std::runtime_error error) {
+		networkConnectionStatus = NetworkConnectionStatus::Error;
+	}
+
+	return networkConnectionStatus;
 }
 
 DeviceInformationBridge::MemoryType DeviceInformationBridgeWindows::getMemoryTypeFromWindowsMemoryType(WindowsMemoryType memoryType) {

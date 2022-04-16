@@ -48,6 +48,14 @@ public:
 		Wireless
 	};
 
+	enum class NetworkConnectionStatus {
+		Internet,
+		Local,
+		Disconnected,
+		Error,
+		Unknown
+	};
+
 	struct MemoryStatus {
 		uint64_t used;
 		uint64_t total;
@@ -85,6 +93,8 @@ public:
 	virtual std::string getLocale() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
+	bool isConnectedToInternet();
+	virtual NetworkConnectionStatus getNetworkConnectionStatus() = 0;
 
 	static std::string getMemoryTypeName(MemoryType memoryType);
 

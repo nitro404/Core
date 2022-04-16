@@ -4,6 +4,10 @@ DeviceInformationBridge::DeviceInformationBridge() { }
 
 DeviceInformationBridge::~DeviceInformationBridge() { }
 
+bool DeviceInformationBridge::isConnectedToInternet() {
+	return getNetworkConnectionStatus() == NetworkConnectionStatus::Internet;
+}
+
 std::string DeviceInformationBridge::getMemoryTypeName(MemoryType memoryType) {
 	switch(memoryType) {
 		case MemoryType::Unknown:
