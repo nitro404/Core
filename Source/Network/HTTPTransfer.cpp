@@ -1,6 +1,7 @@
 #include "HTTPTransfer.h"
 
 #include "HTTPService.h"
+#include "Utilities/RapidJSONUtilities.h"
 #include "Utilities/StringUtilities.h"
 
 #include <rapidjson/stringbuffer.h>
@@ -169,10 +170,7 @@ bool HTTPTransfer::setBody(const rapidjson::Document & jsonDocument, bool update
 		return false;
 	}
 
-	rapidjson::StringBuffer jsonBuffer;
-	rapidjson::Writer<rapidjson::StringBuffer> jsonWriter(jsonBuffer);
-	jsonDocument.Accept(jsonWriter);
-	m_body->setData(jsonBuffer.GetString());
+	m_body->setData(Utilities::valueToString(jsonDocument, false));
 
 	if(updateContentType) {
 		setContentType(APPLICATION_JSON_CONTENT_TYPE);
