@@ -60,6 +60,7 @@ public:
 		std::string manufacturer;
 		std::string macAddress;
 		std::string serviceName;
+		bool connected = false;
 	};
 
 	DeviceInformationBridge();

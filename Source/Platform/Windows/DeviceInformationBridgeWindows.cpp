@@ -337,26 +337,29 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 	static const std::string ADAPTER_NET_CONNECTION_ID_PROPERTY_NAME("NetConnectionID");
 	static const std::string ADAPTER_SERVICE_NAME_PROPERTY_NAME("ServiceName");
 	static const std::string ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME("PhysicalAdapter");
+	static const std::string ADAPTER_NET_CONNECTION_STATUS_PROPERTY_NAME("NetConnectionStatus");
 	static const std::string INVALID_MANUFACTURER_VALUE("Microsoft");
 	static const std::string ETHERNET_NET_CONNECTION_ID_VALUE("Local Area Connection");
 	static const std::string WIRELESS_NET_CONNECTION_ID_VALUE("Wireless Network Connection");
-	static const std::vector<std::string> networkAdapterPropertyNames = {
+	static const int32_t CONNECTED_STATUS_VALUE = 2;
+	static const std::vector<std::string> NETWORK_ADAPTER_PROPERTY_NAMES = {
 		ADAPTER_DEVICE_ID_PROPERTY_NAME,
 		ADAPTER_MAC_ADDRESS_PROPERTY_NAME,
 		ADAPTER_MANUFACTURER_PROPERTY_NAME,
 		ADAPTER_NAME_PROPERTY_NAME,
 		ADAPTER_NET_CONNECTION_ID_PROPERTY_NAME,
 		ADAPTER_SERVICE_NAME_PROPERTY_NAME,
-		ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME
+		ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME,
+		ADAPTER_NET_CONNECTION_STATUS_PROPERTY_NAME
 	};
 
-	std::optional<std::vector<std::map<std::string, std::any>>> networkData = WindowsUtilities::getWindowsManagementInstrumentationEntries(NETWORK_ADAPTER_PROVIDER_CLASS_NAME, networkAdapterPropertyNames);
+	std::optional<std::vector<std::map<std::string, std::any>>> networkData(WindowsUtilities::getWindowsManagementInstrumentationEntries(NETWORK_ADAPTER_PROVIDER_CLASS_NAME, NETWORK_ADAPTER_PROPERTY_NAMES));
 
 	if(!networkData.has_value()) {
 		return {};
 	}
 
-	std::vector<DeviceInformationBridge::NetworkAdapterInformation> networkAdapterInfoCollection;
+	std::vector<NetworkAdapterInformation> networkAdapterInfoCollection;
 
 	for(std::vector<std::map<std::string, std::any>>::const_iterator i = networkData->begin(); i != networkData->end(); ++i) {
 		const std::map<std::string, std::any> networkAdapterData = *i;
@@ -421,6 +424,12 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 
 		if(serviceName != networkAdapterData.end() && serviceName->second.has_value()) {
 			networkAdapterInfo.serviceName = std::any_cast<std::string>(serviceName->second);
+		}
+
+		std::map<std::string, std::any>::const_iterator netConnectionStatus(networkAdapterData.find(ADAPTER_NET_CONNECTION_STATUS_PROPERTY_NAME));
+
+		if(netConnectionStatus != networkAdapterData.end() && netConnectionStatus->second.has_value()) {
+			networkAdapterInfo.connected = std::any_cast<int32_t>(netConnectionStatus->second) == CONNECTED_STATUS_VALUE;
 		}
 
 		networkAdapterInfoCollection.emplace_back(networkAdapterInfo);
