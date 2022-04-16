@@ -1,5 +1,7 @@
 #include "TimeUtilities.h"
 
+#include <fmt/core.h>
+
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -66,12 +68,30 @@ std::optional<std::tm> Utilities::getUTCTime() {
 	return utcTime;
 }
 
-std::string Utilities::timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint) {
+std::string Utilities::timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint, TimePointFormat format) {
 	std::time_t dateTime = std::chrono::system_clock::to_time_t(timePoint);
 	std::tm localTime = *std::localtime(&dateTime);
 
+	std::string formatString;
 	std::stringstream timePointStringStream;
-	timePointStringStream << std::put_time(&localTime, "%B %e, %Y %X");
+
+	switch(format) {
+		case TimePointFormat::Default: {
+			formatString = "%B %e, %Y %X";
+			break;
+		}
+
+		case TimePointFormat::ISO8601: {
+			formatString = "%FT%T";
+			break;
+		}
+	}
+
+	timePointStringStream << std::put_time(&localTime, formatString.c_str());
+
+	if(format == TimePointFormat::ISO8601) {
+		timePointStringStream << fmt::format(".{}Z", std::chrono::time_point_cast<std::chrono::milliseconds>(timePoint).time_since_epoch().count() % 1000);
+	}
 
 	return timePointStringStream.str();
 }
