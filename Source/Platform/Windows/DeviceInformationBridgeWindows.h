@@ -11,6 +11,7 @@ public:
 	virtual std::string getHostName() override;
 	virtual std::string getDeviceModel() override;
 	virtual std::string getDeviceModelIdentifier() override;
+	virtual std::string getDeviceType() override;
 	virtual std::string getDeviceManufacturerName() override;
 	virtual std::string getDeviceUniqueIdentifier() override;
 	virtual std::string getOperatingSystemName() override;

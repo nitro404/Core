@@ -26,6 +26,7 @@ public:
 	virtual std::string getHostName() = 0;
 	virtual std::string getDeviceModel() = 0;
 	virtual std::string getDeviceModelIdentifier() = 0;
+	virtual std::string getDeviceType() = 0;
 	virtual std::string getDeviceManufacturerName() = 0;
 	virtual std::string getDeviceUniqueIdentifier() = 0;
 	virtual std::string getOperatingSystemName() = 0;

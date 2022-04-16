@@ -3,6 +3,10 @@
 #include "WindowsUtilities.h"
 #include "Utilities/StringUtilities.h"
 
+#include <powerbase.h>
+
+#pragma comment(lib, "Powrprof.lib")
+
 static const std::string COMPUTER_SYSTEM_PROVIDER_CLASS_NAME("Win32_ComputerSystem");
 static const std::string COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME("Win32_ComputerSystemProduct");
 static const std::string OPERATING_SYSTEM_PROVIDER_CLASS_NAME("Win32_OperatingSystem");
@@ -51,6 +55,20 @@ std::string DeviceInformationBridgeWindows::getDeviceModelIdentifier() {
 	}
 
 	return s_optionalModelIdentifier.value();
+}
+
+std::string DeviceInformationBridgeWindows::getDeviceType() {
+	static std::optional<std::string> s_optionalType;
+
+	if(!s_optionalType.has_value()) {
+		SYSTEM_POWER_CAPABILITIES systemPowerCapabilities;
+
+		if(CallNtPowerInformation(SystemPowerCapabilities, nullptr, 0, &systemPowerCapabilities, sizeof(SYSTEM_POWER_CAPABILITIES)) == 0) {
+			s_optionalType = systemPowerCapabilities.LidPresent ? "Laptop" : "Desktop";
+		}
+	}
+
+	return s_optionalType.value();
 }
 
 std::string DeviceInformationBridgeWindows::getDeviceManufacturerName() {
