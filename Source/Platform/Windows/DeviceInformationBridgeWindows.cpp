@@ -12,6 +12,7 @@ static const std::string COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME("Win32_Comp
 static const std::string OPERATING_SYSTEM_PROVIDER_CLASS_NAME("Win32_OperatingSystem");
 static const std::string SYSTEM_ENCLOSURE_PROVIDER_CLASS_NAME("Win32_SystemEnclosure");
 static const std::string NETWORK_ADAPTER_PROVIDER_CLASS_NAME("Win32_NetworkAdapter");
+static const std::string PROCESSOR_PROVIDER_CLASS_NAME("Win32_Processor");
 
 DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
 
@@ -138,6 +139,16 @@ std::string DeviceInformationBridgeWindows::getOperatingSystemArchitecture() {
 	}
 
 	return s_operatingSystemArchitecture;
+}
+
+std::string DeviceInformationBridgeWindows::getProcessorName() {
+	static std::string s_processorName;
+
+	if(s_processorName.empty()) {
+		s_processorName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(PROCESSOR_PROVIDER_CLASS_NAME, "Name"));
+	}
+
+	return s_processorName;
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {
