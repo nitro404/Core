@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 #include <powerbase.h>
+#include <timezoneapi.h>
 
 #pragma comment(lib, "Powrprof.lib")
 
@@ -204,6 +205,16 @@ std::vector<std::string> DeviceInformationBridgeWindows::getGraphicsCardNames() 
 	}
 
 	return s_graphicsCardNames.value();
+}
+
+std::string DeviceInformationBridgeWindows::getTimeZone() {
+	DYNAMIC_TIME_ZONE_INFORMATION dynamicTimeZoneInfo;
+
+	if(GetDynamicTimeZoneInformation(&dynamicTimeZoneInfo) == TIME_ZONE_ID_INVALID) {
+		return {};
+	}
+
+	return Utilities::wideStringToString(dynamicTimeZoneInfo.StandardName);
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {
