@@ -339,9 +339,13 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 	static const std::string ADAPTER_PHYSICAL_ADAPTER_PROPERTY_NAME("PhysicalAdapter");
 	static const std::string ADAPTER_NET_CONNECTION_STATUS_PROPERTY_NAME("NetConnectionStatus");
 	static const std::string INVALID_MANUFACTURER_VALUE("Microsoft");
-	static const std::string ETHERNET_NET_CONNECTION_ID_VALUE("Local Area Connection");
-	static const std::string WIRELESS_NET_CONNECTION_ID_VALUE("Wireless Network Connection");
 	static const int32_t CONNECTED_STATUS_VALUE = 2;
+	static const std::array<std::pair<std::string, DeviceInformationBridge::NetworkConnectionType>, 4> NET_CONNECTION_ID_PREFIX_TYPES = {
+		std::make_pair("Local Area Connection", NetworkConnectionType::Wired),
+		std::make_pair("Ethernet", NetworkConnectionType::Wired),
+		std::make_pair("Wireless Network Connection", NetworkConnectionType::Wireless),
+		std::make_pair("Wi-Fi", NetworkConnectionType::Wireless)
+	};
 	static const std::vector<std::string> NETWORK_ADAPTER_PROPERTY_NAMES = {
 		ADAPTER_DEVICE_ID_PROPERTY_NAME,
 		ADAPTER_MAC_ADDRESS_PROPERTY_NAME,
@@ -383,13 +387,17 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 		if(netConnectionID != networkAdapterData.end() && netConnectionID->second.has_value()) {
 			std::string netConnectionIDValue = std::any_cast<std::string>(netConnectionID->second);
 
-			if(netConnectionIDValue == ETHERNET_NET_CONNECTION_ID_VALUE) {
-				networkAdapterInfo.type = DeviceInformationBridge::NetworkConnectionType::Wired;
+			bool netConnectionIDTypeFound = false;
+
+			for(auto j = NET_CONNECTION_ID_PREFIX_TYPES.cbegin(); j != NET_CONNECTION_ID_PREFIX_TYPES.cend(); ++j) {
+				if(netConnectionIDValue.find(j->first) == 0) {
+					networkAdapterInfo.type = j->second;
+					netConnectionIDTypeFound = true;
+					break;
+				}
 			}
-			else if(netConnectionIDValue == WIRELESS_NET_CONNECTION_ID_VALUE) {
-				networkAdapterInfo.type = DeviceInformationBridge::NetworkConnectionType::Wireless;
-			}
-			else {
+
+			if(!netConnectionIDTypeFound) {
 				continue;
 			}
 		}
