@@ -2,6 +2,7 @@
 
 #include "Application/ComponentRegistry.h"
 #include "Network/IpifyIPAddressService.h"
+#include "Location/FreeGeoIPGeoLocationService.h"
 
 static std::unique_ptr<FactoryRegistry> s_factoryRegistryInstance;
 
@@ -27,6 +28,10 @@ void FactoryRegistry::assignFactories() {
 void FactoryRegistry::assignStandardFactories() {
 	setFactory<IPAddressService>([]() {
 		return std::make_unique<IpifyIPAddressService>();
+	});
+
+	setFactory<GeoLocationService>([]() {
+		return std::make_unique<FreeGeoIPGeoLocationService>();
 	});
 }
 

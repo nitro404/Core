@@ -12,6 +12,8 @@ set(SOURCE_FILES
 	Factory/FactoryRegistry.cpp
 	Point.cpp
 	Rectangle.cpp
+	Location/FreeGeoIPGeoLocationService.cpp
+	Location/GeoLocationService.cpp
 	Math/ExtendedMath.cpp
 	Math/Matrix2x2.cpp
 	Math/Matrix3x3.cpp
@@ -56,6 +58,7 @@ source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|
 source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
 source_group(Source\\Factory            REGULAR_EXPRESSION "Factory/.*\\.(h|cpp)")
 source_group(Source\\Factory\\Windows   REGULAR_EXPRESSION "Factory/Windows/.*\\.(h|cpp)")
+source_group(Source\\Location           REGULAR_EXPRESSION "Location/.*\\.(h|cpp)")
 source_group(Source\\Math               REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
 source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
 source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
