@@ -18,6 +18,7 @@ public:
 	virtual std::string getOperatingSystemVersion() override;
 	virtual std::string getOperatingSystemArchitecture() override;
 	virtual std::string getProcessorName() override;
+	virtual std::string getMotherboardName() override;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
 

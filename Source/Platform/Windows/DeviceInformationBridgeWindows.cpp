@@ -3,6 +3,7 @@
 #include "WindowsUtilities.h"
 #include "Utilities/StringUtilities.h"
 
+#include <fmt/core.h>
 #include <powerbase.h>
 
 #pragma comment(lib, "Powrprof.lib")
@@ -12,6 +13,7 @@ static const std::string COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME("Win32_Comp
 static const std::string OPERATING_SYSTEM_PROVIDER_CLASS_NAME("Win32_OperatingSystem");
 static const std::string SYSTEM_ENCLOSURE_PROVIDER_CLASS_NAME("Win32_SystemEnclosure");
 static const std::string NETWORK_ADAPTER_PROVIDER_CLASS_NAME("Win32_NetworkAdapter");
+static const std::string BASE_BOARD_PROVIDER_CLASS_NAME("Win32_BaseBoard");
 static const std::string PROCESSOR_PROVIDER_CLASS_NAME("Win32_Processor");
 
 DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
@@ -149,6 +151,34 @@ std::string DeviceInformationBridgeWindows::getProcessorName() {
 	}
 
 	return s_processorName;
+}
+
+std::string DeviceInformationBridgeWindows::getMotherboardName() {
+	static const std::string MANUFACTURER_PROPERTY_NAME("Manufacturer");
+	static const std::string PRODUCT_PROPERTY_NAME("Product");
+	static const std::string VERSION_PROPERTY_NAME("Version");
+	static const std::vector<std::string> BASE_BOARD_PROPERTY_NAMES = {
+		MANUFACTURER_PROPERTY_NAME,
+		PRODUCT_PROPERTY_NAME,
+		VERSION_PROPERTY_NAME
+	};
+
+	static std::string s_motherboardName;
+
+	if(s_motherboardName.empty()) {
+		std::optional<std::vector<std::map<std::string, std::any>>> optionalMotherboardInfo(WindowsUtilities::getWindowsManagementInstrumentationEntries(BASE_BOARD_PROVIDER_CLASS_NAME, BASE_BOARD_PROPERTY_NAMES));
+
+		if(optionalMotherboardInfo.has_value() && !optionalMotherboardInfo->empty()) {
+			const std::map<std::string, std::any> & motherboardInfo(optionalMotherboardInfo.value().at(0));
+
+			s_motherboardName = fmt::format("{} {} {}",
+				std::any_cast<std::string>(motherboardInfo.at(MANUFACTURER_PROPERTY_NAME)),
+				std::any_cast<std::string>(motherboardInfo.at(PRODUCT_PROPERTY_NAME)),
+				std::any_cast<std::string>(motherboardInfo.at(VERSION_PROPERTY_NAME)));
+		}
+	}
+
+	return s_motherboardName;
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {

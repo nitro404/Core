@@ -33,6 +33,7 @@ public:
 	virtual std::string getOperatingSystemVersion() = 0;
 	virtual std::string getOperatingSystemArchitecture() = 0;
 	virtual std::string getProcessorName() = 0;
+	virtual std::string getMotherboardName() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
 
