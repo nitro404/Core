@@ -1,6 +1,7 @@
 #include "FactoryRegistry.h"
 
 #include "Application/ComponentRegistry.h"
+#include "Network/IpifyIPAddressService.h"
 
 static std::unique_ptr<FactoryRegistry> s_factoryRegistryInstance;
 
@@ -23,7 +24,11 @@ void FactoryRegistry::assignFactories() {
 	assignPlatformFactories();
 }
 
-void FactoryRegistry::assignStandardFactories() { }
+void FactoryRegistry::assignStandardFactories() {
+	setFactory<IPAddressService>([]() {
+		return std::make_unique<IpifyIPAddressService>();
+	});
+}
 
 void FactoryRegistry::resetFactories() {
 	m_factories.clear();

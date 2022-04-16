@@ -26,6 +26,8 @@ set(SOURCE_FILES
 	Network/HTTPTimeout.cpp
 	Network/HTTPTransfer.cpp
 	Network/HTTPUtilities.cpp
+	Network/IPAddressService.cpp
+	Network/IpifyIPAddressService.cpp
 	Platform/DeviceInformationBridge.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
