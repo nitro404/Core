@@ -14,128 +14,128 @@ DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
 DeviceInformationBridgeWindows::~DeviceInformationBridgeWindows() { }
 
 std::string DeviceInformationBridgeWindows::getHostName() {
-	static std::string hostName;
+	static std::string s_hostName;
 
-	if(hostName.empty()) {
-		hostName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PROVIDER_CLASS_NAME, "Name"));
+	if(s_hostName.empty()) {
+		s_hostName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PROVIDER_CLASS_NAME, "Name"));
 	}
 
-	return hostName;
+	return s_hostName;
 }
 
-std::string DeviceInformationBridgeWindows::getModel() {
-	static std::string model;
+std::string DeviceInformationBridgeWindows::getDeviceModel() {
+	static std::optional<std::string> s_optionalModel;
 	static const std::string INVALID_MODEL("System Product Name");
 
-	if(model.empty()) {
-		model = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "Name"));
+	if(!s_optionalModel.has_value()) {
+		s_optionalModel = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "Name"));
 
-		if(model == INVALID_MODEL) {
-			model = UNKNOWN_VALUE;
+		if(s_optionalModel == INVALID_MODEL) {
+			s_optionalModel = Utilities::emptyString;
 		}
 	}
 
-	return model;
+	return s_optionalModel.value();
 }
 
-std::string DeviceInformationBridgeWindows::getModelIdentifier() {
-	static std::string modelIdentifier;
+std::string DeviceInformationBridgeWindows::getDeviceModelIdentifier() {
+	static std::optional<std::string> s_optionalModelIdentifier;
 	static const std::string INVALID_MODEL_IDENTIFIER("System Serial Number");
 
-	if(modelIdentifier.empty()) {
-		modelIdentifier = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "IdentifyingNumber"));
+	if(!s_optionalModelIdentifier.has_value()) {
+		s_optionalModelIdentifier = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "IdentifyingNumber"));
 
-		if(modelIdentifier == INVALID_MODEL_IDENTIFIER) {
-			modelIdentifier = UNKNOWN_VALUE;
+		if(s_optionalModelIdentifier.value() == INVALID_MODEL_IDENTIFIER) {
+			s_optionalModelIdentifier = Utilities::emptyString;
 		}
 	}
 
-	return modelIdentifier;
+	return s_optionalModelIdentifier.value();
 }
 
-std::string DeviceInformationBridgeWindows::getManufacturerName() {
-	static std::string manufacturerName;
+std::string DeviceInformationBridgeWindows::getDeviceManufacturerName() {
+	static std::optional<std::string> s_optionalManufacturerName;
 	static const std::string INVALID_MANUFACTURER_NAME("System manufacturer");
 
-	if(manufacturerName.empty()) {
-		manufacturerName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "Vendor"));
+	if(!s_optionalManufacturerName.has_value()) {
+		s_optionalManufacturerName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "Vendor"));
 
-		if(manufacturerName == INVALID_MANUFACTURER_NAME) {
-			manufacturerName = UNKNOWN_VALUE;
+		if(s_optionalManufacturerName.value() == INVALID_MANUFACTURER_NAME) {
+			s_optionalManufacturerName = Utilities::emptyString;
 		}
 	}
 
-	return manufacturerName;
+	return s_optionalManufacturerName.value();
 }
 
-std::string DeviceInformationBridgeWindows::getUniqueIdentifier() {
-	static std::string uniqueIdentifier;
+std::string DeviceInformationBridgeWindows::getDeviceUniqueIdentifier() {
+	static std::string s_uniqueIdentifier;
 	static const std::string INVALID_UUID("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
 
-	if(uniqueIdentifier.empty()) {
-		uniqueIdentifier = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "UUID"));
+	if(s_uniqueIdentifier.empty()) {
+		s_uniqueIdentifier = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(COMPUTER_SYSTEM_PRODUCT_PROVIDER_CLASS_NAME, "UUID"));
 
-		if(uniqueIdentifier.empty() || uniqueIdentifier == INVALID_UUID) {
-			uniqueIdentifier = getMACAddress();
+		if(s_uniqueIdentifier.empty() || s_uniqueIdentifier == INVALID_UUID) {
+			s_uniqueIdentifier = getMACAddress();
 
-			if(uniqueIdentifier.empty()) {
-				uniqueIdentifier = std::any_cast<std::string>(WindowsUtilities::getRegistryEntry("SOFTWARE\\Microsoft\\Cryptography", "MachineGuid"));
+			if(s_uniqueIdentifier.empty()) {
+				s_uniqueIdentifier = std::any_cast<std::string>(WindowsUtilities::getRegistryEntry("SOFTWARE\\Microsoft\\Cryptography", "MachineGuid"));
 			}
 		}
 	}
 
-	return uniqueIdentifier;
+	return s_uniqueIdentifier;
 }
 
 std::string DeviceInformationBridgeWindows::getOperatingSystemName() {
-	static std::string operatingSystemName;
+	static std::string s_operatingSystemName;
 
-	if(operatingSystemName.empty()) {
-		operatingSystemName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "Name"));
-		size_t separatorIndex = operatingSystemName.find_first_of("|");
+	if(s_operatingSystemName.empty()) {
+		s_operatingSystemName = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "Name"));
+		size_t separatorIndex = s_operatingSystemName.find_first_of("|");
 
 		if(separatorIndex != std::string::npos) {
-			operatingSystemName = Utilities::trimString(operatingSystemName.substr(0, separatorIndex));
+			s_operatingSystemName = Utilities::trimString(s_operatingSystemName.substr(0, separatorIndex));
 		}
 	}
 
-	return operatingSystemName;
-}
-
-std::string DeviceInformationBridgeWindows::getOperatingSystemArchitecture() {
-	static std::string operatingSystemArchitecture;
-
-	if(operatingSystemArchitecture.empty()) {
-		operatingSystemArchitecture = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "OSArchitecture"));
-	}
-
-	return operatingSystemArchitecture;
+	return s_operatingSystemName;
 }
 
 std::string DeviceInformationBridgeWindows::getOperatingSystemVersion() {
-	static std::string operatingSystemVersion;
+	static std::string s_operatingSystemVersion;
 
-	if(operatingSystemVersion.empty()) {
-		operatingSystemVersion = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "Version"));
+	if(s_operatingSystemVersion.empty()) {
+		s_operatingSystemVersion = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "Version"));
 	}
 
-	return operatingSystemVersion;
+	return s_operatingSystemVersion;
+}
+
+std::string DeviceInformationBridgeWindows::getOperatingSystemArchitecture() {
+	static std::string s_operatingSystemArchitecture;
+
+	if(s_operatingSystemArchitecture.empty()) {
+		s_operatingSystemArchitecture = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "OSArchitecture"));
+	}
+
+	return s_operatingSystemArchitecture;
 }
 
 std::string DeviceInformationBridgeWindows::getMACAddress(NetworkConnectionType connectionType) {
-	static std::string macAddress;
+	static std::string s_macAddress;
 
-	if(macAddress.empty()) {
+	if(s_macAddress.empty()) {
 		std::vector<DeviceInformationBridge::NetworkAdapterInformation> networkAdapters = getNetworkAdapterInformation();
 
 		for(const DeviceInformationBridge::NetworkAdapterInformation & networkAdapter : networkAdapters) {
 			if(networkAdapter.type == connectionType) {
-				return networkAdapter.macAddress;
+				s_macAddress = networkAdapter.macAddress;
 			}
 		}
 	}
 
-	return macAddress;
+	return s_macAddress;
 }
 
 std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformationBridgeWindows::getNetworkAdapterInformation() {

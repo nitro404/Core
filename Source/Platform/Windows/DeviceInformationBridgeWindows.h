@@ -9,10 +9,10 @@ public:
 	virtual ~DeviceInformationBridgeWindows();
 
 	virtual std::string getHostName() override;
-	virtual std::string getModel() override;
-	virtual std::string getModelIdentifier() override;
-	virtual std::string getManufacturerName() override;
-	virtual std::string getUniqueIdentifier() override;
+	virtual std::string getDeviceModel() override;
+	virtual std::string getDeviceModelIdentifier() override;
+	virtual std::string getDeviceManufacturerName() override;
+	virtual std::string getDeviceUniqueIdentifier() override;
 	virtual std::string getOperatingSystemName() override;
 	virtual std::string getOperatingSystemVersion() override;
 	virtual std::string getOperatingSystemArchitecture() override;

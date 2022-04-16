@@ -24,17 +24,16 @@ public:
 	virtual ~DeviceInformationBridge();
 
 	virtual std::string getHostName() = 0;
-	virtual std::string getModel() = 0;
-	virtual std::string getModelIdentifier() = 0;
-	virtual std::string getManufacturerName() = 0;
-	virtual std::string getUniqueIdentifier() = 0;
+	virtual std::string getDeviceModel() = 0;
+	virtual std::string getDeviceModelIdentifier() = 0;
+	virtual std::string getDeviceManufacturerName() = 0;
+	virtual std::string getDeviceUniqueIdentifier() = 0;
 	virtual std::string getOperatingSystemName() = 0;
 	virtual std::string getOperatingSystemVersion() = 0;
 	virtual std::string getOperatingSystemArchitecture() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
 
-	static const std::string UNKNOWN_VALUE;
 
 private:
 	DeviceInformationBridge(const DeviceInformationBridge &) = delete;
