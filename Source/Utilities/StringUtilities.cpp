@@ -1090,7 +1090,7 @@ std::optional<double> Utilities::parseDouble(const std::string & data) {
 }
 
 std::optional<std::vector<std::string>> Utilities::parseVersion(const std::string & value, bool trimTrailingZeroes) {
-	static const std::regex versionSplitRegex("[^. \t]+");
+	static const std::regex versionSplitRegex("[. \t]+");
 
 	if(value.empty()) {
 		return {};
