@@ -4,6 +4,8 @@
 #include "Utilities/StringUtilities.h"
 
 #include <fmt/core.h>
+#include <magic_enum.hpp>
+
 #include <powerbase.h>
 #include <sysinfoapi.h>
 #include <timezoneapi.h>
@@ -20,6 +22,7 @@ static const std::string NETWORK_ADAPTER_PROVIDER_CLASS_NAME("Win32_NetworkAdapt
 static const std::string BASE_BOARD_PROVIDER_CLASS_NAME("Win32_BaseBoard");
 static const std::string PROCESSOR_PROVIDER_CLASS_NAME("Win32_Processor");
 static const std::string VIDEO_CONTROLLER_PROVIDER_CLASS_NAME("Win32_VideoController");
+static const std::string PHYSICAL_MEMORY_PROVIDER_CLASS_NAME("Win32_PhysicalMemory");
 
 DeviceInformationBridgeWindows::DeviceInformationBridgeWindows() { }
 
@@ -228,6 +231,59 @@ DeviceInformationBridge::MemoryStatus DeviceInformationBridgeWindows::getMemoryS
 	return totalSystemMemory.value();
 }
 
+std::vector<std::string> DeviceInformationBridgeWindows::getMemoryDetails() {
+	static const std::string MANUFACTURER_PROPERTY_NAME("Manufacturer");
+	static const std::string MEMORY_TYPE_PROPERTY_NAME("MemoryType");
+	static const std::string SMBIOS_MEMORY_TYPE_PROPERTY_NAME("SMBIOSMemoryType");
+	static const std::string SPEED_PROPERTY_NAME("Speed");
+	static const std::string CAPACITY_PROPERTY_NAME("Capacity");
+	static const std::string PART_NUMBER_PROPERTY_NAME("PartNumber");
+	static const std::vector<std::string> PHYSICAL_MEMORY_PROPERTY_NAMES = {
+		MANUFACTURER_PROPERTY_NAME,
+		MEMORY_TYPE_PROPERTY_NAME,
+		SMBIOS_MEMORY_TYPE_PROPERTY_NAME,
+		SPEED_PROPERTY_NAME,
+		CAPACITY_PROPERTY_NAME,
+		PART_NUMBER_PROPERTY_NAME
+	};
+
+	static std::vector<std::string> s_memoryDetails;
+
+	if(s_memoryDetails.empty()) {
+		std::optional<std::vector<std::map<std::string, std::any>>> optionalPhysicalMemoryInfo(WindowsUtilities::getWindowsManagementInstrumentationEntries(PHYSICAL_MEMORY_PROVIDER_CLASS_NAME, PHYSICAL_MEMORY_PROPERTY_NAMES));
+
+		if(optionalPhysicalMemoryInfo.has_value()) {
+			for(std::vector<std::map<std::string, std::any>>::const_iterator i = optionalPhysicalMemoryInfo->cbegin(); i != optionalPhysicalMemoryInfo->cend(); ++i) {
+				const std::map<std::string, std::any> & memoryStickInfo = *i;
+
+				uint64_t capacityBytes = Utilities::parseUnsignedLong(std::any_cast<std::string>(memoryStickInfo.at(CAPACITY_PROPERTY_NAME))).value_or(0U);
+				std::string manufacturer(std::any_cast<std::string>(memoryStickInfo.at(MANUFACTURER_PROPERTY_NAME)));
+				std::string partNumber(Utilities::trimString(std::any_cast<std::string>(memoryStickInfo.at(PART_NUMBER_PROPERTY_NAME))));
+				MemoryType type = getMemoryTypeFromWindowsMemoryType(magic_enum::enum_cast<WindowsMemoryType>(std::any_cast<int32_t>(memoryStickInfo.at(MEMORY_TYPE_PROPERTY_NAME))).value_or(WindowsMemoryType::Unknown));
+				int32_t speed = std::any_cast<int32_t>(memoryStickInfo.at(SPEED_PROPERTY_NAME));
+
+				if(type == MemoryType::Unknown) {
+					std::map<std::string, std::any>::const_iterator rawMemoryTypeIterator(memoryStickInfo.find(SMBIOS_MEMORY_TYPE_PROPERTY_NAME));
+
+					if(rawMemoryTypeIterator != memoryStickInfo.end()) {
+						type = magic_enum::enum_cast<MemoryType>(std::any_cast<int32_t>(rawMemoryTypeIterator->second)).value_or(MemoryType::Unknown);
+					}
+				}
+
+				std::string memoryTypeAndSpeed;
+
+				if(type != MemoryType::Unknown) {
+					memoryTypeAndSpeed = fmt::format("{}-{} ", getMemoryTypeName(type), speed);
+				}
+
+				s_memoryDetails.emplace_back(fmt::format("{} {}{} GB ({})", manufacturer, memoryTypeAndSpeed, capacityBytes / 1073741824UL, partNumber));
+			}
+		}
+	}
+
+	return s_memoryDetails;
+}
+
 Dimension DeviceInformationBridgeWindows::getScreenResolution() {
 	RECT desktopRectangle;
 	const HWND desktopWindowHandle = GetDesktopWindow();
@@ -371,4 +427,115 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 	}
 
 	return networkAdapterInfoCollection;
+}
+
+DeviceInformationBridge::MemoryType DeviceInformationBridgeWindows::getMemoryTypeFromWindowsMemoryType(WindowsMemoryType memoryType) {
+	switch(memoryType) {
+		case WindowsMemoryType::Unknown:
+			break;
+
+		case WindowsMemoryType::Other:
+			return MemoryType::Other;
+
+		case WindowsMemoryType::DRAM:
+			return MemoryType::DRAM;
+
+		case WindowsMemoryType::SynchronousDRAM:
+			return MemoryType::Other;
+
+		case WindowsMemoryType::CacheDRAM:
+			return MemoryType::Other;
+
+		case WindowsMemoryType::EDO:
+			return MemoryType::Other;
+
+		case WindowsMemoryType::EDRAM:
+			return MemoryType::EDRAM;
+
+		case WindowsMemoryType::VRAM:
+			return MemoryType::VRAM;
+
+		case WindowsMemoryType::SRAM:
+			return MemoryType::SRAM;
+
+		case WindowsMemoryType::RAM:
+			return MemoryType::RAM;
+
+		case WindowsMemoryType::ROM:
+			return MemoryType::ROM;
+
+		case WindowsMemoryType::Flash:
+			return MemoryType::Flash;
+
+		case WindowsMemoryType::EEPROM:
+			return MemoryType::EEPROM;
+
+		case WindowsMemoryType::FEPROM:
+			return MemoryType::FEPROM;
+
+		case WindowsMemoryType::EPROM:
+			return MemoryType::EPROM;
+
+		case WindowsMemoryType::CDRAM:
+			return MemoryType::CDRAM;
+
+		case WindowsMemoryType::RAM3D:
+			return MemoryType::RAM3D;
+
+		case WindowsMemoryType::SDRAM:
+			return MemoryType::SDRAM;
+
+		case WindowsMemoryType::SGRAM:
+			return MemoryType::SGRAM;
+
+		case WindowsMemoryType::RDRAM:
+			return MemoryType::RDRAM;
+
+		case WindowsMemoryType::DDR:
+			return MemoryType::DDR;
+
+		case WindowsMemoryType::DDR2:
+			return MemoryType::DDR2;
+
+		case WindowsMemoryType::DDR2FBDIMM:
+			return MemoryType::DDR2FBDIMM;
+
+		case WindowsMemoryType::DDR3:
+			return MemoryType::DDR3;
+
+		case WindowsMemoryType::FBD2:
+			return MemoryType::FBD2;
+
+		case WindowsMemoryType::DDR4:
+			return MemoryType::DDR4;
+
+		case WindowsMemoryType::LPDDR:
+			return MemoryType::LPDDR;
+
+		case WindowsMemoryType::LPDDR2:
+			return MemoryType::LPDDR2;
+
+		case WindowsMemoryType::LPDDR3:
+			return MemoryType::LPDDR3;
+
+		case WindowsMemoryType::LPDDR4:
+			return MemoryType::LPDDR4;
+
+		case WindowsMemoryType::LogicalNonVolatileDevice:
+			return MemoryType::LogicalNonVolatileDevice;
+
+		case WindowsMemoryType::HBM:
+			return MemoryType::HBM;
+
+		case WindowsMemoryType::HBM2:
+			return MemoryType::HBM2;
+
+		case WindowsMemoryType::DDR5:
+			return MemoryType::DDR5;
+
+		case WindowsMemoryType::LPDDR5:
+			return MemoryType::LPDDR5;
+	}
+
+	return MemoryType::Unknown;
 }
