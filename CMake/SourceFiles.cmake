@@ -1,4 +1,5 @@
 set(SOURCE_FILES
+	Application/ComponentRegistry.cpp
 	Arguments/ArgumentCollection.cpp
 	Arguments/ArgumentParser.cpp
 	ByteBuffer.cpp
@@ -45,12 +46,13 @@ set(SOURCE_FILES_WINDOWS
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 
-source_group(Source                    REGULAR_EXPRESSION ".*\\.(h|cpp)")
-source_group(Source\\Arguments         REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
-source_group(Source\\Math              REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
-source_group(Source\\Network           REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
-source_group(Source\\Platform          REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
-source_group(Source\\Platform\\Windows REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
-source_group(Source\\Script            REGULAR_EXPRESSION "Script/.*\\.(h|cpp)")
-source_group(Source\\Utilities         REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
-source_group(Source\\Zip               REGULAR_EXPRESSION "Zip/.*\\.(h|cpp)")
+source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
+source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
+source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
+source_group(Source\\Math               REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
+source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
+source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
+source_group(Source\\Platform\\Windows  REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
+source_group(Source\\Script             REGULAR_EXPRESSION "Script/.*\\.(h|cpp)")
+source_group(Source\\Utilities          REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
+source_group(Source\\Zip                REGULAR_EXPRESSION "Zip/.*\\.(h|cpp)")
