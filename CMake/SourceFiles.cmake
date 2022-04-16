@@ -1,4 +1,5 @@
 set(SOURCE_FILES
+	Application/Application.cpp
 	Application/ComponentRegistry.cpp
 	Arguments/ArgumentCollection.cpp
 	Arguments/ArgumentParser.cpp
