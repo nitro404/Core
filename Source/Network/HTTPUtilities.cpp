@@ -15,7 +15,7 @@ std::string HTTPUtilities::getStatusCodeName(uint16_t statusCode) {
 		return Utilities::emptyString;
 	}
 
-	return Utilities::toCapitalCase(std::string(magic_enum::enum_name(optionalStatusCode.value())));
+	return Utilities::toCapitalCase(magic_enum::enum_name(optionalStatusCode.value()));
 }
 
 bool HTTPUtilities::isSuccess(CURLcode code, const std::string & errorMessage) {

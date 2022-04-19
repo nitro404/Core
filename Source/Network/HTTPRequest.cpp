@@ -563,7 +563,7 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 
 	// set request method type
 	if(requestType.value() == CURLOPT_CUSTOMREQUEST) {
-		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_CUSTOMREQUEST, Utilities::toUpperCase(std::string(magic_enum::enum_name(m_method)))), fmt::format("Failed to set cURL request #{} to custom type '{}'.", m_id, magic_enum::enum_name(m_method)))) {
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_CUSTOMREQUEST, Utilities::toUpperCase(magic_enum::enum_name(m_method))), fmt::format("Failed to set cURL request #{} to custom type '{}'.", m_id, magic_enum::enum_name(m_method)))) {
 			return false;
 		}
 	}
