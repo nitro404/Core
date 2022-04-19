@@ -59,7 +59,7 @@ static const std::unordered_map<std::type_index, AnyToStringConverterFunction> a
 			const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->type()));
 
 			if(anyToStringConverter == anyToStringConverters.cend()) {
-				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", typeid(i->type()).name());
+				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->type().name());
 				continue;
 			}
 
@@ -92,7 +92,7 @@ static const std::unordered_map<std::type_index, AnyToStringConverterFunction> a
 			const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->second.type()));
 
 			if(anyToStringConverter == anyToStringConverters.cend()) {
-				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", typeid(i->second.type()).name());
+				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->second.type().name());
 				continue;
 			}
 
@@ -147,10 +147,10 @@ float Utilities::randomFloat(float min, float max, bool randomize) {
 }
 
 std::string Utilities::anyToString(const std::any & value) {
-	const auto anyToStringConverter = anyToStringConverters.find(std::type_index(typeid(value.type())));
+	const auto anyToStringConverter = anyToStringConverters.find(std::type_index(value.type()));
 
 	if(anyToStringConverter == anyToStringConverters.cend()) {
-		fmt::print("Failed to convert any to string value, no converter registered for type: '{}'.\n", typeid(value.type()).name());
+		fmt::print("Failed to convert any to string value, no converter registered for type: '{}'.\n", value.type().name());
 		return {};
 	}
 
@@ -159,4 +159,72 @@ std::string Utilities::anyToString(const std::any & value) {
 	anyToStringConverter->second(value, anyString);
 
 	return anyString;
+}
+
+std::string Utilities::anyVectorToString(const std::vector<std::any> & values) {
+	std::stringstream outputStringStream;
+
+	outputStringStream << "[";
+
+	bool firstEntry = true;
+
+	for(std::vector<std::any>::const_iterator i = values.cbegin(); i != values.cend(); ++i) {
+		const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->type()));
+
+		if(anyToStringConverter == anyToStringConverters.cend()) {
+			fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->type().name());
+			continue;
+		}
+
+		if(firstEntry) {
+			firstEntry = false;
+		}
+		else {
+			outputStringStream << ", ";
+		}
+
+		std::string anyString;
+
+		anyToStringConverter->second(*i, anyString);
+
+		outputStringStream << anyString;
+	}
+
+	outputStringStream << "]";
+
+	return outputStringStream.str();
+}
+
+std::string Utilities::anyMapToString(const std::map<std::string, std::any> & valueMap) {
+	std::stringstream outputStringStream;
+
+	outputStringStream << "{";
+
+	bool firstEntry = true;
+
+	for(std::map<std::string, std::any>::const_iterator i = valueMap.cbegin(); i != valueMap.cend(); ++i) {
+		const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->second.type()));
+
+		if(anyToStringConverter == anyToStringConverters.cend()) {
+			fmt::print("Failed to any to string, no converter registered for type: '{}'.\n", i->second.type().name());
+			continue;
+		}
+
+		if(firstEntry) {
+			firstEntry = false;
+		}
+		else {
+			outputStringStream << ",";
+		}
+
+		std::string anyString;
+
+		anyToStringConverter->second(i->second, anyString);
+
+		outputStringStream << fmt::format(" {}: {}", i->first, anyString);
+	}
+
+	outputStringStream << " }";
+
+	return outputStringStream.str();
 }
