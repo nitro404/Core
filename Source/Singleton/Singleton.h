@@ -54,15 +54,17 @@ T * Singleton<T>::getInstance() {
 
 template <class T>
 bool Singleton<T>::destroyInstance() {
+	SingletonManager & singletonManager = SingletonManager::getInstance();
+
 	T * instance = singletonManager.getSingleton<T>();
 
 	if(instance == nullptr) {
-		return;
+		return false;
 	}
 
-	bool unregistered = SingletonManager::getInstance().unregisterSingleton(typeid(T).name());
+	bool unregistered = SingletonManager::getInstance().unregisterSingleton<T>();
 
-	ComponentRegistry::getInstance().deleteComponent(newSingleton->m_componentID);
+	ComponentRegistry::getInstance().deleteComponent(instance->m_componentID);
 
 	return unregistered;
 }
