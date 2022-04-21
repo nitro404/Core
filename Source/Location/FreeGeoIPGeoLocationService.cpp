@@ -61,8 +61,6 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	std::unique_ptr<rapidjson::Document> geoLocationDocument(response->getBodyAsJSON());
 
-	fmt::print("{}\n", response->getBodyAsString());
-
 	if(geoLocationDocument == nullptr) {
 		return {};
 	}
