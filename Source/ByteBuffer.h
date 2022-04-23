@@ -134,8 +134,8 @@ public:
 	bool putUnsignedLong(uint64_t value, size_t offset);
 	bool putFloat(float value, size_t offset);
 	bool putDouble(double value, size_t offset);
-	bool putString(std::string & value, size_t offset);
-	bool putCString(std::string & value, size_t offset);
+	bool putString(const std::string & value, size_t offset);
+	bool putCString(const std::string & value, size_t offset);
 	bool putBytes(const uint8_t * data, size_t size, size_t offset);
 	bool putBytes(const std::vector<uint8_t> data, size_t offset);
 	bool putBytes(const ByteBuffer & buffer, size_t offset);
@@ -150,8 +150,8 @@ public:
 	bool insertUnsignedLong(uint64_t value, size_t offset);
 	bool insertFloat(float value, size_t offset);
 	bool insertDouble(double value, size_t offset);
-	bool insertString(std::string & value, size_t offset);
-	bool insertCString(std::string & value, size_t offset);
+	bool insertString(const std::string & value, size_t offset);
+	bool insertCString(const std::string & value, size_t offset);
 	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
 	bool insertBytes(const std::vector<uint8_t> data, size_t offset);
 	bool insertBytes(const ByteBuffer & buffer, size_t offset);
@@ -166,8 +166,8 @@ public:
 	bool writeUnsignedLong(uint64_t value);
 	bool writeFloat(float value);
 	bool writeDouble(double value);
-	bool writeString(std::string & value);
-	bool writeCString(std::string & value);
+	bool writeString(const std::string & value);
+	bool writeCString(const std::string & value);
 	bool writeBytes(const uint8_t * data, size_t size);
 	bool writeBytes(const std::vector<uint8_t> data);
 	bool writeBytes(const ByteBuffer & buffer);

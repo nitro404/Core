@@ -1152,11 +1152,11 @@ bool ByteBuffer::putDouble(double value, size_t offset) {
 	return putUnsignedLong(double_conversion::double_to_uint64(value), offset);
 }
 
-bool ByteBuffer::putString(std::string & value, size_t offset) {
+bool ByteBuffer::putString(const std::string & value, size_t offset) {
 	return putBytes(reinterpret_cast<const uint8_t *>(value.data()), value.length(), offset);
 }
 
-bool ByteBuffer::putCString(std::string & value, size_t offset) {
+bool ByteBuffer::putCString(const std::string & value, size_t offset) {
 	return putBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
@@ -1300,11 +1300,11 @@ bool ByteBuffer::insertDouble(double value, size_t offset) {
 	return insertUnsignedLong(double_conversion::double_to_uint64(value), offset);
 }
 
-bool ByteBuffer::insertString(std::string & value, size_t offset) {
+bool ByteBuffer::insertString(const std::string & value, size_t offset) {
 	return insertBytes(reinterpret_cast<const uint8_t *>(value.data()), value.length(), offset);
 }
 
-bool ByteBuffer::insertCString(std::string & value, size_t offset) {
+bool ByteBuffer::insertCString(const std::string & value, size_t offset) {
 	return insertBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
@@ -1426,7 +1426,7 @@ bool ByteBuffer::writeDouble(double value) {
 	return false;
 }
 
-bool ByteBuffer::writeString(std::string & value) {
+bool ByteBuffer::writeString(const std::string & value) {
 	if(putString(value, m_writeOffset)) {
 		m_writeOffset += value.length() * sizeof(uint8_t);
 
@@ -1436,7 +1436,7 @@ bool ByteBuffer::writeString(std::string & value) {
 	return false;
 }
 
-bool ByteBuffer::writeCString(std::string & value) {
+bool ByteBuffer::writeCString(const std::string & value) {
 	if(putCString(value, m_writeOffset)) {
 		m_writeOffset += (value.length() + 1) * sizeof(uint8_t);
 
