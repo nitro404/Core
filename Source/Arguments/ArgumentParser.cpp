@@ -15,13 +15,19 @@ ArgumentParser::ArgumentParser(int argc, char * argv[])
 }
 
 ArgumentParser::ArgumentParser(ArgumentParser && parser) noexcept
-	: ArgumentCollection(std::move(parser)) { }
+	: ArgumentCollection(parser)
+	, m_passthroughArguments(std::move(parser.m_passthroughArguments)) { }
 
 ArgumentParser::ArgumentParser(const ArgumentParser & parser)
-	: ArgumentCollection(parser) { }
+	: ArgumentCollection(parser)
+	, m_passthroughArguments(parser.m_passthroughArguments) { }
 
 ArgumentParser & ArgumentParser::operator = (ArgumentParser && parser) noexcept {
-	ArgumentCollection::operator = (parser);
+	if(this != &parser) {
+		ArgumentCollection::operator = (parser);
+
+		m_passthroughArguments = parser.m_passthroughArguments;
+	}
 
 	return *this;
 }
@@ -29,13 +35,16 @@ ArgumentParser & ArgumentParser::operator = (ArgumentParser && parser) noexcept 
 ArgumentParser & ArgumentParser::operator = (const ArgumentParser & parser) {
 	ArgumentCollection::operator = (parser);
 
+	m_passthroughArguments = parser.m_passthroughArguments;
+
 	return *this;
 }
 
 ArgumentParser::~ArgumentParser() { }
 
 bool ArgumentParser::hasPassthroughArguments() const {
-	return m_passthroughArguments.has_value();
+	return m_passthroughArguments.has_value() &&
+		   !m_passthroughArguments->empty();
 }
 
 std::optional<std::string> ArgumentParser::getPassthroughArguments() const {
