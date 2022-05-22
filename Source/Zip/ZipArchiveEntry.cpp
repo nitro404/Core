@@ -6,6 +6,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t inflatedSize, uint32_t crc32, ZipArchive * parentArchive)
 	: m_parentArchive(parentArchive)
@@ -67,14 +68,14 @@ std::string_view ZipArchive::Entry::getName() const {
 
 bool ZipArchive::Entry::setName(const std::string & name) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to set the entry name.\n");
+		spdlog::error("Zip archive must be open to set the entry name.");
 		return false;
 	}
 
 	std::string_view formattedName(Utilities::getFileName(name));
 
 	if(formattedName.empty()) {
-		fmt::print("Failed to rename zip entry, entry name cannot be empty.\n");
+		spdlog::error("Failed to rename zip entry, entry name cannot be empty.");
 		return false;
 	}
 
@@ -99,14 +100,12 @@ bool ZipArchive::Entry::setName(const std::string & name) {
 	}
 
 	if(m_parentArchive->hasEntry(newEntryPath)) {
-		fmt::print("Failed to rename zip entry, entry with requested name '{}' already exists!\n", formattedName);
+		spdlog::error("Failed to rename zip entry, entry with requested name '{}' already exists!", formattedName);
 		return false;
 	}
 
 	if(ZipUtilities::isSuccess(zip_file_rename(m_parentArchive->getRawArchiveHandle(), m_index, newEntryPath.c_str(), ZIP_FL_ENC_GUESS), fmt::format("Failed to rename zip entry from '{}' to '{}'.", currentName, formattedName))) {
-#if _DEBUG
-		fmt::print("Renamed zip entry from '{}' to '{}'.\n", currentName, formattedName);
-#endif
+		spdlog::debug("Renamed zip entry from '{}' to '{}'.", currentName, formattedName);
 
 		m_parentArchive->setModified();
 		m_path = newEntryPath;
@@ -155,9 +154,7 @@ bool ZipArchive::Entry::setName(const std::string & name) {
 				return false;
 			}
 
-#if _DEBUG
-			fmt::print("Renamed zip entry directory child from '{}' to '{}'.\n", curentEntryPath, newCurrentEntryPath);
-#endif
+			spdlog::debug("Renamed zip entry directory child from '{}' to '{}'.", curentEntryPath, newCurrentEntryPath);
 
 			(*i)->m_path = newCurrentEntryPath;
 		}
@@ -172,7 +169,7 @@ const std::string & ZipArchive::Entry::getPath() const {
 
 bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to move an entry.\n");
+		spdlog::error("Zip archive must be open to move an entry.");
 		return false;
 	}
 
@@ -188,7 +185,7 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 		}
 
 		if(destinationDirectory.expired()) {
-			fmt::print("Failed to create zip entry destination directory: '{}'.\n", formattedNewBasePath);
+			spdlog::error("Failed to create zip entry destination directory: '{}'.", formattedNewBasePath);
 			return false;
 		}
 	}
@@ -208,13 +205,13 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 	if(!existingDestinationEntry.expired()) {
 		if(isFile()) {
 			if(!overwrite) {
-				fmt::print("Destination zip entry already exists, must specify overwrite to replace it.\n");
+				spdlog::error("Destination zip entry already exists, must specify overwrite to replace it.");
 				return false;
 			}
 		}
 
 		if(!m_parentArchive->removeEntry(*existingDestinationEntry.lock(), false)) {
-			fmt::print("Failed to remove existing destination zip entry.\n");
+			spdlog::error("Failed to remove existing destination zip entry.");
 			return false;
 		}
 	}
@@ -226,9 +223,7 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 		return false;
 	}
 
-#if _DEBUG
-	fmt::print("Moved zip entry from '{}' to '{}'.\n", m_path, destinationEntryPath);
-#endif
+	spdlog::debug("Moved zip entry from '{}' to '{}'.", m_path, destinationEntryPath);
 
 	m_parentArchive->setModified();
 	m_path = destinationEntryPath;
@@ -252,7 +247,7 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 			}
 
 			if(!overwrite && m_parentArchive->hasEntry(newChildPath)) {
-				fmt::print("Destination child zip entry already exists, must specify overwrite to replace it: '{}'.\n", newChildPath);
+				spdlog::warn("Destination child zip entry already exists, must specify overwrite to replace it: '{}'.", newChildPath);
 				return false;
 			}
 
@@ -266,9 +261,7 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 				return false;
 			}
 
-#if _DEBUG
-			fmt::print("Renamed zip entry directory child from '{}' to '{}'.\n", i->first->getPath(), i->second);
-#endif
+			spdlog::debug("Renamed zip entry directory child from '{}' to '{}'.", i->first->getPath(), i->second);
 
 			i->first->m_path = i->second;
 		}
@@ -328,7 +321,7 @@ uint64_t ZipArchive::Entry::getIndex() const {
 
 bool ZipArchive::Entry::setIndex(uint64_t index) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to set the entry index.\n");
+		spdlog::error("Zip archive must be open to set the entry index.");
 		return false;
 	}
 
@@ -368,7 +361,7 @@ std::string ZipArchive::Entry::getComment() const {
 
 bool ZipArchive::Entry::setComment(const std::string & comment) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to set the entry comment.\n");
+		spdlog::error("Zip archive must be open to set the entry comment.");
 		return false;
 	}
 
@@ -399,7 +392,7 @@ bool ZipArchive::Entry::hasUnsavedData() const {
 
 std::unique_ptr<ByteBuffer> ZipArchive::Entry::getData() const {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to get the entry data.\n");
+		spdlog::error("Zip archive must be open to get the entry data.");
 		return nullptr;
 	}
 
@@ -418,7 +411,7 @@ std::unique_ptr<ByteBuffer> ZipArchive::Entry::getData() const {
 	int64_t numberOfBytesRead = zip_fread(zipFileHandle.get(), zipEntryData->getRawData(), m_inflatedSize);
 
 	if(numberOfBytesRead != m_inflatedSize) {
-		fmt::print("Failed to retrieve zip entry file data, number of bytes read ({}) did not match expected inflated size ({}) for entry: '{}'.\n", numberOfBytesRead, m_inflatedSize, m_path);
+		spdlog::error("Failed to retrieve zip entry file data, number of bytes read ({}) did not match expected inflated size ({}) for entry: '{}'.", numberOfBytesRead, m_inflatedSize, m_path);
 		return nullptr;
 	}
 
@@ -435,17 +428,17 @@ ZipArchive::CompressionMethod ZipArchive::Entry::getCompressionMethod() const {
 
 bool ZipArchive::Entry::setCompressionMethod(CompressionMethod compressionMethod) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to set the entry compression method.\n");
+		spdlog::error("Zip archive must be open to set the entry compression method.");
 		return false;
 	}
 
 	if(isDirectory()) {
-		fmt::print("Cannot set compression method on directory entries.\n");
+		spdlog::error("Cannot set compression method on directory entries.");
 		return false;
 	}
 
 	if(!ZipArchive::isCompressionMethodSupported(compressionMethod)) {
-		fmt::print("Failed to change zip entry compression method to unsupported method: '{}'. \n", magic_enum::enum_name(compressionMethod));
+		spdlog::error("Failed to change zip entry compression method to unsupported method: '{}'. ", magic_enum::enum_name(compressionMethod));
 		return false;
 	}
 
@@ -473,17 +466,17 @@ ZipArchive::EncryptionMethod ZipArchive::Entry::getEncryptionMethod() const {
 
 bool ZipArchive::Entry::setEncryptionMethod(EncryptionMethod encryptionMethod) {
 	if(!isParentArchiveOpen()) {
-		fmt::print("Zip archive must be open to set the entry encryption method.\n");
+		spdlog::error("Zip archive must be open to set the entry encryption method.");
 		return false;
 	}
 
 	if(isDirectory()) {
-		fmt::print("Cannot set encryption method on directory entries.\n");
+		spdlog::error("Cannot set encryption method on directory entries.");
 		return false;
 	}
 
 	if(!ZipArchive::isEncryptionMethodSupported(encryptionMethod)) {
-		fmt::print("Failed to change zip entry encryption method to unsupported method: '{}'. \n", magic_enum::enum_name(encryptionMethod));
+		spdlog::error("Failed to change zip entry encryption method to unsupported method: '{}'. ", magic_enum::enum_name(encryptionMethod));
 		return false;
 	}
 
@@ -509,7 +502,7 @@ bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 	std::unique_ptr<ByteBuffer> data(getData());
 
 	if(data == nullptr) {
-		fmt::print("Failed to obtain zip entry file data when writing entry '{}' to directory: '{}'.\n", m_path, directoryPath);
+		spdlog::error("Failed to obtain zip entry file data when writing entry '{}' to directory: '{}'.", m_path, directoryPath);
 		return false;
 	}
 

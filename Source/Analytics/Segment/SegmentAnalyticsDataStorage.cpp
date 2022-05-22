@@ -4,11 +4,11 @@
 #include "Utilities/RapidJSONUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-#include <fmt/core.h>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/prettywriter.h>
+#include <spdlog/spdlog.h>
 
 #include <array>
 #include <filesystem>
@@ -50,17 +50,17 @@ bool SegmentAnalytics::DataStorage::initialize(const std::string & filePath, con
 	}
 
 	if(filePath.empty()) {
-		fmt::print("Failed to initialize Segment analytics data storage, file path cannot be empty!\n");
+		spdlog::error("Failed to initialize Segment analytics data storage, file path cannot be empty!");
 		return false;
 	}
 
 	if(applicationVersion.empty()) {
-		fmt::print("Failed to initialize Segment analytics data storage, application version cannot be empty!\n");
+		spdlog::error("Failed to initialize Segment analytics data storage, application version cannot be empty!");
 		return false;
 	}
 
 	if(applicationBuild.empty()) {
-		fmt::print("Failed to initialize Segment analytics data storage, application build cannot be empty!\n");
+		spdlog::error("Failed to initialize Segment analytics data storage, application build cannot be empty!");
 		return false;
 	}
 
@@ -69,7 +69,7 @@ bool SegmentAnalytics::DataStorage::initialize(const std::string & filePath, con
 	m_applicationBuild = applicationBuild;
 
 	if(!createRequiredDirectories()) {
-		fmt::print("Failed to create required Segment analytics cache directories!\n");
+		spdlog::error("Failed to create required Segment analytics cache directories!");
 		return false;
 	}
 
@@ -371,7 +371,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(!value.IsObject()) {
-		fmt::print("Invalid Segment analytics data type: '{}', expected 'object'.\n", Utilities::typeToString(value.GetType()));
+		spdlog::error("Invalid Segment analytics data type: '{}', expected 'object'.", Utilities::typeToString(value.GetType()));
 		return false;
 	}
 
@@ -389,88 +389,88 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 		}
 
 		if(!propertyHandled) {
-			fmt::print("Segment analytics data has unexpected property: '{}'.\n", i->name.GetString());
+			spdlog::error("Segment analytics data has unexpected property: '{}'.", i->name.GetString());
 			return false;
 		}
 	}
 
 	// parse previous session number property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME)) {
-		fmt::print("Segment analytics data is missing '{}' property'.\n", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME);
 		return nullptr;
 	}
 
 	const rapidjson::Value & previousSessionNumberValue = value[JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME];
 
 	if(!previousSessionNumberValue.IsUint64()) {
-		fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
+		spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
 		return nullptr;
 	}
 
 	uint64_t previousSessionNumber = previousSessionNumberValue.GetUint64();
 
 	if(previousSessionNumber == 0) {
-		fmt::print("Segment analytics data has an invalid '{}' property value: '{}', expected positive integer greater than zero.\n", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
+		spdlog::error("Segment analytics data has an invalid '{}' property value: '{}', expected positive integer greater than zero.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
 		return nullptr;
 	}
 
 	// parse previous application version property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME)) {
-		fmt::print("Segment analytics data is missing '{}' property'.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
 		return false;
 	}
 
 	const rapidjson::Value & previousApplicationVersionValue = value[JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME];
 
 	if(!previousApplicationVersionValue.IsString()) {
-		fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME, Utilities::typeToString(previousApplicationVersionValue.GetType()));
+		spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME, Utilities::typeToString(previousApplicationVersionValue.GetType()));
 		return false;
 	}
 
 	std::string previousApplicationVersion(Utilities::trimString(previousApplicationVersionValue.GetString()));
 
 	if(previousApplicationVersion.empty()) {
-		fmt::print("Segment analytics data '{}' property value cannot be empty.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
+		spdlog::error("Segment analytics data '{}' property value cannot be empty.", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
 		return false;
 	}
 
 	// parse previous application build property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME)) {
-		fmt::print("Segment analytics data is missing '{}' property'.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
 		return false;
 	}
 
 	const rapidjson::Value & previousApplicationBuildValue = value[JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME];
 
 	if(!previousApplicationBuildValue.IsString()) {
-		fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME, Utilities::typeToString(previousApplicationBuildValue.GetType()));
+		spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME, Utilities::typeToString(previousApplicationBuildValue.GetType()));
 		return false;
 	}
 
 	std::string previousApplicationBuild(Utilities::trimString(previousApplicationBuildValue.GetString()));
 
 	if(previousApplicationBuild.empty()) {
-		fmt::print("Segment analytics data '{}' property value cannot be empty.\n", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
+		spdlog::error("Segment analytics data '{}' property value cannot be empty.", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
 		return false;
 	}
 
 	// parse anonymous id property
 	if(!value.HasMember(JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME)) {
-		fmt::print("Segment analytics data is missing '{}' property'.\n", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
 		return false;
 	}
 
 	const rapidjson::Value & anonymousIDValue = value[JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME];
 
 	if(!anonymousIDValue.IsString()) {
-		fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME, Utilities::typeToString(anonymousIDValue.GetType()));
+		spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME, Utilities::typeToString(anonymousIDValue.GetType()));
 		return false;
 	}
 
 	std::string anonymousID(Utilities::trimString(anonymousIDValue.GetString()));
 
 	if(anonymousID.empty()) {
-		fmt::print("Segment analytics data '{}' property value cannot be empty.\n", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
+		spdlog::error("Segment analytics data '{}' property value cannot be empty.", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
 		return false;
 	}
 
@@ -481,14 +481,14 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 		const rapidjson::Value & analyticEventIDCounterValue = value[JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME];
 
 		if(!analyticEventIDCounterValue.IsUint64()) {
-			fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected 'number'.\n", JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME, Utilities::typeToString(analyticEventIDCounterValue.GetType()));
+			spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected 'number'.", JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME, Utilities::typeToString(analyticEventIDCounterValue.GetType()));
 			return false;
 		}
 
 		analyticEventIDCounter = analyticEventIDCounterValue.GetUint64();
 
 		if(analyticEventIDCounter.value() == 0) {
-			fmt::print("Segment analytics data has an invalid '{}' property value: '{}', expected positive integer greater than zero.\n", JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME, analyticEventIDCounter.value());
+			spdlog::error("Segment analytics data has an invalid '{}' property value: '{}', expected positive integer greater than zero.", JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME, analyticEventIDCounter.value());
 			return false;
 		}
 	}
@@ -500,7 +500,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 		const rapidjson::Value & analyticEventsValue = value[JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME];
 
 		if(!analyticEventsValue.IsArray()) {
-			fmt::print("Segment analytics data has an invalid '{}' property type: '{}', expected 'array'.\n", JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME, Utilities::typeToString(analyticEventsValue.GetType()));
+			spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected 'array'.", JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME, Utilities::typeToString(analyticEventsValue.GetType()));
 			return false;
 		}
 
@@ -583,7 +583,7 @@ bool SegmentAnalytics::DataStorage::save() const {
 
 bool SegmentAnalytics::DataStorage::createRequiredDirectories() {
 	if(m_filePath.empty()) {
-		fmt::print("Missing Segment analytics data storage file path setting.\n");
+		spdlog::error("Missing Segment analytics data storage file path setting.");
 		return false;
 	}
 
@@ -596,7 +596,7 @@ bool SegmentAnalytics::DataStorage::createRequiredDirectories() {
 	}
 
 	if(cacheDirectoryPath.empty()) {
-		fmt::print("Invalid Segment analytics data storage file path setting.\n");
+		spdlog::error("Invalid Segment analytics data storage file path setting.");
 		return false;
 	}
 
@@ -604,13 +604,11 @@ bool SegmentAnalytics::DataStorage::createRequiredDirectories() {
 		std::filesystem::create_directories(cacheDirectoryPath, errorCode);
 
 		if(errorCode) {
-			fmt::print("Failed to create Segment analytics data storage file base directory structure '{}': {}\n", cacheDirectoryPath.string(), errorCode.message());
+			spdlog::error("Failed to create Segment analytics data storage file base directory structure '{}': {}", cacheDirectoryPath.string(), errorCode.message());
 			return false;
 		}
 
-#if _DEBUG
-			fmt::print("Created Segment analytics data storage file base directory structure: '{}'.\n", cacheDirectoryPath.string());
-#endif _DEBUG
+		spdlog::debug("Created Segment analytics data storage file base directory structure: '{}'.", cacheDirectoryPath.string());
 	}
 
 	return true;

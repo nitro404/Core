@@ -6,6 +6,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 using namespace std::chrono_literals;
 
@@ -673,7 +674,7 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 		m_statusCode = static_cast<uint16_t>(responseCode);
 	}
 	else {
-		fmt::print("Failed to get HTTP status code.\n");
+		spdlog::error("Failed to get HTTP status code.");
 	}
 
 	char * localIPAddress = nullptr;

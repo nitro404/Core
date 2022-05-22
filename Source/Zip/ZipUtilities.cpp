@@ -1,6 +1,6 @@
 #include "ZipUtilities.h"
 
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 bool ZipUtilities::isSuccess(int zipErrorCode, const std::string & errorMessage) {
 	if(zipErrorCode != 0) {
@@ -8,7 +8,7 @@ bool ZipUtilities::isSuccess(int zipErrorCode, const std::string & errorMessage)
 			zip_error_t zipError;
 			zip_error_init_with_code(&zipError, zipErrorCode);
 
-			fmt::print("{} {}\n", errorMessage, zip_error_strerror(&zipError));
+			spdlog::error("{} {}", errorMessage, zip_error_strerror(&zipError));
 
 			zip_error_fini(&zipError);
 		}

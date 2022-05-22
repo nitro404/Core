@@ -3,8 +3,8 @@
 #include "HTTPStatusCode.h"
 #include "Utilities/StringUtilities.h"
 
-#include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <optional>
 
@@ -21,7 +21,7 @@ std::string HTTPUtilities::getStatusCodeName(uint16_t statusCode) {
 bool HTTPUtilities::isSuccess(CURLcode code, const std::string & errorMessage) {
 	if(code != CURLE_OK) {
 		if(!errorMessage.empty()) {
-			fmt::print("{}\n", errorMessage);
+			spdlog::error("{}", errorMessage);
 		}
 
 		return false;
@@ -33,7 +33,7 @@ bool HTTPUtilities::isSuccess(CURLcode code, const std::string & errorMessage) {
 bool HTTPUtilities::isSuccess(CURLMcode code, const std::string & errorMessage) {
 	if(code != CURLM_OK) {
 		if(!errorMessage.empty()) {
-			fmt::print("{}\n", errorMessage);
+			spdlog::error("{}", errorMessage);
 		}
 
 		return false;
@@ -45,7 +45,7 @@ bool HTTPUtilities::isSuccess(CURLMcode code, const std::string & errorMessage) 
 bool HTTPUtilities::isSuccess(CURLSHcode code, const std::string & errorMessage) {
 	if(code != CURLSHE_OK) {
 		if(!errorMessage.empty()) {
-			fmt::print("{}\n", errorMessage);
+			spdlog::error("{}", errorMessage);
 		}
 
 		return false;
@@ -63,7 +63,7 @@ HTTPUtilities::CURLEasyHandle HTTPUtilities::createCURLEasyHandle() {
 HTTPUtilities::CURLMultiHandle HTTPUtilities::createCURLMultiHandle() {
 	return CURLMultiHandle(curl_multi_init(), [](CURLM * curlMultiHandle) {
 		if(!HTTPUtilities::isSuccess(curl_multi_cleanup(curlMultiHandle))) {
-			fmt::print("Failed to clean up CURL multi handle.");
+			spdlog::error("Failed to clean up CURL multi handle.");
 		}
 	});
 }
@@ -71,7 +71,7 @@ HTTPUtilities::CURLMultiHandle HTTPUtilities::createCURLMultiHandle() {
 HTTPUtilities::CURLSharedHandle HTTPUtilities::createCURLSharedHandle() {
 	return CURLSharedHandle(curl_share_init(), [](CURLSH * curlSharedHandle) {
 		if(!HTTPUtilities::isSuccess(curl_share_cleanup(curlSharedHandle))) {
-			fmt::print("Failed to clean up CURL shared handle.");
+			spdlog::error("Failed to clean up CURL shared handle.");
 		}
 	});
 }

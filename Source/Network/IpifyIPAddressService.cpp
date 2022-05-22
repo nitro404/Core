@@ -2,7 +2,7 @@
 
 #include "Network/HTTPService.h"
 
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 using namespace std::chrono_literals;
 
@@ -28,7 +28,7 @@ std::string IpifyIPAddressService::getIPAddress(IPAddressType type) {
 	std::future<std::shared_ptr<HTTPResponse>> futureResponse(httpService->sendRequest(request));
 
 	if(!futureResponse.valid()) {
-		fmt::print("Failed to create ipify HTTP request!\n");
+		spdlog::error("Failed to create ipify HTTP request!");
 		return {};
 	}
 
@@ -37,13 +37,13 @@ std::string IpifyIPAddressService::getIPAddress(IPAddressType type) {
 	std::shared_ptr<HTTPResponse> response(futureResponse.get());
 
 	if(response->isFailure()) {
-		fmt::print("Failed to retrieve IP address with error: {}\n", response->getErrorMessage());
+		spdlog::error("Failed to retrieve IP address with error: {}", response->getErrorMessage());
 		return {};
 	}
 
 	if(response->isFailureStatusCode()) {
 		std::string statusCodeName(HTTPUtilities::getStatusCodeName(response->getStatusCode()));
-		fmt::print("Failed to retrieve IP address ({}{})!\n", response->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
+		spdlog::error("Failed to retrieve IP address ({}{})!", response->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
 		return {};
 	}
 

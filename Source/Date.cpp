@@ -6,6 +6,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <chrono>
 #include <ctime>
@@ -245,7 +246,7 @@ bool Date::setValue(uint32_t packedValue, ByteOrder byteOrder, Endianness endian
 
 bool Date::setValue(const rapidjson::Value & dateValue) {
 	if(!dateValue.IsObject()) {
-		fmt::print("Invalid date type: '{}', expected 'object'.\n", Utilities::typeToString(dateValue.GetType()));
+		spdlog::error("Invalid date type: '{}', expected 'object'.", Utilities::typeToString(dateValue.GetType()));
 		return false;
 	}
 
@@ -263,14 +264,14 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 		}
 
 		if(!propertyHandled) {
-			fmt::print("Date has unexpected property '{}'.\n", i->name.GetString());
+			spdlog::error("Date has unexpected property '{}'.", i->name.GetString());
 			return false;
 		}
 	}
 
 	// parse month
 	if(!dateValue.HasMember(JSON_DATE_MONTH_PROPERTY_NAME)) {
-		fmt::print("Date is missing '{}' property'.\n", JSON_DATE_MONTH_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property'.", JSON_DATE_MONTH_PROPERTY_NAME);
 		return false;
 	}
 
@@ -284,52 +285,52 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 		monthOptional = magic_enum::enum_cast<Date::Month>(monthValue.GetUint());
 	}
 	else {
-		fmt::print("Date has an invalid '{}' property type: '{}', expected 'number' or 'string'.\n", JSON_DATE_MONTH_PROPERTY_NAME, Utilities::typeToString(monthValue.GetType()));
+		spdlog::error("Date has an invalid '{}' property type: '{}', expected 'number' or 'string'.", JSON_DATE_MONTH_PROPERTY_NAME, Utilities::typeToString(monthValue.GetType()));
 		return false;
 	}
 
 	if(!monthOptional.has_value()) {
-		fmt::print("Date '{}' property has invalid value: '{}'.\n", JSON_DATE_MONTH_PROPERTY_NAME, Utilities::valueToString(monthValue));
+		spdlog::error("Date '{}' property has invalid value: '{}'.", JSON_DATE_MONTH_PROPERTY_NAME, Utilities::valueToString(monthValue));
 		return false;
 	}
 
 	// parse day
 	if(!dateValue.HasMember(JSON_DATE_DAY_PROPERTY_NAME)) {
-		fmt::print("Date is missing '{}' property'.\n", JSON_DATE_DAY_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property'.", JSON_DATE_DAY_PROPERTY_NAME);
 		return false;
 	}
 
 	const rapidjson::Value & dayValue = dateValue[JSON_DATE_DAY_PROPERTY_NAME];
 
 	if(!dayValue.IsUint()) {
-		fmt::print("Date has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_DATE_DAY_PROPERTY_NAME, Utilities::typeToString(dayValue.GetType()));
+		spdlog::error("Date has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_DATE_DAY_PROPERTY_NAME, Utilities::typeToString(dayValue.GetType()));
 		return false;
 	}
 
 	uint32_t day = dayValue.GetUint();
 
 	if(day > std::numeric_limits<uint16_t>::max()) {
-		fmt::print("Date '{}' property value has an invalid value: '{}', expected unsigned integer 'number' between 1 and {} inclusively.\n", JSON_DATE_DAY_PROPERTY_NAME, day, std::numeric_limits<uint8_t>::max());
+		spdlog::error("Date '{}' property value has an invalid value: '{}', expected unsigned integer 'number' between 1 and {} inclusively.", JSON_DATE_DAY_PROPERTY_NAME, day, std::numeric_limits<uint8_t>::max());
 		return false;
 	}
 
 	// parse year
 	if(!dateValue.HasMember(JSON_DATE_YEAR_PROPERTY_NAME)) {
-		fmt::print("Date is missing '{}' property'.\n", JSON_DATE_YEAR_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property'.", JSON_DATE_YEAR_PROPERTY_NAME);
 		return false;
 	}
 
 	const rapidjson::Value & yearValue = dateValue[JSON_DATE_YEAR_PROPERTY_NAME];
 
 	if(!yearValue.IsUint()) {
-		fmt::print("Date has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_DATE_YEAR_PROPERTY_NAME, Utilities::typeToString(yearValue.GetType()));
+		spdlog::error("Date has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_DATE_YEAR_PROPERTY_NAME, Utilities::typeToString(yearValue.GetType()));
 		return false;
 	}
 
 	uint32_t year = yearValue.GetUint();
 
 	if(year > std::numeric_limits<uint16_t>::max()) {
-		fmt::print("Date '{}' property value has an invalid value: '{}', expected unsigned integer 'number' between 0 and {} inclusively.\n", JSON_DATE_YEAR_PROPERTY_NAME, year, std::numeric_limits<uint8_t>::max());
+		spdlog::error("Date '{}' property value has an invalid value: '{}', expected unsigned integer 'number' between 0 and {} inclusively.", JSON_DATE_YEAR_PROPERTY_NAME, year, std::numeric_limits<uint8_t>::max());
 		return false;
 	}
 

@@ -1,9 +1,9 @@
 #include "RapidJSONUtilities.h"
 
-#include <fmt/core.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <spdlog/spdlog.h>
 
 #include <functional>
 #include <typeindex>
@@ -97,7 +97,7 @@ static const std::unordered_map<std::type_index, AnyToJSONConverterFunction> any
 			const auto anyToJSONConverter = anyToJSONConverters.find(std::type_index(i->type()));
 
 			if(anyToJSONConverter == anyToJSONConverters.cend()) {
-				fmt::print("Failed to convert any to JSON, no converter registered for type: '{}'.\n", i->type().name());
+				spdlog::warn("Failed to convert any to JSON, no converter registered for type: '{}'.", i->type().name());
 				continue;
 			}
 
@@ -117,7 +117,7 @@ static const std::unordered_map<std::type_index, AnyToJSONConverterFunction> any
 			const auto anyToJSONConverter = anyToJSONConverters.find(std::type_index(i->second.type()));
 
 			if(anyToJSONConverter == anyToJSONConverters.cend()) {
-				fmt::print("Failed to convert any to JSON, no converter registered for type: '{}'.\n", i->second.type().name());
+				spdlog::warn("Failed to convert any to JSON, no converter registered for type: '{}'.", i->second.type().name());
 				continue;
 			}
 
@@ -178,7 +178,7 @@ std::optional<rapidjson::Value> Utilities::anyToJSONValue(const std::any & value
 	const auto anyToJSONConverter = anyToJSONConverters.find(std::type_index(value.type()));
 
 	if(anyToJSONConverter == anyToJSONConverters.cend()) {
-		fmt::print("Failed to convert any to JSON value, no converter registered for type: '{}'.\n", value.type().name());
+		spdlog::warn("Failed to convert any to JSON value, no converter registered for type: '{}'.", value.type().name());
 		return {};
 	}
 
@@ -201,7 +201,7 @@ rapidjson::Document Utilities::anyVectorToJSONDocument(const std::vector<std::an
 		const auto anyToJSONConverter = anyToJSONConverters.find(std::type_index(i->type()));
 
 		if(anyToJSONConverter == anyToJSONConverters.cend()) {
-			fmt::print("Failed to convert any to JSON, no converter registered for type: '{}'.\n", i->type().name());
+			spdlog::warn("Failed to convert any to JSON, no converter registered for type: '{}'.", i->type().name());
 			continue;
 		}
 
@@ -221,7 +221,7 @@ rapidjson::Value Utilities::anyVectorToJSONValue(const std::vector<std::any> & v
 	const auto anyVectorToJSONConverter = anyToJSONConverters.find(std::type_index(typeid(std::vector<std::any>)));
 
 	if(anyVectorToJSONConverter == anyToJSONConverters.cend()) {
-		fmt::print("Failed to convert any vector to JSON value, no converter registered for type: '{}'.\n", typeid(std::vector<std::any>).name());
+		spdlog::warn("Failed to convert any vector to JSON value, no converter registered for type: '{}'.", typeid(std::vector<std::any>).name());
 		return {};
 	}
 
@@ -244,7 +244,7 @@ rapidjson::Document Utilities::anyMapToJSONDocument(const std::map<std::string, 
 		const auto anyToJSONConverter = anyToJSONConverters.find(std::type_index(i->second.type()));
 
 		if(anyToJSONConverter == anyToJSONConverters.cend()) {
-			fmt::print("Failed to convert any to JSON, no converter registered for type: '{}'.\n", i->second.type().name());
+			spdlog::warn("Failed to convert any to JSON, no converter registered for type: '{}'.", i->second.type().name());
 			continue;
 		}
 
@@ -265,7 +265,7 @@ rapidjson::Value Utilities::anyMapToJSONValue(const std::map<std::string, std::a
 	const auto anyMapToJSONConverter = anyToJSONConverters.find(std::type_index(typeid(std::map<std::string, std::any>)));
 
 	if(anyMapToJSONConverter == anyToJSONConverters.cend()) {
-		fmt::print("Failed to convert any map to JSON value, no converter registered for type: '{}'.\n", typeid(std::map<std::string, std::any>).name());
+		spdlog::warn("Failed to convert any map to JSON value, no converter registered for type: '{}'.", typeid(std::map<std::string, std::any>).name());
 		return {};
 	}
 

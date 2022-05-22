@@ -6,7 +6,7 @@
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha.h>
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -289,7 +289,7 @@ std::optional<std::string> Utilities::getFileSHA1Hash(const std::string & filePa
 	std::ifstream inputFileStream(filePath, std::ios::binary | std::ios::ate);
 
 	if(!inputFileStream.is_open()) {
-		fmt::print("Failed to open file '{}' for hashing.\n", filePath);
+		spdlog::error("Failed to open file '{}' for hashing.", filePath);
 		return {};
 	}
 
@@ -298,14 +298,14 @@ std::optional<std::string> Utilities::getFileSHA1Hash(const std::string & filePa
 	size_t fileSize = std::size_t(fileEnd - inputFileStream.tellg());
 
 	if(fileSize == 0) {
-		fmt::print("File '{}' is empty, skipping hashing.\n", filePath);
+		spdlog::debug("File '{}' is empty, skipping hashing.", filePath);
 		return {};
 	}
 
 	ByteBuffer fileData(fileSize);
 
 	if(!inputFileStream.read(reinterpret_cast<char *>(fileData.getRawData()), fileData.getSize())) {
-		fmt::print("Failed to read file '{}' is empty, skipping hashing.\n", filePath);
+		spdlog::error("Failed to read file '{}', skipping hashing.", filePath);
 		return {};
 	}
 

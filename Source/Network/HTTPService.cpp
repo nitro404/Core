@@ -2,7 +2,7 @@
 
 #include "Utilities/StringUtilities.h"
 
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 using namespace std::chrono_literals;
 
@@ -365,7 +365,7 @@ void HTTPService::run() {
 			m_abortedRequests.pop_front();
 
 			if(!HTTPUtilities::isSuccess(curl_multi_remove_handle(curlMultiHandle.get(), abortedRequest->getCURLEasyHandle().get()))) {
-				fmt::print("Failed to remove CURL easy handle from multi handle.\n");
+				spdlog::error("Failed to remove CURL easy handle from multi handle.");
 			}
 
 			abortedRequest->getResponse()->onTransferAborted();
@@ -382,7 +382,7 @@ void HTTPService::run() {
 
 		if(!m_activeRequests.empty()) {
 			if(!HTTPUtilities::isSuccess(curl_multi_perform(curlMultiHandle.get(), &numberOfRunningHandles))) {
-				fmt::print("Failed to execute 'curl_multi_perform'.\n");
+				spdlog::error("Failed to execute 'curl_multi_perform'.");
 			}
 
 			CURLMsg * curlMessage = nullptr;
@@ -403,14 +403,14 @@ void HTTPService::run() {
 				std::shared_ptr<HTTPRequest> completedRequest(completedRequestIterator->second);
 
 				if(completedRequest == nullptr) {
-					fmt::print("Could not find completed request using cURL easy handle!\n");
+					spdlog::error("Could not find completed request using cURL easy handle!");
 					continue;
 				}
 
 				completedRequest->getResponse()->onTransferCompleted(HTTPUtilities::isSuccess(curlMessage->data.result));
 
 				if(!HTTPUtilities::isSuccess(curl_multi_remove_handle(curlMultiHandle.get(), curlMessage->easy_handle))) {
-					fmt::print("Failed to remove CURL easy handle from multi handle.\n");
+					spdlog::error("Failed to remove CURL easy handle from multi handle.");
 				}
 
 				m_activeRequests.erase(curlMessage->easy_handle);

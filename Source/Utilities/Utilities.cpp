@@ -3,6 +3,7 @@
 #include "StringUtilities.h"
 
 #include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 #include <functional>
 #include <map>
@@ -59,7 +60,7 @@ static const std::unordered_map<std::type_index, AnyToStringConverterFunction> a
 			const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->type()));
 
 			if(anyToStringConverter == anyToStringConverters.cend()) {
-				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->type().name());
+				spdlog::warn("Failed to convert any to string, no converter registered for type: '{}'.", i->type().name());
 				continue;
 			}
 
@@ -92,7 +93,7 @@ static const std::unordered_map<std::type_index, AnyToStringConverterFunction> a
 			const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->second.type()));
 
 			if(anyToStringConverter == anyToStringConverters.cend()) {
-				fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->second.type().name());
+				spdlog::warn("Failed to convert any to string, no converter registered for type: '{}'.", i->second.type().name());
 				continue;
 			}
 
@@ -150,7 +151,7 @@ std::string Utilities::anyToString(const std::any & value) {
 	const auto anyToStringConverter = anyToStringConverters.find(std::type_index(value.type()));
 
 	if(anyToStringConverter == anyToStringConverters.cend()) {
-		fmt::print("Failed to convert any to string value, no converter registered for type: '{}'.\n", value.type().name());
+		spdlog::warn("Failed to convert any to string value, no converter registered for type: '{}'.", value.type().name());
 		return {};
 	}
 
@@ -172,7 +173,7 @@ std::string Utilities::anyVectorToString(const std::vector<std::any> & values) {
 		const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->type()));
 
 		if(anyToStringConverter == anyToStringConverters.cend()) {
-			fmt::print("Failed to convert any to string, no converter registered for type: '{}'.\n", i->type().name());
+			spdlog::warn("Failed to convert any to string, no converter registered for type: '{}'.", i->type().name());
 			continue;
 		}
 
@@ -206,7 +207,7 @@ std::string Utilities::anyMapToString(const std::map<std::string, std::any> & va
 		const auto anyToStringConverter = anyToStringConverters.find(std::type_index(i->second.type()));
 
 		if(anyToStringConverter == anyToStringConverters.cend()) {
-			fmt::print("Failed to any to string, no converter registered for type: '{}'.\n", i->second.type().name());
+			spdlog::warn("Failed to any to string, no converter registered for type: '{}'.", i->second.type().name());
 			continue;
 		}
 

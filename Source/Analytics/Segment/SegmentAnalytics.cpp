@@ -9,8 +9,8 @@
 #include "Utilities/TimeUtilities.h"
 
 #include <date/tz.h>
-#include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <chrono>
 
@@ -43,7 +43,7 @@ bool SegmentAnalytics::initialize(const Configuration & configuration) {
 	}
 
 	if(getLibraryInfoProvider() == nullptr) {
-		fmt::print("Library info provider must not be null!\n");
+		spdlog::error("Library info provider must not be null!");
 		return false;
 	}
 
@@ -78,7 +78,7 @@ bool SegmentAnalytics::initialize(const Configuration & configuration) {
 	}
 
 	if(!m_dataStorage->initialize(configuration.dataStorageFilePath, m_applicationVersion, m_applicationBuild)) {
-		fmt::print("Failed to initialize Segment analytics data storage!\n");
+		spdlog::error("Failed to initialize Segment analytics data storage!");
 		return false;
 	}
 
@@ -381,37 +381,37 @@ bool SegmentAnalytics::onApplicationClosed() {
 
 bool SegmentAnalytics::isConfigurationValid(const Configuration & configuration) const {
 	if(configuration.writeKey.empty()) {
-		fmt::print("Invalid Segment analytics configuration - write key cannot be empty.\n");
+		spdlog::error("Invalid Segment analytics configuration - write key cannot be empty.");
 		return false;
 	}
 
 	if(configuration.dataStorageFilePath.empty()) {
-		fmt::print("Invalid Segment analytics configuration - data storage file path cannot be empty.\n");
+		spdlog::error("Invalid Segment analytics configuration - data storage file path cannot be empty.");
 		return false;
 	}
 
 	if(configuration.httpService == nullptr || !configuration.httpService->isInitialized()) {
-		fmt::print("Invalid Segment analytics configuration - HTTP service is invalid or uninitialized.\n");
+		spdlog::error("Invalid Segment analytics configuration - HTTP service is invalid or uninitialized.");
 		return false;
 	}
 
 	if(configuration.batchMode && configuration.maxEventQueueSize <= 1) {
-		fmt::print("Invalid Segment analytics configuration - max event queue size value must be greater than one.\n");
+		spdlog::error("Invalid Segment analytics configuration - max event queue size value must be greater than one.");
 		return false;
 	}
 
 	if(configuration.applicationName.empty()) {
-		fmt::print("Invalid Segment analytics configuration - application name cannot be empty.\n");
+		spdlog::error("Invalid Segment analytics configuration - application name cannot be empty.");
 		return false;
 	}
 
 	if(configuration.applicationVersion.empty()) {
-		fmt::print("Invalid Segment analytics configuration - application version cannot be empty.\n");
+		spdlog::error("Invalid Segment analytics configuration - application version cannot be empty.");
 		return false;
 	}
 
 	if(configuration.applicationBuild.empty()) {
-		fmt::print("Invalid Segment analytics configuration - application build cannot be empty.\n");
+		spdlog::error("Invalid Segment analytics configuration - application build cannot be empty.");
 		return false;
 	}
 
@@ -464,7 +464,7 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 		timeZone = date::current_zone()->name();
 	}
 	catch(std::runtime_error error) {
-		fmt::print("Failed to obtain current time zone name: {}\n", error.what());
+		spdlog::error("Failed to obtain current time zone name: {}", error.what());
 	}
 
 	if(timeZone.empty()) {

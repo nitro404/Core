@@ -2,7 +2,7 @@
 
 #include "ZipUtilities.h"
 
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 ZipArchive::SourceBuffer::SourceBuffer(ZipSourceHandle zipSourceHandle, std::unique_ptr<ByteBuffer> data)
 	: m_sourceHandle(std::move(zipSourceHandle))
@@ -90,12 +90,12 @@ bool ZipArchive::SourceBuffer::close() {
 	}
 
 	if(numberOfBytesRead == -1) {
-		fmt::print("Failed to write updated zip archive source buffer data to byte buffer.\n");
+		spdlog::error("Failed to write updated zip archive source buffer data to byte buffer.");
 		return false;
 	}
 
 	if(numberOfBytesRead != zipSourceInfo.size) {
-		fmt::print("Failed to write updated zip archive source buffer data to buffer, read only {} bytes from source buffer when {} bytes were expected.\n", numberOfBytesRead, zipSourceInfo.size);
+		spdlog::error("Failed to write updated zip archive source buffer data to buffer, read only {} bytes from source buffer when {} bytes were expected.", numberOfBytesRead, zipSourceInfo.size);
 		return false;
 	}
 
@@ -115,7 +115,7 @@ bool ZipArchive::SourceBuffer::reopen() {
 	m_sourceHandle = createZipSourceHandle(zip_source_buffer_create(m_data->getRawData(), m_data->getSize(), 0, zipError.get()));
 
 	if(m_sourceHandle == nullptr) {
-		fmt::print("Failed to re-open zip archive source buffer. {}\n", zip_error_strerror(zipError.get()));
+		spdlog::error("Failed to re-open zip archive source buffer. {}", zip_error_strerror(zipError.get()));
 		return false;
 	}
 

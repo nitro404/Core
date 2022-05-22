@@ -7,6 +7,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <array>
 #include <sstream>
@@ -381,67 +382,67 @@ rapidjson::Value SegmentAnalyticEvent::toJSON(rapidjson::MemoryPoolAllocator<rap
 
 std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapidjson::Value & analyticEventValue) {
 	if(!analyticEventValue.IsObject()) {
-		fmt::print("Invalid Segment analytic event type: '{}', expected 'object'.\n", Utilities::typeToString(analyticEventValue.GetType()));
+		spdlog::error("Invalid Segment analytic event type: '{}', expected 'object'.", Utilities::typeToString(analyticEventValue.GetType()));
 		return nullptr;
 	}
 
 	// parse analytic event ID
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME)) {
-		fmt::print("Segment analytic event is missing '{}' property'.\n", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME);
 		return nullptr;
 	}
 
 	const rapidjson::Value & idValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME];
 
 	if(!idValue.IsUint64()) {
-		fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME, Utilities::typeToString(idValue.GetType()));
+		spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME, Utilities::typeToString(idValue.GetType()));
 		return nullptr;
 	}
 
 	uint64_t id = idValue.GetUint64();
 
 	if(id == 0) {
-		fmt::print("Segment analytic event has an invalid '{}' property value: '{}', expected positive integer greater than zero.\n", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME, Utilities::typeToString(idValue.GetType()));
+		spdlog::error("Segment analytic event has an invalid '{}' property value: '{}', expected positive integer greater than zero.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME, Utilities::typeToString(idValue.GetType()));
 		return nullptr;
 	}
 
 	// parse analytic event type
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME)) {
-		fmt::print("Segment analytic event is missing '{}' property'.\n", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME);
 		return nullptr;
 	}
 
 	const rapidjson::Value & typeValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME];
 
 	if(!typeValue.IsString()) {
-		fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME, Utilities::typeToString(typeValue.GetType()));
+		spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME, Utilities::typeToString(typeValue.GetType()));
 		return nullptr;
 	}
 
 	std::optional<SegmentAnalyticEvent::EventType> optionalType(magic_enum::enum_cast<SegmentAnalyticEvent::EventType>(typeValue.GetString()));
 
 	if(!optionalType.has_value()) {
-		fmt::print("Segment analytic event has an invalid '{}' property value: '{}'.\n", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME, typeValue.GetString());
+		spdlog::error("Segment analytic event has an invalid '{}' property value: '{}'.", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME, typeValue.GetString());
 		return nullptr;
 	}
 
 	// parse analytic event name
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME)) {
-		fmt::print("Segment analytic event is missing '{}' property'.\n", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
 		return nullptr;
 	}
 
 	const rapidjson::Value & nameValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME];
 
 	if(!nameValue.IsString()) {
-		fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME, Utilities::typeToString(nameValue.GetType()));
+		spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME, Utilities::typeToString(nameValue.GetType()));
 		return nullptr;
 	}
 
 	std::string name(Utilities::trimString(nameValue.GetString()));
 
 	if(name.empty()) {
-		fmt::print("Segment analytic event '{}' property cannot be empty.\n", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
+		spdlog::error("Segment analytic event '{}' property cannot be empty.", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -452,7 +453,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 		const rapidjson::Value & categoryValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_CATEGORY_PROPERTY_NAME];
 
 		if(!categoryValue.IsString()) {
-			fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_ANALYTIC_EVENT_CATEGORY_PROPERTY_NAME, Utilities::typeToString(categoryValue.GetType()));
+			spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_ANALYTIC_EVENT_CATEGORY_PROPERTY_NAME, Utilities::typeToString(categoryValue.GetType()));
 			return nullptr;
 		}
 
@@ -461,14 +462,14 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 
 	// parse analytic event timestamp
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME)) {
-		fmt::print("Segment analytic event is missing '{}' property'.\n", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME);
 		return nullptr;
 	}
 
 	const rapidjson::Value & timestampValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME];
 
 	if(!timestampValue.IsUint64()) {
-		fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME, Utilities::typeToString(timestampValue.GetType()));
+		spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME, Utilities::typeToString(timestampValue.GetType()));
 		return nullptr;
 	}
 
@@ -481,7 +482,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 		const rapidjson::Value & userIDValue = analyticEventValue[JSON_SEGMENT_ANALYTIC_EVENT_USER_ID_PROPERTY_NAME];
 
 		if(!userIDValue.IsString()) {
-			fmt::print("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_SEGMENT_ANALYTIC_EVENT_USER_ID_PROPERTY_NAME, Utilities::typeToString(userIDValue.GetType()));
+			spdlog::error("Segment analytic event has an invalid '{}' property type: '{}', expected 'string'.", JSON_SEGMENT_ANALYTIC_EVENT_USER_ID_PROPERTY_NAME, Utilities::typeToString(userIDValue.GetType()));
 			return nullptr;
 		}
 

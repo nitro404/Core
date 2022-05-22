@@ -4,7 +4,7 @@
 #include "Utilities/RapidJSONUtilities.h"
 
 #include <rapidjson/document.h>
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 using namespace std::chrono_literals;
 
@@ -40,7 +40,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 	std::future<std::shared_ptr<HTTPResponse>> futureResponse(httpService->sendRequest(request));
 
 	if(!futureResponse.valid()) {
-		fmt::print("Failed to create Free GeoIP HTTP request!\n");
+		spdlog::error("Failed to create Free GeoIP HTTP request!");
 		return {};
 	}
 
@@ -49,13 +49,13 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 	std::shared_ptr<HTTPResponse> response(futureResponse.get());
 
 	if(response->isFailure()) {
-		fmt::print("Failed to retrieve geo location with error: {}\n", response->getErrorMessage());
+		spdlog::error("Failed to retrieve geo location with error: {}", response->getErrorMessage());
 		return {};
 	}
 
 	if(response->isFailureStatusCode()) {
 		std::string statusCodeName(HTTPUtilities::getStatusCodeName(response->getStatusCode()));
-		fmt::print("Failed to retrieve geo location ({}{})!\n", response->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
+		spdlog::error("Failed to retrieve geo location ({}{})!", response->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
 		return {};
 	}
 
@@ -69,154 +69,154 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse ip address
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & ipAddressValue = (*geoLocationDocument)[JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME];
 
 	if(!ipAddressValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME, Utilities::typeToString(ipAddressValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME, Utilities::typeToString(ipAddressValue.GetType()));
 		return {};
 	}
 
 	geoLocation.ipAddress = ipAddressValue.GetString();
 
 	if(geoLocation.ipAddress.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse country name
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & countryNameValue = (*geoLocationDocument)[JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME];
 
 	if(!countryNameValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME, Utilities::typeToString(countryNameValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME, Utilities::typeToString(countryNameValue.GetType()));
 		return {};
 	}
 
 	geoLocation.countryName = countryNameValue.GetString();
 
 	if(geoLocation.countryName.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse country code
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & countryCodeValue = (*geoLocationDocument)[JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME];
 
 	if(!countryCodeValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME, Utilities::typeToString(countryCodeValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME, Utilities::typeToString(countryCodeValue.GetType()));
 		return {};
 	}
 
 	geoLocation.countryCode = countryCodeValue.GetString();
 
 	if(geoLocation.countryCode.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse region name
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & regionNameValue = (*geoLocationDocument)[JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME];
 
 	if(!regionNameValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME, Utilities::typeToString(regionNameValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME, Utilities::typeToString(regionNameValue.GetType()));
 		return {};
 	}
 
 	geoLocation.regionName = regionNameValue.GetString();
 
 	if(geoLocation.regionName.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse region code
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & regionCodeValue = (*geoLocationDocument)[JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME];
 
 	if(!regionCodeValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME, Utilities::typeToString(regionCodeValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME, Utilities::typeToString(regionCodeValue.GetType()));
 		return {};
 	}
 
 	geoLocation.regionCode = regionCodeValue.GetString();
 
 	if(geoLocation.regionCode.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse city
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & cityNameValue = (*geoLocationDocument)[JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME];
 
 	if(!cityNameValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME, Utilities::typeToString(cityNameValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME, Utilities::typeToString(cityNameValue.GetType()));
 		return {};
 	}
 
 	geoLocation.cityName = cityNameValue.GetString();
 
 	if(geoLocation.cityName.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse time zone
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & timeZoneValue = (*geoLocationDocument)[JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME];
 
 	if(!timeZoneValue.IsString()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected 'string'.\n", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME, Utilities::typeToString(timeZoneValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected 'string'.", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME, Utilities::typeToString(timeZoneValue.GetType()));
 		return {};
 	}
 
 	geoLocation.timeZone = timeZoneValue.GetString();
 
 	if(geoLocation.timeZone.empty()) {
-		fmt::print("Geo location data '{}' property cannot be empty.\n", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
+		spdlog::error("Geo location data '{}' property cannot be empty.", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
 		return {};
 	}
 
 	// parse latitude
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & latitudeValue = (*geoLocationDocument)[JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME];
 
 	if(!latitudeValue.IsDouble()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME, Utilities::typeToString(latitudeValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME, Utilities::typeToString(latitudeValue.GetType()));
 		return {};
 	}
 
@@ -224,14 +224,14 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse longitude
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME)) {
-		fmt::print("Geo location data is missing '{}' property'.\n", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & longitudeValue = (*geoLocationDocument)[JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME];
 
 	if(!longitudeValue.IsDouble()) {
-		fmt::print("Geo location data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.\n", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME, Utilities::typeToString(latitudeValue.GetType()));
+		spdlog::error("Geo location data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME, Utilities::typeToString(latitudeValue.GetType()));
 		return {};
 	}
 

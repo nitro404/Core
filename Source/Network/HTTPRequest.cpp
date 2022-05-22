@@ -8,6 +8,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <array>
 #include <optional>
@@ -627,7 +628,7 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 			std::string header(fmt::format("{}: {}", i->first, i->second));
 
 			if(!HTTPUtilities::appendToCURLStringList(m_rawHTTPHeaderList, header)) {
-				fmt::print("Failed to append header '{}' to cURL string list for cURL request #{}.\n", header, m_id);
+				spdlog::error("Failed to append header '{}' to cURL string list for cURL request #{}.", header, m_id);
 				return false;
 			}
 		}

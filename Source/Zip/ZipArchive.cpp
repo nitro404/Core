@@ -7,6 +7,7 @@
 
 #include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <filesystem>
 #include <sstream>
@@ -48,7 +49,7 @@ const std::string & ZipArchive::getPassword() const {
 
 bool ZipArchive::setPassword(const std::string & password) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to set the password.\n");
+		spdlog::error("Zip archive must be open to set the password.");
 		return false;
 	}
 
@@ -84,12 +85,12 @@ ZipArchive::CompressionMethod ZipArchive::getCompressionMethod() const {
 
 bool ZipArchive::setCompressionMethod(CompressionMethod compressionMethod) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to set the compression method.\n");
+		spdlog::error("Zip archive must be open to set the compression method.");
 		return false;
 	}
 
 	if(!ZipArchive::isCompressionMethodSupported(compressionMethod)) {
-		fmt::print("Failed to change zip archive compression method to unsupported method: '{}'. \n", magic_enum::enum_name(compressionMethod));
+		spdlog::error("Failed to change zip archive compression method to unsupported method: '{}'. ", magic_enum::enum_name(compressionMethod));
 		return false;
 	}
 
@@ -124,12 +125,12 @@ ZipArchive::EncryptionMethod ZipArchive::getEncryptionMethod() const {
 
 bool ZipArchive::setEncryptionMethod(EncryptionMethod encryptionMethod) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to set encryption method.\n");
+		spdlog::error("Zip archive must be open to set encryption method.");
 		return false;
 	}
 
 	if(!isEncryptionMethodSupported(encryptionMethod)) {
-		fmt::print("Failed to change zip archive encryption method to unsupported method: '{}'. \n", magic_enum::enum_name(encryptionMethod));
+		spdlog::error("Failed to change zip archive encryption method to unsupported method: '{}'. ", magic_enum::enum_name(encryptionMethod));
 		return false;
 	}
 
@@ -208,7 +209,7 @@ std::string ZipArchive::getComment() const {
 
 bool ZipArchive::setComment(const std::string & comment) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to set a comment.\n");
+		spdlog::error("Zip archive must be open to set a comment.");
 		return false;
 	}
 
@@ -338,7 +339,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::getEntry(size_t index) {
 
 size_t ZipArchive::extractAllEntries(const std::string & directoryPath, bool overwrite) const {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to extract all entries.\n");
+		spdlog::error("Zip archive must be open to extract all entries.");
 		return 0;
 	}
 
@@ -351,7 +352,7 @@ size_t ZipArchive::extractAllEntries(const std::string & directoryPath, bool ove
 			std::filesystem::create_directories(outputDirectoryPath, errorCode);
 
 			if(errorCode) {
-				fmt::print("Cannot extract files from zip archive, output directory '{}' creation failed: {}\n", outputDirectoryPath.string(), errorCode.message());
+				spdlog::error("Cannot extract files from zip archive, output directory '{}' creation failed: {}", outputDirectoryPath.string(), errorCode.message());
 				return false;
 			}
 		}
@@ -371,23 +372,21 @@ size_t ZipArchive::extractAllEntries(const std::string & directoryPath, bool ove
 				std::filesystem::create_directories(currentEntryDestinationPath, errorCode);
 
 				if(errorCode) {
-					fmt::print("Cannot extract files from zip archive, entry directory '{}' creation failed: {}\n", currentEntryDestinationPath.string(), errorCode.message());
+					spdlog::error("Cannot extract files from zip archive, entry directory '{}' creation failed: {}", currentEntryDestinationPath.string(), errorCode.message());
 					return false;
 				}
 			}
 		}
 		else if((*i)->isFile()) {
 			if(!overwrite && std::filesystem::is_regular_file(currentEntryDestinationPath)) {
-				fmt::print("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?\n", currentEntryDestinationPath.string());
+				spdlog::warn("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?", currentEntryDestinationPath.string());
 				continue;
 			}
 
 			if((*i)->writeTo(directoryPath, overwrite)) {
 				numberOfExtractedFileEntries++;
 
-#if _DEBUG
-				fmt::print("Extracted zip file entry #{}/{} to: '{}'.\n", numberOfExtractedFileEntries, m_numberOfFiles, currentEntryDestinationPath.string());
-#endif
+				spdlog::debug("Extracted zip file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, m_numberOfFiles, currentEntryDestinationPath.string());
 			}
 		}
 	}
@@ -397,7 +396,7 @@ size_t ZipArchive::extractAllEntries(const std::string & directoryPath, bool ove
 
 std::weak_ptr<ZipArchive::Entry> ZipArchive::addFile(const std::string & filePath, const std::string & entryDirectoryPath, bool overwrite) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to add a file.\n");
+		spdlog::error("Zip archive must be open to add a file.");
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -406,12 +405,12 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addFile(const std::string & filePat
 
 std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to add data.\n");
+		spdlog::error("Zip archive must be open to add data.");
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
 	if(entryFilePath.empty()) {
-		fmt::print("Cannot add file data without a destination zip entry file path specified.\n");
+		spdlog::error("Cannot add file data without a destination zip entry file path specified.");
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -424,7 +423,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 	std::unique_ptr<SourceBuffer> zipFileDataSourceBuffer(createZipFileSourceBuffer(std::move(data)));
 
 	if(zipFileDataSourceBuffer == nullptr) {
-		fmt::print("Failed to create zip file data source buffer when adding file to zip archive: '{}'.\n", entryFilePath);
+		spdlog::error("Failed to create zip file data source buffer when adding file to zip archive: '{}'.", entryFilePath);
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -439,7 +438,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 	int64_t newZipFileIndex = zip_file_add(m_archiveHandle.get(), formattedEntryFilePath.c_str(), zipFileDataSourceBuffer->getRawSourceHandle(), zipFlags);
 
 	if(newZipFileIndex == -1) {
-		fmt::print("Failed to add zip file to archive: '{}'.\n", entryFilePath);
+		spdlog::error("Failed to add zip file to archive: '{}'.", entryFilePath);
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -454,7 +453,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 	zipFileDataSourceBuffer.reset();
 
 	if(newFileEntry == nullptr) {
-		fmt::print("Failed to create zip file entry for file: '{}'.\n", entryFilePath);
+		spdlog::error("Failed to create zip file entry for file: '{}'.", entryFilePath);
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -469,7 +468,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 	}
 
 	if(!addEntry(std::move(newFileEntry))) {
-		fmt::print("Failed add new zip file entry to archive for file: '{}'.\n", entryFilePath);
+		spdlog::error("Failed add new zip file entry to archive for file: '{}'.", entryFilePath);
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -478,7 +477,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 
 std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & entryDirectoryPath) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to add a directory.\n");
+		spdlog::error("Zip archive must be open to add a directory.");
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -489,7 +488,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 	std::string formattedEntryDirectoryPath(formatDirectoryPath(entryDirectoryPath));
 
 	if(Utilities::startsWithPathSeparator(formattedEntryDirectoryPath)) {
-		fmt::print("Cannot add invalid directory path, must not start with path separator: '{}'.\n", entryDirectoryPath);
+		spdlog::error("Cannot add invalid directory path, must not start with path separator: '{}'.", entryDirectoryPath);
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
@@ -513,7 +512,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 		newDirectoryIndex = zip_dir_add(m_archiveHandle.get(), curentDirectoryPath.c_str(), ZIP_FL_ENC_GUESS);
 
 		if(newDirectoryIndex == -1) {
-			fmt::print("Failed to add zip directory to archive: '{}'.\n", formattedEntryDirectoryPath);
+			spdlog::error("Failed to add zip directory to archive: '{}'.", formattedEntryDirectoryPath);
 			return std::weak_ptr<ZipArchive::Entry>();
 		}
 
@@ -523,11 +522,11 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 
 		if(newDirectoryEntry != nullptr) {
 			if(!addEntry(std::move(newDirectoryEntry))) {
-				fmt::print("Failed add new zip directory entry to archive for directory: '{}'.\n", formattedEntryDirectoryPath);
+				spdlog::error("Failed add new zip directory entry to archive for directory: '{}'.", formattedEntryDirectoryPath);
 			}
 		}
 		else {
-			fmt::print("Failed to create zip directory entry for directory: '{}'.\n", formattedEntryDirectoryPath);
+			spdlog::error("Failed to create zip directory entry for directory: '{}'.", formattedEntryDirectoryPath);
 		}
 	}
 
@@ -554,7 +553,7 @@ size_t ZipArchive::removeEntry(Entry & entry) {
 
 size_t ZipArchive::removeEntry(Entry & entry, bool removeChildren) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to remove an entry.\n");
+		spdlog::error("Zip archive must be open to remove an entry.");
 		return 0;
 	}
 
@@ -608,7 +607,7 @@ size_t ZipArchive::removeFirstEntryWithName(const std::string & entryName, bool 
 
 size_t ZipArchive::removeAllEntries() {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to remove all entries.\n");
+		spdlog::error("Zip archive must be open to remove all entries.");
 		return 0;
 	}
 
@@ -644,7 +643,7 @@ void ZipArchive::setModified() {
 
 std::unique_ptr<ZipArchive> ZipArchive::createNew(const std::string & filePath, bool overwrite) {
 	if(!overwrite && !filePath.empty() && std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
-		fmt::print("Zip archive '{}' already exists, please enable overwrite flag to create.\n", filePath);
+		spdlog::error("Zip archive '{}' already exists, please enable overwrite flag to create.", filePath);
 		return nullptr;
 	}
 
@@ -658,7 +657,7 @@ std::unique_ptr<ZipArchive> ZipArchive::createNew(const std::string & filePath, 
 		ZipArchiveHandle zipArchiveHandle(createZipArchiveHandle(zip_open_from_source(zipSourceBuffer->getRawSourceHandle(), zipFlags, zipError.get())));
 
 		if(zipArchiveHandle == nullptr) {
-			fmt::print("Failed to create new zip archive. {}\n", zip_error_strerror(zipError.get()));
+			spdlog::error("Failed to create new zip archive. {}", zip_error_strerror(zipError.get()));
 			return nullptr;
 		}
 
@@ -673,7 +672,7 @@ std::unique_ptr<ZipArchive> ZipArchive::createNew(const std::string & filePath, 
 		}
 
 		if(zipArchiveHandle == nullptr) {
-			fmt::print("Failed to create new zip archive file: '{}'.\n", filePath);
+			spdlog::error("Failed to create new zip archive file: '{}'.", filePath);
 			return nullptr;
 		}
 
@@ -695,7 +694,7 @@ std::unique_ptr<ZipArchive> ZipArchive::createFrom(std::unique_ptr<ByteBuffer> d
 	ZipArchiveHandle zipArchiveHandle(createZipArchiveHandle(zip_open_from_source(zipSourceBuffer->getRawSourceHandle(), zipFlags, zipError.get())));
 
 	if(zipArchiveHandle == nullptr) {
-		fmt::print("Failed to open zip archive from source buffer. {}\n", zip_error_strerror(zipError.get()));
+		spdlog::error("Failed to open zip archive from source buffer. {}", zip_error_strerror(zipError.get()));
 		return nullptr;
 	}
 
@@ -714,7 +713,7 @@ std::unique_ptr<ZipArchive> ZipArchive::createFrom(std::unique_ptr<ByteBuffer> d
 
 std::unique_ptr<ZipArchive> ZipArchive::readFrom(const std::string & filePath, const std::string & password, bool verifyConsistency) {
 	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
-		fmt::print("Failed to read zip archive from non-existent file: '{}'!\n", filePath);
+		spdlog::error("Failed to read zip archive from non-existent file: '{}'!", filePath);
 		return nullptr;
 	}
 
@@ -732,7 +731,7 @@ std::unique_ptr<ZipArchive> ZipArchive::readFrom(const std::string & filePath, c
 	}
 
 	if(zipArchiveHandle == nullptr) {
-		fmt::print("Failed to open zip archive file: '{}'.\n", filePath);
+		spdlog::error("Failed to open zip archive file: '{}'.", filePath);
 		return nullptr;
 	}
 
@@ -768,7 +767,7 @@ bool ZipArchive::reopen(bool verifyConsistency) {
 
 	if(m_sourceBuffer != nullptr) {
 		if(!m_sourceBuffer->reopen()) {
-			fmt::print("Failed to re-open zip archive source buffer.\n");
+			spdlog::error("Failed to re-open zip archive source buffer.");
 			return false;
 		}
 
@@ -777,13 +776,13 @@ bool ZipArchive::reopen(bool verifyConsistency) {
 		m_archiveHandle = createZipArchiveHandle(zip_open_from_source(m_sourceBuffer->getRawSourceHandle(), zipFlags, zipError.get()));
 
 		if(m_archiveHandle == nullptr) {
-			fmt::print("Failed to re-open zip archive from source buffer. {}\n", zip_error_strerror(zipError.get()));
+			spdlog::error("Failed to re-open zip archive from source buffer. {}", zip_error_strerror(zipError.get()));
 			return false;
 		}
 	}
 	else if(!m_filePath.empty()) {
 		if(!std::filesystem::is_regular_file(std::filesystem::path(m_filePath))) {
-			fmt::print("Failed to re-open zip archive from non-existent file: '{}'!\n", m_filePath);
+			spdlog::error("Failed to re-open zip archive from non-existent file: '{}'!", m_filePath);
 			return nullptr;
 		}
 
@@ -795,12 +794,12 @@ bool ZipArchive::reopen(bool verifyConsistency) {
 		}
 
 		if(m_archiveHandle == nullptr) {
-			fmt::print("Failed to re-open zip archive from file: '{}'.\n", m_filePath);
+			spdlog::error("Failed to re-open zip archive from file: '{}'.", m_filePath);
 			return nullptr;
 		}
 	}
 	else {
-		fmt::print("Failed to re-open zip archive, both file path and source buffer are empty.\n");
+		spdlog::error("Failed to re-open zip archive, both file path and source buffer are empty.");
 		return false;
 	}
 
@@ -831,25 +830,21 @@ bool ZipArchive::close() {
 
 	if(m_sourceBuffer != nullptr) {
 		if(!m_sourceBuffer->close()) {
-			fmt::print("Failed to close zip archive source buffer.\n");
+			spdlog::error("Failed to close zip archive source buffer.");
 			return false;
 		}
 
 		if(!m_filePath.empty()) {
 			if(!m_sourceBuffer->getData()->writeTo(m_filePath, true)) {
-				fmt::print("Failed to write zip archive data buffer to file: '{}'.\n", m_filePath);
+				spdlog::error("Failed to write zip archive data buffer to file: '{}'.", m_filePath);
 			}
 			else {
-#if _DEBUG
-				fmt::print("Successfully wrote updated zip archive data buffer to file: '{}'.\n", m_filePath);
-#endif
+				spdlog::debug("Successfully wrote updated zip archive data buffer to file: '{}'.", m_filePath);
 			}
 		}
 	}
 	else if(!m_filePath.empty()) {
-#if _DEBUG
-		fmt::print("Successfully wrote updated zip archive to file: '{}'.\n", m_filePath);
-#endif
+		spdlog::debug("Successfully wrote updated zip archive to file: '{}'.", m_filePath);
 	}
 
 	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
@@ -891,14 +886,14 @@ std::string ZipArchive::toDebugString() const {
 
 std::unique_ptr<ZipArchive::Entry> ZipArchive::createEntryFromIndex(size_t index, std::unique_ptr<ByteBuffer> data) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to create an entry from an index.\n");
+		spdlog::error("Zip archive must be open to create an entry from an index.");
 		return nullptr;
 	}
 
 	size_t entryCount = numberOfEntries();
 
 	if(index >= entryCount) {
-		fmt::print("Cannot create zip entry from out of bounds index value: {}!\n", index);
+		spdlog::error("Cannot create zip entry from out of bounds index value: {}!", index);
 		return nullptr;
 	}
 
@@ -912,14 +907,14 @@ std::unique_ptr<ZipArchive::Entry> ZipArchive::createEntryFromIndex(size_t index
 	std::optional<CompressionMethod> optionalCompressionMethod(magic_enum::enum_cast<CompressionMethod>(zipEntryInfo.comp_method));
 
 	if(!optionalCompressionMethod.has_value()) {
-		fmt::print("Failed to determine zip file entry '{}' compression method.\n", zipEntryInfo.name);
+		spdlog::error("Failed to determine zip file entry '{}' compression method.", zipEntryInfo.name);
 		return nullptr;
 	}
 
 	std::optional<EncryptionMethod> optionalEncryptionMethod(magic_enum::enum_cast<EncryptionMethod>(zipEntryInfo.encryption_method));
 
 	if(!optionalEncryptionMethod.has_value()) {
-		fmt::print("Failed to determine zip file entry '{}' encryption method.\n", zipEntryInfo.name);
+		spdlog::error("Failed to determine zip file entry '{}' encryption method.", zipEntryInfo.name);
 		return nullptr;
 	}
 
@@ -941,7 +936,7 @@ bool ZipArchive::initialize() {
 
 bool ZipArchive::populateInfo() {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to populate information.\n");
+		spdlog::error("Zip archive must be open to populate information.");
 		return false;
 	}
 
@@ -959,7 +954,7 @@ bool ZipArchive::populateInfo() {
 
 bool ZipArchive::populateEntries() {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to populate entries.\n");
+		spdlog::error("Zip archive must be open to populate entries.");
 		return false;
 	}
 
@@ -990,7 +985,7 @@ bool ZipArchive::populateEntries() {
 
 bool ZipArchive::populateDefaultMethods() {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to populate default compression and encryption methods.\n");
+		spdlog::error("Zip archive must be open to populate default compression and encryption methods.");
 		return false;
 	}
 
@@ -1016,25 +1011,23 @@ bool ZipArchive::populateDefaultMethods() {
 	}
 
 	if(!isCompressionMethodSupported(m_compressionMethod)) {
-		fmt::print("Zip archive compression method '{}' is not supported.\n", magic_enum::enum_name(m_compressionMethod));
+		spdlog::error("Zip archive compression method '{}' is not supported.", magic_enum::enum_name(m_compressionMethod));
 		return false;
 	}
 
 	if(!isEncryptionMethodSupported(m_encryptionMethod)) {
-		fmt::print("Zip archive encryption method '{}' is not supported.\n", magic_enum::enum_name(m_encryptionMethod));
+		spdlog::error("Zip archive encryption method '{}' is not supported.", magic_enum::enum_name(m_encryptionMethod));
 		return false;
 	}
 
-#if _DEBUG
-	fmt::print("Using default compression method '{}' and default encryption method '{}'.\n", magic_enum::enum_name(m_compressionMethod), magic_enum::enum_name(m_encryptionMethod));
-#endif
+	spdlog::debug("Using default compression method '{}' and default encryption method '{}'.", magic_enum::enum_name(m_compressionMethod), magic_enum::enum_name(m_encryptionMethod));
 
 	return true;
 }
 
 bool ZipArchive::addEntry(std::unique_ptr<Entry> entry) {
 	if(!isOpen()) {
-		fmt::print("Zip archive must be open to add an entry.\n");
+		spdlog::error("Zip archive must be open to add an entry.");
 		return false;
 	}
 
@@ -1114,7 +1107,7 @@ std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createEmptyZipFileSourceBu
 
 std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createZipFileSourceBuffer(std::unique_ptr<ByteBuffer> data) {
 	if(data == nullptr) {
-		fmt::print("Cannot create zip file source buffer from null data!\n");
+		spdlog::error("Cannot create zip file source buffer from null data!");
 		return nullptr;
 	}
 
@@ -1123,7 +1116,7 @@ std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createZipFileSourceBuffer(
 	ZipSourceHandle zipSourceHandle(createZipSourceHandle(zip_source_buffer(m_archiveHandle.get(), data->getRawData(), data->getSize(), 0)));
 
 	if(zipSourceHandle == nullptr) {
-		fmt::print("Failed to create zip file source buffer.\n");
+		spdlog::error("Failed to create zip file source buffer.");
 		return nullptr;
 	}
 
@@ -1136,7 +1129,7 @@ std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createEmptyZipArchiveSourc
 
 std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createZipArchiveSourceBuffer(std::unique_ptr<ByteBuffer> data) {
 	if(data == nullptr) {
-		fmt::print("Cannot create zip archive source buffer from null data!\n");
+		spdlog::error("Cannot create zip archive source buffer from null data!");
 		return nullptr;
 	}
 
@@ -1145,7 +1138,7 @@ std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createZipArchiveSourceBuff
 	ZipSourceHandle zipSourceHandle(createZipSourceHandle(zip_source_buffer_create(data->getRawData(), data->getSize(), 0, zipError.get())));
 
 	if(zipSourceHandle == nullptr) {
-		fmt::print("Failed to create zip archive source buffer. {}\n", zip_error_strerror(zipError.get()));
+		spdlog::error("Failed to create zip archive source buffer. {}", zip_error_strerror(zipError.get()));
 		return nullptr;
 	}
 

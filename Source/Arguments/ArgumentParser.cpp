@@ -2,7 +2,7 @@
 
 #include "Utilities/StringUtilities.h"
 
-#include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 #include <sstream>
 
@@ -107,7 +107,7 @@ bool ArgumentParser::parseArguments(int argc, char * argv[]) {
 		}
 		else {
 			if(arg.empty()) {
-				fmt::print("Value does not have corresponding argument: '{}'.\n", data);
+				spdlog::warn("Value does not have corresponding argument: '{}'.", data);
 
 				continue;
 			}

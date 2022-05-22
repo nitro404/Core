@@ -6,8 +6,8 @@
 #include "Utilities/RapidJSONUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-#include <fmt/core.h>
 #include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
 
 #include <chrono>
 #include <limits>
@@ -80,9 +80,7 @@ bool SegmentAnalyticsCURL::flush(std::chrono::milliseconds waitForDuration) {
 
 			std::chrono::milliseconds flushWaitDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - flushStartTimePoint);
 
-#if _DEBUG
-			fmt::print("Waited for {} ms to flush pending analytic events.\n", flushWaitDuration.count());
-#endif
+			spdlog::debug("Waited for {} ms to flush pending analytic events.", flushWaitDuration.count());
 		}
 	}
 
@@ -189,7 +187,7 @@ std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::createSingleAnalyticEventRequ
 	std::unique_ptr<rapidjson::Document> bodyDocument(createBaseEventPayloadDocument());
 
 	if(!addEventDataToValue(analyticEvent, getAnonymousID(), *bodyDocument, bodyDocument->GetAllocator(), false)) {
-		fmt::print("Failed to convert analytic event values to JSON data.\n");
+		spdlog::error("Failed to convert analytic event values to JSON data.");
 		return nullptr;
 	}
 
@@ -218,7 +216,7 @@ std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::createBatchAnalyticEventReque
 		rapidjson::Value eventArrayEntryValue(rapidjson::kObjectType);
 
 		if(!addEventDataToValue(**i, getAnonymousID(), eventArrayEntryValue, allocator, true)) {
-			fmt::print("Failed to convert analytic event values to JSON data.\n");
+			spdlog::error("Failed to convert analytic event values to JSON data.");
 			return nullptr;
 		}
 
@@ -332,7 +330,7 @@ void SegmentAnalyticsCURL::run() {
 					continue;
 				}
 
-				fmt::print("Re-trying failed Segment analytics event network transfer.\n");
+				spdlog::debug("Re-trying failed Segment analytics event network transfer.");
 
 				const SingleFailedEvent * singleFailedEvent = dynamic_cast<const SingleFailedEvent *>(i->get());
 				const BatchFailedEvents * batchFailedEvents = dynamic_cast<const BatchFailedEvents *>(i->get());
@@ -409,17 +407,17 @@ void SegmentAnalyticsCURL::run() {
 						shouldRemoveTransferAnalyticEvents = true;
 					}
 					else {
-						fmt::print("Segment analytics network transfer failed with status: {}{}.\n", response->getStatusCode(), responseStatusCode == HTTPStatusCode::None ? "" : " " + Utilities::toCapitalCase(magic_enum::enum_name(responseStatusCode)));
+						spdlog::info("Segment analytics network transfer failed with status: {}{}.", response->getStatusCode(), responseStatusCode == HTTPStatusCode::None ? "" : " " + Utilities::toCapitalCase(magic_enum::enum_name(responseStatusCode)));
 
 						if(responseStatusCode == HTTPStatusCode::BadRequest ||
 						   responseStatusCode == HTTPStatusCode::PayloadTooLarge ||
 						   responseStatusCode == HTTPStatusCode::UnprocessableEntity) {
-							fmt::print("Cancelling and removing failed Segment analytics event network transfer.\n");
+							spdlog::warn("Cancelling and removing failed Segment analytics event network transfer.");
 
 							shouldRemoveTransferAnalyticEvents = true;
 						}
 						else {
-							fmt::print("Re-trying failed Segment analytics event network transfer in {} ms.\n", m_failedNetworkTransferRetryDelay.count());
+							spdlog::debug("Re-trying failed Segment analytics event network transfer in {} ms.", m_failedNetworkTransferRetryDelay.count());
 
 							if(batchEventTransfer != nullptr) {
 								m_failedEvents.emplace_back(std::make_unique<BatchFailedEvents>(m_failedNetworkTransferRetryDelay, batchEventTransfer->getAnalyticEvents()));
