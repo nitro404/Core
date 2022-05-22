@@ -2,7 +2,7 @@
 
 #include "Utilities/StringUtilities.h"
 
-#include <stdio.h>
+#include <spdlog/spdlog.h>
 
 #pragma comment(lib, "wbemuuid.lib")
 
@@ -11,11 +11,9 @@ std::string WindowsUtilities::getErrorMessage(HRESULT result) {
 }
 
 std::string WindowsUtilities::getRegistryEntry(const std::string & key, const std::string & entryName, bool * error) {
-	HKEY hkey;
+	HKEY hkey = 0;
 
 	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &hkey) != ERROR_SUCCESS) {
-		printf("Failed to open registry key.\n");
-
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -23,13 +21,13 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 		return {};
 	}
 
-	DWORD registryValueType;
-	DWORD registryValueSize;
+	DWORD registryValueType = 0;
+	DWORD registryValueSize = 0;
 
 	if(RegQueryValueEx(hkey, entryName.c_str(), nullptr, &registryValueType, nullptr, &registryValueSize) != ERROR_SUCCESS) {
 		RegCloseKey(hkey);
 
-		printf("Failed to read registry entry value size.\n");
+		spdlog::error("Failed to read '{}' registry entry value size.", entryName);
 
 		if(error != nullptr) {
 			*error = true;
@@ -41,7 +39,7 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 	if(registryValueType != REG_SZ) {
 		RegCloseKey(hkey);
 
-		printf("Invalid registry entry value type.\n");
+		spdlog::error("Unsupported registry entry value type.");
 
 		if(error != nullptr) {
 			*error = true;
@@ -50,12 +48,12 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 		return {};
 	}
 
-	std::wstring value(registryValueSize / sizeof(wchar_t), L'\0');
+	std::string value(registryValueSize - 1, '\0');
 
-	if(RegQueryValueEx(hkey, entryName.c_str(), nullptr, nullptr, reinterpret_cast<LPBYTE>(&value[0]), &registryValueSize) != ERROR_SUCCESS) {
+	if(RegQueryValueEx(hkey, entryName.c_str(), nullptr, nullptr, reinterpret_cast<LPBYTE>(value.data()), &registryValueSize) != ERROR_SUCCESS) {
 		RegCloseKey(hkey);
 
-		printf("Failed to read registry entry value.\n");
+		spdlog::error("Failed to read registry entry value.");
 
 		if(error != nullptr) {
 			*error = true;
@@ -70,7 +68,7 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 		*error = false;
 	}
 
-	return Utilities::wideStringToString(value);
+	return value;
 }
 
 std::optional<std::string> WindowsUtilities::getRegistryEntry(const std::string & key, const std::string & entryName) {

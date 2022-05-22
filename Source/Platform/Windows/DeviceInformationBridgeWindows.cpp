@@ -109,7 +109,11 @@ std::string DeviceInformationBridgeWindows::getDeviceUniqueIdentifier() {
 			s_uniqueIdentifier = getMACAddress();
 
 			if(s_uniqueIdentifier.empty()) {
-				s_uniqueIdentifier = std::any_cast<std::string>(WindowsUtilities::getRegistryEntry("SOFTWARE\\Microsoft\\Cryptography", "MachineGuid"));
+				std::optional<std::string> machineGUID(WindowsUtilities::getRegistryEntry(R"(SOFTWARE\Microsoft\Cryptography)", "MachineGuid"));
+
+				if(machineGUID.has_value()) {
+					s_uniqueIdentifier = machineGUID.value();
+				}
 			}
 		}
 	}
