@@ -10,7 +10,11 @@ const spdlog::level::level_enum LogSystem::DEFAULT_LEVEL = spdlog::level::level_
 const spdlog::level::level_enum LogSystem::DEFAULT_LEVEL = spdlog::level::level_enum::info;
 #endif // _DEBUG
 
+#if _DEBUG
 const char * LogSystem::DEFAULT_PATTERN = "%^%T.%e [%t] %L: %v%$";
+#else
+const char * LogSystem::DEFAULT_PATTERN = "%^%T.%e %L: %v%$";
+#endif // _DEBUG
 
 LogSystem::LogSystem(std::shared_ptr<spdlog::logger> logger)
 	: m_logger(logger) {
