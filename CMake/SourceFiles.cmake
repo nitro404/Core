@@ -46,6 +46,7 @@ set(SOURCE_FILES
 	Utilities/RapidJSONUtilities.cpp
 	Utilities/StringUtilities.cpp
 	Utilities/TimeUtilities.cpp
+	Utilities/TinyXML2Utilities.cpp
 	Utilities/Utilities.cpp
 	Zip/ZipArchive.cpp
 	Zip/ZipArchiveEntry.cpp
