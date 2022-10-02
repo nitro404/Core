@@ -45,6 +45,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(
 	${PROJECT_NAME}
 		PUBLIC
+			7Zip::7Zip
 			cryptopp-static
 			CURL::libcurl
 			date::date

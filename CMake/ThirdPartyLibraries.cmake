@@ -1,5 +1,6 @@
 include_guard()
 
+hunter_add_package(7Zip)
 hunter_add_package(CryptoPP)
 hunter_add_package(CURL)
 hunter_add_package(date)
@@ -13,6 +14,7 @@ hunter_add_package(spdlog)
 hunter_add_package(tinyxml2)
 hunter_add_package(ZLIB)
 
+find_package(7Zip CONFIG REQUIRED)
 find_package(CryptoPP CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(date CONFIG REQUIRED)

@@ -1,5 +1,11 @@
 include_guard()
 
+hunter_config(7Zip
+	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.zip"
+	VERSION "21.7.0"
+	SHA1 "832fac1b5776d83f879fd4924afbec9d70494f64"
+)
+
 hunter_config(CryptoPP
 	URL "https://github.com/Telefrag-Software/cryptopp/archive/refs/heads/hunter-8.5.0.1.zip"
 	VERSION "8.5.0.1"

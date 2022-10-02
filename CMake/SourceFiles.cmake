@@ -1,4 +1,6 @@
 set(SOURCE_FILES
+	7Zip/SevenZipArchive.cpp
+	7Zip/SevenZipArchiveEntry.cpp
 	Analytics/Segment/SegmentAnalyticEvent.cpp
 	Analytics/Segment/SegmentAnalytics.cpp
 	Analytics/Segment/SegmentAnalyticsDataStorage.cpp
@@ -64,6 +66,7 @@ set(SOURCE_FILES_WINDOWS
 )
 
 source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
+source_group(Source\\7Zip               REGULAR_EXPRESSION "7Zip/.*\\.(h|cpp)")
 source_group(Source\\Analytics          REGULAR_EXPRESSION "Analytics/.*\\.(h|cpp)")
 source_group(Source\\Analytics\\Segment REGULAR_EXPRESSION "Analytics/Segment/.*\\.(h|cpp)")
 source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
