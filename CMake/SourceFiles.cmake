@@ -47,6 +47,7 @@ set(SOURCE_FILES
 	Utilities/NumberUtilities.cpp
 	Utilities/RapidJSONUtilities.cpp
 	Utilities/StringUtilities.cpp
+	Utilities/TidyHTMLUtilities.cpp
 	Utilities/TimeUtilities.cpp
 	Utilities/TinyXML2Utilities.cpp
 	Utilities/Utilities.cpp

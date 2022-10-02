@@ -57,6 +57,7 @@ target_link_libraries(
 			magic_enum::magic_enum
 			RapidJSON::rapidjson
 			spdlog::spdlog
+			tidy::tidy-static
 			tinyxml2::tinyxml2
 			ZLIB::zlib
 )
