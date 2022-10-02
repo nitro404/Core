@@ -132,6 +132,7 @@ public:
 
 	~ZipArchive();
 
+	std::string getFilePath() const;
 	bool hasPassword() const;
 	const std::string & getPassword() const;
 	bool setPassword(const std::string & password);
@@ -150,6 +151,7 @@ public:
 	bool setComment(const std::string & comment);
 	bool clearComment();
 	uint64_t getCompressedSize() const;
+	uint64_t getInflatedSize() const;
 	const ByteBuffer * getData() const;
 	size_t numberOfEntries() const;
 	size_t numberOfFiles() const;
@@ -182,7 +184,7 @@ public:
 	bool close();
 	bool reopen(bool verifyConsistency = false);
 	bool save();
-	std::string toDebugString() const;
+	std::string toDebugString(bool includeDate = false) const;
 
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
 

@@ -37,7 +37,15 @@ ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, const std::string & fi
 	, m_numberOfDirectories(0)
 	, m_modified(false) { }
 
-ZipArchive::~ZipArchive() = default;
+ZipArchive::~ZipArchive() {
+	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
+		(*i)->clearParentArchive();
+	}
+}
+
+std::string ZipArchive::getFilePath() const {
+	return m_filePath;
+}
 
 bool ZipArchive::hasPassword() const {
 	return !m_password.empty();
@@ -228,6 +236,16 @@ bool ZipArchive::clearComment() {
 
 uint64_t ZipArchive::getCompressedSize() const {
 	return m_compressedSize;
+}
+
+uint64_t ZipArchive::getInflatedSize() const {
+	uint64_t inflatedSize = 0;
+
+	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.cbegin(); i != m_entries.cend(); ++i) {
+		inflatedSize += (*i)->getInflatedSize();
+	}
+
+	return inflatedSize;
 }
 
 const ByteBuffer * ZipArchive::getData() const {
@@ -862,7 +880,7 @@ bool ZipArchive::save() {
 	return close() && reopen();
 }
 
-std::string ZipArchive::toDebugString() const {
+std::string ZipArchive::toDebugString(bool includeDate) const {
 	std::stringstream stringStream;
 
 	stringStream << fmt::format("File Path: '{}'\n", m_filePath);
@@ -870,7 +888,11 @@ std::string ZipArchive::toDebugString() const {
 	stringStream << fmt::format("Compressed Size: {} bytes\n", m_compressedSize);
 	stringStream << fmt::format("Compression Method: {}\n", magic_enum::enum_name(m_compressionMethod));
 	stringStream << fmt::format("Encryption Method: {}\n", magic_enum::enum_name(m_encryptionMethod));
-	stringStream << fmt::format("Date Modified: {}\n", Utilities::timePointToString(m_date));
+
+	if(includeDate) {
+		stringStream << fmt::format("Date: {}\n", Utilities::timePointToString(m_date));
+	}
+
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
@@ -878,7 +900,13 @@ std::string ZipArchive::toDebugString() const {
 			continue;
 		}
 
-		stringStream << fmt::format("{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}\n", (*i)->getIndex(), (*i)->getPath(), (*i)->getInflatedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
+		stringStream << fmt::format("{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getInflatedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
+
+		if(includeDate) {
+			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
+		}
+
+		stringStream << "\n";
 	}
 
 	return stringStream.str();
