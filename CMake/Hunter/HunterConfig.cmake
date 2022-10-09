@@ -6,6 +6,12 @@ hunter_config(7Zip
 	SHA1 "832fac1b5776d83f879fd4924afbec9d70494f64"
 )
 
+hunter_config(BZip2
+	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.6.zip"
+	VERSION "1.0.6"
+	SHA1 "957a9a1e137840af0f75dc6798f349d15cbfdb38"
+)
+
 hunter_config(CryptoPP
 	URL "https://github.com/Telefrag-Software/cryptopp/archive/refs/heads/hunter-8.5.0.1.zip"
 	VERSION "8.5.0.1"

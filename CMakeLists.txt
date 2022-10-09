@@ -46,6 +46,7 @@ target_link_libraries(
 	${PROJECT_NAME}
 		PUBLIC
 			7Zip::7Zip
+			BZip2::bz2
 			cryptopp-static
 			CURL::libcurl
 			date::date
