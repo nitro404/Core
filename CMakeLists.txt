@@ -54,6 +54,7 @@ target_link_libraries(
 			fmt::fmt
 			GTest::gtest
 			libzip::zip
+			lzma::lzma
 			magic_enum::magic_enum
 			RapidJSON::rapidjson
 			spdlog::spdlog

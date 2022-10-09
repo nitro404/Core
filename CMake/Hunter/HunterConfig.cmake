@@ -55,6 +55,12 @@ hunter_config(libzip
 	SHA1 "fe21a3d2e4724774506c431c7d1e2095629fb68e"
 )
 
+hunter_config(lzma
+	URL "https://github.com/Telefrag-Software/lzma/archive/refs/heads/hunter-5.2.3.zip"
+	VERSION "5.2.3"
+	SHA1 "6d8c01e2895034bb91bf90711bd5f3dab3607bf1"
+)
+
 hunter_config(magic_enum
 	URL "https://github.com/Telefrag-Software/magic_enum/archive/refs/heads/hunter-0.7.3.1.zip"
 	VERSION "0.7.3.1"
