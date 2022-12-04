@@ -29,6 +29,7 @@ public:
 	uint64_t getID() const;
 	const ByteBuffer * getBody() const;
 	ByteBuffer * getBody();
+	std::string getBodySHA1() const;
 	std::unique_ptr<ByteBuffer> transferBody();
 	std::string getBodyAsString() const;
 	std::unique_ptr<rapidjson::Document> getBodyAsJSON() const;

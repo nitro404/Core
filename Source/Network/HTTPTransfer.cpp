@@ -75,6 +75,12 @@ ByteBuffer * HTTPTransfer::getBody() {
 	return m_body.get();
 }
 
+std::string HTTPTransfer::getBodySHA1() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_body->getSHA1();
+}
+
 std::unique_ptr<ByteBuffer> HTTPTransfer::transferBody() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
