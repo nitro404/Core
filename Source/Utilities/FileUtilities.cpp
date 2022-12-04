@@ -285,7 +285,7 @@ std::string Utilities::getSafeDirectoryName(std::string_view value) {
 	return safeDirectoryName.substr(0, lastPeriodIndex);
 }
 
-std::optional<std::string> Utilities::getFileSHA1Hash(const std::string & filePath) {
+std::string Utilities::getFileSHA1Hash(const std::string & filePath) {
 	std::ifstream inputFileStream(filePath, std::ios::binary | std::ios::ate);
 
 	if(!inputFileStream.is_open()) {

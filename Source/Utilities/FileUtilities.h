@@ -32,7 +32,7 @@ namespace Utilities {
 	std::string joinPaths(char separator, Arguments &&... arguments);
 	std::vector<std::string_view> splitPath(std::string_view path);
 	std::string getSafeDirectoryName(std::string_view value);
-	std::optional<std::string> getFileSHA1Hash(const std::string & filePath);
+	std::string getFileSHA1Hash(const std::string & filePath);
 
 }
 
