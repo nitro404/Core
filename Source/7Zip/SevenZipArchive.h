@@ -73,6 +73,7 @@ public:
 	std::string toDebugString(bool includeDate = false) const;
 
 	static std::unique_ptr<SevenZipArchive> readFrom(const std::string & filePath);
+	static std::unique_ptr<SevenZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
 private:
 	using ArchiveStreamHandle = std::unique_ptr<CFileInStream, std::function<void (CFileInStream *)>>;
@@ -86,7 +87,7 @@ private:
 		size_t outputBufferSize = 0;
 	};
 
-	SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath);
+	SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
 
 	const std::vector<std::shared_ptr<Entry>> & getEntries() const;
 	std::vector<std::shared_ptr<Entry>> & getEntries();
@@ -100,6 +101,7 @@ private:
 	ISzAlloc * getRawAllocatorHandle();
 	ExtractionData & getCachedExtractionData();
 
+	static std::unique_ptr<SevenZipArchive> createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
 	static std::chrono::time_point<std::chrono::system_clock> getTimePointFromNTFSFileTime(const CNtfsFileTime & ntfsFileTime);
 	static ArchiveStreamHandle createArchiveStreamHandle();
 	static LookStreamHandle createLookStreamHandle(ISzAlloc & allocator);
@@ -110,6 +112,7 @@ private:
 	LookStreamHandle m_lookStream;
 	ArchiveHandle m_archive;
 	AllocatorHandle m_allocator;
+	std::unique_ptr<ByteBuffer> m_data;
 	ExtractionData m_cachedExtractionData;
 	std::string m_filePath;
 	std::vector<std::shared_ptr<Entry>> m_entries;
