@@ -8,6 +8,8 @@
 #include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
 
+#include <filesystem>
+
 ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t inflatedSize, uint32_t crc32, ZipArchive * parentArchive)
 	: m_parentArchive(parentArchive)
 	, m_path(path)
@@ -506,7 +508,28 @@ bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 		return false;
 	}
 
-	return data->writeTo(Utilities::joinPaths(directoryPath, m_path), overwrite);
+	std::string destinationFilePath(Utilities::joinPaths(directoryPath, m_path));
+	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(destinationFilePath, "\\", "/"), "//", "/"));
+
+	if(destinationFilePath != formattedDestinationFilePath) {
+		spdlog::debug("Updating zip entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
+	}
+
+	if(formattedDestinationFilePath.find_first_of("/") != std::string::npos) {
+		std::string destinationFileBasePath(Utilities::getFilePath(formattedDestinationFilePath));
+
+		if(!destinationFileBasePath.empty() && !std::filesystem::exists(std::filesystem::path(destinationFileBasePath))) {
+			std::error_code errorCode;
+			std::filesystem::create_directories(destinationFileBasePath, errorCode);
+
+			if(errorCode) {
+				spdlog::error("Failed to create zip archive file entry extraction destination directory structure for path '{}': {}", destinationFileBasePath, errorCode.message());
+				return false;
+			}
+		}
+	}
+
+	return data->writeTo(formattedDestinationFilePath, overwrite);
 }
 
 bool ZipArchive::Entry::isParentArchiveOpen() const {
