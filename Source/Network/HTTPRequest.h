@@ -4,7 +4,7 @@
 #include "BitmaskOperators.h"
 #include "HTTPConfiguration.h"
 #include "HTTPResponse.h"
-#include "HTTPTimeout.h"
+#include "HTTPRequestSettings.h"
 #include "HTTPTransfer.h"
 #include "HTTPUtilities.h"
 
@@ -16,7 +16,7 @@
 class HTTPService;
 
 class HTTPRequest final : public HTTPTransfer,
-                          public HTTPTimeout {
+                          public HTTPRequestSettings {
 	friend class HTTPResponse;
 	friend class HTTPService;
 

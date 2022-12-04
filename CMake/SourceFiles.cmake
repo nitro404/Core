@@ -32,9 +32,9 @@ set(SOURCE_FILES
 	Math/Vector4.cpp
 	Network/HTTPHeaders.cpp
 	Network/HTTPRequest.cpp
+	Network/HTTPRequestSettings.cpp
 	Network/HTTPResponse.cpp
 	Network/HTTPService.cpp
-	Network/HTTPTimeout.cpp
 	Network/HTTPTransfer.cpp
 	Network/HTTPUtilities.cpp
 	Network/IPAddressService.cpp

@@ -6,15 +6,13 @@
 
 using namespace std::chrono_literals;
 
-const int64_t HTTPService::DEFAULT_MAXIMUM_REDIRECTS = 5L;
 const size_t HTTPService::DEFAULT_MAXIMUM_ACTIVE_REQUESTS = 8u;
 
 HTTPService::HTTPService()
-	: HTTPTimeout()
+	: HTTPRequestSettings()
 	, m_initialized(false)
 	, m_running(false)
 	, m_stopRequested(false)
-	, m_maximumRedirects(DEFAULT_MAXIMUM_REDIRECTS)
 	, m_maximumActiveRequests(DEFAULT_MAXIMUM_ACTIVE_REQUESTS) { }
 
 HTTPService::~HTTPService() {
@@ -74,6 +72,10 @@ void HTTPService::setConfiguration(const HTTPConfiguration & configuration) {
 	if(configuration.networkTimeout.has_value()) {
 		m_networkTimeout = configuration.networkTimeout.value();
 	}
+
+	if(configuration.maximumRedirects.has_value()) {
+		m_maximumRedirects = configuration.maximumRedirects.value();
+	}
 }
 
 bool HTTPService::isRunning() const {
@@ -118,18 +120,6 @@ void HTTPService::stop() {
 	lock.lock();
 
 	m_running = false;
-}
-
-int64_t HTTPService::getMaximumRedirects() const {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-	return m_maximumRedirects;
-}
-
-void HTTPService::setMaximumRedirects(int64_t maximumRedirects) {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-	m_maximumRedirects = maximumRedirects >= 0L ? maximumRedirects : -1L;
 }
 
 bool HTTPService::hasMaximumActiveRequests() const {
@@ -246,6 +236,7 @@ std::shared_ptr<HTTPRequest> HTTPService::createRequest(HTTPRequest::Method meth
 	std::shared_ptr<HTTPRequest> newRequest(new HTTPRequest(method, url, this));
 	newRequest->setConnectionTimeout(m_connectionTimeout);
 	newRequest->setNetworkTimeout(m_networkTimeout);
+	newRequest->setMaximumRedirects(m_maximumRedirects);
 
 	if(hasUserAgent()) {
 		newRequest->setUserAgent(m_userAgent);

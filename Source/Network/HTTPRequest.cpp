@@ -20,14 +20,14 @@ const HTTPRequest::EncodingTypes HTTPRequest::DEFAULT_ACCEPTED_ENCODING_TYPES = 
 
 HTTPRequest::HTTPRequest(HTTPRequest::Method method, const std::string & url, HTTPService * service)
 	: HTTPTransfer(service)
-	, HTTPTimeout()
+	, HTTPRequestSettings()
 	, m_method(method)
 	, m_url(Utilities::trimString(url))
 	, m_acceptedEncodingTypes(DEFAULT_ACCEPTED_ENCODING_TYPES) { }
 
 HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
 	: HTTPTransfer(request)
-	, HTTPTimeout()
+	, HTTPRequestSettings()
 	, m_method(request.m_method)
 	, m_url(std::move(request.m_url))
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
@@ -39,7 +39,7 @@ HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
 
 HTTPRequest::HTTPRequest(const HTTPRequest & request)
 	: HTTPTransfer(request)
-	, HTTPTimeout()
+	, HTTPRequestSettings()
 	, m_method(request.m_method)
 	, m_url(request.m_url)
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
@@ -54,7 +54,7 @@ HTTPRequest & HTTPRequest::operator = (HTTPRequest && request) noexcept {
 		std::lock_guard<std::recursive_mutex> otherLock(request.m_mutex);
 
 		HTTPTransfer::operator = (request);
-		HTTPTimeout::operator = (request);
+		HTTPRequestSettings::operator = (request);
 
 		m_method = request.m_method;
 		m_url = std::move(request.m_url);
@@ -74,7 +74,7 @@ HTTPRequest & HTTPRequest::operator = (const HTTPRequest & request) {
 	std::lock_guard<std::recursive_mutex> otherLock(request.m_mutex);
 
 	HTTPTransfer::operator = (request);
-	HTTPTimeout::operator = (request);
+	HTTPRequestSettings::operator = (request);
 
 	m_method = request.m_method;
 	m_url = request.m_url;
@@ -643,6 +643,17 @@ bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities
 		std::string acceptedEncodingTypes(getAcceptedEncodingTypesAsString());
 
 		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_ACCEPT_ENCODING, acceptedEncodingTypes.c_str()), fmt::format("Failed to set cURL request #{} accepted encoding types to: '{}'.", m_id, acceptedEncodingTypes))) {
+			return false;
+		}
+	}
+
+	// configure re-direct following
+	if(m_maximumRedirects != 0) {
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_FOLLOWLOCATION, 1L), fmt::format("Failed to set cURL follow re-directs flag."))) {
+			return false;
+		}
+
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_MAXREDIRS, m_maximumRedirects), fmt::format("Failed to set cURL maximum re-directs property to {}.", m_maximumRedirects))) {
 			return false;
 		}
 	}

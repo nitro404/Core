@@ -5,7 +5,7 @@
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "HTTPStatusCode.h"
-#include "HTTPTimeout.h"
+#include "HTTPRequestSettings.h"
 #include "HTTPUtilities.h"
 
 #define NOMINMAX
@@ -22,7 +22,7 @@
 #include <thread>
 #include <vector>
 
-class HTTPService final : public HTTPTimeout {
+class HTTPService final : public HTTPRequestSettings {
 public:
 	HTTPService();
 	virtual ~HTTPService();
@@ -34,8 +34,6 @@ public:
 	bool isRunning() const;
 	bool start();
 	void stop();
-	int64_t getMaximumRedirects() const;
-	void setMaximumRedirects(int64_t maximumRedirects);
 	bool hasMaximumActiveRequests() const;
 	size_t numberOfActiveRequests() const;
 	size_t getMaximumActiveRequests() const;
@@ -57,7 +55,6 @@ public:
 	std::future<std::shared_ptr<HTTPResponse>> sendRequest(std::shared_ptr<HTTPRequest> request);
 	bool abortRequest(std::shared_ptr<HTTPRequest> request);
 
-	static const int64_t DEFAULT_MAXIMUM_REDIRECTS;
 	static const size_t DEFAULT_MAXIMUM_ACTIVE_REQUESTS;
 
 private:
@@ -70,7 +67,6 @@ private:
 	bool m_running;
 	bool m_stopRequested;
 	HTTPConfiguration m_configuration;
-	int64_t m_maximumRedirects;
 	size_t m_maximumActiveRequests;
 	std::string m_baseURL;
 	std::string m_userAgent;
