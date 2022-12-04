@@ -288,11 +288,11 @@ std::string Utilities::replaceAll(std::string_view value, std::string_view match
 	size_t lastIndex = 0;
 	size_t matchIndex = std::numeric_limits<size_t>::max();
 
-	while((matchIndex = value.find(match, lastIndex) != std::string::npos)) {
+	while((matchIndex = value.find(match, lastIndex)) != std::string::npos) {
 		replacedString.append(value, lastIndex, matchIndex - lastIndex);
 		replacedString.append(replacement);
 
-		lastIndex += matchIndex + match.length();
+		lastIndex = matchIndex + match.length();
 	}
 
 	replacedString.append(value.substr(lastIndex));
