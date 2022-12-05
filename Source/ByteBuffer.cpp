@@ -17,7 +17,7 @@
 static constexpr const char * BASE_64_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static constexpr const char * BASE_16_CHARACTERS = "0123456789ABCDEF";
 
-Endianness ByteBuffer::DEFAULT_ENDIANNESS = Endianness::BigEndian;
+const Endianness ByteBuffer::DEFAULT_ENDIANNESS = Endianness::BigEndian;
 
 ByteBuffer::ByteBuffer(Endianness endianness)
 	: m_data()
