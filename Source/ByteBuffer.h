@@ -207,7 +207,6 @@ public:
 	bool operator != (const ByteBuffer & byteBuffer) const;
 
 	static Endianness DEFAULT_ENDIANNESS;
-	static size_t DEFAULT_INITIAL_CAPACITY;
 
 private:
 	bool checkOverflow(size_t baseSize, size_t additionalBytes) const;
