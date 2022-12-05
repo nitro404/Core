@@ -186,6 +186,12 @@ public:
 	static std::optional<ByteBuffer> fromHexadecimal(const std::string & hexadecimal);
 	static ByteBuffer fromBase64(const std::string & base64, bool * error);
 	static std::optional<ByteBuffer> fromBase64(const std::string & base64);
+	static std::string binaryToHexadecimal(const std::string & binary);
+	static std::string binaryToBase64(const std::string & binary);
+	static std::string hexadecimalToBinary(const std::string & hexadecimal);
+	static std::string hexadecimalToBase64(const std::string & hexadecimal);
+	static std::string base64ToBinary(const std::string & base64);
+	static std::string base64ToHexadecimal(const std::string & base64);
 	static const ByteBuffer & emptyByteBuffer();
 
 	bool writeTo(const std::string & filePath, bool overwrite = false) const;

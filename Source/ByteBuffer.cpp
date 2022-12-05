@@ -1719,6 +1719,30 @@ ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
 	return buffer;
 }
 
+std::string ByteBuffer::binaryToHexadecimal(const std::string & binary) {
+	return fromBinary(binary).value_or(ByteBuffer::emptyByteBuffer()).toHexadecimal();
+}
+
+std::string ByteBuffer::binaryToBase64(const std::string & binary) {
+	return fromBinary(binary).value_or(ByteBuffer::emptyByteBuffer()).toBase64();
+}
+
+std::string ByteBuffer::hexadecimalToBinary(const std::string & hexadecimal) {
+	return fromHexadecimal(hexadecimal).value_or(ByteBuffer::emptyByteBuffer()).toBinary();
+}
+
+std::string ByteBuffer::hexadecimalToBase64(const std::string & hexadecimal) {
+	return fromHexadecimal(hexadecimal).value_or(ByteBuffer::emptyByteBuffer()).toBase64();
+}
+
+std::string ByteBuffer::base64ToBinary(const std::string & base64) {
+	return fromBase64(base64).value_or(ByteBuffer::emptyByteBuffer()).toBinary();
+}
+
+std::string ByteBuffer::base64ToHexadecimal(const std::string & base64) {
+	return fromBase64(base64).value_or(ByteBuffer::emptyByteBuffer()).toHexadecimal();
+}
+
 std::optional<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
 	bool error = false;
 
