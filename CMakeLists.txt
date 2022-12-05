@@ -41,6 +41,7 @@ target_compile_definitions(${PROJECT_NAME}
 	PUBLIC
 		${PLATFORM_UPPER}
 		NOMINMAX
+		CRYPTOPP_ENABLE_NAMESPACE_WEAK=1
 )
 
 target_link_libraries(

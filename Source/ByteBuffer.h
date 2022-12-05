@@ -12,6 +12,16 @@
 
 class ByteBuffer final {
 public:
+	enum class HashType {
+		MD5,
+		SHA1
+	};
+
+	enum class HashFormat {
+		Hexadecimal,
+		Base64
+	};
+
 	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(size_t initialCapacity, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const uint8_t * data, size_t size, Endianness endianness = DEFAULT_ENDIANNESS);
@@ -52,7 +62,9 @@ public:
 	void fill(uint8_t value, size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void reverse(size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void clear();
-	std::string getSHA1() const;
+	std::string getMD5(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
+	std::string getSHA1(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
+	std::string getHash(HashType hashType, HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
 
 	size_t getReadOffset() const;
 	void setReadOffset(size_t offset) const;
@@ -207,6 +219,7 @@ public:
 	bool operator != (const ByteBuffer & byteBuffer) const;
 
 	static const Endianness DEFAULT_ENDIANNESS;
+	static const HashFormat DEFAULT_HASH_FORMAT;
 
 private:
 	bool checkOverflow(size_t baseSize, size_t additionalBytes) const;

@@ -4,6 +4,7 @@
 #include "Utilities/StringUtilities.h"
 
 #include <cryptopp/cryptlib.h>
+#include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 #include <double-conversion/ieee.h>
 
@@ -18,6 +19,7 @@ static constexpr const char * BASE_64_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZab
 static constexpr const char * BASE_16_CHARACTERS = "0123456789ABCDEF";
 
 const Endianness ByteBuffer::DEFAULT_ENDIANNESS = Endianness::BigEndian;
+const ByteBuffer::HashFormat ByteBuffer::DEFAULT_HASH_FORMAT = HashFormat::Hexadecimal;
 
 ByteBuffer::ByteBuffer(Endianness endianness)
 	: m_data()
@@ -248,7 +250,30 @@ void ByteBuffer::clear() {
 	m_data.clear();
 }
 
-std::string ByteBuffer::getSHA1() const {
+std::string ByteBuffer::getMD5(HashFormat hashFormat) const {
+	if(isEmpty()) {
+		return {};
+	}
+
+	CryptoPP::Weak::MD5 hash;
+	hash.Update(m_data.data(), m_data.size());
+	ByteBuffer digest(hash.DigestSize());
+	digest.resize(hash.DigestSize());
+	hash.Final(digest.getRawData());
+
+	switch(hashFormat) {
+		case HashFormat::Hexadecimal: {
+			return digest.toHexadecimal();
+		}
+		case HashFormat::Base64: {
+			return digest.toBase64();
+		}
+	}
+
+	return {};
+}
+
+std::string ByteBuffer::getSHA1(HashFormat hashFormat) const {
 	if(isEmpty()) {
 		return {};
 	}
@@ -258,7 +283,30 @@ std::string ByteBuffer::getSHA1() const {
 	ByteBuffer digest(hash.DigestSize());
 	digest.resize(hash.DigestSize());
 	hash.Final(digest.getRawData());
-	return digest.toHexadecimal();
+
+	switch(hashFormat) {
+		case HashFormat::Hexadecimal: {
+			return digest.toHexadecimal();
+		}
+		case HashFormat::Base64: {
+			return digest.toBase64();
+		}
+	}
+
+	return {};
+}
+
+std::string ByteBuffer::getHash(HashType hashType, HashFormat hashFormat) const {
+	switch(hashType) {
+		case HashType::MD5: {
+			return getMD5(hashFormat);
+		}
+		case HashType::SHA1: {
+			return getSHA1(hashFormat);
+		}
+	}
+
+	return {};
 }
 
 size_t ByteBuffer::getReadOffset() const {

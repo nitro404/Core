@@ -29,7 +29,9 @@ public:
 	uint64_t getID() const;
 	const ByteBuffer * getBody() const;
 	ByteBuffer * getBody();
-	std::string getBodySHA1() const;
+	std::string getBodyMD5(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
+	std::string getBodySHA1(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
+	std::string getBodyHash(ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
 	std::unique_ptr<ByteBuffer> transferBody();
 	std::string getBodyAsString() const;
 	std::unique_ptr<rapidjson::Document> getBodyAsJSON() const;

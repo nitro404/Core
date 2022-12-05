@@ -285,7 +285,15 @@ std::string Utilities::getSafeDirectoryName(std::string_view value) {
 	return safeDirectoryName.substr(0, lastPeriodIndex);
 }
 
-std::string Utilities::getFileSHA1Hash(const std::string & filePath) {
+std::string Utilities::getFileMD5Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat) {
+	return getFileHash(filePath, ByteBuffer::HashType::MD5, hashFormat);
+}
+
+std::string Utilities::getFileSHA1Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat) {
+	return getFileHash(filePath, ByteBuffer::HashType::SHA1, hashFormat);
+}
+
+std::string Utilities::getFileHash(const std::string & filePath, ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat) {
 	std::ifstream inputFileStream(filePath, std::ios::binary | std::ios::ate);
 
 	if(!inputFileStream.is_open()) {
@@ -309,5 +317,5 @@ std::string Utilities::getFileSHA1Hash(const std::string & filePath) {
 		return {};
 	}
 
-	return fileData.getSHA1();
+	return fileData.getHash(hashType, hashFormat);
 }

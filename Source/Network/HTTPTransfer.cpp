@@ -75,10 +75,22 @@ ByteBuffer * HTTPTransfer::getBody() {
 	return m_body.get();
 }
 
-std::string HTTPTransfer::getBodySHA1() const {
+std::string HTTPTransfer::getBodyMD5(ByteBuffer::HashFormat hashFormat) const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_body->getSHA1();
+	return m_body->getMD5(hashFormat);
+}
+
+std::string HTTPTransfer::getBodySHA1(ByteBuffer::HashFormat hashFormat) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_body->getSHA1(hashFormat);
+}
+
+std::string HTTPTransfer::getBodyHash(ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_body->getHash(hashType, hashFormat);
 }
 
 std::unique_ptr<ByteBuffer> HTTPTransfer::transferBody() {
