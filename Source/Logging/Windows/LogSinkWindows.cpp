@@ -2,7 +2,6 @@
 
 #include "Logging/LogSystem.h"
 
-#define NOMINMAX
 #include <windows.h>
 
 LogSinkWindows::LogSinkWindows() {

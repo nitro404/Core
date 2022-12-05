@@ -40,6 +40,7 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
 	PUBLIC
 		${PLATFORM_UPPER}
+		NOMINMAX
 )
 
 target_link_libraries(

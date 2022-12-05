@@ -8,7 +8,6 @@
 #include "HTTPRequestSettings.h"
 #include "HTTPUtilities.h"
 
-#define NOMINMAX
 #include <curl/curl.h>
 
 #include <cstdint>

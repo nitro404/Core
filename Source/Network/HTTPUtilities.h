@@ -1,7 +1,6 @@
 #ifndef _HTTP_UTILITIES_H_
 #define _HTTP_UTILITIES_H_
 
-#define NOMINMAX
 #include <curl/curl.h>
 
 #include <cstdint>

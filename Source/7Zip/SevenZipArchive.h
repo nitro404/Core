@@ -3,7 +3,6 @@
 
 #include "ByteBuffer.h"
 
-#define NOMINMAX
 #include <7Zip/C/7z.h>
 #include <7Zip/C/7zFile.h>
 
