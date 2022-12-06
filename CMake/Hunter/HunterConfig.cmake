@@ -37,6 +37,12 @@ hunter_config(date
 		MANUAL_TZ_DB=ON
 )
 
+hunter_config(dmc_unrar
+	URL "https://github.com/Telefrag-Software/dmc_unrar/archive/refs/heads/hunter-1.7.0.zip"
+	VERSION "1.7.0"
+	SHA1 "985425d6268954b043abcdeea7f947e14d8d6290"
+)
+
 hunter_config(double-conversion
 	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.1.5.zip"
 	VERSION "3.1.5"

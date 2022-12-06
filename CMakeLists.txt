@@ -53,6 +53,7 @@ target_link_libraries(
 			CURL::libcurl
 			date::date
 			date::date-tz
+			dmc_unrar::dmc_unrar
 			double-conversion::double-conversion
 			fmt::fmt
 			GTest::gtest
