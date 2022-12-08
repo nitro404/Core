@@ -270,6 +270,18 @@ std::future<std::shared_ptr<HTTPResponse>> HTTPService::sendRequest(std::shared_
 	return response->getFuture();
 }
 
+std::shared_ptr<HTTPResponse> HTTPService::sendRequestAndWait(std::shared_ptr<HTTPRequest> request) {
+	std::future<std::shared_ptr<HTTPResponse>> futureResponse(sendRequest(request));
+
+	if(!futureResponse.valid()) {
+		return nullptr;
+	}
+
+	futureResponse.wait();
+
+	return futureResponse.get();
+}
+
 bool HTTPService::abortRequest(std::shared_ptr<HTTPRequest> request) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 

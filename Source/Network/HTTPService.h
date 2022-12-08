@@ -52,6 +52,7 @@ public:
 	void clearAuthorization();
 	std::shared_ptr<HTTPRequest> createRequest(HTTPRequest::Method method, const std::string & url);
 	std::future<std::shared_ptr<HTTPResponse>> sendRequest(std::shared_ptr<HTTPRequest> request);
+	std::shared_ptr<HTTPResponse> sendRequestAndWait(std::shared_ptr<HTTPRequest> request);
 	bool abortRequest(std::shared_ptr<HTTPRequest> request);
 
 	static const size_t DEFAULT_MAXIMUM_ACTIVE_REQUESTS;
