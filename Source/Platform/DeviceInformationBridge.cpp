@@ -1,8 +1,42 @@
 #include "DeviceInformationBridge.h"
 
+#include "Utilities/StringUtilities.h"
+
 DeviceInformationBridge::DeviceInformationBridge() { }
 
 DeviceInformationBridge::~DeviceInformationBridge() { }
+
+std::optional<DeviceInformationBridge::OperatingSystemType> DeviceInformationBridge::getOperatingSystemType() {
+	static std::optional<DeviceInformationBridge::OperatingSystemType> s_optionalOperatingSystemType;
+
+	if(!s_optionalOperatingSystemType.has_value()) {
+		std::string operatingSystemName(getOperatingSystemName());
+		std::string operatingSystemNameLowerCase(Utilities::toLowerCase(operatingSystemName));
+
+		if(operatingSystemNameLowerCase.find("windows") != std::string::npos) {
+			s_optionalOperatingSystemType = OperatingSystemType::Windows;
+		}
+	}
+
+	return s_optionalOperatingSystemType;
+}
+
+std::optional<DeviceInformationBridge::OperatingSystemArchitectureType> DeviceInformationBridge::getOperatingSystemArchitectureType() {
+	static std::optional<DeviceInformationBridge::OperatingSystemArchitectureType> s_optionalOperatingSystemArchitectureType;
+
+	if(!s_optionalOperatingSystemArchitectureType.has_value()) {
+		std::string operatingSystemArchitectureName(getOperatingSystemArchitectureName());
+
+		if(operatingSystemArchitectureName.find("64") != std::string::npos) {
+			s_optionalOperatingSystemArchitectureType = OperatingSystemArchitectureType::x64;
+		}
+		else if(operatingSystemArchitectureName.find("32") != std::string::npos) {
+			s_optionalOperatingSystemArchitectureType = OperatingSystemArchitectureType::x86;
+		}
+	}
+
+	return s_optionalOperatingSystemArchitectureType;
+}
 
 bool DeviceInformationBridge::isConnectedToInternet() {
 	return getNetworkConnectionStatus() == NetworkConnectionStatus::Internet;

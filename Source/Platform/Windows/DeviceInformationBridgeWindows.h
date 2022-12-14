@@ -16,7 +16,7 @@ public:
 	virtual std::string getDeviceUniqueIdentifier() override;
 	virtual std::string getOperatingSystemName() override;
 	virtual std::string getOperatingSystemVersion() override;
-	virtual std::string getOperatingSystemArchitecture() override;
+	virtual std::string getOperatingSystemArchitectureName() override;
 	virtual std::string getProcessorName() override;
 	virtual std::string getMotherboardName() override;
 	virtual std::vector<std::string> getGraphicsCardNames() override;

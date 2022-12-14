@@ -4,6 +4,7 @@
 #include "Dimension.h"
 #include "Singleton/Singleton.h"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -58,6 +59,17 @@ public:
 		Unknown
 	};
 
+	enum class OperatingSystemType {
+		Windows,
+		Linux,
+		MacOS
+	};
+
+	enum class OperatingSystemArchitectureType {
+		x86,
+		x64
+	};
+
 	struct MemoryStatus {
 		uint64_t used;
 		uint64_t total;
@@ -82,8 +94,10 @@ public:
 	virtual std::string getDeviceManufacturerName() = 0;
 	virtual std::string getDeviceUniqueIdentifier() = 0;
 	virtual std::string getOperatingSystemName() = 0;
+	std::optional<OperatingSystemType> getOperatingSystemType();
 	virtual std::string getOperatingSystemVersion() = 0;
-	virtual std::string getOperatingSystemArchitecture() = 0;
+	virtual std::string getOperatingSystemArchitectureName() = 0;
+	std::optional<OperatingSystemArchitectureType> getOperatingSystemArchitectureType();
 	virtual std::string getProcessorName() = 0;
 	virtual std::string getMotherboardName() = 0;
 	virtual std::vector<std::string> getGraphicsCardNames() = 0;

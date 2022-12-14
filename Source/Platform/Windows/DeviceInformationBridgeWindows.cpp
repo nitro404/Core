@@ -146,7 +146,7 @@ std::string DeviceInformationBridgeWindows::getOperatingSystemVersion() {
 	return s_operatingSystemVersion;
 }
 
-std::string DeviceInformationBridgeWindows::getOperatingSystemArchitecture() {
+std::string DeviceInformationBridgeWindows::getOperatingSystemArchitectureName() {
 	static std::string s_operatingSystemArchitecture;
 
 	if(s_operatingSystemArchitecture.empty()) {
