@@ -11,7 +11,7 @@ SevenZipArchive::Entry::Entry(uint64_t index, SevenZipArchive * parentArchive)
 	: m_index(index)
 	, m_parentArchive(parentArchive) { }
 
-SevenZipArchive::Entry::~Entry() = default;
+SevenZipArchive::Entry::~Entry() { }
 
 bool SevenZipArchive::Entry::isFile() const {
 	if(!isParentArchiveValid()) {
@@ -21,34 +21,12 @@ bool SevenZipArchive::Entry::isFile() const {
 	return !SzArEx_IsDir(m_parentArchive->getRawArchiveHandle(), m_index);
 }
 
-bool SevenZipArchive::Entry::isInSubdirectory() const {
-	return isInSubdirectory(getPath());
-}
-
-bool SevenZipArchive::Entry::isInSubdirectory(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path.find_first_of("/") < path.length() - 1;
-}
-
 bool SevenZipArchive::Entry::isDirectory() const {
 	if(!isParentArchiveValid()) {
 		return false;
 	}
 
 	return SzArEx_IsDir(m_parentArchive->getRawArchiveHandle(), m_index);
-}
-
-std::string SevenZipArchive::Entry::getName() const {
-	std::string filePath(getPath());
-
-	if(isFile()) {
-		return std::string(Utilities::getFileName(filePath));
-	}
-
-	return std::string(Utilities::getFileName(Utilities::trimTrailingPathSeparator(filePath)));
 }
 
 std::string SevenZipArchive::Entry::getPath() const {
@@ -67,55 +45,16 @@ std::string SevenZipArchive::Entry::getPath() const {
 	return Utilities::wideStringToString(std::wstring(reinterpret_cast<const wchar_t *>(archiveHandle->FileNames + (offset * 2)), archiveHandle->FileNameOffsets[m_index + 1] - offset - 1)).append(isDirectory() ? "/" : "");
 }
 
-std::vector<std::weak_ptr<SevenZipArchive::Entry>> SevenZipArchive::Entry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
-	if(!isParentArchiveValid() || !isDirectory()) {
-		return {};
-	}
-
-	std::vector<std::weak_ptr<Entry>> children;
-	const std::vector<std::shared_ptr<Entry>> & entries = m_parentArchive->getEntries();
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
-		if(*i == nullptr || (*i).get() == this) {
-			continue;
-		}
-
-		const std::string & currentPath = (*i)->getPath();
-		size_t firstPathSeparatorIndex = currentPath.find_first_of("/");
-
-		std::string entryBasePath;
-
-		if(firstPathSeparatorIndex != std::string::npos && firstPathSeparatorIndex != currentPath.length() - 1) {
-			entryBasePath = Utilities::addTrailingPathSeparator(Utilities::getFilePath(Utilities::trimTrailingPathSeparator(currentPath)));
-		}
-
-		if(entryBasePath.empty()) {
-			continue;
-		}
-
-		std::string path(getPath());
-
-		if(includeSubdirectories) {
-			if(entryBasePath.length() < path.length()) {
-				continue;
-			}
-
-			if(Utilities::areStringsEqual(std::string_view(entryBasePath.data(), path.length()), path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-		else {
-			if(Utilities::areStringsEqual(entryBasePath, path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-	}
-
-	return children;
-}
-
 uint64_t SevenZipArchive::Entry::getIndex() const {
 	return m_index;
+}
+
+bool SevenZipArchive::Entry::hasComment() const {
+	return false;
+}
+
+std::string SevenZipArchive::Entry::getComment() const {
+	return "";
 }
 
 std::chrono::time_point<std::chrono::system_clock> SevenZipArchive::Entry::getDate() const {
@@ -128,13 +67,18 @@ std::chrono::time_point<std::chrono::system_clock> SevenZipArchive::Entry::getDa
 	return SevenZipArchive::getTimePointFromNTFSFileTime(archiveHandle->MTime.Vals[m_index]);
 }
 
-uint64_t SevenZipArchive::Entry::getInflatedSize() const {
+uint64_t SevenZipArchive::Entry::getCompressedSize() const {
+	// Note: 7-Zip does not report the compressed size of archive file entries
+	return 0;
+}
+
+uint64_t SevenZipArchive::Entry::getUncompressedSize() const {
 	if(!isParentArchiveValid()) {
 		return 0;
 	}
 
 	return SzArEx_GetFileSize(m_parentArchive->getRawArchiveHandle(), m_index);
-};
+}
 
 std::unique_ptr<ByteBuffer> SevenZipArchive::Entry::getData() const {
 	if(!isParentArchiveValid()) {
@@ -174,14 +118,10 @@ bool SevenZipArchive::Entry::writeTo(const std::string & directoryPath, bool ove
 	return data->writeTo(Utilities::joinPaths(directoryPath, path), overwrite);
 }
 
-SevenZipArchive * SevenZipArchive::Entry::getParentArchive() const {
+Archive * SevenZipArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
 void SevenZipArchive::Entry::clearParentArchive() {
 	m_parentArchive = nullptr;
-}
-
-bool SevenZipArchive::Entry::isParentArchiveValid() const {
-	return m_parentArchive != nullptr;
 }

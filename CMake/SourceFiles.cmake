@@ -1,6 +1,4 @@
 set(SOURCE_FILES
-	7Zip/SevenZipArchive.cpp
-	7Zip/SevenZipArchiveEntry.cpp
 	Analytics/Segment/SegmentAnalyticEvent.cpp
 	Analytics/Segment/SegmentAnalytics.cpp
 	Analytics/Segment/SegmentAnalyticsDataStorage.cpp
@@ -9,6 +7,16 @@ set(SOURCE_FILES
 	Analytics/Segment/SegmentAnalyticsCURLFailedEvent.cpp
 	Application/Application.cpp
 	Application/ComponentRegistry.cpp
+	Archive/Archive.cpp
+	Archive/ArchiveEntry.cpp
+	Archive/7Zip/SevenZipArchive.cpp
+	Archive/7Zip/SevenZipArchiveEntry.cpp
+	Archive/Rar/RarArchive.cpp
+	Archive/Rar/RarArchiveEntry.cpp
+	Archive/Zip/ZipArchive.cpp
+	Archive/Zip/ZipArchiveEntry.cpp
+	Archive/Zip/ZipArchiveSourceBuffer.cpp
+	Archive/Zip/ZipUtilities.cpp
 	Arguments/ArgumentCollection.cpp
 	Arguments/ArgumentParser.cpp
 	ByteBuffer.cpp
@@ -40,8 +48,6 @@ set(SOURCE_FILES
 	Network/IPAddressService.cpp
 	Network/IpifyIPAddressService.cpp
 	Platform/DeviceInformationBridge.cpp
-	Rar/RarArchive.cpp
-	Rar/RarArchiveEntry.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
 	Singleton/SingletonManager.cpp
@@ -53,10 +59,6 @@ set(SOURCE_FILES
 	Utilities/TimeUtilities.cpp
 	Utilities/TinyXML2Utilities.cpp
 	Utilities/Utilities.cpp
-	Zip/ZipArchive.cpp
-	Zip/ZipArchiveEntry.cpp
-	Zip/ZipArchiveSourceBuffer.cpp
-	Zip/ZipUtilities.cpp
 )
 
 set(SOURCE_FILES_WINDOWS
@@ -69,10 +71,13 @@ set(SOURCE_FILES_WINDOWS
 )
 
 source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
-source_group(Source\\7Zip               REGULAR_EXPRESSION "7Zip/.*\\.(h|cpp)")
 source_group(Source\\Analytics          REGULAR_EXPRESSION "Analytics/.*\\.(h|cpp)")
 source_group(Source\\Analytics\\Segment REGULAR_EXPRESSION "Analytics/Segment/.*\\.(h|cpp)")
 source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
+source_group(Source\\Archive            REGULAR_EXPRESSION "Archive/.*\\.(h|cpp)")
+source_group(Source\\Archive\\7Zip      REGULAR_EXPRESSION "Archive/7Zip/.*\\.(h|cpp)")
+source_group(Source\\Archive\\Rar       REGULAR_EXPRESSION "Archive/Rar/.*\\.(h|cpp)")
+source_group(Source\\Archive\\Zip       REGULAR_EXPRESSION "Archive/Zip/.*\\.(h|cpp)")
 source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
 source_group(Source\\Factory            REGULAR_EXPRESSION "Factory/.*\\.(h|cpp)")
 source_group(Source\\Factory\\Windows   REGULAR_EXPRESSION "Factory/Windows/.*\\.(h|cpp)")
@@ -83,8 +88,6 @@ source_group(Source\\Math               REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
 source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
 source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
 source_group(Source\\Platform\\Windows  REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
-source_group(Source\\Rar                REGULAR_EXPRESSION "Rar/.*\\.(h|cpp)")
 source_group(Source\\Script             REGULAR_EXPRESSION "Script/.*\\.(h|cpp)")
 source_group(Source\\Singleton          REGULAR_EXPRESSION "Singleton/.*\\.(h|cpp)")
 source_group(Source\\Utilities          REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
-source_group(Source\\Zip                REGULAR_EXPRESSION "Zip/.*\\.(h|cpp)")

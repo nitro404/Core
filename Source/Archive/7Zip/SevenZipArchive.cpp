@@ -71,7 +71,8 @@ static SRes seekVirtualByteBufferFile(const ISeekInStream * seekInStreamInterfac
 }
 
 SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data)
-	: m_archiveStream(std::move(archiveStream))
+	: Archive(Type::SevenZip)
+	, m_archiveStream(std::move(archiveStream))
 	, m_lookStream(std::move(lookStream))
 	, m_archive(std::move(archive))
 	, m_allocator(std::move(allocator))
@@ -92,7 +93,7 @@ SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHa
 }
 
 SevenZipArchive::~SevenZipArchive() {
-	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
+	for(std::vector<std::shared_ptr<SevenZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
 }
@@ -101,14 +102,17 @@ std::string SevenZipArchive::getFilePath() const {
 	return m_filePath;
 }
 
-uint64_t SevenZipArchive::getInflatedSize() const {
-	uint64_t inflatedSize = 0;
+bool SevenZipArchive::hasComment() const {
+	return false;
+}
 
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.cbegin(); i != m_entries.cend(); ++i) {
-		inflatedSize += (*i)->getInflatedSize();
-	}
+std::string SevenZipArchive::getComment() const {
+	return "";
+}
 
-	return inflatedSize;
+uint64_t SevenZipArchive::getCompressedSize() const {
+	// Note: 7-Zip does not report the compressed size of archive file entries
+	return 0;
 }
 
 size_t SevenZipArchive::numberOfEntries() const {
@@ -123,141 +127,6 @@ size_t SevenZipArchive::numberOfDirectories() const {
 	return m_numberOfDirectories;
 }
 
-bool SevenZipArchive::hasEntry(const Entry & entry) const {
-	return entry.getParentArchive() == this &&
-		   entry.getIndex() < m_entries.size() &&
-		   m_entries[entry.getIndex()] != nullptr &&
-		   m_entries[entry.getIndex()].get() == &entry;
-}
-
-bool SevenZipArchive::hasEntry(const std::string & entryPath, bool caseSensitive) const {
-	return indexOfEntry(entryPath, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-bool SevenZipArchive::hasEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-size_t SevenZipArchive::indexOfEntry(const std::string & entryPath, bool caseSensitive) const {
-	if(entryPath.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getPath()), Utilities::trimTrailingPathSeparator(entryPath), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-size_t SevenZipArchive::indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	if(entryName.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getName()), Utilities::trimTrailingPathSeparator(entryName), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-const std::weak_ptr<SevenZipArchive::Entry> SevenZipArchive::getEntry(const std::string & entryPath, bool caseSensitive) const {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<SevenZipArchive::Entry> SevenZipArchive::getEntry(const std::string & entryPath, bool caseSensitive) {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<SevenZipArchive::Entry> SevenZipArchive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return getEntry(indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive));
-}
-
-const std::weak_ptr<SevenZipArchive::Entry> SevenZipArchive::getEntry(size_t index) const {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
-}
-
-std::weak_ptr<SevenZipArchive::Entry> SevenZipArchive::getEntry(size_t index) {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
-}
-
-size_t SevenZipArchive::extractAllEntries(const std::string & directoryPath, bool overwrite) const {
-	std::error_code errorCode;
-
-	if(!directoryPath.empty()) {
-		std::filesystem::path outputDirectoryPath(directoryPath);
-
-		if(!std::filesystem::is_directory(outputDirectoryPath)) {
-			std::filesystem::create_directories(outputDirectoryPath, errorCode);
-
-			if(errorCode) {
-				spdlog::error("Cannot extract files from 7-Zip archive, output directory '{}' creation failed: {}", outputDirectoryPath.string(), errorCode.message());
-				return false;
-			}
-		}
-	}
-
-	size_t numberOfExtractedFileEntries = 0;
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		std::filesystem::path currentEntryDestinationPath(Utilities::joinPaths(directoryPath, (*i)->getPath()));
-
-		if((*i)->isDirectory()) {
-			if(!std::filesystem::is_directory(currentEntryDestinationPath)) {
-				std::filesystem::create_directories(currentEntryDestinationPath, errorCode);
-
-				if(errorCode) {
-					spdlog::error("Cannot extract files from 7-Zip archive, entry directory '{}' creation failed: {}", currentEntryDestinationPath.string(), errorCode.message());
-					return false;
-				}
-			}
-		}
-		else if((*i)->isFile()) {
-			if(!overwrite && std::filesystem::is_regular_file(currentEntryDestinationPath)) {
-				spdlog::warn("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?", currentEntryDestinationPath.string());
-				continue;
-			}
-
-			if((*i)->writeTo(directoryPath, overwrite)) {
-				numberOfExtractedFileEntries++;
-
-				spdlog::debug("Extracted 7-Zip file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, m_numberOfFiles, currentEntryDestinationPath.string());
-			}
-		}
-	}
-
-	return numberOfExtractedFileEntries;
-}
-
 std::string SevenZipArchive::toDebugString(bool includeDate) const {
 	std::stringstream stringStream;
 
@@ -265,7 +134,7 @@ std::string SevenZipArchive::toDebugString(bool includeDate) const {
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getInflatedSize());
+		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize());
 
 		if(includeDate) {
 			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
@@ -333,12 +202,11 @@ std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(ArchiveStreamHandle
 	return std::unique_ptr<SevenZipArchive>(new SevenZipArchive(std::move(archiveStream), std::move(lookStream), std::move(archive), std::move(allocator), filePath, std::move(data)));
 }
 
-const std::vector<std::shared_ptr<SevenZipArchive::Entry>> & SevenZipArchive::getEntries() const {
-	return m_entries;
-}
+std::vector<std::shared_ptr<ArchiveEntry>> SevenZipArchive::getEntries() const {
+	std::vector<std::shared_ptr<ArchiveEntry>> entires(m_entries.size());
+	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entires));
 
-std::vector<std::shared_ptr<SevenZipArchive::Entry>> & SevenZipArchive::getEntries() {
-	return m_entries;
+	return entires;
 }
 
 const CFileInStream * SevenZipArchive::getRawArchiveStreamHandle() const {

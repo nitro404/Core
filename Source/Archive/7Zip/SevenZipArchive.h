@@ -1,6 +1,7 @@
 #ifndef _SEVEN_ZIP_ARCHIVE_H_
 #define _SEVEN_ZIP_ARCHIVE_H_
 
+#include "Archive/Archive.h"
 #include "ByteBuffer.h"
 
 #include <7Zip/C/7z.h>
@@ -11,36 +12,35 @@
 #include <memory>
 #include <string>
 
-class SevenZipArchive final {
+class SevenZipArchive final : public Archive {
 	friend class Entry;
 
 public:
-	class Entry final {
+	class Entry final : public ArchiveEntry {
 		friend class SevenZipArchive;
 
 	public:
-		~Entry();
+		virtual ~Entry();
 
-		bool isFile() const;
-		bool isDirectory() const;
-		bool isInSubdirectory() const;
-		static bool isInSubdirectory(std::string_view path);
-		std::string getName() const;
-		std::string getPath() const;
-		std::vector<std::weak_ptr<Entry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
-		uint64_t getIndex() const;
-		std::chrono::time_point<std::chrono::system_clock> getDate() const;
-		uint64_t getInflatedSize() const;
-		std::unique_ptr<ByteBuffer> getData() const;
-		uint32_t getCRC32() const;
-		bool writeTo(const std::string & directoryPath, bool overwrite = false) const;
+		virtual bool isFile() const override;
+		virtual bool isDirectory() const override;
+		virtual std::string getPath() const override;
+		virtual uint64_t getIndex() const override;
+		virtual bool hasComment() const override;
+		virtual std::string getComment() const override;
+		virtual std::chrono::time_point<std::chrono::system_clock> getDate() const override;
+		virtual uint64_t getCompressedSize() const override;
+		virtual uint64_t getUncompressedSize() const override;
+		virtual std::unique_ptr<ByteBuffer> getData() const override;
+		virtual uint32_t getCRC32() const override;
+		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const override;
+
+	protected:
+		virtual Archive * getParentArchive() const override;
+		virtual void clearParentArchive() override;
 
 	private:
 		Entry(uint64_t index, SevenZipArchive * parentArchive);
-
-		SevenZipArchive * getParentArchive() const;
-		void clearParentArchive();
-		bool isParentArchiveValid() const;
 
 		uint64_t m_index;
 		SevenZipArchive * m_parentArchive;
@@ -51,28 +51,22 @@ public:
 		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
-	~SevenZipArchive();
+	virtual ~SevenZipArchive();
 
-	std::string getFilePath() const;
-	uint64_t getInflatedSize() const;
-	size_t numberOfEntries() const;
-	size_t numberOfFiles() const;
-	size_t numberOfDirectories() const;
-	bool hasEntry(const Entry & entry) const;
-	bool hasEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	bool hasEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	size_t indexOfEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	size_t indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false);
-	std::weak_ptr<Entry> getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(size_t index) const;
-	std::weak_ptr<Entry> getEntry(size_t index);
-	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false) const;
-	std::string toDebugString(bool includeDate = false) const;
+	virtual std::string getFilePath() const override;
+	virtual bool hasComment() const override;
+	virtual std::string getComment() const override;
+	virtual uint64_t getCompressedSize() const override;
+	virtual size_t numberOfEntries() const override;
+	virtual size_t numberOfFiles() const override;
+	virtual size_t numberOfDirectories() const override;
+	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static std::unique_ptr<SevenZipArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<SevenZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
+
+protected:
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 
 private:
 	using ArchiveStreamHandle = std::unique_ptr<CFileInStream, std::function<void (CFileInStream *)>>;
@@ -88,8 +82,6 @@ private:
 
 	SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
 
-	const std::vector<std::shared_ptr<Entry>> & getEntries() const;
-	std::vector<std::shared_ptr<Entry>> & getEntries();
 	const CFileInStream * getRawArchiveStreamHandle() const;
 	CFileInStream * getRawArchiveStreamHandle();
 	const CLookToRead2 * getRawLookStreamHandle() const;

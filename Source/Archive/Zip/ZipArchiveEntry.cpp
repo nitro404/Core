@@ -10,7 +10,7 @@
 
 #include <filesystem>
 
-ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t inflatedSize, uint32_t crc32, ZipArchive * parentArchive)
+ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t uncompressedSize, uint32_t crc32, ZipArchive * parentArchive)
 	: m_parentArchive(parentArchive)
 	, m_path(path)
 	, m_index(index)
@@ -19,10 +19,10 @@ ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_p
 	, m_compressionMethod(compressionMethod)
 	, m_encryptionMethod(encryptionMethod)
 	, m_compressedSize(compressedSize)
-	, m_inflatedSize(inflatedSize)
+	, m_uncompressedSize(uncompressedSize)
 	, m_crc32(crc32) { }
 
-ZipArchive::Entry::~Entry() = default;
+ZipArchive::Entry::~Entry() { }
 
 bool ZipArchive::Entry::isFile() const {
 	return isFile(m_path);
@@ -48,28 +48,8 @@ bool ZipArchive::Entry::isDirectory(std::string_view path) {
 	return path[path.length() - 1] == '/';
 }
 
-bool ZipArchive::Entry::isInSubdirectory() const {
-	return isInSubdirectory(m_path);
-}
-
-bool ZipArchive::Entry::isInSubdirectory(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path.find_first_of("/") < path.length() - 1;
-}
-
-std::string_view ZipArchive::Entry::getName() const {
-	if(isFile(m_path)) {
-		return Utilities::getFileName(m_path);
-	}
-
-	return Utilities::getFileName(Utilities::trimTrailingPathSeparator(m_path));
-}
-
 bool ZipArchive::Entry::setName(const std::string & name) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry name.");
 		return false;
 	}
@@ -121,9 +101,9 @@ bool ZipArchive::Entry::setName(const std::string & name) {
 	}
 
 	std::string_view currentEntryBasePath;
-	std::vector<std::shared_ptr<Entry>> & entries = m_parentArchive->getEntries();
+	std::vector<std::shared_ptr<ArchiveEntry>> & entries = m_parentArchive->getEntries();
 
-	for(std::vector<std::shared_ptr<Entry>>::iterator i = entries.begin(); i != entries.end(); ++i) {
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::iterator i = entries.begin(); i != entries.end(); ++i) {
 		if(*i == nullptr) {
 			continue;
 		}
@@ -158,26 +138,26 @@ bool ZipArchive::Entry::setName(const std::string & name) {
 
 			spdlog::debug("Renamed zip entry directory child from '{}' to '{}'.", curentEntryPath, newCurrentEntryPath);
 
-			(*i)->m_path = newCurrentEntryPath;
+			std::dynamic_pointer_cast<ZipArchive::Entry>(*i)->m_path = newCurrentEntryPath;
 		}
 	}
 
 	return true;
 }
 
-const std::string & ZipArchive::Entry::getPath() const {
+std::string ZipArchive::Entry::getPath() const {
 	return m_path;
 }
 
 bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to move an entry.");
 		return false;
 	}
 
 	std::string formattedNewBasePath(ZipArchive::formatDirectoryPath(newBasePath));
 
-	std::weak_ptr<ZipArchive::Entry> destinationDirectory;
+	std::weak_ptr<ArchiveEntry> destinationDirectory;
 
 	if(!formattedNewBasePath.empty()) {
 		destinationDirectory = m_parentArchive->getEntry(formattedNewBasePath);
@@ -202,7 +182,7 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 		return false;
 	}
 
-	std::weak_ptr<ZipArchive::Entry> existingDestinationEntry(m_parentArchive->getEntry(destinationEntryPath));
+	std::weak_ptr<ArchiveEntry> existingDestinationEntry(m_parentArchive->getEntry(destinationEntryPath));
 
 	if(!existingDestinationEntry.expired()) {
 		if(isFile()) {
@@ -212,14 +192,14 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 			}
 		}
 
-		if(!m_parentArchive->removeEntry(*existingDestinationEntry.lock(), false)) {
+		if(!m_parentArchive->removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>(existingDestinationEntry.lock()), false)) {
 			spdlog::error("Failed to remove existing destination zip entry.");
 			return false;
 		}
 	}
 
 	std::string previousPath = m_path;
-	std::vector<std::weak_ptr<Entry>> children(getChildren(true, false));
+	std::vector<std::weak_ptr<ArchiveEntry>> children(getChildren(true, false));
 
 	if(!ZipUtilities::isSuccess(zip_file_rename(m_parentArchive->getRawArchiveHandle(), m_index, destinationEntryPath.c_str(), ZIP_FL_ENC_GUESS), fmt::format("Failed to move zip entry from '{}' to '{}'.", m_path, destinationEntryPath))) {
 		return false;
@@ -232,10 +212,10 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 
 	if(!children.empty()) {
 		std::string newChildPath;
-		std::vector<std::pair<std::shared_ptr<Entry>, std::string>> newChildPaths;
+		std::vector<std::pair<std::shared_ptr<ArchiveEntry>, std::string>> newChildPaths;
 
-		for(std::vector<std::weak_ptr<Entry>>::const_iterator i = children.begin(); i != children.end(); ++i) {
-			std::shared_ptr<Entry> child((*i).lock());
+		for(std::vector<std::weak_ptr<ArchiveEntry>>::const_iterator i = children.begin(); i != children.end(); ++i) {
+			std::shared_ptr<ArchiveEntry> child((*i).lock());
 
 			if(child.get() == nullptr || child.get() == this) {
 				continue;
@@ -258,63 +238,18 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 
 		children.clear();
 
-		for(std::vector<std::pair<std::shared_ptr<Entry>, std::string>>::iterator i = newChildPaths.begin(); i != newChildPaths.end(); ++i) {
+		for(std::vector<std::pair<std::shared_ptr<ArchiveEntry>, std::string>>::iterator i = newChildPaths.begin(); i != newChildPaths.end(); ++i) {
 			if(!ZipUtilities::isSuccess(zip_file_rename(m_parentArchive->getRawArchiveHandle(), i->first->getIndex(), i->second.c_str(), ZIP_FL_ENC_GUESS), fmt::format("Failed to update child zip entry path from '{}' to '{}'.", i->first->getPath(), i->second))) {
 				return false;
 			}
 
 			spdlog::debug("Renamed zip entry directory child from '{}' to '{}'.", i->first->getPath(), i->second);
 
-			i->first->m_path = i->second;
+			std::dynamic_pointer_cast<ZipArchive::Entry>(i->first)->m_path = i->second;
 		}
 	}
 
 	return true;
-}
-
-std::vector<std::weak_ptr<ZipArchive::Entry>> ZipArchive::Entry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
-	if(m_parentArchive == nullptr || !isDirectory()) {
-		return {};
-	}
-
-	std::vector<std::weak_ptr<Entry>> children;
-	const std::vector<std::shared_ptr<Entry>> & entries = m_parentArchive->getEntries();
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
-		if(*i == nullptr || (*i).get() == this) {
-			continue;
-		}
-
-		const std::string & currentPath = (*i)->getPath();
-		size_t firstPathSeparatorIndex = currentPath.find_first_of("/");
-
-		std::string entryBasePath;
-
-		if(firstPathSeparatorIndex != std::string::npos && firstPathSeparatorIndex != currentPath.length() - 1) {
-			entryBasePath = Utilities::addTrailingPathSeparator(Utilities::getFilePath(Utilities::trimTrailingPathSeparator(currentPath)));
-		}
-
-		if(entryBasePath.empty()) {
-			continue;
-		}
-
-		if(includeSubdirectories) {
-			if(entryBasePath.length() < m_path.length()) {
-				continue;
-			}
-
-			if(Utilities::areStringsEqual(std::string_view(entryBasePath.data(), m_path.length()), m_path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-		else {
-			if(Utilities::areStringsEqual(entryBasePath, m_path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-	}
-
-	return children;
 }
 
 uint64_t ZipArchive::Entry::getIndex() const {
@@ -322,7 +257,7 @@ uint64_t ZipArchive::Entry::getIndex() const {
 }
 
 bool ZipArchive::Entry::setIndex(uint64_t index) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry index.");
 		return false;
 	}
@@ -338,7 +273,7 @@ std::chrono::time_point<std::chrono::system_clock> ZipArchive::Entry::getDate() 
 }
 
 bool ZipArchive::Entry::hasComment() const {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		return false;
 	}
 
@@ -347,7 +282,7 @@ bool ZipArchive::Entry::hasComment() const {
 }
 
 std::string ZipArchive::Entry::getComment() const {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		return Utilities::emptyString;
 	}
 
@@ -362,7 +297,7 @@ std::string ZipArchive::Entry::getComment() const {
 }
 
 bool ZipArchive::Entry::setComment(const std::string & comment) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry comment.");
 		return false;
 	}
@@ -384,8 +319,8 @@ uint64_t ZipArchive::Entry::getCompressedSize() const {
 	return m_compressedSize;
 }
 
-uint64_t ZipArchive::Entry::getInflatedSize() const {
-	return m_inflatedSize;
+uint64_t ZipArchive::Entry::getUncompressedSize() const {
+	return m_uncompressedSize;
 }
 
 bool ZipArchive::Entry::hasUnsavedData() const {
@@ -393,7 +328,7 @@ bool ZipArchive::Entry::hasUnsavedData() const {
 }
 
 std::unique_ptr<ByteBuffer> ZipArchive::Entry::getData() const {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to get the entry data.");
 		return nullptr;
 	}
@@ -408,12 +343,12 @@ std::unique_ptr<ByteBuffer> ZipArchive::Entry::getData() const {
 		return nullptr;
 	}
 
-	std::unique_ptr<ByteBuffer> zipEntryData(std::make_unique<ByteBuffer>(m_inflatedSize));
+	std::unique_ptr<ByteBuffer> zipEntryData(std::make_unique<ByteBuffer>(m_uncompressedSize));
 
-	int64_t numberOfBytesRead = zip_fread(zipFileHandle.get(), zipEntryData->getRawData(), m_inflatedSize);
+	int64_t numberOfBytesRead = zip_fread(zipFileHandle.get(), zipEntryData->getRawData(), m_uncompressedSize);
 
-	if(numberOfBytesRead != m_inflatedSize) {
-		spdlog::error("Failed to retrieve zip entry file data, number of bytes read ({}) did not match expected inflated size ({}) for entry: '{}'.", numberOfBytesRead, m_inflatedSize, m_path);
+	if(numberOfBytesRead != m_uncompressedSize) {
+		spdlog::error("Failed to retrieve zip entry file data, number of bytes read ({}) did not match expected uncompressed size ({}) for entry: '{}'.", numberOfBytesRead, m_uncompressedSize, m_path);
 		return nullptr;
 	}
 
@@ -429,7 +364,7 @@ ZipArchive::CompressionMethod ZipArchive::Entry::getCompressionMethod() const {
 }
 
 bool ZipArchive::Entry::setCompressionMethod(CompressionMethod compressionMethod) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry compression method.");
 		return false;
 	}
@@ -467,7 +402,7 @@ ZipArchive::EncryptionMethod ZipArchive::Entry::getEncryptionMethod() const {
 }
 
 bool ZipArchive::Entry::setEncryptionMethod(EncryptionMethod encryptionMethod) {
-	if(!isParentArchiveOpen()) {
+	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry encryption method.");
 		return false;
 	}
@@ -532,11 +467,11 @@ bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 	return data->writeTo(formattedDestinationFilePath, overwrite);
 }
 
-bool ZipArchive::Entry::isParentArchiveOpen() const {
+bool ZipArchive::Entry::isParentArchiveValid() const {
 	return m_parentArchive != nullptr && m_parentArchive->isOpen();
 }
 
-ZipArchive * ZipArchive::Entry::getParentArchive() const {
+Archive * ZipArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 

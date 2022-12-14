@@ -11,7 +11,7 @@ RarArchive::Entry::Entry(uint64_t index, RarArchive * parentArchive)
 	: m_index(index)
 	, m_parentArchive(parentArchive) { }
 
-RarArchive::Entry::~Entry() = default;
+RarArchive::Entry::~Entry() { }
 
 bool RarArchive::Entry::isFile() const {
 	if(!isParentArchiveValid()) {
@@ -21,34 +21,12 @@ bool RarArchive::Entry::isFile() const {
 	return !isDirectory();
 }
 
-bool RarArchive::Entry::isInSubdirectory() const {
-	return isInSubdirectory(getPath());
-}
-
-bool RarArchive::Entry::isInSubdirectory(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path.find_first_of("/") < path.length() - 1;
-}
-
 bool RarArchive::Entry::isDirectory() const {
 	if(!isParentArchiveValid()) {
 		return false;
 	}
 
 	return dmc_unrar_file_is_directory(getRawParentArchiveHandle(), m_index);
-}
-
-std::string RarArchive::Entry::getName() const {
-	std::string filePath(getPath());
-
-	if(isFile()) {
-		return std::string(Utilities::getFileName(filePath));
-	}
-
-	return std::string(Utilities::getFileName(Utilities::trimTrailingPathSeparator(filePath)));
 }
 
 std::string RarArchive::Entry::getPath() const {
@@ -69,53 +47,6 @@ std::string RarArchive::Entry::getPath() const {
 	}
 
 	return path;
-}
-
-std::vector<std::weak_ptr<RarArchive::Entry>> RarArchive::Entry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
-	if(!isParentArchiveValid() || !isDirectory()) {
-		return {};
-	}
-
-	std::vector<std::weak_ptr<Entry>> children;
-	const std::vector<std::shared_ptr<Entry>> & entries = m_parentArchive->getEntries();
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
-		if(*i == nullptr || (*i).get() == this) {
-			continue;
-		}
-
-		const std::string & currentPath = (*i)->getPath();
-		size_t firstPathSeparatorIndex = currentPath.find_first_of("/");
-
-		std::string entryBasePath;
-
-		if(firstPathSeparatorIndex != std::string::npos && firstPathSeparatorIndex != currentPath.length() - 1) {
-			entryBasePath = Utilities::addTrailingPathSeparator(Utilities::getFilePath(Utilities::trimTrailingPathSeparator(currentPath)));
-		}
-
-		if(entryBasePath.empty()) {
-			continue;
-		}
-
-		std::string path(getPath());
-
-		if(includeSubdirectories) {
-			if(entryBasePath.length() < path.length()) {
-				continue;
-			}
-
-			if(Utilities::areStringsEqual(std::string_view(entryBasePath.data(), path.length()), path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-		else {
-			if(Utilities::areStringsEqual(entryBasePath, path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-	}
-
-	return children;
 }
 
 uint64_t RarArchive::Entry::getIndex() const {
@@ -227,16 +158,12 @@ bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 	return isSuccess(dmc_unrar_extract_file_to_path(getRawParentArchiveHandle(), m_index, formattedDestinationFilePath.c_str(), nullptr, true), fmt::format("Failed to extract file '{}' to '{}'!", filePath, directoryPath));
 }
 
-RarArchive * RarArchive::Entry::getParentArchive() const {
+Archive * RarArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
 void RarArchive::Entry::clearParentArchive() {
 	m_parentArchive = nullptr;
-}
-
-bool RarArchive::Entry::isParentArchiveValid() const {
-	return m_parentArchive != nullptr;
 }
 
 dmc_unrar_archive * RarArchive::Entry::getRawParentArchiveHandle() const {

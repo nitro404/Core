@@ -15,7 +15,8 @@
 const ZipArchive::EncryptionMethod ZipArchive::DEFAULT_ENCRYPTION_METHOD = EncryptionMethod::AES256;
 
 ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, std::unique_ptr<SourceBuffer> zipSourceBuffer, const std::string & filePath, const std::string & password)
-	: m_archiveHandle(std::move(zipArchiveHandle))
+	: Archive(Type::Zip)
+	, m_archiveHandle(std::move(zipArchiveHandle))
 	, m_sourceBuffer(std::move(zipSourceBuffer))
 	, m_filePath(filePath)
 	, m_password(password)
@@ -27,7 +28,8 @@ ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, std::unique_ptr<Source
 	, m_modified(false) { }
 
 ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, const std::string & filePath, const std::string & password)
-	: m_archiveHandle(std::move(zipArchiveHandle))
+	: Archive(Type::Zip)
+	, m_archiveHandle(std::move(zipArchiveHandle))
 	, m_filePath(filePath)
 	, m_password(password)
 	, m_compressionMethod(CompressionMethod::Default)
@@ -38,7 +40,7 @@ ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, const std::string & fi
 	, m_modified(false) { }
 
 ZipArchive::~ZipArchive() {
-	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
+	for(std::vector<std::shared_ptr<ZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
 }
@@ -238,16 +240,6 @@ uint64_t ZipArchive::getCompressedSize() const {
 	return m_compressedSize;
 }
 
-uint64_t ZipArchive::getInflatedSize() const {
-	uint64_t inflatedSize = 0;
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.cbegin(); i != m_entries.cend(); ++i) {
-		inflatedSize += (*i)->getInflatedSize();
-	}
-
-	return inflatedSize;
-}
-
 const ByteBuffer * ZipArchive::getData() const {
 	if(m_sourceBuffer == nullptr) {
 		return nullptr;
@@ -270,146 +262,6 @@ size_t ZipArchive::numberOfFiles() const {
 
 size_t ZipArchive::numberOfDirectories() const {
 	return m_numberOfDirectories;
-}
-
-bool ZipArchive::hasEntry(const Entry & entry) const {
-	return entry.getParentArchive() == this &&
-		   entry.getIndex() < m_entries.size() &&
-		   m_entries[entry.getIndex()] != nullptr &&
-		   m_entries[entry.getIndex()].get() == &entry;
-}
-
-bool ZipArchive::hasEntry(const std::string & entryPath, bool caseSensitive) const {
-	return indexOfEntry(entryPath, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-bool ZipArchive::hasEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-size_t ZipArchive::indexOfEntry(const std::string & entryPath, bool caseSensitive) const {
-	if(entryPath.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getPath()), Utilities::trimTrailingPathSeparator(entryPath), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-size_t ZipArchive::indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	if(entryName.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getName()), Utilities::trimTrailingPathSeparator(entryName), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-const std::weak_ptr<ZipArchive::Entry> ZipArchive::getEntry(const std::string & entryPath, bool caseSensitive) const {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<ZipArchive::Entry> ZipArchive::getEntry(const std::string & entryPath, bool caseSensitive) {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<ZipArchive::Entry> ZipArchive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return getEntry(indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive));
-}
-
-const std::weak_ptr<ZipArchive::Entry> ZipArchive::getEntry(size_t index) const {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
-}
-
-std::weak_ptr<ZipArchive::Entry> ZipArchive::getEntry(size_t index) {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
-}
-
-size_t ZipArchive::extractAllEntries(const std::string & directoryPath, bool overwrite) const {
-	if(!isOpen()) {
-		spdlog::error("Zip archive must be open to extract all entries.");
-		return 0;
-	}
-
-	std::error_code errorCode;
-
-	if(!directoryPath.empty()) {
-		std::filesystem::path outputDirectoryPath(directoryPath);
-
-		if(!std::filesystem::is_directory(outputDirectoryPath)) {
-			std::filesystem::create_directories(outputDirectoryPath, errorCode);
-
-			if(errorCode) {
-				spdlog::error("Cannot extract files from zip archive, output directory '{}' creation failed: {}", outputDirectoryPath.string(), errorCode.message());
-				return false;
-			}
-		}
-	}
-
-	size_t numberOfExtractedFileEntries = 0;
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		std::filesystem::path currentEntryDestinationPath(Utilities::joinPaths(directoryPath, (*i)->getPath()));
-
-		if((*i)->isDirectory()) {
-			if(!std::filesystem::is_directory(currentEntryDestinationPath)) {
-				std::filesystem::create_directories(currentEntryDestinationPath, errorCode);
-
-				if(errorCode) {
-					spdlog::error("Cannot extract files from zip archive, entry directory '{}' creation failed: {}", currentEntryDestinationPath.string(), errorCode.message());
-					return false;
-				}
-			}
-		}
-		else if((*i)->isFile()) {
-			if(!overwrite && std::filesystem::is_regular_file(currentEntryDestinationPath)) {
-				spdlog::warn("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?", currentEntryDestinationPath.string());
-				continue;
-			}
-
-			if((*i)->writeTo(directoryPath, overwrite)) {
-				numberOfExtractedFileEntries++;
-
-				spdlog::debug("Extracted zip file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, m_numberOfFiles, currentEntryDestinationPath.string());
-			}
-		}
-	}
-
-	return numberOfExtractedFileEntries;
 }
 
 std::weak_ptr<ZipArchive::Entry> ZipArchive::addFile(const std::string & filePath, const std::string & entryDirectoryPath, bool overwrite) {
@@ -490,7 +342,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
-	return getEntry(newZipFileIndex);
+	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(newZipFileIndex).lock());
 }
 
 std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & entryDirectoryPath) {
@@ -510,10 +362,10 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 		return std::weak_ptr<ZipArchive::Entry>();
 	}
 
-	std::weak_ptr<ZipArchive::Entry> existingEntryDirectory(getEntry(formattedEntryDirectoryPath, false));
+	std::weak_ptr<ArchiveEntry> existingEntryDirectory(getEntry(formattedEntryDirectoryPath, false));
 
 	if(!existingEntryDirectory.expired()) {
-		return existingEntryDirectory;
+		return std::dynamic_pointer_cast<ZipArchive::Entry>(existingEntryDirectory.lock());
 	}
 
 	int64_t newDirectoryIndex = -1;
@@ -548,7 +400,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 		}
 	}
 
-	return getEntry(formattedEntryDirectoryPath, false);
+	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(formattedEntryDirectoryPath, false).lock());
 }
 
 std::string ZipArchive::formatDirectoryPath(const std::string & directoryPath) {
@@ -583,10 +435,10 @@ size_t ZipArchive::removeEntry(Entry & entry, bool removeChildren) {
 	size_t numberOfEntriesRemoved = 0;
 
 	if(entry.isDirectory() && removeChildren) {
-		std::vector<std::weak_ptr<Entry>> directoryEntries(entry.getChildren(false, false));
+		std::vector<std::weak_ptr<ArchiveEntry>> directoryEntries(entry.getChildren(false, false));
 
-		for(std::vector<std::weak_ptr<Entry>>::iterator i = directoryEntries.begin(); i != directoryEntries.end(); ++i) {
-			numberOfEntriesRemoved += removeEntry(*(*i).lock(), removeChildren);
+		for(std::vector<std::weak_ptr<ArchiveEntry>>::iterator i = directoryEntries.begin(); i != directoryEntries.end(); ++i) {
+			numberOfEntriesRemoved += removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>((*i).lock()), removeChildren);
 		}
 	}
 
@@ -649,6 +501,14 @@ size_t ZipArchive::removeAllEntries() {
 	m_numberOfDirectories = 0;
 
 	return numberOfEntriesRemoved;
+}
+
+bool ZipArchive::isOpen() const {
+	return m_archiveHandle != nullptr;
+}
+
+bool ZipArchive::isModifiable() const {
+	return true;
 }
 
 bool ZipArchive::isModified() const {
@@ -764,10 +624,6 @@ std::unique_ptr<ZipArchive> ZipArchive::readFrom(const std::string & filePath, c
 	}
 
 	return zipArchive;
-}
-
-bool ZipArchive::isOpen() const {
-	return m_archiveHandle != nullptr;
 }
 
 bool ZipArchive::reopen(bool verifyConsistency) {
@@ -900,7 +756,7 @@ std::string ZipArchive::toDebugString(bool includeDate) const {
 			continue;
 		}
 
-		stringStream << fmt::format("{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getInflatedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
+		stringStream << fmt::format("{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
 
 		if(includeDate) {
 			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
@@ -1089,12 +945,11 @@ bool ZipArchive::addEntry(std::unique_ptr<Entry> entry) {
 	return true;
 }
 
-const std::vector<std::shared_ptr<ZipArchive::Entry>> & ZipArchive::getEntries() const {
-	return m_entries;
-}
+std::vector<std::shared_ptr<ArchiveEntry>> ZipArchive::getEntries() const {
+	std::vector<std::shared_ptr<ArchiveEntry>> entires(m_entries.size());
+	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entires));
 
-std::vector<std::shared_ptr<ZipArchive::Entry>> & ZipArchive::getEntries() {
-	return m_entries;
+	return entires;
 }
 
 zip * ZipArchive::getRawArchiveHandle() const {

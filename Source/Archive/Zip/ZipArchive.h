@@ -1,6 +1,7 @@
 #ifndef _ZIP_ARCHIVE_H_
 #define _ZIP_ARCHIVE_H_
 
+#include "Archive/Archive.h"
 #include "BitmaskOperators.h"
 #include "ByteBuffer.h"
 
@@ -13,7 +14,7 @@
 #include <string>
 #include <vector>
 
-class ZipArchive final {
+class ZipArchive final : public Archive {
 	friend class Entry;
 
 private:
@@ -65,51 +66,49 @@ public:
 		Both = Encrypt | Decrypt
 	};
 
-	class Entry final {
+	class Entry final : public ArchiveEntry {
 		friend class ZipArchive;
 
 	public:
-		~Entry();
+		virtual ~Entry();
 
-		bool isFile() const;
+		virtual bool isFile() const override;
 		static bool isFile(std::string_view path);
-		bool isDirectory() const;
+		virtual bool isDirectory() const override;
 		static bool isDirectory(std::string_view path);
-		bool isInSubdirectory() const;
-		static bool isInSubdirectory(std::string_view path);
-		std::string_view getName() const;
 		bool setName(const std::string & name);
-		const std::string & getPath() const;
+		virtual std::string getPath() const override;
 		bool move(const std::string & newBasePath, bool overwrite = false);
-		std::vector<std::weak_ptr<Entry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
-		uint64_t getIndex() const;
-		std::chrono::time_point<std::chrono::system_clock> getDate() const;
-		bool hasComment() const;
-		std::string getComment() const;
+		virtual uint64_t getIndex() const override;
+		virtual std::chrono::time_point<std::chrono::system_clock> getDate() const override;
+		virtual bool hasComment() const override;
+		virtual std::string getComment() const override;
 		bool setComment(const std::string & comment);
 		bool clearComment();
-		uint64_t getCompressedSize() const;
-		uint64_t getInflatedSize() const;
+		virtual uint64_t getCompressedSize() const override;
+		virtual uint64_t getUncompressedSize() const override;
 		bool hasUnsavedData() const;
-		std::unique_ptr<ByteBuffer> getData() const;
+		virtual std::unique_ptr<ByteBuffer> getData() const override;
 		bool isCompressed() const;
 		CompressionMethod getCompressionMethod() const;
 		bool setCompressionMethod(CompressionMethod compressionMethod);
 		bool isEncrypted() const;
 		EncryptionMethod getEncryptionMethod() const;
 		bool setEncryptionMethod(EncryptionMethod encryptionMethod);
-		uint32_t getCRC32() const;
-		bool writeTo(const std::string & directoryPath, bool overwrite = false) const;
+		virtual uint32_t getCRC32() const override;
+		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const override;
+
+	protected:
+		virtual bool isParentArchiveValid() const override;
+		virtual Archive * getParentArchive() const override;
+		virtual void clearParentArchive() override;
 
 	private:
 		using ZipFileHandle = std::unique_ptr<struct zip_file, std::function<void (struct zip_file *)>>;
 
-		Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t inflatedSize, uint32_t crc32, ZipArchive * parentArchive);
+		Entry(const std::string & path, uint64_t index, std::unique_ptr<ByteBuffer> data, std::chrono::time_point<std::chrono::system_clock> date, CompressionMethod compressionMethod, EncryptionMethod encryptionMethod, uint64_t compressedSize, uint64_t uncompressedSize, uint32_t crc32, ZipArchive * parentArchive);
 
 		bool setIndex(uint64_t index);
-		bool isParentArchiveOpen() const;
-		ZipArchive * getParentArchive() const;
-		void clearParentArchive();
 		void clearUnsavedData();
 		static ZipFileHandle createZipFileHandle(zip_file * zipFileHandle);
 
@@ -121,7 +120,7 @@ public:
 		CompressionMethod m_compressionMethod;
 		EncryptionMethod m_encryptionMethod;
 		uint64_t m_compressedSize;
-		uint64_t m_inflatedSize;
+		uint64_t m_uncompressedSize;
 		uint32_t m_crc32;
 
 		Entry(const Entry &) = delete;
@@ -130,9 +129,11 @@ public:
 		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
-	~ZipArchive();
+	virtual ~ZipArchive();
 
-	std::string getFilePath() const;
+	virtual bool isOpen() const override;
+	virtual bool isModifiable() const override;
+	virtual std::string getFilePath() const override;
 	bool hasPassword() const;
 	const std::string & getPassword() const;
 	bool setPassword(const std::string & password);
@@ -146,27 +147,15 @@ public:
 	static bool isCompressionMethodSupported(CompressionMethod compressionMethod, CompressionType compressionType = CompressionType::Both);
 	static bool isEncryptionMethodSupported(EncryptionMethod encryptionMethod, EncryptionType encryptionType = EncryptionType::Both);
 	std::chrono::time_point<std::chrono::system_clock> getDate() const;
-	bool hasComment() const;
-	std::string getComment() const;
+	virtual bool hasComment() const override;
+	virtual std::string getComment() const override;
 	bool setComment(const std::string & comment);
 	bool clearComment();
-	uint64_t getCompressedSize() const;
-	uint64_t getInflatedSize() const;
+	virtual uint64_t getCompressedSize() const override;
 	const ByteBuffer * getData() const;
-	size_t numberOfEntries() const;
-	size_t numberOfFiles() const;
-	size_t numberOfDirectories() const;
-	bool hasEntry(const Entry & entry) const;
-	bool hasEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	bool hasEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	size_t indexOfEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	size_t indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false);
-	std::weak_ptr<Entry> getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(size_t index) const;
-	std::weak_ptr<Entry> getEntry(size_t index);
-	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false) const;
+	virtual size_t numberOfEntries() const override;
+	virtual size_t numberOfFiles() const override;
+	virtual size_t numberOfDirectories() const override;
 	std::weak_ptr<Entry> addFile(const std::string & filePath, const std::string & entryDirectoryPath = {}, bool overwrite = true);
 	std::weak_ptr<Entry> addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite = true);
 	std::weak_ptr<Entry> addDirectory(const std::string & entryDirectoryPath);
@@ -180,13 +169,15 @@ public:
 	static std::unique_ptr<ZipArchive> createNew(const std::string & filePath = {}, bool overwrite = false);
 	static std::unique_ptr<ZipArchive> createFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & password = {}, bool verifyConsistency = false, const std::string & filePath = {});
 	static std::unique_ptr<ZipArchive> readFrom(const std::string & filePath, const std::string & password = {}, bool verifyConsistency = false);
-	bool isOpen() const;
 	bool close();
 	bool reopen(bool verifyConsistency = false);
 	bool save();
-	std::string toDebugString(bool includeDate = false) const;
+	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
+
+protected:
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 
 private:
 	class SourceBuffer final {
@@ -235,8 +226,6 @@ private:
 	bool populateDefaultMethods();
 	bool addEntry(std::unique_ptr<Entry> entry);
 	size_t removeEntry(Entry & entry, bool removeChildren);
-	const std::vector<std::shared_ptr<Entry>> & getEntries() const;
-	std::vector<std::shared_ptr<Entry>> & getEntries();
 	zip * getRawArchiveHandle() const;
 	zip_source * getRawSourceHandle() const;
 	static ZipArchiveHandle createZipArchiveHandle(zip * zipArchiveHandle);
