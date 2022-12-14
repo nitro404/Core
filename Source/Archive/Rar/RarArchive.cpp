@@ -8,6 +8,8 @@
 
 #include <filesystem>
 
+const std::string RarArchive::DEFAULT_FILE_EXTENSION("rar");
+
 RarArchive::RarArchive(ArchiveHandle archiveHandle, const std::string & filePath, std::unique_ptr<ByteBuffer> data)
 	: Archive(Type::Rar)
 	, m_archiveHandle(std::move(archiveHandle))
@@ -31,6 +33,10 @@ RarArchive::~RarArchive() {
 	for(std::vector<std::shared_ptr<RarArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
+}
+
+std::string RarArchive::getDefaultFileExtension() const {
+	return DEFAULT_FILE_EXTENSION;
 }
 
 std::string RarArchive::getFilePath() const {

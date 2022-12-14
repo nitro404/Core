@@ -23,6 +23,7 @@ public:
 	virtual ~Archive();
 
 	Type getType() const;
+	virtual std::string getDefaultFileExtension() const = 0;
 	virtual bool isOpen() const;
 	virtual bool isModifiable() const;
 	virtual std::string getFilePath() const = 0;

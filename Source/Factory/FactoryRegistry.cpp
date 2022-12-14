@@ -1,6 +1,7 @@
 #include "FactoryRegistry.h"
 
 #include "Application/ComponentRegistry.h"
+#include "Archive/ArchiveFactoryRegistry.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Location/FreeGeoIPGeoLocationService.h"
 #include "Analytics/Segment/SegmentAnalyticsCURL.h"
@@ -37,6 +38,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<SegmentAnalytics>([]() {
 		return std::make_unique<SegmentAnalyticsCURL>();
+	});
+
+	setFactory<ArchiveFactoryRegistry>([]() {
+		return std::make_unique<ArchiveFactoryRegistry>();
 	});
 }
 

@@ -9,6 +9,7 @@ set(SOURCE_FILES
 	Application/ComponentRegistry.cpp
 	Archive/Archive.cpp
 	Archive/ArchiveEntry.cpp
+	Archive/ArchiveFactoryRegistry.cpp
 	Archive/7Zip/SevenZipArchive.cpp
 	Archive/7Zip/SevenZipArchiveEntry.cpp
 	Archive/Rar/RarArchive.cpp

@@ -70,6 +70,8 @@ static SRes seekVirtualByteBufferFile(const ISeekInStream * seekInStreamInterfac
 	return SZ_OK;
 }
 
+const std::string SevenZipArchive::DEFAULT_FILE_EXTENSION("7z");
+
 SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data)
 	: Archive(Type::SevenZip)
 	, m_archiveStream(std::move(archiveStream))
@@ -96,6 +98,10 @@ SevenZipArchive::~SevenZipArchive() {
 	for(std::vector<std::shared_ptr<SevenZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
+}
+
+std::string SevenZipArchive::getDefaultFileExtension() const {
+	return DEFAULT_FILE_EXTENSION;
 }
 
 std::string SevenZipArchive::getFilePath() const {

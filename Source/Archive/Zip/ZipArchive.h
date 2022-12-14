@@ -131,6 +131,7 @@ public:
 
 	virtual ~ZipArchive();
 
+	virtual std::string getDefaultFileExtension() const override;
 	virtual bool isOpen() const override;
 	virtual bool isModifiable() const override;
 	virtual std::string getFilePath() const override;
@@ -174,6 +175,7 @@ public:
 	bool save();
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
+	static const std::string DEFAULT_FILE_EXTENSION;
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
 
 protected:

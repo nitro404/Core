@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <sstream>
 
+const std::string ZipArchive::DEFAULT_FILE_EXTENSION("zip");
 const ZipArchive::EncryptionMethod ZipArchive::DEFAULT_ENCRYPTION_METHOD = EncryptionMethod::AES256;
 
 ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, std::unique_ptr<SourceBuffer> zipSourceBuffer, const std::string & filePath, const std::string & password)
@@ -43,6 +44,10 @@ ZipArchive::~ZipArchive() {
 	for(std::vector<std::shared_ptr<ZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
+}
+
+std::string ZipArchive::getDefaultFileExtension() const {
+	return DEFAULT_FILE_EXTENSION;
 }
 
 std::string ZipArchive::getFilePath() const {

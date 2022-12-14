@@ -53,6 +53,7 @@ public:
 
 	virtual ~SevenZipArchive();
 
+	virtual std::string getDefaultFileExtension() const override;
 	virtual std::string getFilePath() const override;
 	virtual bool hasComment() const override;
 	virtual std::string getComment() const override;
@@ -64,6 +65,8 @@ public:
 
 	static std::unique_ptr<SevenZipArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<SevenZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
+
+	static const std::string DEFAULT_FILE_EXTENSION;
 
 protected:
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
