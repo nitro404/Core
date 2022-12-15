@@ -4,8 +4,8 @@
 #include "Archive/Archive.h"
 #include "ByteBuffer.h"
 
-#include <7Zip/C/7z.h>
-#include <7Zip/C/7zFile.h>
+#include <SevenZip/C/7z.h>
+#include <SevenZip/C/7zFile.h>
 
 #include <chrono>
 #include <functional>

@@ -4,9 +4,9 @@
 #include "Utilities/StringUtilities.h"
 #include "Utilities/TimeUtilities.h"
 
-#include <7Zip/C/7zAlloc.h>
-#include <7Zip/C/7zCrc.h>
-#include <7Zip/C/7zTypes.h>
+#include <SevenZip/C/7zAlloc.h>
+#include <SevenZip/C/7zCrc.h>
+#include <SevenZip/C/7zTypes.h>
 
 #include <spdlog/spdlog.h>
 

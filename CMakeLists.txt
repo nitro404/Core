@@ -47,7 +47,6 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(
 	${PROJECT_NAME}
 		PUBLIC
-			7Zip::7Zip
 			BZip2::bz2
 			cryptopp-static
 			CURL::libcurl
@@ -60,6 +59,7 @@ target_link_libraries(
 			lzma::lzma
 			magic_enum::magic_enum
 			RapidJSON::rapidjson
+			SevenZip::SevenZip
 			spdlog::spdlog
 			tidy::tidy-static
 			tinyxml2::tinyxml2

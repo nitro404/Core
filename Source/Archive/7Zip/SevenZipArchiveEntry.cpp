@@ -3,7 +3,7 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-#include <7Zip/C/7z.h>
+#include <SevenZip/C/7z.h>
 
 #include <spdlog/spdlog.h>
 

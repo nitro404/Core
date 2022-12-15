@@ -1,11 +1,5 @@
 include_guard()
 
-hunter_config(7Zip
-	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.zip"
-	VERSION "21.7.0"
-	SHA1 "832fac1b5776d83f879fd4924afbec9d70494f64"
-)
-
 hunter_config(BZip2
 	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.6.zip"
 	VERSION "1.0.6"
@@ -85,6 +79,12 @@ hunter_config(RapidJSON
 	SHA1 "626bc8a7d738c0ab5648f1c7c86e06ed7d760c1a"
 )
 
+hunter_config(SevenZip
+	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.1.zip"
+	VERSION "21.7.0.1"
+	SHA1 "68e5db5849b3b09d3612324fae99e582144a69dd"
+)
+
 hunter_config(spdlog
 	URL "https://github.com/Telefrag-Software/spdlog/archive/refs/heads/hunter-1.8.5.1.zip"
 	VERSION "1.8.5.1"
@@ -92,9 +92,9 @@ hunter_config(spdlog
 )
 
 hunter_config(tidy
-	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.1.zip"
-	VERSION "5.8.0.1"
-	SHA1 "a6f7024f92f2f39c62fc0ca04a25489f8d76e1ea"
+	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.2.zip"
+	VERSION "5.8.0.2"
+	SHA1 "51d9e9329db1eeaf1ffafd075f6d4370b5b9d81d"
 	CMAKE_ARGS
 		BUILD_SHARED_LIB=OFF
 		SUPPORT_CONSOLE_APP=OFF
@@ -102,9 +102,9 @@ hunter_config(tidy
 )
 
 hunter_config(tinyxml2
-	URL "https://github.com/Telefrag-Software/tinyxml2/archive/refs/heads/hunter-9.0.0.zip"
-	VERSION "9.0.0"
-	SHA1 "0da3ec832b72e1cc3b27aff8327ab0f43ecbb484"
+	URL "https://github.com/Telefrag-Software/tinyxml2/archive/refs/heads/hunter-9.0.0.1.zip"
+	VERSION "9.0.0.1"
+	SHA1 "594b6b1e75477ad7d769713f0b59edeb929614c7"
 )
 
 hunter_config(ZLIB
