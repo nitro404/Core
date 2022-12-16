@@ -1,4 +1,4 @@
-set(SOURCE_FILES
+set(CORE_SOURCE_FILES
 	Analytics/Segment/SegmentAnalyticEvent.cpp
 	Analytics/Segment/SegmentAnalytics.cpp
 	Analytics/Segment/SegmentAnalyticsDataStorage.cpp
@@ -66,7 +66,69 @@ set(SOURCE_FILES
 	Utilities/Utilities.cpp
 )
 
-set(SOURCE_FILES_WINDOWS
+set(CORE_HEADER_FILES
+	Analytics/Segment/SegmentAnalyticEvent.h
+	Analytics/Segment/SegmentAnalytics.h
+	Analytics/Segment/SegmentAnalyticsCURL.h
+	Application/Application.h
+	Application/ComponentRegistry.h
+	Archive/Archive.h
+	Archive/ArchiveEntry.h
+	Archive/ArchiveFactoryRegistry.h
+	Archive/7Zip/SevenZipArchive.h
+	Archive/Rar/RarArchive.h
+	Archive/Zip/ZipArchive.h
+	Archive/Zip/ZipUtilities.h
+	Arguments/ArgumentCollection.h
+	Arguments/ArgumentParser.h
+	BitmaskOperators.h
+	ByteBuffer.h
+	Colour.h
+	Core.h
+	Date.h
+	Dimension.h
+	Endianness.h
+	Factory/Factory.h
+	Factory/FactoryRegistry.h
+	Point.h
+	Rectangle.h
+	Location/FreeGeoIPGeoLocationService.h
+	Location/GeoLocation.h
+	Location/GeoLocationService.h
+	Logging/LogSystem.h
+	Math/ExtendedMath.h
+	Math/Matrix2x2.h
+	Math/Matrix3x3.h
+	Math/Matrix4x4.h
+	Math/Vector2.h
+	Math/Vector3.h
+	Math/Vector4.h
+	Network/HTTPConfiguration.h
+	Network/HTTPHeaders.h
+	Network/HTTPRequest.h
+	Network/HTTPRequestSettings.h
+	Network/HTTPResponse.h
+	Network/HTTPService.h
+	Network/HTTPTransfer.h
+	Network/HTTPUtilities.h
+	Network/IPAddressService.h
+	Network/IpifyIPAddressService.h
+	Platform/DeviceInformationBridge.h
+	Script/Script.h
+	Script/ScriptArguments.h
+	Singleton/Singleton.h
+	Singleton/SingletonManager.h
+	Utilities/FileUtilities.h
+	Utilities/NumberUtilities.h
+	Utilities/RapidJSONUtilities.h
+	Utilities/StringUtilities.h
+	Utilities/TidyHTMLUtilities.h
+	Utilities/TimeUtilities.h
+	Utilities/TinyXML2Utilities.h
+	Utilities/Utilities.h
+)
+
+set(CORE_SOURCE_FILES_WINDOWS
 	Factory/Windows/FactoryRegistryWindows.cpp
 	Logging/Windows/LogSinkWindows.cpp
 	Logging/Windows/LogSystemWindows.cpp
@@ -75,24 +137,19 @@ set(SOURCE_FILES_WINDOWS
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 
-source_group(Source                     REGULAR_EXPRESSION ".*\\.(h|cpp)")
-source_group(Source\\Analytics          REGULAR_EXPRESSION "Analytics/.*\\.(h|cpp)")
-source_group(Source\\Analytics\\Segment REGULAR_EXPRESSION "Analytics/Segment/.*\\.(h|cpp)")
-source_group(Source\\Application        REGULAR_EXPRESSION "Application/.*\\.(h|cpp)")
-source_group(Source\\Archive            REGULAR_EXPRESSION "Archive/.*\\.(h|cpp)")
-source_group(Source\\Archive\\7Zip      REGULAR_EXPRESSION "Archive/7Zip/.*\\.(h|cpp)")
-source_group(Source\\Archive\\Rar       REGULAR_EXPRESSION "Archive/Rar/.*\\.(h|cpp)")
-source_group(Source\\Archive\\Zip       REGULAR_EXPRESSION "Archive/Zip/.*\\.(h|cpp)")
-source_group(Source\\Arguments          REGULAR_EXPRESSION "Arguments/.*\\.(h|cpp)")
-source_group(Source\\Factory            REGULAR_EXPRESSION "Factory/.*\\.(h|cpp)")
-source_group(Source\\Factory\\Windows   REGULAR_EXPRESSION "Factory/Windows/.*\\.(h|cpp)")
-source_group(Source\\Location           REGULAR_EXPRESSION "Location/.*\\.(h|cpp)")
-source_group(Source\\Logging            REGULAR_EXPRESSION "Logging/.*\\.(h|cpp)")
-source_group(Source\\Logging\\Windows   REGULAR_EXPRESSION "Logging/Windows.*\\.(h|cpp)")
-source_group(Source\\Math               REGULAR_EXPRESSION "Math/.*\\.(h|cpp)")
-source_group(Source\\Network            REGULAR_EXPRESSION "Network/.*\\.(h|cpp)")
-source_group(Source\\Platform           REGULAR_EXPRESSION "Platform/.*\\.(h|cpp)")
-source_group(Source\\Platform\\Windows  REGULAR_EXPRESSION "Platform/Windows/.*\\.(h|cpp)")
-source_group(Source\\Script             REGULAR_EXPRESSION "Script/.*\\.(h|cpp)")
-source_group(Source\\Singleton          REGULAR_EXPRESSION "Singleton/.*\\.(h|cpp)")
-source_group(Source\\Utilities          REGULAR_EXPRESSION "Utilities/.*\\.(h|cpp)")
+set(CORE_HEADER_FILES_WINDOWS
+	Logging/Windows/LogSinkWindows.h
+	Logging/Windows/LogSystemWindows.h
+	Platform/Windows/DeviceInformationBridgeWindows.h
+	Platform/Windows/WindowsUtilities.h
+)
+
+list(APPEND CORE_HEADER_FILES ${CORE_HEADER_FILES_${PLATFORM_UPPER}})
+list(APPEND CORE_SOURCE_FILES ${CORE_SOURCE_FILES_${PLATFORM_UPPER}})
+
+list(TRANSFORM CORE_HEADER_FILES PREPEND "${_SOURCE_DIRECTORY}/")
+list(TRANSFORM CORE_SOURCE_FILES PREPEND "${_SOURCE_DIRECTORY}/")
+
+list(APPEND CORE_ALL_FILES ${CORE_HEADER_FILES} ${CORE_SOURCE_FILES} )
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CORE_ALL_FILES})

@@ -26,11 +26,7 @@ configure_file("${_CORE_FILE_PATH}.in" "${_CORE_FILE_PATH}" @ONLY)
 
 include(SourceFiles)
 
-list(APPEND SOURCE_FILES ${SOURCE_FILES_${PLATFORM_UPPER}})
-
-list(TRANSFORM SOURCE_FILES PREPEND "${_SOURCE_DIRECTORY}/")
-
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
+add_library(${PROJECT_NAME} STATIC ${CORE_ALL_FILES})
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
@@ -40,9 +36,15 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
 	PUBLIC
 		${PLATFORM_UPPER}
-		NOMINMAX
 		CRYPTOPP_ENABLE_NAMESPACE_WEAK=1
 )
+
+if(WIN32)
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC
+			NOMINMAX
+	)
+endif()
 
 target_link_libraries(
 	${PROJECT_NAME}
