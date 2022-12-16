@@ -15,11 +15,12 @@ IpifyIPAddressService::IpifyIPAddressService()
 IpifyIPAddressService::~IpifyIPAddressService() { }
 
 std::string IpifyIPAddressService::getIPAddress(IPAddressType type) {
-	if(!isInitialized()) {
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		spdlog::error("Failed to retrieve IP address, HTTP service is not initialized!");
 		return {};
 	}
-
-	std::shared_ptr<HTTPService> httpService(getHTTPService());
 
 	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, type == IPAddressType::V4 ? IPIFY_IPV4_API_ADDRESS : IPIFY_IPV6_API_ADDRESS));
 	request->setConnectionTimeout(2s);

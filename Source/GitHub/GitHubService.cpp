@@ -18,22 +18,6 @@ GitHubService::GitHubService()
 
 GitHubService::~GitHubService() { }
 
-bool GitHubService::isInitialized() const {
-	return m_initialized;
-}
-
-bool GitHubService::initialize(std::shared_ptr<HTTPService> httpService) {
-	if(m_initialized || httpService == nullptr || !httpService->isInitialized()) {
-		return false;
-	}
-
-	m_httpService = httpService;
-
-	m_initialized = true;
-
-	return true;
-}
-
 std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string & repositoryURL) const {
 	std::optional<RepositoryInformation> repositoryInfo(GitHubService::parseRepositoryURL(repositoryURL));
 
@@ -46,11 +30,18 @@ std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string
 }
 
 std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string & repositoryName, const std::string & organizationName) const {
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		spdlog::error("Failed to retrieve latest '{}' release information, HTTP service is not initialized!");
+		return nullptr;
+	}
+
 	std::string latestReleaseURL(fmt::format(GITHUB_LATEST_RELEASE_API_URL_TEMPLATE, organizationName, repositoryName));
 
-	std::shared_ptr<HTTPRequest> request(m_httpService->createRequest(HTTPRequest::Method::Get, latestReleaseURL));
+	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, latestReleaseURL));
 
-	std::shared_ptr<HTTPResponse> response(m_httpService->sendRequestAndWait(request));
+	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
 	if(response->isFailure()) {
 		spdlog::error("Failed to retrieve latest '{}' release information with error: {}", repositoryName, response->getErrorMessage());
@@ -92,11 +83,18 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 }
 
 std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::string & repositoryName, const std::string & organizationName) const {
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		spdlog::error("Failed to retrieve '{}' releases information, HTTP service is not initialized!");
+		return nullptr;
+	}
+
 	std::string releasesURL(fmt::format(GITHUB_RELEASES_API_URL_TEMPLATE, organizationName, repositoryName));
 
-	std::shared_ptr<HTTPRequest> request(m_httpService->createRequest(HTTPRequest::Method::Get, releasesURL));
+	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, releasesURL));
 
-	std::shared_ptr<HTTPResponse> response(m_httpService->sendRequestAndWait(request));
+	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
 	if(response->isFailure()) {
 		spdlog::error("Failed to retrieve '{}' releases information with error: {}", repositoryName, response->getErrorMessage());

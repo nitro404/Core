@@ -116,13 +116,19 @@ bool SegmentAnalyticsCURL::sendSingleAnalyticEvent(std::shared_ptr<SegmentAnalyt
 		return false;
 	}
 
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		return false;
+	}
+
 	std::shared_ptr<HTTPRequest> singleRequest(createSingleAnalyticEventRequest(*analyticEvent));
 
 	if(singleRequest == nullptr) {
 		return false;
 	}
 
-	std::future<std::shared_ptr<HTTPResponse>> futureResponse(getHTTPService()->sendRequest(singleRequest));
+	std::future<std::shared_ptr<HTTPResponse>> futureResponse(httpService->sendRequest(singleRequest));
 
 	if(!futureResponse.valid()) {
 		return false;
@@ -140,13 +146,19 @@ bool SegmentAnalyticsCURL::sendAnalyticEventBatch(const std::vector<std::shared_
 		return false;
 	}
 
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		return false;
+	}
+
 	std::shared_ptr<HTTPRequest> batchRequest(createBatchAnalyticEventRequest(analyticEvents));
 
 	if(batchRequest == nullptr) {
 		return false;
 	}
 
-	std::future<std::shared_ptr<HTTPResponse>> futureResponse(getHTTPService()->sendRequest(batchRequest));
+	std::future<std::shared_ptr<HTTPResponse>> futureResponse(httpService->sendRequest(batchRequest));
 
 	if(!futureResponse.valid()) {
 		return false;
@@ -178,9 +190,15 @@ std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::createSingleAnalyticEventRequ
 		return nullptr;
 	}
 
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		return nullptr;
+	}
+
 	std::string apiEndpoint(Utilities::toLowerCase(magic_enum::enum_name(analyticEvent.getType())));
 
-	std::shared_ptr<HTTPRequest> singleRequest(getHTTPService()->createRequest(HTTPRequest::Method::Post, Utilities::joinPaths(m_apiAddress, apiEndpoint)));
+	std::shared_ptr<HTTPRequest> singleRequest(httpService->createRequest(HTTPRequest::Method::Post, Utilities::joinPaths(m_apiAddress, apiEndpoint)));
 
 	configureAnalyticEventRequest(*singleRequest);
 
@@ -203,7 +221,13 @@ std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::createBatchAnalyticEventReque
 		return nullptr;
 	}
 
-	std::shared_ptr<HTTPRequest> batchRequest(getHTTPService()->createRequest(HTTPRequest::Method::Post, Utilities::joinPaths(m_apiAddress, "batch")));
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		return nullptr;
+	}
+
+	std::shared_ptr<HTTPRequest> batchRequest(httpService->createRequest(HTTPRequest::Method::Post, Utilities::joinPaths(m_apiAddress, "batch")));
 
 	configureAnalyticEventRequest(*batchRequest);
 
@@ -280,8 +304,13 @@ void SegmentAnalyticsCURL::run() {
 		return;
 	}
 
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		return;
+	}
+
 	DataStorage * dataStorage = getDataStorage();
-	std::shared_ptr<HTTPService> httpService(getHTTPService());
 	bool batchMode = isUsingBatchMode();
 	uint16_t maxEventQueueSize = getMaxEventQueueSize();
 	std::vector<std::shared_ptr<SegmentAnalyticEvent>> analyticEventsToSend;

@@ -1,7 +1,6 @@
 #include "SegmentAnalytics.h"
 
 #include "Location/GeoLocationService.h"
-#include "Network/HTTPService.h"
 #include "Network/IPAddressService.h"
 #include "Platform/DeviceInformationBridge.h"
 #include "Utilities/RapidJSONUtilities.h"
@@ -52,7 +51,6 @@ bool SegmentAnalytics::initialize(const Configuration & configuration) {
 	m_includeGeoLocation = configuration.includeGeoLocation;
 	m_batchMode = configuration.batchMode;
 	m_maxEventQueueSize = configuration.maxEventQueueSize;
-	m_httpService = configuration.httpService;
 	m_applicationName = configuration.applicationName;
 	m_applicationVersion = configuration.applicationVersion;
 	m_applicationBuild = configuration.applicationBuild;
@@ -61,10 +59,6 @@ bool SegmentAnalytics::initialize(const Configuration & configuration) {
 
 	if(m_includeIPAddress) {
 		IPAddressService * ipAddressService = IPAddressService::getInstance();
-
-		if(!ipAddressService->isInitialized()) {
-			ipAddressService->initialize(m_httpService);
-		}
 
 		m_ipAddress = ipAddressService->getIPAddress(IPAddressService::IPAddressType::V6);
 	}
@@ -297,10 +291,6 @@ SegmentAnalytics::DataStorage * SegmentAnalytics::getDataStorage() {
 	return m_dataStorage.get();
 }
 
-std::shared_ptr<HTTPService> SegmentAnalytics::getHTTPService() const {
-	return m_httpService;
-}
-
 const std::string & SegmentAnalytics::getApplicationName() const {
 	return m_applicationName;
 }
@@ -387,11 +377,6 @@ bool SegmentAnalytics::isConfigurationValid(const Configuration & configuration)
 
 	if(configuration.dataStorageFilePath.empty()) {
 		spdlog::error("Invalid Segment analytics configuration - data storage file path cannot be empty.");
-		return false;
-	}
-
-	if(configuration.httpService == nullptr || !configuration.httpService->isInitialized()) {
-		spdlog::error("Invalid Segment analytics configuration - HTTP service is invalid or uninitialized.");
 		return false;
 	}
 

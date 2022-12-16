@@ -31,7 +31,12 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 		return {};
 	}
 
-	std::shared_ptr<HTTPService> httpService(getHTTPService());
+	HTTPService * httpService = HTTPService::getInstance();
+
+	if(!httpService->isInitialized()) {
+		spdlog::error("Failed to retrieve geo location, HTTP service is not initialized!");
+		return {};
+	}
 
 	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, FREE_GEO_IP_API_ADDRESS + "?" + API_KEY_QUERY_PARAMETER + "=" + getAPIKey()));
 	request->setConnectionTimeout(3s);

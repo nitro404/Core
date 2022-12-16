@@ -21,8 +21,6 @@
 #include <thread>
 #include <vector>
 
-class HTTPService;
-
 class SegmentAnalytics : public Singleton<SegmentAnalytics> {
 public:
 	struct Configuration {
@@ -35,7 +33,6 @@ public:
 		uint16_t maxEventQueueSize = 20;
 		std::chrono::milliseconds failedNetworkTransferRetryDelay = std::chrono::seconds(60);
 		std::string dataStorageFilePath;
-		std::shared_ptr<HTTPService> httpService;
 		std::string applicationName;
 		std::string applicationVersion;
 		std::string applicationBuild;
@@ -152,7 +149,6 @@ protected:
 	const std::string & getWriteKey() const;
 	const DataStorage * getDataStorage() const;
 	DataStorage * getDataStorage();
-	std::shared_ptr<HTTPService> getHTTPService() const;
 	const std::string & getApplicationName() const;
 	const std::string & getApplicationVersion() const;
 	const std::string & getApplicationBuild() const;
@@ -184,7 +180,6 @@ private:
 	std::optional<GeoLocation> m_geoLocation;
 	bool m_batchMode;
 	uint16_t m_maxEventQueueSize;
-	std::shared_ptr<HTTPService> m_httpService;
 	std::string m_applicationName;
 	std::string m_applicationVersion;
 	std::string m_applicationBuild;

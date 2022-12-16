@@ -7,6 +7,7 @@
 #include "HTTPStatusCode.h"
 #include "HTTPRequestSettings.h"
 #include "HTTPUtilities.h"
+#include "Singleton/Singleton.h"
 
 #include <curl/curl.h>
 
@@ -21,7 +22,7 @@
 #include <thread>
 #include <vector>
 
-class HTTPService final : public HTTPRequestSettings {
+class HTTPService final : public HTTPRequestSettings, public Singleton<HTTPService> {
 public:
 	HTTPService();
 	virtual ~HTTPService();

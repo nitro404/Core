@@ -3,6 +3,7 @@
 #include "Application/ComponentRegistry.h"
 #include "Archive/ArchiveFactoryRegistry.h"
 #include "GitHub/GitHubService.h"
+#include "Network/HTTPService.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Location/FreeGeoIPGeoLocationService.h"
 #include "Analytics/Segment/SegmentAnalyticsCURL.h"
@@ -39,6 +40,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<GitHubService>([]() {
 		return std::make_unique<GitHubService>();
+	});
+
+	setFactory<HTTPService>([]() {
+		return std::make_unique<HTTPService>();
 	});
 
 	setFactory<SegmentAnalytics>([]() {
