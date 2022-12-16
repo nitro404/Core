@@ -17,6 +17,8 @@ namespace Utilities {
 	std::tm getUTCTime(bool * error);
 	std::optional<std::tm> getLocalTime();
 	std::optional<std::tm> getUTCTime();
+	std::chrono::time_point<std::chrono::system_clock> parseTimePointFromString(const std::string & time, bool * error);
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> parseTimePointFromString(const std::string & time);
 	std::string timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint, TimePointFormat format = TimePointFormat::Default);
 
 }
