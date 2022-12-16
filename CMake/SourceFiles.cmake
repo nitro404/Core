@@ -27,6 +27,10 @@ set(SOURCE_FILES
 	Endianness.cpp
 	Factory/Factory.cpp
 	Factory/FactoryRegistry.cpp
+	GitHub/GitHubRelease.cpp
+	GitHub/GitHubReleaseAsset.cpp
+	GitHub/GitHubReleaseCollection.cpp
+	GitHub/GitHubService.cpp
 	Point.cpp
 	Rectangle.cpp
 	Location/FreeGeoIPGeoLocationService.cpp
