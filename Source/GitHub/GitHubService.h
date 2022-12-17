@@ -28,10 +28,10 @@ private:
 
 	bool m_initialized;
 
-	GitHubService(const GitHubService&) = delete;
-	GitHubService(GitHubService&&) noexcept = delete;
-	const GitHubService& operator = (const GitHubService&) = delete;
-	const GitHubService& operator = (GitHubService&&) noexcept = delete;
+	GitHubService(const GitHubService &) = delete;
+	GitHubService(GitHubService &&) noexcept = delete;
+	const GitHubService & operator = (const GitHubService &) = delete;
+	const GitHubService & operator = (GitHubService &&) noexcept = delete;
 };
 
 #endif // _GITHUB_SERVICE_H_

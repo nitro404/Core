@@ -754,20 +754,20 @@ std::string ZipArchive::toDebugString(bool includeDate) const {
 		stringStream << fmt::format("Date: {}\n", Utilities::timePointToString(m_date));
 	}
 
-	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
+	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		if(*i == nullptr) {
 			continue;
 		}
 
-		stringStream << fmt::format("{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
+		stringStream << "\n";
+
+		stringStream << fmt::format("\n{}. '{}' Size: {} CRC32: {} Compression: {} Encryption: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize(), (*i)->getCRC32(), magic_enum::enum_name((*i)->getCompressionMethod()), magic_enum::enum_name((*i)->getEncryptionMethod()));
 
 		if(includeDate) {
 			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
 		}
-
-		stringStream << "\n";
 	}
 
 	return stringStream.str();

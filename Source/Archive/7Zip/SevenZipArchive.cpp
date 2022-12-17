@@ -140,13 +140,15 @@ std::string SevenZipArchive::toDebugString(bool includeDate) const {
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
+		if(i != m_entries.begin()) {
+			stringStream << "\n";
+		}
+
 		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize());
 
 		if(includeDate) {
 			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
 		}
-
-		stringStream << "\n";
 	}
 
 	return stringStream.str();

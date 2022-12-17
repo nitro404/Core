@@ -80,10 +80,12 @@ std::string RarArchive::toDebugString(bool includeDate) const {
 	stringStream << fmt::format("File Path: '{}'\n", m_filePath);
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 	stringStream << fmt::format("Compressed Size: {}\n", getCompressedSize());
-	stringStream << fmt::format("Uncompressed Size: {}", getUncompressedSize());
+	stringStream << fmt::format("Uncompressed Size: {}\n", getUncompressedSize());
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		stringStream << "\n";
+		if(i != m_entries.begin()) {
+			stringStream << "\n";
+		}
 
 		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize());
 
