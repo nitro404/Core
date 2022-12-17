@@ -53,6 +53,8 @@ set(CORE_SOURCE_FILES
 	Network/IPAddressService.cpp
 	Network/IpifyIPAddressService.cpp
 	Platform/DeviceInformationBridge.cpp
+	Platform/Process.cpp
+	Platform/ProcessCreator.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
 	Singleton/SingletonManager.cpp
@@ -114,6 +116,8 @@ set(CORE_HEADER_FILES
 	Network/IPAddressService.h
 	Network/IpifyIPAddressService.h
 	Platform/DeviceInformationBridge.h
+	Platform/Process.h
+	Platform/ProcessCreator.h
 	Script/Script.h
 	Script/ScriptArguments.h
 	Singleton/Singleton.h
@@ -133,6 +137,8 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Logging/Windows/LogSinkWindows.cpp
 	Logging/Windows/LogSystemWindows.cpp
 	Platform/Windows/DeviceInformationBridgeWindows.cpp
+	Platform/Windows/ProcessCreatorWindows.cpp
+	Platform/Windows/ProcessWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
@@ -141,6 +147,8 @@ set(CORE_HEADER_FILES_WINDOWS
 	Logging/Windows/LogSinkWindows.h
 	Logging/Windows/LogSystemWindows.h
 	Platform/Windows/DeviceInformationBridgeWindows.h
+	Platform/Windows/ProcessCreatorWindows.h
+	Platform/Windows/ProcessWindows.h
 	Platform/Windows/WindowsUtilities.h
 )
 
