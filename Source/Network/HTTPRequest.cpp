@@ -659,14 +659,16 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 	}
 
 	// configure SSL certificate authority bundle type
-	if(!configuration.certificateAuthorityStoreFilePath.empty()) {
+	if(!configuration.certificateAuthorityCertificateStoreDirectoryPath.empty()) {
 		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_SSLCERTTYPE, "PEM"), fmt::format("Failed to set cURL request #{} SSL certificate authority store file type.", m_id))) {
 			return false;
 		}
 
 		// set SSL certificate authority bundle file path
 		// updated cacert.pem files can be obtained from: https://curl.se/docs/caextract.html
-		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_CAINFO, configuration.certificateAuthorityStoreFilePath.c_str()), fmt::format("Failed to set cURL request #{} SSL certificate authority store file path to: '{}'.", m_id, configuration.certificateAuthorityStoreFilePath))) {
+		std::string certificateAuthorityCertificateStoreFilePath(Utilities::joinPaths(configuration.certificateAuthorityCertificateStoreDirectoryPath, HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME));
+
+		if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_CAINFO, certificateAuthorityCertificateStoreFilePath.c_str()), fmt::format("Failed to set cURL request #{} SSL certificate authority store file path to: '{}'.", m_id, certificateAuthorityCertificateStoreFilePath))) {
 			return false;
 		}
 	}

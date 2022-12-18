@@ -6,7 +6,7 @@
 #include <string>
 
 struct HTTPConfiguration {
-	std::string certificateAuthorityStoreFilePath;
+	std::string certificateAuthorityCertificateStoreDirectoryPath;
 	std::string baseURL;
 	std::optional<std::chrono::seconds> connectionTimeout;
 	std::optional<std::chrono::seconds> networkTimeout;

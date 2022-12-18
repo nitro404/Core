@@ -51,16 +51,23 @@ public:
 	void setAuthorization(const std::string & bearerToken);
 	void setAuthorization(const std::string & userName, const std::string & password);
 	void clearAuthorization();
+	std::future<bool> updateCertificateAuthorityCertificate(bool force = false);
+	bool updateCertificateAuthorityCertificateAndWait(bool force = false);
 	std::shared_ptr<HTTPRequest> createRequest(HTTPRequest::Method method, const std::string & url);
 	std::future<std::shared_ptr<HTTPResponse>> sendRequest(std::shared_ptr<HTTPRequest> request);
 	std::shared_ptr<HTTPResponse> sendRequestAndWait(std::shared_ptr<HTTPRequest> request);
 	bool abortRequest(std::shared_ptr<HTTPRequest> request);
 
 	static const size_t DEFAULT_MAXIMUM_ACTIVE_REQUESTS;
+	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL;
+	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME;
+	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX;
 
 private:
 	using HTTPThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
+	using CACertUpdateThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
 
+	void runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertDirectoryPath, bool force);
 	void run();
 	std::shared_ptr<HTTPResponse> createResponse(std::shared_ptr<HTTPRequest> request);
 
@@ -73,6 +80,8 @@ private:
 	std::string m_userAgent;
 	std::string m_authorizationToken;
 	HTTPThread m_httpThread;
+	bool m_updatingCACert;
+	CACertUpdateThread m_caCertUpdateThread;
 	std::vector<std::weak_ptr<HTTPRequest>> m_requests;
 	std::deque<std::shared_ptr<HTTPRequest>> m_pendingRequests;
 	std::deque<std::shared_ptr<HTTPRequest>> m_abortedRequests;

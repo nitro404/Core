@@ -1,5 +1,6 @@
 #include "HTTPService.h"
 
+#include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
 #include <spdlog/spdlog.h>
@@ -7,13 +8,17 @@
 using namespace std::chrono_literals;
 
 const size_t HTTPService::DEFAULT_MAXIMUM_ACTIVE_REQUESTS = 8u;
+const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL("https://curl.se/ca");
+const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME("cacert.pem");
+const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX(".sha256");
 
 HTTPService::HTTPService()
 	: HTTPRequestSettings()
 	, m_initialized(false)
 	, m_running(false)
 	, m_stopRequested(false)
-	, m_maximumActiveRequests(DEFAULT_MAXIMUM_ACTIVE_REQUESTS) { }
+	, m_maximumActiveRequests(DEFAULT_MAXIMUM_ACTIVE_REQUESTS)
+	, m_updatingCACert(false) { }
 
 HTTPService::~HTTPService() {
 	stop();
@@ -93,7 +98,9 @@ bool HTTPService::start() {
 
 	m_running = true;
 
-	m_httpThread = HTTPThread(new std::thread(&HTTPService::run, this), [](std::thread * httpThread) {
+	m_httpThread = HTTPThread(new std::thread(&HTTPService::run, this), [this](std::thread * httpThread) {
+		m_running = false;
+
 		if(httpThread != nullptr) {
 			if(httpThread->joinable()) {
 				httpThread->join();
@@ -115,11 +122,11 @@ void HTTPService::stop() {
 
 	m_waitCondition.notify_one();
 
+	m_caCertUpdateThread.reset();
+
 	m_httpThread.reset();
 
 	lock.lock();
-
-	m_running = false;
 }
 
 bool HTTPService::hasMaximumActiveRequests() const {
@@ -230,6 +237,43 @@ void HTTPService::clearAuthorization() {
 	m_authorizationToken.clear();
 }
 
+std::future<bool> HTTPService::updateCertificateAuthorityCertificate(bool force) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_caCertUpdateThread != nullptr && m_caCertUpdateThread->joinable()) {
+		m_updatingCACert = false;
+		m_caCertUpdateThread->join();
+	}
+
+	std::shared_ptr<std::promise<bool>> caCertUpdatedPromise(std::make_shared<std::promise<bool>>());
+
+	m_caCertUpdateThread = CACertUpdateThread(new std::thread(&HTTPService::runCACertUpdate, this, caCertUpdatedPromise, m_configuration.certificateAuthorityCertificateStoreDirectoryPath, force), [this](std::thread * caCertUpdateThread) {
+		m_updatingCACert = false;
+
+		if(caCertUpdateThread != nullptr) {
+			if(caCertUpdateThread->joinable()) {
+				caCertUpdateThread->join();
+			}
+
+			delete caCertUpdateThread;
+		}
+	});
+
+	return caCertUpdatedPromise->get_future();
+}
+
+bool HTTPService::updateCertificateAuthorityCertificateAndWait(bool force) {
+	std::future<bool> caCertUpdateFuture(updateCertificateAuthorityCertificate());
+
+	if(!caCertUpdateFuture.valid()) {
+		return false;
+	}
+
+	caCertUpdateFuture.wait();
+
+	return caCertUpdateFuture.get();
+}
+
 std::shared_ptr<HTTPRequest> HTTPService::createRequest(HTTPRequest::Method method, const std::string & url) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
@@ -305,6 +349,122 @@ std::shared_ptr<HTTPResponse> HTTPService::createResponse(std::shared_ptr<HTTPRe
 	std::shared_ptr<HTTPResponse> response(new HTTPResponse(this, request));
 
 	return response;
+}
+
+void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertDirectoryPath, bool force) {
+	if(!m_initialized || !m_running) {
+		promise->set_value(false);
+		return;
+	}
+
+	m_updatingCACert = true;
+
+	std::shared_ptr<HTTPRequest> caCertSHA256FileRequest(createRequest(HTTPRequest::Method::Get, Utilities::joinPaths(CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME + CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX)));
+
+	std::shared_ptr<HTTPResponse> caCertSHA256FileResponse(sendRequestAndWait(caCertSHA256FileRequest));
+
+	if(caCertSHA256FileResponse->isFailure()) {
+		spdlog::error("Failed to download certificate authority certificate store SHA256 file with error: {}", caCertSHA256FileResponse->getErrorMessage());
+		promise->set_value(false);
+		return;
+	}
+	else if(caCertSHA256FileResponse->isFailureStatusCode()) {
+		std::string statusCodeName(HTTPUtilities::getStatusCodeName(caCertSHA256FileResponse->getStatusCode()));
+		spdlog::error("Failed to download certificate authority certificate store SHA256 file ({}{})!", caCertSHA256FileResponse->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
+		promise->set_value(false);
+		return;
+	}
+
+	if(!m_updatingCACert) {
+		promise->set_value(false);
+		return;
+	}
+
+	std::string expectedCACertSHA256Data(caCertSHA256FileResponse->getBodyAsString());
+
+	if(expectedCACertSHA256Data.empty()) {
+		spdlog::error("Certificate authority certificate store SHA256 file is empty.");
+		promise->set_value(false);
+		return;
+	}
+
+	size_t fileNameSeparatorIndex = expectedCACertSHA256Data.find_first_of(" ");
+
+	if(fileNameSeparatorIndex == std::string::npos) {
+		fileNameSeparatorIndex = expectedCACertSHA256Data.length();
+
+		spdlog::warn("Certificate authority certificate store SHA256 file missing file name separator whitespace.");
+	}
+
+	std::string_view expectedCACertSHA256(expectedCACertSHA256Data.data(), fileNameSeparatorIndex);
+
+	caCertSHA256FileResponse.reset();
+
+	if(!m_updatingCACert) {
+		promise->set_value(false);
+		return;
+	}
+
+	std::string caCertFilePath(Utilities::joinPaths(caCertDirectoryPath, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME));
+
+	std::string currentCACertSHA256(Utilities::getFileSHA256Hash(caCertFilePath));
+
+	if(!force && Utilities::areStringsEqual(currentCACertSHA256, expectedCACertSHA256)) {
+		spdlog::info("Certificate authority certificate store file is already up to date.");
+		promise->set_value(true);
+		return;
+	}
+
+	if(!m_updatingCACert) {
+		promise->set_value(false);
+		return;
+	}
+
+	std::shared_ptr<HTTPRequest> caCertFileRequest(createRequest(HTTPRequest::Method::Get, Utilities::joinPaths(CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME)));
+
+	std::shared_ptr<HTTPResponse> caCertFileResponse(sendRequestAndWait(caCertFileRequest));
+
+	if(caCertFileResponse->isFailure()) {
+		spdlog::error("Failed to download certificate authority certificate store file with error: {}", caCertFileResponse->getErrorMessage());
+		promise->set_value(false);
+		return;
+	}
+	else if(caCertFileResponse->isFailureStatusCode()) {
+		std::string statusCodeName(HTTPUtilities::getStatusCodeName(caCertFileResponse->getStatusCode()));
+		spdlog::error("Failed to download certificate authority certificate store file ({}{})!", caCertFileResponse->getStatusCode(), statusCodeName.empty() ? "" : " " + statusCodeName);
+		promise->set_value(false);
+		return;
+	}
+
+	if(!m_updatingCACert) {
+		promise->set_value(false);
+		return;
+	}
+
+	std::string calculcatedCACertFileSHA256(caCertFileResponse->getBodySHA256());
+
+	if(!Utilities::areStringsEqual(calculcatedCACertFileSHA256, expectedCACertSHA256)) {
+		spdlog::error("Certificate authority certificate store file SHA256 verification failed. Calculated '{}', but expected: '{}'.", calculcatedCACertFileSHA256);
+		promise->set_value(false);
+		return;
+	}
+
+	spdlog::debug("Certificate authority certificate store file data download and validated.");
+
+	if(!m_updatingCACert) {
+		promise->set_value(false);
+		return;
+	}
+
+	if(!caCertFileResponse->getBody()->writeTo(caCertFilePath, true)) {
+		spdlog::error("Failed to write certificate authority certificate store data to file: '{}'.", caCertFilePath);
+		promise->set_value(false);
+		return;
+	}
+
+	spdlog::info("Certificate authority certificate store file updated successfully!");
+
+	promise->set_value(true);
 }
 
 void HTTPService::run() {
