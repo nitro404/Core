@@ -117,6 +117,8 @@ protected:
 		bool clearPendingAnalyticEvents();
 		void reset();
 
+		static const std::string FILE_FORMAT_VERSION;
+
 	private:
 		rapidjson::Document toJSON() const;
 		bool parseFrom(const rapidjson::Value & value);

@@ -14,13 +14,15 @@
 #include <filesystem>
 #include <fstream>
 
+static constexpr const char * JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME = "fileFormatVersion";
 static constexpr const char * JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME = "previousSessionNumber";
 static constexpr const char * JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME = "previousApplicationVersion";
 static constexpr const char * JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME = "previousApplicationBuild";
 static constexpr const char * JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME = "anonymousID";
 static constexpr const char * JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME = "analyticEventIDCounter";
 static constexpr const char * JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME = "analyticEvents";
-static const std::array<std::string_view, 6> JSON_SEGMENT_PROPERTY_NAMES = {
+static const std::array<std::string_view, 7> JSON_SEGMENT_PROPERTY_NAMES = {
+	JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME,
 	JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME,
 	JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME,
 	JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME,
@@ -28,6 +30,8 @@ static const std::array<std::string_view, 6> JSON_SEGMENT_PROPERTY_NAMES = {
 	JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME,
 	JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME
 };
+
+const std::string SegmentAnalytics::DataStorage::FILE_FORMAT_VERSION("1.0.0");
 
 SegmentAnalytics::DataStorage::DataStorage()
 	: m_initialized(false)
@@ -343,6 +347,9 @@ rapidjson::Document SegmentAnalytics::DataStorage::toJSON() const {
 	rapidjson::Document dataDocument(rapidjson::kObjectType);
 	rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator = dataDocument.GetAllocator();
 
+	rapidjson::Value fileFormatVersionValue(FILE_FORMAT_VERSION.c_str(), allocator);
+	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME), fileFormatVersionValue, allocator);
+
 	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME), rapidjson::Value(m_sessionNumber), allocator);
 
 	rapidjson::Value previousApplicationVersionValue(m_applicationVersion.c_str(), allocator);
@@ -392,6 +399,30 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 			spdlog::error("Segment analytics data has unexpected property: '{}'.", i->name.GetString());
 			return false;
 		}
+	}
+
+	if(value.HasMember(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME)) {
+		const rapidjson::Value & fileFormatVersionValue = value[JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME];
+
+		if(!fileFormatVersionValue.IsString()) {
+			spdlog::error("Invalid Segment analytics data file format version type: '{}', expected: 'string'.", Utilities::typeToString(fileFormatVersionValue.GetType()));
+			return false;
+		}
+
+		std::optional<std::uint8_t> optionalVersionComparison(Utilities::compareVersions(fileFormatVersionValue.GetString(), FILE_FORMAT_VERSION));
+
+		if(!optionalVersionComparison.has_value()) {
+			spdlog::error("Invalid Segment analytics data file format version: '{}'.", fileFormatVersionValue.GetString());
+			return false;
+		}
+
+		if(*optionalVersionComparison != 0) {
+			spdlog::error("Unsupported Segment analytics data file format version: '{}', only version '{}' is supported.", fileFormatVersionValue.GetString(), FILE_FORMAT_VERSION);
+			return false;
+		}
+	}
+	else {
+		spdlog::warn("Segment analytics JSON data is missing file format version, and may fail to load correctly!");
 	}
 
 	// parse previous session number property
