@@ -87,6 +87,18 @@ std::string HTTPTransfer::getBodySHA1(ByteBuffer::HashFormat hashFormat) const {
 	return m_body->getSHA1(hashFormat);
 }
 
+std::string HTTPTransfer::getBodySHA256(ByteBuffer::HashFormat hashFormat) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_body->getSHA256(hashFormat);
+}
+
+std::string HTTPTransfer::getBodySHA512(ByteBuffer::HashFormat hashFormat) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_body->getSHA512(hashFormat);
+}
+
 std::string HTTPTransfer::getBodyHash(ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat) const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 

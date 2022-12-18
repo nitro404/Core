@@ -251,49 +251,19 @@ void ByteBuffer::clear() {
 }
 
 std::string ByteBuffer::getMD5(HashFormat hashFormat) const {
-	if(isEmpty()) {
-		return {};
-	}
-
-	CryptoPP::Weak::MD5 hash;
-	hash.Update(m_data.data(), m_data.size());
-	ByteBuffer digest(hash.DigestSize());
-	digest.resize(hash.DigestSize());
-	hash.Final(digest.getRawData());
-
-	switch(hashFormat) {
-		case HashFormat::Hexadecimal: {
-			return digest.toHexadecimal();
-		}
-		case HashFormat::Base64: {
-			return digest.toBase64();
-		}
-	}
-
-	return {};
+	return getHash<CryptoPP::Weak::MD5>(hashFormat);
 }
 
 std::string ByteBuffer::getSHA1(HashFormat hashFormat) const {
-	if(isEmpty()) {
-		return {};
-	}
+	return getHash<CryptoPP::SHA1>(hashFormat);
+}
 
-	CryptoPP::SHA1 hash;
-	hash.Update(m_data.data(), m_data.size());
-	ByteBuffer digest(hash.DigestSize());
-	digest.resize(hash.DigestSize());
-	hash.Final(digest.getRawData());
+std::string ByteBuffer::getSHA256(HashFormat hashFormat) const {
+	return getHash<CryptoPP::SHA256>(hashFormat);
+}
 
-	switch(hashFormat) {
-		case HashFormat::Hexadecimal: {
-			return digest.toHexadecimal();
-		}
-		case HashFormat::Base64: {
-			return digest.toBase64();
-		}
-	}
-
-	return {};
+std::string ByteBuffer::getSHA512(HashFormat hashFormat) const {
+	return getHash<CryptoPP::SHA512>(hashFormat);
 }
 
 std::string ByteBuffer::getHash(HashType hashType, HashFormat hashFormat) const {
@@ -303,6 +273,12 @@ std::string ByteBuffer::getHash(HashType hashType, HashFormat hashFormat) const 
 		}
 		case HashType::SHA1: {
 			return getSHA1(hashFormat);
+		}
+		case HashType::SHA256: {
+			return getSHA256(hashFormat);
+		}
+		case HashType::SHA512: {
+			return getSHA512(hashFormat);
 		}
 	}
 

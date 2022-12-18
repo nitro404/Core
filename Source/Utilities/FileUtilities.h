@@ -36,6 +36,8 @@ namespace Utilities {
 	std::string getSafeDirectoryName(std::string_view value);
 	std::string getFileMD5Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
 	std::string getFileSHA1Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
+	std::string getFileSHA256Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
+	std::string getFileSHA512Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
 	std::string getFileHash(const std::string & filePath, ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
 
 }

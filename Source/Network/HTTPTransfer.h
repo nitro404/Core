@@ -31,6 +31,8 @@ public:
 	ByteBuffer * getBody();
 	std::string getBodyMD5(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
 	std::string getBodySHA1(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
+	std::string getBodySHA256(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
+	std::string getBodySHA512(ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
 	std::string getBodyHash(ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT) const;
 	std::unique_ptr<ByteBuffer> transferBody();
 	std::string getBodyAsString() const;

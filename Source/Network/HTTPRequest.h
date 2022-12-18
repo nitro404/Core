@@ -101,7 +101,7 @@ private:
 	HTTPRequest(Method method, const std::string & url, HTTPService * service);
 
 	bool setResponse(std::shared_ptr<HTTPResponse> response);
-	bool startTransfer(HTTPConfiguration & configuration, HTTPUtilities::CURLMultiHandle & curlMultiHandle);
+	bool startTransfer(const HTTPConfiguration & configuration, HTTPUtilities::CURLMultiHandle & curlMultiHandle);
 	HTTPUtilities::CURLEasyHandle & getCURLEasyHandle();
 
 	Method m_method;

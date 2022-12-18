@@ -293,6 +293,14 @@ std::string Utilities::getFileSHA1Hash(const std::string & filePath, ByteBuffer:
 	return getFileHash(filePath, ByteBuffer::HashType::SHA1, hashFormat);
 }
 
+std::string Utilities::getFileSHA256Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat) {
+	return getFileHash(filePath, ByteBuffer::HashType::SHA256, hashFormat);
+}
+
+std::string Utilities::getFileSHA512Hash(const std::string & filePath, ByteBuffer::HashFormat hashFormat) {
+	return getFileHash(filePath, ByteBuffer::HashType::SHA512, hashFormat);
+}
+
 std::string Utilities::getFileHash(const std::string & filePath, ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat) {
 	std::ifstream inputFileStream(filePath, std::ios::binary | std::ios::ate);
 

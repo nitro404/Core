@@ -14,7 +14,9 @@ class ByteBuffer final {
 public:
 	enum class HashType {
 		MD5,
-		SHA1
+		SHA1,
+		SHA256,
+		SHA512
 	};
 
 	enum class HashFormat {
@@ -64,6 +66,10 @@ public:
 	void clear();
 	std::string getMD5(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
 	std::string getSHA1(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
+	std::string getSHA256(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
+	std::string getSHA512(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
+	template <class A>
+	std::string getHash(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
 	std::string getHash(HashType hashType, HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;
 
 	size_t getReadOffset() const;
@@ -230,5 +236,29 @@ private:
 	mutable size_t m_readOffset;
 	mutable size_t m_writeOffset;
 };
+
+template <class A>
+std::string ByteBuffer::getHash(HashFormat hashFormat) const {
+	if(isEmpty()) {
+		return {};
+	}
+
+	A hash;
+	hash.Update(m_data.data(), m_data.size());
+	ByteBuffer digest(hash.DigestSize());
+	digest.resize(hash.DigestSize());
+	hash.Final(digest.getRawData());
+
+	switch(hashFormat) {
+		case HashFormat::Hexadecimal: {
+			return digest.toHexadecimal();
+		}
+		case HashFormat::Base64: {
+			return digest.toBase64();
+		}
+	}
+
+	return {};
+}
 
 #endif // _BYTE_BUFFER_H_

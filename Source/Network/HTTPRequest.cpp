@@ -495,7 +495,7 @@ const std::string & HTTPRequest::getErrorMessage() const {
 	return m_response->getErrorMessage();
 }
 
-bool HTTPRequest::startTransfer(HTTPConfiguration & configuration, HTTPUtilities::CURLMultiHandle & curlMultiHandle) {
+bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUtilities::CURLMultiHandle & curlMultiHandle) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	static const std::array<std::string, 1> IGNORED_HEADERS = {
