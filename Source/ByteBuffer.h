@@ -27,7 +27,8 @@ public:
 	enum class CompressionMethod {
 		BZip2,
 		LZMA,
-		XZ
+		XZ,
+		ZLib
 	};
 
 	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);

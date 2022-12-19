@@ -24,6 +24,7 @@ set(CORE_SOURCE_FILES
 	Colour.cpp
 	Compression/BZip2Utilities.cpp
 	Compression/LZMAUtilities.cpp
+	Compression/ZLibUtilities.cpp
 	Date.cpp
 	Dimension.cpp
 	Endianness.cpp
@@ -90,6 +91,7 @@ set(CORE_HEADER_FILES
 	Colour.h
 	Compression/BZip2Utilities.h
 	Compression/LZMAUtilities.h
+	Compression/ZLibUtilities.h
 	Core.h
 	Date.h
 	Dimension.h

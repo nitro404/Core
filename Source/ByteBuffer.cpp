@@ -2,6 +2,7 @@
 
 #include "Compression/BZip2Utilities.h"
 #include "Compression/LZMAUtilities.h"
+#include "Compression/ZLibUtilities.h"
 #include "Utilities/NumberUtilities.h"
 #include "Utilities/StringUtilities.h"
 
@@ -1653,6 +1654,43 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 
 			break;
 		}
+		case CompressionMethod::ZLib: {
+			ZLib::StreamHandle zLibStream(ZLib::createInflationStreamHandle());
+
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			int zLibResult = Z_OK;
+			ByteBuffer decompressedData;
+
+			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			zLibStream->avail_in = size;
+			zLibStream->next_out = reinterpret_cast<Bytef *>(outputBuffer);
+			zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			while(true) {
+				zLibResult = inflate(zLibStream.get(), Z_NO_FLUSH);
+
+				if(!ZLib::isSuccess(zLibResult, "Failed to decompress ZLib data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+
+				if(zLibStream->avail_out != 0) {
+					if(!decompressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
+						spdlog::error("Failed to write decompressed ZLib data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					zLibStream->next_out = reinterpret_cast<Bytef *>(outputBuffer);
+					zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(zLibResult == Z_STREAM_END) {
+					return decompressedData;
+				}
+			}
+
+			break;
+		}
 	}
 
 	return EMPTY_BYTE_BUFFER;
@@ -1768,6 +1806,43 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 
 				if(!LZMA::isSuccess(lzmaStatus, "Failed to compress LZMA data")) {
 					return EMPTY_BYTE_BUFFER;
+				}
+			}
+
+			break;
+		}
+		case CompressionMethod::ZLib: {
+			ZLib::StreamHandle zLibStream(ZLib::createDeflationStreamHandle());
+
+			int zLibResult = Z_OK;
+			ByteBuffer compressedData;
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
+
+			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			zLibStream->avail_in = size;
+			zLibStream->next_out = outputBuffer;
+			zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			while(true) {
+				zLibResult = deflate(zLibStream.get(), Z_FINISH);
+
+				if(!ZLib::isSuccess(zLibResult, "Failed to compress ZLib data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+
+				if(zLibStream->avail_out != 0) {
+					if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
+						spdlog::error("Failed to write compressed ZLib data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					zLibStream->next_out = outputBuffer;
+					zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(zLibResult == Z_STREAM_END) {
+					return compressedData;
 				}
 			}
 
