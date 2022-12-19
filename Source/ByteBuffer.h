@@ -25,6 +25,7 @@ public:
 	};
 
 	enum class CompressionMethod {
+		BZip2,
 		LZMA,
 		XZ
 	};

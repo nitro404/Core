@@ -1,5 +1,6 @@
 #include "ByteBuffer.h"
 
+#include "Compression/BZip2Utilities.h"
 #include "Compression/LZMAUtilities.h"
 #include "Utilities/NumberUtilities.h"
 #include "Utilities/StringUtilities.h"
@@ -1571,6 +1572,43 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 	}
 
 	switch(compressionMethod) {
+		case CompressionMethod::BZip2: {
+			BZip2::StreamHandle bZip2Stream(BZip2::createDecompressionStreamHandle());
+
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			int result = BZ_OK;
+			ByteBuffer decompressedData;
+
+			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			bZip2Stream->avail_in = size;
+			bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+			bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			while(true) {
+				result = BZ2_bzDecompress(bZip2Stream.get());
+
+				if(!BZip2::isSuccess(result, "Failed to decompress BZip2 data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+
+				if(bZip2Stream->avail_out != 0) {
+					if(!decompressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
+						spdlog::error("Failed to write decompressed BZip2 data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+					bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(result == BZ_STREAM_END) {
+					return decompressedData;
+				}
+			}
+
+			break;
+		}
 		case CompressionMethod::LZMA:
 		case CompressionMethod::XZ: {
 			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());
@@ -1638,6 +1676,43 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 	}
 
 	switch(compressionMethod) {
+		case CompressionMethod::BZip2: {
+			BZip2::StreamHandle bZip2Stream(BZip2::createCompressionStreamHandle());
+
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			int result = BZ_OK;
+			ByteBuffer compressedData;
+
+			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			bZip2Stream->avail_in = size;
+			bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+			bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			while(true) {
+				result = BZ2_bzCompress(bZip2Stream.get(), BZ_FINISH);
+
+				if(!BZip2::isSuccess(result, "Failed to compress BZip2 data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+
+				if(bZip2Stream->avail_out != 0) {
+					if(!compressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
+						spdlog::error("Failed to write compressed BZip2 data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+					bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(result == BZ_STREAM_END) {
+					return compressedData;
+				}
+			}
+
+			break;
+		}
 		case CompressionMethod::LZMA:
 		case CompressionMethod::XZ: {
 			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());

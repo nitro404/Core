@@ -22,6 +22,7 @@ set(CORE_SOURCE_FILES
 	Arguments/ArgumentParser.cpp
 	ByteBuffer.cpp
 	Colour.cpp
+	Compression/BZip2Utilities.cpp
 	Compression/LZMAUtilities.cpp
 	Date.cpp
 	Dimension.cpp
@@ -87,6 +88,7 @@ set(CORE_HEADER_FILES
 	BitmaskOperators.h
 	ByteBuffer.h
 	Colour.h
+	Compression/BZip2Utilities.h
 	Compression/LZMAUtilities.h
 	Core.h
 	Date.h
