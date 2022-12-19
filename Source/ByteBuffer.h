@@ -24,6 +24,11 @@ public:
 		Base64
 	};
 
+	enum class CompressionMethod {
+		LZMA,
+		XZ
+	};
+
 	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(size_t initialCapacity, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const uint8_t * data, size_t size, Endianness endianness = DEFAULT_ENDIANNESS);
@@ -53,6 +58,7 @@ public:
 	void setData(const std::string & data);
 	void setData(const ByteBuffer & buffer);
 	bool isEmpty() const;
+	bool isNotEmpty() const;
 	bool isFull() const;
 	size_t getSize() const;
 	size_t getCapacity() const;
@@ -74,6 +80,7 @@ public:
 
 	size_t getReadOffset() const;
 	void setReadOffset(size_t offset) const;
+	bool canReadBytes(size_t numberOfBytes) const;
 	bool skipReadBytes(size_t numberOfBytes) const;
 	size_t getRemainingBytes() const;
 	bool isEndOfBuffer() const;
@@ -106,8 +113,8 @@ public:
 	std::optional<double> getDouble(size_t offset) const;
 	std::string getString(size_t length, size_t offset, bool * error) const;
 	std::optional<std::string> getString(size_t length, size_t offset) const;
-	std::string getCString(size_t offset, bool * error) const;
-	std::optional<std::string> getCString(size_t offset) const;
+	std::string getNullTerminatedString(size_t offset, bool * error) const;
+	std::optional<std::string> getNullTerminatedString(size_t offset) const;
 	std::vector<uint8_t> getBytes(size_t numberOfBytes, size_t offset, bool * error) const;
 	std::optional<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
 
@@ -133,8 +140,8 @@ public:
 	std::optional<double> readDouble() const;
 	std::string readString(size_t length, bool * error) const;
 	std::optional<std::string> readString(size_t length) const;
-	std::string readCString(bool * error) const;
-	std::optional<std::string> readCString() const;
+	std::string readNullTerminatedString(bool * error) const;
+	std::optional<std::string> readNullTerminatedString() const;
 	template <size_t N>
 	std::array<uint8_t, N> readBytes(bool * error) const;
 	template <size_t N>
@@ -153,8 +160,10 @@ public:
 	bool putFloat(float value, size_t offset);
 	bool putDouble(double value, size_t offset);
 	bool putString(const std::string & value, size_t offset);
-	bool putCString(const std::string & value, size_t offset);
+	bool putNullTerminatedString(const std::string & value, size_t offset);
 	bool putBytes(const uint8_t * data, size_t size, size_t offset);
+	template <size_t N>
+	bool putBytes(const std::array<uint8_t, N> data, size_t offset);
 	bool putBytes(const std::vector<uint8_t> data, size_t offset);
 	bool putBytes(const ByteBuffer & buffer, size_t offset);
 
@@ -169,8 +178,10 @@ public:
 	bool insertFloat(float value, size_t offset);
 	bool insertDouble(double value, size_t offset);
 	bool insertString(const std::string & value, size_t offset);
-	bool insertCString(const std::string & value, size_t offset);
+	bool insertNullTerminatedString(const std::string & value, size_t offset);
 	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
+	template <size_t N>
+	bool insertBytes(const std::array<uint8_t, N> data, size_t offset);
 	bool insertBytes(const std::vector<uint8_t> data, size_t offset);
 	bool insertBytes(const ByteBuffer & buffer, size_t offset);
 
@@ -185,13 +196,17 @@ public:
 	bool writeFloat(float value);
 	bool writeDouble(double value);
 	bool writeString(const std::string & value);
-	bool writeCString(const std::string & value);
+	bool writeNullTerminatedString(const std::string & value);
 	bool writeBytes(const uint8_t * data, size_t size);
+	template <size_t N>
+	bool writeBytes(const std::array<uint8_t, N> data);
 	bool writeBytes(const std::vector<uint8_t> data);
 	bool writeBytes(const ByteBuffer & buffer);
 
 	ByteBuffer clone() const;
 	ByteBuffer copyOfRange(size_t start, size_t end) const;
+	ByteBuffer decompressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
+	ByteBuffer compressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
 	std::string toString() const;
 	std::string_view toStringView() const;
 	std::string toBinary() const;
@@ -215,6 +230,21 @@ public:
 	bool writeTo(const std::string & filePath, bool overwrite = false) const;
 	static std::unique_ptr<ByteBuffer> readFrom(const std::string & filePath, Endianness endianness = DEFAULT_ENDIANNESS);
 
+	[[deprecated("Use getNullTerminatedString(size_t, bool *) instead.")]]
+	std::string getCString(size_t offset, bool * error) const;
+	[[deprecated("Use getNullTerminatedString(size_t) instead.")]]
+	std::optional<std::string> getCString(size_t offset) const;
+	[[deprecated("Use readNullTerminatedString(bool *) instead.")]]
+	std::string readCString(bool * error) const;
+	[[deprecated("Use readNullTerminatedString() instead.")]]
+	std::optional<std::string> readCString() const;
+	[[deprecated("Use putNullTerminatedString(const std::string &, size_t) instead.")]]
+	bool putCString(const std::string & value, size_t offset);
+	[[deprecated("Use insertNullTerminatedString(const std::string &, size_t) instead.")]]
+	bool insertCString(const std::string & value, size_t offset);
+	[[deprecated("Use writeNullTerminatedString(const std::string &) instead.")]]
+	bool writeCString(const std::string & value);
+
 	ByteBuffer operator + (const ByteBuffer & buffer) const;
 	ByteBuffer operator + (const std::vector<uint8_t> & buffer) const;
 	void operator += (const ByteBuffer & buffer);
@@ -226,6 +256,7 @@ public:
 
 	static const Endianness DEFAULT_ENDIANNESS;
 	static const HashFormat DEFAULT_HASH_FORMAT;
+	static const ByteBuffer EMPTY_BYTE_BUFFER;
 
 private:
 	bool checkOverflow(size_t baseSize, size_t additionalBytes) const;

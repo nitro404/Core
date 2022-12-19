@@ -1,5 +1,6 @@
 #include "ByteBuffer.h"
 
+#include "Compression/LZMAUtilities.h"
 #include "Utilities/NumberUtilities.h"
 #include "Utilities/StringUtilities.h"
 
@@ -7,10 +8,12 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 #include <double-conversion/ieee.h>
+#include <spdlog/spdlog.h>
 
 #include <bitset>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <ios>
 #include <sstream>
 #include <utility>
@@ -20,6 +23,7 @@ static constexpr const char * BASE_16_CHARACTERS = "0123456789ABCDEF";
 
 const Endianness ByteBuffer::DEFAULT_ENDIANNESS = Endianness::BigEndian;
 const ByteBuffer::HashFormat ByteBuffer::DEFAULT_HASH_FORMAT = HashFormat::Hexadecimal;
+const ByteBuffer ByteBuffer::EMPTY_BYTE_BUFFER;
 
 ByteBuffer::ByteBuffer(Endianness endianness)
 	: m_data()
@@ -186,6 +190,10 @@ bool ByteBuffer::isEmpty() const {
 	return m_data.empty();
 }
 
+bool ByteBuffer::isNotEmpty() const {
+	return !m_data.empty();
+}
+
 bool ByteBuffer::isFull() const {
 	return m_data.size() == m_data.max_size();
 }
@@ -291,6 +299,10 @@ size_t ByteBuffer::getReadOffset() const {
 
 void ByteBuffer::setReadOffset(size_t offset) const {
 	m_readOffset = offset > m_data.size() ? m_data.size() : offset;
+}
+
+bool ByteBuffer::canReadBytes(size_t numberOfBytes) const {
+	return !checkOverflow(m_readOffset, numberOfBytes);
 }
 
 bool ByteBuffer::skipReadBytes(size_t numberOfBytes) const {
@@ -619,7 +631,7 @@ std::optional<std::string> ByteBuffer::getString(size_t length, size_t offset) c
 	return value;
 }
 
-std::string ByteBuffer::getCString(size_t offset, bool * error) const {
+std::string ByteBuffer::getNullTerminatedString(size_t offset, bool * error) const {
 	if(isEndOfBuffer()) {
 		if(error != nullptr) {
 			*error = true;
@@ -631,10 +643,10 @@ std::string ByteBuffer::getCString(size_t offset, bool * error) const {
 	return std::string(reinterpret_cast<const char *>(m_data.data() + (offset * sizeof(uint8_t))));
 }
 
-std::optional<std::string> ByteBuffer::getCString(size_t offset) const {
+std::optional<std::string> ByteBuffer::getNullTerminatedString(size_t offset) const {
 	bool error = false;
 
-	std::string value(getCString(offset, &error));
+	std::string value(getNullTerminatedString(offset, &error));
 
 	if(error) {
 		return {};
@@ -977,9 +989,9 @@ std::optional<std::string> ByteBuffer::readString(size_t length) const {
 	return value;
 }
 
-std::string ByteBuffer::readCString(bool * error) const {
+std::string ByteBuffer::readNullTerminatedString(bool * error) const {
 	bool e = false;
-	std::string value(getCString(m_readOffset, &e));
+	std::string value(getNullTerminatedString(m_readOffset, &e));
 
 	if(e) {
 		if(error != nullptr) {
@@ -993,10 +1005,10 @@ std::string ByteBuffer::readCString(bool * error) const {
 	return value;
 }
 
-std::optional<std::string> ByteBuffer::readCString() const {
+std::optional<std::string> ByteBuffer::readNullTerminatedString() const {
 	bool error = false;
 
-	std::string value(readCString(&error));
+	std::string value(readNullTerminatedString(&error));
 
 	if(error) {
 		return {};
@@ -1180,7 +1192,7 @@ bool ByteBuffer::putString(const std::string & value, size_t offset) {
 	return putBytes(reinterpret_cast<const uint8_t *>(value.data()), value.length(), offset);
 }
 
-bool ByteBuffer::putCString(const std::string & value, size_t offset) {
+bool ByteBuffer::putNullTerminatedString(const std::string & value, size_t offset) {
 	return putBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
@@ -1192,6 +1204,11 @@ bool ByteBuffer::putBytes(const uint8_t * data, size_t size, size_t offset) {
 	memcpy(m_data.data() + (offset * sizeof(uint8_t)), data, size);
 
 	return true;
+}
+
+template <size_t N>
+bool ByteBuffer::putBytes(const std::array<uint8_t, N> data, size_t offset) {
+	return putBytes(data.data(), data.size(), offset);
 }
 
 bool ByteBuffer::putBytes(const std::vector<uint8_t> data, size_t offset) {
@@ -1328,7 +1345,7 @@ bool ByteBuffer::insertString(const std::string & value, size_t offset) {
 	return insertBytes(reinterpret_cast<const uint8_t *>(value.data()), value.length(), offset);
 }
 
-bool ByteBuffer::insertCString(const std::string & value, size_t offset) {
+bool ByteBuffer::insertNullTerminatedString(const std::string & value, size_t offset) {
 	return insertBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
@@ -1340,6 +1357,11 @@ bool ByteBuffer::insertBytes(const uint8_t * data, size_t size, size_t offset) {
 	m_data.insert(m_data.begin() + offset, data, data + (size * sizeof(uint8_t)));
 
 	return true;
+}
+
+template <size_t N>
+bool ByteBuffer::insertBytes(const std::array<uint8_t, N> data, size_t offset) {
+	return insertBytes(data.data(), data.size(), offset);
 }
 
 bool ByteBuffer::insertBytes(const std::vector<uint8_t> data, size_t offset) {
@@ -1460,8 +1482,8 @@ bool ByteBuffer::writeString(const std::string & value) {
 	return false;
 }
 
-bool ByteBuffer::writeCString(const std::string & value) {
-	if(putCString(value, m_writeOffset)) {
+bool ByteBuffer::writeNullTerminatedString(const std::string & value) {
+	if(putNullTerminatedString(value, m_writeOffset)) {
 		m_writeOffset += (value.length() + 1) * sizeof(uint8_t);
 
 		return true;
@@ -1477,6 +1499,17 @@ bool ByteBuffer::writeBytes(const uint8_t * data, size_t size) {
 
 	if(putBytes(data, size, m_writeOffset)) {
 		m_writeOffset += size * sizeof(uint8_t);
+
+		return true;
+	}
+
+	return false;
+}
+
+template <size_t N>
+bool ByteBuffer::writeBytes(const std::array<uint8_t, N> data) {
+	if(putBytes<N>(data, m_writeOffset)) {
+		m_writeOffset += data.size() * sizeof(uint8_t);
 
 		return true;
 	}
@@ -1518,6 +1551,156 @@ ByteBuffer ByteBuffer::copyOfRange(size_t start, size_t end) const {
 	}
 
 	return ByteBuffer(m_data.data() + (start * sizeof(uint8_t)), end - start + 1);
+}
+
+ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t offset, size_t size) const {
+	if(offset == std::numeric_limits<size_t>::max()) {
+		offset = m_readOffset;
+	}
+
+	if(size == std::numeric_limits<size_t>::max()) {
+		size = m_data.size();
+	}
+
+	if(size > m_data.size() - offset) {
+		size = m_data.size() - offset;
+	}
+
+	if(size == 0) {
+		return EMPTY_BYTE_BUFFER;
+	}
+
+	switch(compressionMethod) {
+		case CompressionMethod::LZMA:
+		case CompressionMethod::XZ: {
+			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());
+
+			lzma_ret lzmaStatus = lzma_auto_decoder(lzmaStream.get(), std::numeric_limits<uint64_t>::max(), 0);
+
+			if(!LZMA::isSuccess(lzmaStatus, "Failed to initialize LZMA decoder")) {
+				return EMPTY_BYTE_BUFFER;
+			}
+
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
+
+			lzmaStream->next_in = m_data.data() + offset;
+			lzmaStream->avail_in = size;
+			lzmaStream->next_out = outputBuffer;
+			lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			ByteBuffer decompressedData;
+
+			while(true) {
+				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
+
+				if(lzmaStream->avail_out != 0) {
+					if(!decompressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
+						spdlog::error("Failed to write decompressed LZMA data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					lzmaStream->next_out = outputBuffer;
+					lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(lzmaStatus == LZMA_STREAM_END) {
+					return decompressedData;
+				}
+
+				if(!LZMA::isSuccess(lzmaStatus, "Failed to decompress LZMA data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return EMPTY_BYTE_BUFFER;
+}
+
+ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t offset, size_t size) const {
+	if(offset == std::numeric_limits<size_t>::max()) {
+		offset = m_readOffset;
+	}
+
+	if(size == std::numeric_limits<size_t>::max()) {
+		size = m_data.size();
+	}
+
+	if(size > m_data.size() - offset) {
+		size = m_data.size() - offset;
+	}
+
+	if(size == 0) {
+		return EMPTY_BYTE_BUFFER;
+	}
+
+	switch(compressionMethod) {
+		case CompressionMethod::LZMA:
+		case CompressionMethod::XZ: {
+			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());
+
+			lzma_ret lzmaStatus = LZMA_OK;
+
+			if(compressionMethod == CompressionMethod::LZMA) {
+				lzma_options_lzma lzmaOptions;
+
+				if(lzma_lzma_preset(&lzmaOptions, LZMA_PRESET_DEFAULT)) {
+					spdlog::error("Failed to initialize LZMA encoder options with default preset.");
+					return EMPTY_BYTE_BUFFER;
+				}
+
+				lzmaStatus = lzma_alone_encoder(lzmaStream.get(), &lzmaOptions);
+			}
+			else if(compressionMethod == CompressionMethod::XZ) {
+				// TODO: Allow LZMA XZ compression present to be configurable (ie. 0 [fastest] - 9 [slowest], LZMA_PRESET_EXTREME)
+				static constexpr uint32_t DEFAULT_LZMA_COMPRESSION_PRESENT = 4;
+				lzmaStatus = lzma_easy_encoder(lzmaStream.get(), DEFAULT_LZMA_COMPRESSION_PRESENT, LZMA_CHECK_CRC64);
+			}
+
+			if(!LZMA::isSuccess(lzmaStatus, "Failed to initialize easy LZMA encoder")) {
+				return EMPTY_BYTE_BUFFER;
+			}
+
+			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
+
+			lzmaStream->next_in = m_data.data() + offset;
+			lzmaStream->avail_in = size;
+			lzmaStream->next_out = outputBuffer;
+			lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+
+			ByteBuffer compressedData;
+
+			while(true) {
+				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
+
+				if(lzmaStream->avail_out != 0) {
+					if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
+						spdlog::error("Failed to write compressed LZMA data to buffer.");
+						return EMPTY_BYTE_BUFFER;
+					}
+
+					lzmaStream->next_out = outputBuffer;
+					lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+				}
+
+				if(lzmaStatus == LZMA_STREAM_END) {
+					return compressedData;
+				}
+
+				if(!LZMA::isSuccess(lzmaStatus, "Failed to compress LZMA data")) {
+					return EMPTY_BYTE_BUFFER;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return EMPTY_BYTE_BUFFER;
 }
 
 std::string ByteBuffer::toString() const {
@@ -1744,27 +1927,27 @@ ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
 }
 
 std::string ByteBuffer::binaryToHexadecimal(const std::string & binary) {
-	return fromBinary(binary).value_or(ByteBuffer::emptyByteBuffer()).toHexadecimal();
+	return fromBinary(binary).value_or(EMPTY_BYTE_BUFFER).toHexadecimal();
 }
 
 std::string ByteBuffer::binaryToBase64(const std::string & binary) {
-	return fromBinary(binary).value_or(ByteBuffer::emptyByteBuffer()).toBase64();
+	return fromBinary(binary).value_or(EMPTY_BYTE_BUFFER).toBase64();
 }
 
 std::string ByteBuffer::hexadecimalToBinary(const std::string & hexadecimal) {
-	return fromHexadecimal(hexadecimal).value_or(ByteBuffer::emptyByteBuffer()).toBinary();
+	return fromHexadecimal(hexadecimal).value_or(EMPTY_BYTE_BUFFER).toBinary();
 }
 
 std::string ByteBuffer::hexadecimalToBase64(const std::string & hexadecimal) {
-	return fromHexadecimal(hexadecimal).value_or(ByteBuffer::emptyByteBuffer()).toBase64();
+	return fromHexadecimal(hexadecimal).value_or(EMPTY_BYTE_BUFFER).toBase64();
 }
 
 std::string ByteBuffer::base64ToBinary(const std::string & base64) {
-	return fromBase64(base64).value_or(ByteBuffer::emptyByteBuffer()).toBinary();
+	return fromBase64(base64).value_or(EMPTY_BYTE_BUFFER).toBinary();
 }
 
 std::string ByteBuffer::base64ToHexadecimal(const std::string & base64) {
-	return fromBase64(base64).value_or(ByteBuffer::emptyByteBuffer()).toHexadecimal();
+	return fromBase64(base64).value_or(EMPTY_BYTE_BUFFER).toHexadecimal();
 }
 
 std::optional<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
@@ -1780,8 +1963,7 @@ std::optional<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
 }
 
 const ByteBuffer & ByteBuffer::emptyByteBuffer() {
-	static const ByteBuffer empty;
-	return empty;
+	return EMPTY_BYTE_BUFFER;
 }
 
 bool ByteBuffer::writeTo(const std::string & filePath, bool overwrite) const {
@@ -1823,6 +2005,34 @@ std::unique_ptr<ByteBuffer> ByteBuffer::readFrom(const std::string & filePath, E
 	fileStream.close();
 
 	return buffer;
+}
+
+std::string ByteBuffer::getCString(size_t offset, bool * error) const {
+	return getNullTerminatedString(offset, error);
+}
+
+std::optional<std::string> ByteBuffer::getCString(size_t offset) const {
+	return getNullTerminatedString(offset);
+}
+
+std::string ByteBuffer::readCString(bool * error) const {
+	return readNullTerminatedString(error);
+}
+
+std::optional<std::string> ByteBuffer::readCString() const {
+	return readNullTerminatedString();
+}
+
+bool ByteBuffer::putCString(const std::string & value, size_t offset) {
+	return putNullTerminatedString(value, offset);
+}
+
+bool ByteBuffer::insertCString(const std::string & value, size_t offset) {
+	return insertNullTerminatedString(value, offset);
+}
+
+bool ByteBuffer::writeCString(const std::string & value) {
+	return writeNullTerminatedString(value);
 }
 
 bool ByteBuffer::checkOverflow(size_t baseSize, size_t additionalBytes) const {
