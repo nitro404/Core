@@ -23,6 +23,16 @@ const char Utilities::newLine[] = "\n";
 
 #endif // _WIN32
 
+size_t getFileExtensionSeparatorIndex(std::string_view filePath) {
+	size_t pathSeparatorIndex = filePath.find_last_of("/\\");
+
+	if(pathSeparatorIndex == std::numeric_limits<size_t>::max()) {
+		pathSeparatorIndex = 0;
+	}
+
+	return filePath.find_first_of(".", pathSeparatorIndex + 1);
+}
+
 bool Utilities::startsWithPathSeparator(std::string_view filePath) {
 	if(filePath.empty()) {
 		return false;
@@ -119,7 +129,7 @@ std::string Utilities::addTrailingPathSeparator(std::string_view filePath, char 
 }
 
 std::string_view Utilities::getFileExtension(std::string_view filePath) {
-	size_t index = filePath.find_last_of(".");
+	size_t index = getFileExtensionSeparatorIndex(filePath);
 
 	if(index == std::string::npos) {
 		return std::string_view();
@@ -129,7 +139,7 @@ std::string_view Utilities::getFileExtension(std::string_view filePath) {
 }
 
 std::string_view Utilities::getFileNameNoExtension(std::string_view filePath) {
-	size_t index = filePath.find_last_of(".");
+	size_t index = getFileExtensionSeparatorIndex(filePath);
 
 	if(index == std::string::npos) {
 		return filePath;
@@ -178,7 +188,7 @@ std::string Utilities::truncateFileName(std::string_view filePath, size_t maxLen
 		return Utilities::joinPaths(basePath, fileName);
 	}
 
-	size_t index = fileName.find_last_of(".");
+	size_t index = getFileExtensionSeparatorIndex(filePath);
 
 	if(index == std::string::npos) {
 		return Utilities::joinPaths(basePath, fileName.substr(0, maxLength));
