@@ -1481,7 +1481,7 @@ ByteBuffer ByteBuffer::copyOfRange(size_t start, size_t end) const {
 	return ByteBuffer(m_data.data() + (start * sizeof(uint8_t)), end - start + 1);
 }
 
-ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t offset, size_t size) const {
+ByteBuffer ByteBuffer::decompressed(CompressionMethod decompressionMethod, size_t offset, size_t size) const {
 	if(offset == std::numeric_limits<size_t>::max()) {
 		offset = m_readOffset;
 	}
@@ -1498,12 +1498,12 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 		return EMPTY_BYTE_BUFFER;
 	}
 
-	switch(compressionMethod) {
+	switch(decompressionMethod) {
 		case CompressionMethod::BZip2: {
 			BZip2::StreamHandle bZip2Stream(BZip2::createDecompressionStreamHandle());
 
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
-			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
 			ByteBuffer decompressedData;
 
@@ -1519,15 +1519,14 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 					return EMPTY_BYTE_BUFFER;
 				}
 
-				if(bZip2Stream->avail_out != 0) {
-					if(!decompressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
-						spdlog::error("Failed to write decompressed BZip2 data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
 
-					bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
-					bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!decompressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
+					spdlog::error("Failed to write decompressed BZip2 data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+				bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(result == BZ_STREAM_END) {
 					return decompressedData;
@@ -1559,15 +1558,14 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 			while(true) {
 				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
 
-				if(lzmaStream->avail_out != 0) {
-					if(!decompressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
-						spdlog::error("Failed to write decompressed LZMA data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
 
-					lzmaStream->next_out = outputBuffer;
-					lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!decompressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
+					spdlog::error("Failed to write decompressed LZMA data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				lzmaStream->next_out = outputBuffer;
+				lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(lzmaStatus == LZMA_STREAM_END) {
 					return decompressedData;
@@ -1584,7 +1582,7 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 			ZLib::StreamHandle zLibStream(ZLib::createInflationStreamHandle());
 
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
-			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int zLibResult = Z_OK;
 			ByteBuffer decompressedData;
 
@@ -1600,15 +1598,13 @@ ByteBuffer ByteBuffer::decompressed(CompressionMethod compressionMethod, size_t 
 					return EMPTY_BYTE_BUFFER;
 				}
 
-				if(zLibStream->avail_out != 0) {
-					if(!decompressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
-						spdlog::error("Failed to write decompressed ZLib data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
-
-					zLibStream->next_out = reinterpret_cast<Bytef *>(outputBuffer);
-					zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!decompressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
+					spdlog::error("Failed to write decompressed ZLib data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				zLibStream->next_out = reinterpret_cast<Bytef *>(outputBuffer);
+				zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(zLibResult == Z_STREAM_END) {
 					return decompressedData;
@@ -1644,7 +1640,7 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 			BZip2::StreamHandle bZip2Stream(BZip2::createCompressionStreamHandle());
 
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
-			char * outputBuffer[OUTPUT_BUFFER_SIZE];
+			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
 			ByteBuffer compressedData;
 
@@ -1660,15 +1656,13 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 					return EMPTY_BYTE_BUFFER;
 				}
 
-				if(bZip2Stream->avail_out != 0) {
-					if(!compressedData.writeBytes(reinterpret_cast<const uint8_t *>(outputBuffer), OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
-						spdlog::error("Failed to write compressed BZip2 data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
-
-					bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
-					bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
+					spdlog::error("Failed to write compressed BZip2 data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
+				bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(result == BZ_STREAM_END) {
 					return compressedData;
@@ -1716,15 +1710,14 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 			while(true) {
 				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
 
-				if(lzmaStream->avail_out != 0) {
-					if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
-						spdlog::error("Failed to write compressed LZMA data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
 
-					lzmaStream->next_out = outputBuffer;
-					lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
+					spdlog::error("Failed to write compressed LZMA data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				lzmaStream->next_out = outputBuffer;
+				lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(lzmaStatus == LZMA_STREAM_END) {
 					return compressedData;
@@ -1757,15 +1750,13 @@ ByteBuffer ByteBuffer::compressed(CompressionMethod compressionMethod, size_t of
 					return EMPTY_BYTE_BUFFER;
 				}
 
-				if(zLibStream->avail_out != 0) {
-					if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
-						spdlog::error("Failed to write compressed ZLib data to buffer.");
-						return EMPTY_BYTE_BUFFER;
-					}
-
-					zLibStream->next_out = outputBuffer;
-					zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
+				if(!compressedData.writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - zLibStream->avail_out)) {
+					spdlog::error("Failed to write compressed ZLib data to buffer.");
+					return EMPTY_BYTE_BUFFER;
 				}
+
+				zLibStream->next_out = outputBuffer;
+				zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
 
 				if(zLibResult == Z_STREAM_END) {
 					return compressedData;
