@@ -48,13 +48,6 @@ ByteBuffer::ByteBuffer(const uint8_t * data, size_t size, Endianness endianness)
 	}
 }
 
-template <size_t N>
-ByteBuffer::ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness)
-	: m_data(data)
-	, m_endianness(endianness)
-	, m_readOffset(0)
-	, m_writeOffset(data.size()) { }
-
 ByteBuffer::ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness)
 	: m_data(data)
 	, m_endianness(endianness)
@@ -82,15 +75,6 @@ ByteBuffer::ByteBuffer(const ByteBuffer & buffer)
 
 ByteBuffer & ByteBuffer::operator = (const char * data) {
 	m_data.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + Utilities::stringLength(data)));
-	m_readOffset = 0;
-	m_writeOffset = 0;
-
-	return *this;
-}
-
-template <size_t N>
-ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
-	m_data = data;
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -159,13 +143,6 @@ void ByteBuffer::setData(const uint8_t * data, size_t size) {
 		m_data.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + size));
 	}
 
-	m_readOffset = 0;
-	m_writeOffset = 0;
-}
-
-template <size_t N>
-void ByteBuffer::setData(const std::array<uint8_t, N> & data) {
-	m_data = data;
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
@@ -1019,36 +996,6 @@ std::optional<std::string> ByteBuffer::readNullTerminatedString() const {
 	return value;
 }
 
-template <size_t N>
-std::array<uint8_t, N> ByteBuffer::readBytes(bool * error) const {
-	bool e = false;
-	std::vector<uint8_t, N> value(getBytes(N, m_readOffset, &e));
-
-	if(e) {
-		if(error != nullptr) {
-			*error = true;
-		}
-	}
-	else {
-		m_readOffset += N * sizeof(uint8_t);
-	}
-
-	return value;
-}
-
-template <size_t N>
-std::optional<std::array<uint8_t, N>> ByteBuffer::readBytes() const {
-	bool error = false;
-
-	std::vector<uint8_t, N> value(readBytes<N>(&error));
-
-	if(error) {
-		return {};
-	}
-
-	return value;
-}
-
 std::vector<uint8_t> ByteBuffer::readBytes(size_t numberOfBytes, bool * error) const {
 	bool e = false;
 	std::vector<uint8_t> value(getBytes(numberOfBytes, m_readOffset, &e));
@@ -1208,11 +1155,6 @@ bool ByteBuffer::putBytes(const uint8_t * data, size_t size, size_t offset) {
 	return true;
 }
 
-template <size_t N>
-bool ByteBuffer::putBytes(const std::array<uint8_t, N> data, size_t offset) {
-	return putBytes(data.data(), data.size(), offset);
-}
-
 bool ByteBuffer::putBytes(const std::vector<uint8_t> data, size_t offset) {
 	return putBytes(data.data(), data.size(), offset);
 }
@@ -1361,11 +1303,6 @@ bool ByteBuffer::insertBytes(const uint8_t * data, size_t size, size_t offset) {
 	return true;
 }
 
-template <size_t N>
-bool ByteBuffer::insertBytes(const std::array<uint8_t, N> data, size_t offset) {
-	return insertBytes(data.data(), data.size(), offset);
-}
-
 bool ByteBuffer::insertBytes(const std::vector<uint8_t> data, size_t offset) {
 	return insertBytes(data.data(), data.size(), offset);
 }
@@ -1501,17 +1438,6 @@ bool ByteBuffer::writeBytes(const uint8_t * data, size_t size) {
 
 	if(putBytes(data, size, m_writeOffset)) {
 		m_writeOffset += size * sizeof(uint8_t);
-
-		return true;
-	}
-
-	return false;
-}
-
-template <size_t N>
-bool ByteBuffer::writeBytes(const std::array<uint8_t, N> data) {
-	if(putBytes<N>(data, m_writeOffset)) {
-		m_writeOffset += data.size() * sizeof(uint8_t);
 
 		return true;
 	}

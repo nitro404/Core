@@ -117,6 +117,10 @@ public:
 	std::optional<std::string> getString(size_t length, size_t offset) const;
 	std::string getNullTerminatedString(size_t offset, bool * error) const;
 	std::optional<std::string> getNullTerminatedString(size_t offset) const;
+	template <size_t N>
+	std::array<uint8_t, N> getBytes(size_t offset, bool * error) const;
+	template <size_t N>
+	std::optional<std::array<uint8_t, N>> getBytes(size_t offset) const;
 	std::vector<uint8_t> getBytes(size_t numberOfBytes, size_t offset, bool * error) const;
 	std::optional<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
 
@@ -270,6 +274,29 @@ private:
 	mutable size_t m_writeOffset;
 };
 
+template <size_t N>
+ByteBuffer::ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness)
+	: m_data(data)
+	, m_endianness(endianness)
+	, m_readOffset(0)
+	, m_writeOffset(data.size()) { }
+
+template <size_t N>
+ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
+	m_data = data;
+	m_readOffset = 0;
+	m_writeOffset = 0;
+
+	return *this;
+}
+
+template <size_t N>
+void ByteBuffer::setData(const std::array<uint8_t, N> & data) {
+	m_data = data;
+	m_readOffset = 0;
+	m_writeOffset = 0;
+}
+
 template <class A>
 std::string ByteBuffer::getHash(HashFormat hashFormat) const {
 	if(isEmpty()) {
@@ -292,6 +319,87 @@ std::string ByteBuffer::getHash(HashFormat hashFormat) const {
 	}
 
 	return {};
+}
+
+template <size_t N>
+std::array<uint8_t, N> ByteBuffer::getBytes(size_t offset, bool * error) const {
+	if(offset + (N * sizeof(uint8_t)) > m_data.size()) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	std::array<uint8_t, N> bytes;
+	std::vector<uint8_t>::const_iterator dataStart(m_data.begin() + (offset * sizeof(uint8_t)));
+	std::copy(dataStart, dataStart + (N * sizeof(uint8_t)), bytes.begin());
+
+	return bytes;
+}
+
+template <size_t N>
+std::optional<std::array<uint8_t, N>> ByteBuffer::getBytes(size_t offset) const {
+	bool error = false;
+
+	std::array<uint8_t, N> value(getBytes<N>(offset, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+template <size_t N>
+std::array<uint8_t, N> ByteBuffer::readBytes(bool * error) const {
+	bool e = false;
+	std::array<uint8_t, N> value(getBytes<N>(m_readOffset, &e));
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+	else {
+		m_readOffset += N * sizeof(uint8_t);
+	}
+
+	return value;
+}
+
+template <size_t N>
+std::optional<std::array<uint8_t, N>> ByteBuffer::readBytes() const {
+	bool error = false;
+
+	std::vector<uint8_t, N> value(readBytes<N>(&error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+template <size_t N>
+bool ByteBuffer::putBytes(const std::array<uint8_t, N> data, size_t offset) {
+	return putBytes(data.data(), data.size(), offset);
+}
+
+template <size_t N>
+bool ByteBuffer::insertBytes(const std::array<uint8_t, N> data, size_t offset) {
+	return insertBytes(data.data(), data.size(), offset);
+}
+
+template <size_t N>
+bool ByteBuffer::writeBytes(const std::array<uint8_t, N> data) {
+	if(putBytes<N>(data, m_writeOffset)) {
+		m_writeOffset += data.size() * sizeof(uint8_t);
+
+		return true;
+	}
+
+	return false;
 }
 
 #endif // _BYTE_BUFFER_H_
