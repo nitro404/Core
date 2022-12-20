@@ -108,9 +108,9 @@ hunter_config(tinyxml2
 )
 
 hunter_config(ZLIB
-	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.2.12.1.zip"
-	VERSION "1.2.12.1"
-	SHA1 "b41c9126bf63dfa53fbb496e24dcceb30ddabee4"
+	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.2.13.1.zip"
+	VERSION "1.2.13.1"
+	SHA1 "1189eb8d6a0d8f5b2cd676f09661f4864cc85896"
 )
 
 include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)
