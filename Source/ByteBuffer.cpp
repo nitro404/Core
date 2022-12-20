@@ -281,7 +281,7 @@ void ByteBuffer::setReadOffset(size_t offset) const {
 }
 
 bool ByteBuffer::canReadBytes(size_t numberOfBytes) const {
-	return !checkOverflow(m_readOffset, numberOfBytes);
+	return m_data.size() - m_readOffset >= numberOfBytes;
 }
 
 bool ByteBuffer::skipReadBytes(size_t numberOfBytes) const {
