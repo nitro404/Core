@@ -55,16 +55,18 @@ hunter_config(GTest
 	SHA1 "399764392feff6f6482aff04d40c7ed33ffa0dc5"
 )
 
+hunter_config(liblzma
+	URL "https://github.com/Telefrag-Software/xz/archive/refs/heads/hunter-5.4.0.zip"
+	VERSION "5.4.0"
+	SHA1 "2347b787e6626f6ffa6baac0a36ceb5dc5439309"
+	CMAKE_ARGS
+		BUILD_TESTING=OFF
+)
+
 hunter_config(libzip
 	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.8.0.2.zip"
 	VERSION "1.8.0.2"
 	SHA1 "fe21a3d2e4724774506c431c7d1e2095629fb68e"
-)
-
-hunter_config(lzma
-	URL "https://github.com/Telefrag-Software/lzma/archive/refs/heads/hunter-5.2.3.zip"
-	VERSION "5.2.3"
-	SHA1 "6d8c01e2895034bb91bf90711bd5f3dab3607bf1"
 )
 
 hunter_config(magic_enum

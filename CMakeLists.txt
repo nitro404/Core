@@ -57,8 +57,8 @@ target_link_libraries(
 			dmc_unrar::dmc_unrar
 			double-conversion::double-conversion
 			fmt::fmt
+			LibLZMA::LibLZMA
 			libzip::zip
-			lzma::lzma
 			magic_enum::magic_enum
 			RapidJSON::rapidjson
 			SevenZip::SevenZip
