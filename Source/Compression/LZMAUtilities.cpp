@@ -49,7 +49,7 @@ namespace LZMA {
 	bool isSuccess(lzma_ret status, const std::string & errorMessage) {
 		if(status != LZMA_OK) {
 			if(!errorMessage.empty()) {
-				spdlog::error("{} {}", errorMessage, statusToString(status));
+				spdlog::error("{}: {}.", errorMessage, statusToString(status));
 			}
 
 			return false;

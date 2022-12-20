@@ -55,7 +55,7 @@ namespace BZip2 {
 	bool isSuccess(int result, const std::string & errorMessage) {
 		if(result < 0) {
 			if(!errorMessage.empty()) {
-				spdlog::error("{} {}", errorMessage, resultToString(result));
+				spdlog::error("{}: {}.", errorMessage, resultToString(result));
 			}
 
 			return false;

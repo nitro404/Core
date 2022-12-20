@@ -40,7 +40,7 @@ namespace ZLib {
 	bool isSuccess(int result, const std::string & errorMessage) {
 		if(result < 0) {
 			if(!errorMessage.empty()) {
-				spdlog::error("{} {}", errorMessage, result == Z_ERRNO ? std::strerror(errno) : resultToString(result));
+				spdlog::error("{}: {}.", errorMessage, result == Z_ERRNO ? std::strerror(errno) : resultToString(result));
 			}
 
 			return false;
