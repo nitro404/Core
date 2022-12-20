@@ -1,9 +1,9 @@
 include_guard()
 
 hunter_config(BZip2
-	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.6.zip"
-	VERSION "1.0.6"
-	SHA1 "957a9a1e137840af0f75dc6798f349d15cbfdb38"
+	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.8.zip"
+	VERSION "1.0.8"
+	SHA1 "1aff69cc4d5ad8af639901fda1642d45217ec9d8"
 )
 
 hunter_config(CryptoPP
