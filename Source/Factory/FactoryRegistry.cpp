@@ -5,6 +5,7 @@
 #include "GitHub/GitHubService.h"
 #include "Network/HTTPService.h"
 #include "Network/IpifyIPAddressService.h"
+#include "Platform/TimeZoneDataManager.h"
 #include "Location/FreeGeoIPGeoLocationService.h"
 #include "Analytics/Segment/SegmentAnalyticsCURL.h"
 
@@ -48,6 +49,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<SegmentAnalytics>([]() {
 		return std::make_unique<SegmentAnalyticsCURL>();
+	});
+
+	setFactory<TimeZoneDataManager>([]() {
+		return std::make_unique<TimeZoneDataManager>();
 	});
 
 	setFactory<ArchiveFactoryRegistry>([]() {

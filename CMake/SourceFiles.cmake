@@ -66,6 +66,7 @@ set(CORE_SOURCE_FILES
 	Platform/DeviceInformationBridge.cpp
 	Platform/Process.cpp
 	Platform/ProcessCreator.cpp
+	Platform/TimeZoneDataManager.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
 	Singleton/SingletonManager.cpp
@@ -139,6 +140,7 @@ set(CORE_HEADER_FILES
 	Platform/DeviceInformationBridge.h
 	Platform/Process.h
 	Platform/ProcessCreator.h
+	Platform/TimeZoneDataManager.h
 	Script/Script.h
 	Script/ScriptArguments.h
 	Singleton/Singleton.h
@@ -160,6 +162,7 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Platform/Windows/DeviceInformationBridgeWindows.cpp
 	Platform/Windows/ProcessCreatorWindows.cpp
 	Platform/Windows/ProcessWindows.cpp
+	Platform/Windows/TimeZoneDataManagerWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
@@ -170,6 +173,7 @@ set(CORE_HEADER_FILES_WINDOWS
 	Platform/Windows/DeviceInformationBridgeWindows.h
 	Platform/Windows/ProcessCreatorWindows.h
 	Platform/Windows/ProcessWindows.h
+	Platform/Windows/TimeZoneDataManagerWindows.h
 	Platform/Windows/WindowsUtilities.h
 )
 
