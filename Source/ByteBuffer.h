@@ -209,10 +209,10 @@ public:
 	bool writeBytes(const std::vector<uint8_t> data);
 	bool writeBytes(const ByteBuffer & buffer);
 
-	ByteBuffer clone() const;
-	ByteBuffer copyOfRange(size_t start, size_t end) const;
-	ByteBuffer decompressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
-	ByteBuffer compressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
+	std::unique_ptr<ByteBuffer> clone() const;
+	std::unique_ptr<ByteBuffer> copyOfRange(size_t start, size_t end) const;
+	std::unique_ptr<ByteBuffer> decompressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
+	std::unique_ptr<ByteBuffer> compressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;
 	std::string toString() const;
 	std::string_view toStringView() const;
 	std::string toBinary() const;
