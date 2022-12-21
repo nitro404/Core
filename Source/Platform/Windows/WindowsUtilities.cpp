@@ -64,10 +64,6 @@ std::string WindowsUtilities::getRegistryEntry(const std::string & key, const st
 
 	RegCloseKey(hkey);
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return value;
 }
 
@@ -206,10 +202,6 @@ std::any WindowsUtilities::variantToAny(VARIANT variant, bool * error) {
 
 			return {};
 		}
-	}
-
-	if(error != nullptr) {
-		*error = false;
 	}
 
 	return any;
@@ -401,10 +393,6 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 	}
 
 	CoUninitialize();
-
-	if(error != nullptr) {
-		*error = false;
-	}
 
 	return results;
 }

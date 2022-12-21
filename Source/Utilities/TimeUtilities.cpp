@@ -84,10 +84,6 @@ std::chrono::time_point<std::chrono::system_clock> Utilities::parseTimePointFrom
 		return {};
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return std::chrono::system_clock::from_time_t(time_t{0}) + systemTimeMs.time_since_epoch();
 }
 

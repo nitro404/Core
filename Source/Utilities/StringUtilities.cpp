@@ -741,19 +741,11 @@ bool Utilities::parseBoolean(std::string_view data, bool * error) {
 		if(trimmedData[0] == 't' ||
 		   trimmedData[0] == '1' ||
 		   trimmedData[0] == 'y') {
-			if(error != nullptr) {
-				*error = false;
-			}
-
 			return true;
 		}
 		else if(trimmedData[0] == 'f' ||
 				trimmedData[0] == '0' ||
 				trimmedData[0] == 'n') {
-			if(error != nullptr) {
-				*error = false;
-			}
-
 			return false;
 		}
 	}
@@ -761,19 +753,11 @@ bool Utilities::parseBoolean(std::string_view data, bool * error) {
 		if(Utilities::areStringsEqualIgnoreCase(trimmedData, "true") ||
 		   Utilities::areStringsEqualIgnoreCase(trimmedData, "on") ||
 		   Utilities::areStringsEqualIgnoreCase(trimmedData, "yes")) {
-			if(error != nullptr) {
-				*error = false;
-			}
-
 			return true;
 		}
 		else if(Utilities::areStringsEqualIgnoreCase(trimmedData, "false") ||
 				Utilities::areStringsEqualIgnoreCase(trimmedData, "off") ||
 				Utilities::areStringsEqualIgnoreCase(trimmedData, "no")) {
-			if(error != nullptr) {
-				*error = false;
-			}
-
 			return false;
 		}
 	}
@@ -809,10 +793,6 @@ int8_t Utilities::parseByte(const std::string & data, bool * error) {
 		return 0;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return static_cast<int8_t>(value);
 }
 
@@ -838,10 +818,6 @@ uint8_t Utilities::parseUnsignedByte(const std::string & data, bool * error) {
 		}
 
 		return 0;
-	}
-
-	if(error != nullptr) {
-		*error = false;
 	}
 
 	return static_cast<uint8_t>(value);
@@ -871,10 +847,6 @@ int16_t Utilities::parseShort(const std::string & data, bool * error) {
 		return 0;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return static_cast<int16_t>(value);
 }
 
@@ -902,10 +874,6 @@ uint16_t Utilities::parseUnsignedShort(const std::string & data, bool * error) {
 		return 0;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return static_cast<uint16_t>(value);
 }
 
@@ -928,10 +896,6 @@ int32_t Utilities::parseInteger(const std::string & data, bool * error) {
 		}
 
 		return 0;
-	}
-
-	if(error != nullptr) {
-		*error = false;
 	}
 
 	return std::stol(data);
@@ -958,10 +922,6 @@ uint32_t Utilities::parseUnsignedInteger(const std::string & data, bool * error)
 		return 0;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return std::stoul(data);
 }
 
@@ -984,10 +944,6 @@ int64_t Utilities::parseLong(const std::string & data, bool * error) {
 		}
 
 		return 0;
-	}
-
-	if(error != nullptr) {
-		*error = false;
 	}
 
 	return std::stoll(data);
@@ -1014,10 +970,6 @@ uint64_t Utilities::parseUnsignedLong(const std::string & data, bool * error) {
 		return 0;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return std::stoull(data);
 }
 
@@ -1042,10 +994,6 @@ float Utilities::parseFloat(const std::string & data, bool * error) {
 		return 0.0f;
 	}
 
-	if(error != nullptr) {
-		*error = false;
-	}
-
 	return std::stof(data);
 }
 
@@ -1068,10 +1016,6 @@ double Utilities::parseDouble(const std::string & data, bool * error) {
 		}
 
 		return 0.0;
-	}
-
-	if(error != nullptr) {
-		*error = false;
 	}
 
 	return std::stod(data);
