@@ -16,6 +16,7 @@ public:
 	enum class Type {
 		Rar,
 		SevenZip,
+		Tar,
 		Zip
 	};
 

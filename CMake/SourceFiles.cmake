@@ -14,6 +14,14 @@ set(CORE_SOURCE_FILES
 	Archive/7Zip/SevenZipArchiveEntry.cpp
 	Archive/Rar/RarArchive.cpp
 	Archive/Rar/RarArchiveEntry.cpp
+	Archive/Tar/CompressedTarArchive.cpp
+	Archive/Tar/TarArchive.cpp
+	Archive/Tar/TarArchiveEntry.cpp
+	Archive/Tar/TarBZip2Archive.cpp
+	Archive/Tar/TarGZipArchive.cpp
+	Archive/Tar/TarLZMAArchive.cpp
+	Archive/Tar/TarUtilities.cpp
+	Archive/Tar/TarXZArchive.cpp
 	Archive/Zip/ZipArchive.cpp
 	Archive/Zip/ZipArchiveEntry.cpp
 	Archive/Zip/ZipArchiveSourceBuffer.cpp
@@ -82,6 +90,13 @@ set(CORE_HEADER_FILES
 	Archive/ArchiveFactoryRegistry.h
 	Archive/7Zip/SevenZipArchive.h
 	Archive/Rar/RarArchive.h
+	Archive/Tar/CompressedTarArchive.h
+	Archive/Tar/TarArchive.h
+	Archive/Tar/TarBZip2Archive.h
+	Archive/Tar/TarGZipArchive.h
+	Archive/Tar/TarLZMAArchive.h
+	Archive/Tar/TarUtilities.h
+	Archive/Tar/TarXZArchive.h
 	Archive/Zip/ZipArchive.h
 	Archive/Zip/ZipUtilities.h
 	Arguments/ArgumentCollection.h

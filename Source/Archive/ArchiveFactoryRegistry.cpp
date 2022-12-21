@@ -2,6 +2,11 @@
 
 #include "Archive/7Zip/SevenZipArchive.h"
 #include "Archive/Rar/RarArchive.h"
+#include "Archive/Tar/TarArchive.h"
+#include "Archive/Tar/TarBZip2Archive.h"
+#include "Archive/Tar/TarGZipArchive.h"
+#include "Archive/Tar/TarLZMAArchive.h"
+#include "Archive/Tar/TarXZArchive.h"
 #include "Archive/Zip/ZipArchive.h"
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
@@ -76,12 +81,6 @@ void ArchiveFactoryRegistry::resetFactories() {
 }
 
 void ArchiveFactoryRegistry::assignStandardFactories() {
-	setFactory(ZipArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
-		return ZipArchive::createFrom(std::move(buffer));
-	}, [](const std::string & filePath) {
-		return ZipArchive::readFrom(filePath);
-	});
-
 	setFactory(RarArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
 		return RarArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
@@ -92,6 +91,42 @@ void ArchiveFactoryRegistry::assignStandardFactories() {
 		return SevenZipArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return SevenZipArchive::readFrom(filePath);
+	});
+
+	setFactory(TarArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarArchive::readFrom(filePath);
+	});
+
+	setFactory(TarLZMAArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarLZMAArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarLZMAArchive::readFrom(filePath);
+	});
+
+	setFactory(TarBZip2Archive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarBZip2Archive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarBZip2Archive::readFrom(filePath);
+	});
+
+	setFactory(TarGZipArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarGZipArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarGZipArchive::readFrom(filePath);
+	});
+
+	setFactory(TarXZArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarXZArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarXZArchive::readFrom(filePath);
+	});
+
+	setFactory(ZipArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+		return ZipArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return ZipArchive::readFrom(filePath);
 	});
 }
 
