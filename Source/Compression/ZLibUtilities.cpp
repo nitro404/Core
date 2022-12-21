@@ -76,7 +76,7 @@ namespace ZLib {
 		streamHandle->opaque = nullptr;
 
 		// TODO: Allow ZLib decompression parameters to be customizable:
-		if(!isSuccess(inflateInit(streamHandle), "Failed to initialize ZLib inflation stream handle")) {
+		if(!isSuccess(inflateInit2(streamHandle, 32), "Failed to initialize ZLib inflation stream handle")) {
 			delete streamHandle;
 			return nullptr;
 		}
