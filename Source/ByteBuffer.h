@@ -233,7 +233,7 @@ public:
 	static std::string base64ToHexadecimal(const std::string & base64);
 	static const ByteBuffer & emptyByteBuffer();
 
-	bool writeTo(const std::string & filePath, bool overwrite = false) const;
+	bool writeTo(const std::string & filePath, bool overwrite = false, bool createParentDirectories = true) const;
 	static std::unique_ptr<ByteBuffer> readFrom(const std::string & filePath, Endianness endianness = DEFAULT_ENDIANNESS);
 
 	[[deprecated("Use getNullTerminatedString(size_t, bool *) instead.")]]

@@ -427,20 +427,6 @@ bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 		spdlog::debug("Updating zip entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
 	}
 
-	if(formattedDestinationFilePath.find_first_of("/") != std::string::npos) {
-		std::string destinationFileBasePath(Utilities::getFilePath(formattedDestinationFilePath));
-
-		if(!destinationFileBasePath.empty() && !std::filesystem::exists(std::filesystem::path(destinationFileBasePath))) {
-			std::error_code errorCode;
-			std::filesystem::create_directories(destinationFileBasePath, errorCode);
-
-			if(errorCode) {
-				spdlog::error("Failed to create zip archive file entry extraction destination directory structure for path '{}': {}", destinationFileBasePath, errorCode.message());
-				return false;
-			}
-		}
-	}
-
 	return data->writeTo(formattedDestinationFilePath, overwrite);
 }
 

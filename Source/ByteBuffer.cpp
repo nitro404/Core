@@ -3,6 +3,7 @@
 #include "Compression/BZip2Utilities.h"
 #include "Compression/LZMAUtilities.h"
 #include "Compression/ZLibUtilities.h"
+#include "Utilities/FileUtilities.h"
 #include "Utilities/NumberUtilities.h"
 #include "Utilities/StringUtilities.h"
 
@@ -2053,9 +2054,24 @@ const ByteBuffer & ByteBuffer::emptyByteBuffer() {
 	return EMPTY_BYTE_BUFFER;
 }
 
-bool ByteBuffer::writeTo(const std::string & filePath, bool overwrite) const {
+bool ByteBuffer::writeTo(const std::string & filePath, bool overwrite, bool createParentDirectories) const {
 	if(!overwrite && std::filesystem::exists(std::filesystem::path(filePath))) {
 		return false;
+	}
+
+	if(createParentDirectories) {
+		std::filesystem::path destinationFileBasePath(Utilities::getFilePath(filePath));
+
+		if(!destinationFileBasePath.empty() && !std::filesystem::exists(std::filesystem::path(destinationFileBasePath))) {
+			std::error_code errorCode;
+			std::filesystem::create_directories(destinationFileBasePath, errorCode);
+
+			if(errorCode) {
+				spdlog::error("Failed to create file destination directory structure for path '{}': {}", destinationFileBasePath.string(), errorCode.message());
+				return false;
+			}
+		}
+
 	}
 
 	std::ofstream fileStream(filePath, std::ios::binary);
