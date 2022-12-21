@@ -72,16 +72,17 @@ static SRes seekVirtualByteBufferFile(const ISeekInStream * seekInStreamInterfac
 
 const std::string SevenZipArchive::DEFAULT_FILE_EXTENSION("7z");
 
-SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data)
+SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize)
 	: Archive(Type::SevenZip)
 	, m_archiveStream(std::move(archiveStream))
 	, m_lookStream(std::move(lookStream))
 	, m_archive(std::move(archive))
 	, m_allocator(std::move(allocator))
+	, m_data(std::move(data))
 	, m_filePath(filePath)
 	, m_numberOfFiles(0)
 	, m_numberOfDirectories(0)
-	, m_data(std::move(data)) {
+	, m_compressedSize(compressedSize) {
 	for(size_t i = 0; i < m_archive->NumFiles; i++) {
 		m_entries.emplace_back(new Entry(i, this));
 
@@ -117,8 +118,7 @@ std::string SevenZipArchive::getComment() const {
 }
 
 uint64_t SevenZipArchive::getCompressedSize() const {
-	// Note: 7-Zip does not report the compressed size of archive file entries
-	return 0;
+	return m_compressedSize;
 }
 
 size_t SevenZipArchive::numberOfEntries() const {
@@ -138,6 +138,7 @@ std::string SevenZipArchive::toDebugString(bool includeDate) const {
 
 	stringStream << fmt::format("File Path: '{}'\n", m_filePath);
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
+	stringStream << fmt::format("Compressed Size: {}\n", getCompressedSize());
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		if(i != m_entries.begin()) {
@@ -170,7 +171,8 @@ std::unique_ptr<SevenZipArchive> SevenZipArchive::readFrom(const std::string & f
 	FileInStream_CreateVTable(archiveStream.get());
 	archiveStream->wres = 0;
 
-	return createFrom(std::move(archiveStream), filePath, nullptr);
+	std::error_code errorCode;
+	return createFrom(std::move(archiveStream), filePath, nullptr, std::filesystem::file_size(std::filesystem::path(filePath), errorCode));
 }
 
 std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(std::unique_ptr<ByteBuffer> data) {
@@ -180,10 +182,11 @@ std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(std::unique_ptr<Byt
 	archiveStream->vt.Read = readFromVirtualByteBufferFile;
 	archiveStream->vt.Seek = seekVirtualByteBufferFile;
 
-	return createFrom(std::move(archiveStream), Utilities::emptyString, std::move(data));
+	uint64_t compressedSize = data->getSize();
+	return createFrom(std::move(archiveStream), Utilities::emptyString, std::move(data), compressedSize);
 }
 
-std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data) {
+std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize) {
 	AllocatorHandle allocator(createAllocatorHandle(DEFAULT_ALLOCATOR));
 
 	LookStreamHandle lookStream(createLookStreamHandle(*allocator));
@@ -207,7 +210,7 @@ std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(ArchiveStreamHandle
 		return nullptr;
 	}
 
-	return std::unique_ptr<SevenZipArchive>(new SevenZipArchive(std::move(archiveStream), std::move(lookStream), std::move(archive), std::move(allocator), filePath, std::move(data)));
+	return std::unique_ptr<SevenZipArchive>(new SevenZipArchive(std::move(archiveStream), std::move(lookStream), std::move(archive), std::move(allocator), filePath, std::move(data), compressedSize));
 }
 
 std::vector<std::shared_ptr<ArchiveEntry>> SevenZipArchive::getEntries() const {

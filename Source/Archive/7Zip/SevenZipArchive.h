@@ -81,7 +81,7 @@ private:
 		size_t outputBufferSize = 0;
 	};
 
-	SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
+	SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHandle lookStream, ArchiveHandle archive, AllocatorHandle allocator, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize);
 
 	const CFileInStream * getRawArchiveStreamHandle() const;
 	CFileInStream * getRawArchiveStreamHandle();
@@ -93,7 +93,7 @@ private:
 	ISzAlloc * getRawAllocatorHandle();
 	ExtractionData & getCachedExtractionData();
 
-	static std::unique_ptr<SevenZipArchive> createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
+	static std::unique_ptr<SevenZipArchive> createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize);
 	static std::chrono::time_point<std::chrono::system_clock> getTimePointFromNTFSFileTime(const CNtfsFileTime & ntfsFileTime);
 	static ArchiveStreamHandle createArchiveStreamHandle();
 	static LookStreamHandle createLookStreamHandle(ISzAlloc & allocator);
@@ -110,6 +110,7 @@ private:
 	std::vector<std::shared_ptr<Entry>> m_entries;
 	size_t m_numberOfFiles;
 	size_t m_numberOfDirectories;
+	uint64_t m_compressedSize;
 
 	static const ISzAlloc DEFAULT_ALLOCATOR;
 
