@@ -72,10 +72,6 @@ public:
 	public:
 		virtual ~Entry();
 
-		virtual bool isFile() const override;
-		static bool isFile(std::string_view path);
-		virtual bool isDirectory() const override;
-		static bool isDirectory(std::string_view path);
 		bool setName(const std::string & name);
 		virtual std::string getPath() const override;
 		bool move(const std::string & newBasePath, bool overwrite = false);

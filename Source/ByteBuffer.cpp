@@ -1525,7 +1525,6 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 					return nullptr;
 				}
 
-
 				if(!decompressedData->writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - bZip2Stream->avail_out)) {
 					spdlog::error("Failed to write decompressed BZip2 data to buffer.");
 					return nullptr;
@@ -1566,7 +1565,6 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 
 			while(true) {
 				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
-
 
 				if(!decompressedData->writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
 					spdlog::error("Failed to write decompressed LZMA data to buffer.");
@@ -1729,7 +1727,6 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 
 			while(true) {
 				lzmaStatus = lzma_code(lzmaStream.get(), LZMA_FINISH);
-
 
 				if(!compressedData->writeBytes(outputBuffer, OUTPUT_BUFFER_SIZE - lzmaStream->avail_out)) {
 					spdlog::error("Failed to write compressed LZMA data to buffer.");

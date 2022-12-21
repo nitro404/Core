@@ -24,6 +24,18 @@ bool ArchiveEntry::isFile() const {
 	return !isDirectory();
 }
 
+bool ArchiveEntry::isDirectory() const {
+	return isDirectory(getPath());
+}
+
+bool ArchiveEntry::isDirectory(std::string_view path) {
+	if(path.empty()) {
+		return false;
+	}
+
+	return path[path.length() - 1] == '/';
+}
+
 bool ArchiveEntry::isInSubdirectory() const {
 	return isInSubdirectory(getPath());
 }

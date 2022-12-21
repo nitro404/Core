@@ -23,7 +23,7 @@ public:
 	virtual ~ArchiveEntry();
 
 	virtual bool isFile() const;
-	virtual bool isDirectory() const = 0;
+	virtual bool isDirectory() const;
 	bool isInSubdirectory() const;
 	static bool isInSubdirectory(std::string_view path);
 	std::string getName() const;
@@ -38,6 +38,8 @@ public:
 	virtual std::unique_ptr<ByteBuffer> getData() const = 0;
 	virtual uint32_t getCRC32() const = 0;
 	virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const = 0;
+
+	static bool isDirectory(std::string_view path);
 
 protected:
 	virtual bool isParentArchiveValid() const;

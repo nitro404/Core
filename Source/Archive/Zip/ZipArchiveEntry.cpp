@@ -24,30 +24,6 @@ ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_p
 
 ZipArchive::Entry::~Entry() { }
 
-bool ZipArchive::Entry::isFile() const {
-	return isFile(m_path);
-}
-
-bool ZipArchive::Entry::isFile(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path[path.length() - 1] != '/';
-}
-
-bool ZipArchive::Entry::isDirectory() const {
-	return isDirectory(m_path);
-}
-
-bool ZipArchive::Entry::isDirectory(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path[path.length() - 1] == '/';
-}
-
 bool ZipArchive::Entry::setName(const std::string & name) {
 	if(!isParentArchiveValid()) {
 		spdlog::error("Zip archive must be open to set the entry name.");
