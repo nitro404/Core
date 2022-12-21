@@ -10,6 +10,7 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 #include <double-conversion/ieee.h>
+#include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
 
 #include <bitset>
@@ -1504,6 +1505,10 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 		case CompressionMethod::BZip2: {
 			BZip2::StreamHandle bZip2Stream(BZip2::createDecompressionStreamHandle());
 
+			if(bZip2Stream == nullptr) {
+				return nullptr;
+			}
+
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
@@ -1539,6 +1544,11 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 		case CompressionMethod::LZMA:
 		case CompressionMethod::XZ: {
 			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());
+
+			if(lzmaStream == nullptr) {
+				spdlog::error("Failed to initialize {} stream handle.", magic_enum::enum_name(decompressionMethod));
+				return nullptr;
+			}
 
 			lzma_ret lzmaStatus = lzma_auto_decoder(lzmaStream.get(), std::numeric_limits<uint64_t>::max(), 0);
 
@@ -1579,6 +1589,10 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 		}
 		case CompressionMethod::ZLib: {
 			ZLib::StreamHandle zLibStream(ZLib::createInflationStreamHandle());
+
+			if(zLibStream == nullptr) {
+				return nullptr;
+			}
 
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
@@ -1639,6 +1653,10 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 		case CompressionMethod::BZip2: {
 			BZip2::StreamHandle bZip2Stream(BZip2::createCompressionStreamHandle());
 
+			if(bZip2Stream == nullptr) {
+				return nullptr;
+			}
+
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
@@ -1673,6 +1691,11 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 		case CompressionMethod::LZMA:
 		case CompressionMethod::XZ: {
 			LZMA::StreamHandle lzmaStream(LZMA::createStreamHandle());
+
+			if(lzmaStream == nullptr) {
+				spdlog::error("Failed to initialize {} stream handle.", magic_enum::enum_name(compressionMethod));
+				return nullptr;
+			}
 
 			lzma_ret lzmaStatus = LZMA_OK;
 
@@ -1729,6 +1752,10 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 		}
 		case CompressionMethod::ZLib: {
 			ZLib::StreamHandle zLibStream(ZLib::createDeflationStreamHandle());
+
+			if(zLibStream == nullptr) {
+				return nullptr;
+			}
 
 			int zLibResult = Z_OK;
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
