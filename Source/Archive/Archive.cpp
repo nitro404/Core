@@ -10,6 +10,26 @@
 Archive::Archive(Type type)
 	: m_type(type) { }
 
+Archive::Archive(Archive && a) noexcept
+	: m_type(a.m_type) { }
+
+Archive::Archive(const Archive & a)
+	: m_type(a.m_type) { }
+
+Archive & Archive::operator = (Archive && a) noexcept {
+	if(this != &a) {
+		m_type = a.m_type;
+	}
+
+	return *this;
+}
+
+Archive & Archive::operator = (const Archive & a) {
+	m_type = a.m_type;
+
+	return *this;
+}
+
 Archive::~Archive() { }
 
 Archive::Type Archive::getType() const {
@@ -29,6 +49,10 @@ uint64_t Archive::getCompressedSize() const {
 	uint64_t compressedSize = 0;
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.cbegin(); i != entries.cend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
 		compressedSize += (*i)->getCompressedSize();
 	}
 
@@ -40,6 +64,10 @@ uint64_t Archive::getUncompressedSize() const {
 	uint64_t uncompressedSize = 0;
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.cbegin(); i != entries.cend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
 		uncompressedSize += (*i)->getUncompressedSize();
 	}
 
@@ -56,6 +84,10 @@ size_t Archive::numberOfFiles() const {
 	size_t fileCount = 0;
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.cbegin(); i != entries.cend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
 		if((*i)->isFile()) {
 			fileCount++;
 		}
@@ -70,6 +102,10 @@ size_t Archive::numberOfDirectories() const {
 	size_t directoryCount = 0;
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
 		if((*i)->isDirectory()) {
 			directoryCount++;
 		}
@@ -139,33 +175,33 @@ size_t Archive::indexOfFirstEntryWithName(const std::string & entryName, bool in
 	return std::numeric_limits<size_t>::max();
 }
 
-const std::weak_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, bool caseSensitive) const {
+const std::shared_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, bool caseSensitive) const {
 	return getEntry(indexOfEntry(entryPath, caseSensitive));
 }
 
-std::weak_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, bool caseSensitive) {
+std::shared_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, bool caseSensitive) {
 	return getEntry(indexOfEntry(entryPath, caseSensitive));
 }
 
-std::weak_ptr<ArchiveEntry> Archive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
+std::shared_ptr<ArchiveEntry> Archive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
 	return getEntry(indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive));
 }
 
-const std::weak_ptr<ArchiveEntry> Archive::getEntry(size_t index) const {
+const std::shared_ptr<ArchiveEntry> Archive::getEntry(size_t index) const {
 	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
 
 	if(index >= entries.size()) {
-		return std::weak_ptr<ArchiveEntry>();
+		return std::shared_ptr<ArchiveEntry>();
 	}
 
 	return entries[index];
 }
 
-std::weak_ptr<ArchiveEntry> Archive::getEntry(size_t index) {
+std::shared_ptr<ArchiveEntry> Archive::getEntry(size_t index) {
 	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
 
 	if(index >= entries.size()) {
-		return std::weak_ptr<ArchiveEntry>();
+		return std::shared_ptr<ArchiveEntry>();
 	}
 
 	return entries[index];
@@ -227,4 +263,18 @@ size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwr
 	}
 
 	return numberOfExtractedFileEntries;
+}
+
+void Archive::updateParentArchive() {
+	std::shared_ptr<ArchiveEntry> currentArchiveEntry;
+
+	for(size_t i = 0; i < numberOfEntries(); i++) {
+		currentArchiveEntry = getEntry(i);
+
+		if(currentArchiveEntry == nullptr) {
+			continue;
+		}
+
+		currentArchiveEntry->setParentArchive(this);
+	}
 }

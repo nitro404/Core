@@ -37,7 +37,7 @@ public:
 
 	protected:
 		virtual Archive * getParentArchive() const override;
-		virtual void clearParentArchive() override;
+		virtual bool setParentArchive(Archive * archive) override;
 
 	private:
 		Entry(uint64_t index, SevenZipArchive * parentArchive);
@@ -61,15 +61,13 @@ public:
 	virtual size_t numberOfEntries() const override;
 	virtual size_t numberOfFiles() const override;
 	virtual size_t numberOfDirectories() const override;
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static std::unique_ptr<SevenZipArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<SevenZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
 	static const std::string DEFAULT_FILE_EXTENSION;
-
-protected:
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 
 private:
 	using ArchiveStreamHandle = std::unique_ptr<CFileInStream, std::function<void (CFileInStream *)>>;

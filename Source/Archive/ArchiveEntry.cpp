@@ -6,6 +6,18 @@
 
 ArchiveEntry::ArchiveEntry() { }
 
+ArchiveEntry::ArchiveEntry(ArchiveEntry && e) noexcept { }
+
+ArchiveEntry::ArchiveEntry(const ArchiveEntry & e) { }
+
+ArchiveEntry & ArchiveEntry::operator = (ArchiveEntry && e) noexcept {
+	return *this;
+}
+
+ArchiveEntry & ArchiveEntry::operator = (const ArchiveEntry & e) {
+	return *this;
+}
+
 ArchiveEntry::~ArchiveEntry() { }
 
 bool ArchiveEntry::isFile() const {
@@ -34,12 +46,12 @@ std::string ArchiveEntry::getName() const {
 	return std::string(Utilities::getFileName(Utilities::trimTrailingPathSeparator(filePath)));
 }
 
-std::vector<std::weak_ptr<ArchiveEntry>> ArchiveEntry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
+std::vector<std::shared_ptr<ArchiveEntry>> ArchiveEntry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
 	if(!isParentArchiveValid() || !isDirectory()) {
 		return {};
 	}
 
-	std::vector<std::weak_ptr<ArchiveEntry>> children;
+	std::vector<std::shared_ptr<ArchiveEntry>> children;
 	const std::vector<std::shared_ptr<ArchiveEntry>> & entries = getParentArchive()->getEntries();
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
@@ -87,4 +99,8 @@ bool ArchiveEntry::hasComment() const {
 
 bool ArchiveEntry::isParentArchiveValid() const {
 	return getParentArchive() != nullptr;
+}
+
+void ArchiveEntry::clearParentArchive() {
+	setParentArchive(nullptr);
 }

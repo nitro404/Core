@@ -157,16 +157,16 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 
 	std::string formattedNewBasePath(ZipArchive::formatDirectoryPath(newBasePath));
 
-	std::weak_ptr<ArchiveEntry> destinationDirectory;
+	std::shared_ptr<ArchiveEntry> destinationDirectory;
 
 	if(!formattedNewBasePath.empty()) {
 		destinationDirectory = m_parentArchive->getEntry(formattedNewBasePath);
 
-		if(destinationDirectory.expired()) {
+		if(destinationDirectory == nullptr) {
 			destinationDirectory = m_parentArchive->addDirectory(newBasePath);
 		}
 
-		if(destinationDirectory.expired()) {
+		if(destinationDirectory == nullptr) {
 			spdlog::error("Failed to create zip entry destination directory: '{}'.", formattedNewBasePath);
 			return false;
 		}
@@ -182,9 +182,9 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 		return false;
 	}
 
-	std::weak_ptr<ArchiveEntry> existingDestinationEntry(m_parentArchive->getEntry(destinationEntryPath));
+	std::shared_ptr<ArchiveEntry> existingDestinationEntry(m_parentArchive->getEntry(destinationEntryPath));
 
-	if(!existingDestinationEntry.expired()) {
+	if(existingDestinationEntry != nullptr) {
 		if(isFile()) {
 			if(!overwrite) {
 				spdlog::error("Destination zip entry already exists, must specify overwrite to replace it.");
@@ -192,14 +192,14 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 			}
 		}
 
-		if(!m_parentArchive->removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>(existingDestinationEntry.lock()), false)) {
+		if(!m_parentArchive->removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>(existingDestinationEntry), false)) {
 			spdlog::error("Failed to remove existing destination zip entry.");
 			return false;
 		}
 	}
 
 	std::string previousPath = m_path;
-	std::vector<std::weak_ptr<ArchiveEntry>> children(getChildren(true, false));
+	std::vector<std::shared_ptr<ArchiveEntry>> children(getChildren(true, false));
 
 	if(!ZipUtilities::isSuccess(zip_file_rename(m_parentArchive->getRawArchiveHandle(), m_index, destinationEntryPath.c_str(), ZIP_FL_ENC_GUESS), fmt::format("Failed to move zip entry from '{}' to '{}'.", m_path, destinationEntryPath))) {
 		return false;
@@ -212,10 +212,11 @@ bool ZipArchive::Entry::move(const std::string & newBasePath, bool overwrite) {
 
 	if(!children.empty()) {
 		std::string newChildPath;
+		std::shared_ptr<ArchiveEntry> child;
 		std::vector<std::pair<std::shared_ptr<ArchiveEntry>, std::string>> newChildPaths;
 
-		for(std::vector<std::weak_ptr<ArchiveEntry>>::const_iterator i = children.begin(); i != children.end(); ++i) {
-			std::shared_ptr<ArchiveEntry> child((*i).lock());
+		for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = children.begin(); i != children.end(); ++i) {
+			child = *i;
 
 			if(child.get() == nullptr || child.get() == this) {
 				continue;
@@ -475,8 +476,21 @@ Archive * ZipArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
-void ZipArchive::Entry::clearParentArchive() {
-	m_parentArchive = nullptr;
+bool ZipArchive::Entry::setParentArchive(Archive * archive) {
+	if(archive == nullptr) {
+		m_parentArchive = nullptr;
+		return true;
+	}
+
+	ZipArchive * zipArchive = dynamic_cast<ZipArchive *>(archive);
+
+	if(zipArchive == nullptr) {
+		return false;
+	}
+
+	m_parentArchive = zipArchive;
+
+	return true;
 }
 
 void ZipArchive::Entry::clearUnsavedData() {

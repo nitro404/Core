@@ -16,6 +16,10 @@ class ArchiveEntry {
 
 public:
 	ArchiveEntry();
+	ArchiveEntry(ArchiveEntry && e) noexcept;
+	ArchiveEntry(const ArchiveEntry & e);
+	ArchiveEntry & operator = (ArchiveEntry && e) noexcept;
+	ArchiveEntry & operator = (const ArchiveEntry & e);
 	virtual ~ArchiveEntry();
 
 	virtual bool isFile() const;
@@ -24,7 +28,7 @@ public:
 	static bool isInSubdirectory(std::string_view path);
 	std::string getName() const;
 	virtual std::string getPath() const = 0;
-	std::vector<std::weak_ptr<ArchiveEntry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
+	std::vector<std::shared_ptr<ArchiveEntry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
 	virtual uint64_t getIndex() const = 0;
 	virtual bool hasComment() const;
 	virtual std::string getComment() const = 0;
@@ -38,13 +42,8 @@ public:
 protected:
 	virtual bool isParentArchiveValid() const;
 	virtual Archive * getParentArchive() const = 0;
-	virtual void clearParentArchive() = 0;
-
-private:
-	ArchiveEntry(const ArchiveEntry &) = delete;
-	ArchiveEntry(ArchiveEntry &&) noexcept = delete;
-	const ArchiveEntry & operator = (const ArchiveEntry &) = delete;
-	const ArchiveEntry & operator = (ArchiveEntry &&) noexcept = delete;
+	virtual bool setParentArchive(Archive * archive) = 0;
+	void clearParentArchive();
 };
 
 #endif // _ARCHIVE_ENTRTY_H_

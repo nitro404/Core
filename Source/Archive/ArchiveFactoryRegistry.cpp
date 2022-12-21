@@ -33,6 +33,18 @@ bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::
 	return true;
 }
 
+size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileExtensions, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
+	size_t numberOfFactoriesSet = 0;
+
+	for(const std::string & fileExtension : fileExtensions) {
+		if(setFactory(fileExtension, createArchiveFunction, readArchiveFunction)) {
+			numberOfFactoriesSet++;
+		}
+	}
+
+	return numberOfFactoriesSet;
+}
+
 void ArchiveFactoryRegistry::assignFactories() {
 	assignStandardFactories();
 }

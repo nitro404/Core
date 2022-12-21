@@ -269,27 +269,27 @@ size_t ZipArchive::numberOfDirectories() const {
 	return m_numberOfDirectories;
 }
 
-std::weak_ptr<ZipArchive::Entry> ZipArchive::addFile(const std::string & filePath, const std::string & entryDirectoryPath, bool overwrite) {
+std::shared_ptr<ZipArchive::Entry> ZipArchive::addFile(const std::string & filePath, const std::string & entryDirectoryPath, bool overwrite) {
 	if(!isOpen()) {
 		spdlog::error("Zip archive must be open to add a file.");
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	return addData(ByteBuffer::readFrom(filePath), Utilities::joinPaths(entryDirectoryPath, Utilities::getFileName(filePath)), overwrite);
 }
 
-std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite) {
+std::shared_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite) {
 	if(!isOpen()) {
 		spdlog::error("Zip archive must be open to add data.");
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	if(entryFilePath.empty()) {
 		spdlog::error("Cannot add file data without a destination zip entry file path specified.");
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
-	std::weak_ptr<ZipArchive::Entry> entryBaseDirectory;
+	std::shared_ptr<ZipArchive::Entry> entryBaseDirectory;
 
 	if(entryFilePath.find_first_of("/\\") != std::string::npos) {
 		entryBaseDirectory = addDirectory(std::string(Utilities::getFilePath(entryFilePath)));
@@ -299,7 +299,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 
 	if(zipFileDataSourceBuffer == nullptr) {
 		spdlog::error("Failed to create zip file data source buffer when adding file to zip archive: '{}'.", entryFilePath);
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	uint64_t zipFlags = ZIP_FL_ENC_GUESS;
@@ -308,13 +308,13 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 		zipFlags |= ZIP_FL_OVERWRITE;
 	}
 
-	std::string formattedEntryFilePath(Utilities::joinPaths(entryBaseDirectory.expired() ? "" : entryBaseDirectory.lock()->getPath(), Utilities::getFileName(entryFilePath)));
+	std::string formattedEntryFilePath(Utilities::joinPaths(entryBaseDirectory == nullptr ? "" : entryBaseDirectory->getPath(), Utilities::getFileName(entryFilePath)));
 
 	int64_t newZipFileIndex = zip_file_add(m_archiveHandle.get(), formattedEntryFilePath.c_str(), zipFileDataSourceBuffer->getRawSourceHandle(), zipFlags);
 
 	if(newZipFileIndex == -1) {
 		spdlog::error("Failed to add zip file to archive: '{}'.", entryFilePath);
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	m_modified = true;
@@ -329,48 +329,48 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffer>
 
 	if(newFileEntry == nullptr) {
 		spdlog::error("Failed to create zip file entry for file: '{}'.", entryFilePath);
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	if(!newFileEntry->setCompressionMethod(m_compressionMethod)) {
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	if(!m_password.empty()) {
 		if(!newFileEntry->setEncryptionMethod(m_encryptionMethod)) {
-			return std::weak_ptr<ZipArchive::Entry>();
+			return nullptr;
 		}
 	}
 
 	if(!addEntry(std::move(newFileEntry))) {
 		spdlog::error("Failed add new zip file entry to archive for file: '{}'.", entryFilePath);
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
-	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(newZipFileIndex).lock());
+	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(newZipFileIndex));
 }
 
-std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & entryDirectoryPath) {
+std::shared_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & entryDirectoryPath) {
 	if(!isOpen()) {
 		spdlog::error("Zip archive must be open to add a directory.");
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	if(entryDirectoryPath.empty()) {
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
 	std::string formattedEntryDirectoryPath(formatDirectoryPath(entryDirectoryPath));
 
 	if(Utilities::startsWithPathSeparator(formattedEntryDirectoryPath)) {
 		spdlog::error("Cannot add invalid directory path, must not start with path separator: '{}'.", entryDirectoryPath);
-		return std::weak_ptr<ZipArchive::Entry>();
+		return nullptr;
 	}
 
-	std::weak_ptr<ArchiveEntry> existingEntryDirectory(getEntry(formattedEntryDirectoryPath, false));
+	std::shared_ptr<ArchiveEntry> existingEntryDirectory(getEntry(formattedEntryDirectoryPath, false));
 
-	if(!existingEntryDirectory.expired()) {
-		return std::dynamic_pointer_cast<ZipArchive::Entry>(existingEntryDirectory.lock());
+	if(existingEntryDirectory != nullptr) {
+		return std::dynamic_pointer_cast<ZipArchive::Entry>(existingEntryDirectory);
 	}
 
 	int64_t newDirectoryIndex = -1;
@@ -388,7 +388,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 
 		if(newDirectoryIndex == -1) {
 			spdlog::error("Failed to add zip directory to archive: '{}'.", formattedEntryDirectoryPath);
-			return std::weak_ptr<ZipArchive::Entry>();
+			return nullptr;
 		}
 
 		m_modified = true;
@@ -405,7 +405,7 @@ std::weak_ptr<ZipArchive::Entry> ZipArchive::addDirectory(const std::string & en
 		}
 	}
 
-	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(formattedEntryDirectoryPath, false).lock());
+	return std::dynamic_pointer_cast<ZipArchive::Entry>(getEntry(formattedEntryDirectoryPath, false));
 }
 
 std::string ZipArchive::formatDirectoryPath(const std::string & directoryPath) {
@@ -440,10 +440,10 @@ size_t ZipArchive::removeEntry(Entry & entry, bool removeChildren) {
 	size_t numberOfEntriesRemoved = 0;
 
 	if(entry.isDirectory() && removeChildren) {
-		std::vector<std::weak_ptr<ArchiveEntry>> directoryEntries(entry.getChildren(false, false));
+		std::vector<std::shared_ptr<ArchiveEntry>> directoryEntries(entry.getChildren(false, false));
 
-		for(std::vector<std::weak_ptr<ArchiveEntry>>::iterator i = directoryEntries.begin(); i != directoryEntries.end(); ++i) {
-			numberOfEntriesRemoved += removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>((*i).lock()), removeChildren);
+		for(std::vector<std::shared_ptr<ArchiveEntry>>::iterator i = directoryEntries.begin(); i != directoryEntries.end(); ++i) {
+			numberOfEntriesRemoved += removeEntry(*std::dynamic_pointer_cast<ZipArchive::Entry>(*i), removeChildren);
 		}
 	}
 
@@ -951,10 +951,10 @@ bool ZipArchive::addEntry(std::unique_ptr<Entry> entry) {
 }
 
 std::vector<std::shared_ptr<ArchiveEntry>> ZipArchive::getEntries() const {
-	std::vector<std::shared_ptr<ArchiveEntry>> entires(m_entries.size());
-	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entires));
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(m_entries.size());
+	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entries));
 
-	return entires;
+	return entries;
 }
 
 zip * ZipArchive::getRawArchiveHandle() const {

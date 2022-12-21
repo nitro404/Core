@@ -211,10 +211,10 @@ std::unique_ptr<SevenZipArchive> SevenZipArchive::createFrom(ArchiveStreamHandle
 }
 
 std::vector<std::shared_ptr<ArchiveEntry>> SevenZipArchive::getEntries() const {
-	std::vector<std::shared_ptr<ArchiveEntry>> entires(m_entries.size());
-	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entires));
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(m_entries.size());
+	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entries));
 
-	return entires;
+	return entries;
 }
 
 const CFileInStream * SevenZipArchive::getRawArchiveStreamHandle() const {

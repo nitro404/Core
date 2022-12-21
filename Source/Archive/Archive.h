@@ -20,6 +20,10 @@ public:
 	};
 
 	Archive(Type type);
+	Archive(Archive && a) noexcept;
+	Archive(const Archive & a);
+	Archive & operator = (Archive && a) noexcept;
+	Archive & operator = (const Archive & a);
 	virtual ~Archive();
 
 	Type getType() const;
@@ -39,26 +43,18 @@ public:
 	bool hasEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
 	size_t indexOfEntry(const std::string & entryPath, bool caseSensitive = false) const;
 	size_t indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<ArchiveEntry> getEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	std::weak_ptr<ArchiveEntry> getEntry(const std::string & entryPath, bool caseSensitive = false);
-	std::weak_ptr<ArchiveEntry> getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<ArchiveEntry> getEntry(size_t index) const;
-	std::weak_ptr<ArchiveEntry> getEntry(size_t index);
+	const std::shared_ptr<ArchiveEntry> getEntry(const std::string & entryPath, bool caseSensitive = false) const;
+	std::shared_ptr<ArchiveEntry> getEntry(const std::string & entryPath, bool caseSensitive = false);
+	std::shared_ptr<ArchiveEntry> getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
+	const std::shared_ptr<ArchiveEntry> getEntry(size_t index) const;
+	std::shared_ptr<ArchiveEntry> getEntry(size_t index);
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const = 0;
 	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false) const;
+	void updateParentArchive();
 	virtual std::string toDebugString(bool includeDate = false) const = 0;
 
-protected:
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const = 0;
-
 private:
-	void clearParentArchiveFromAllEntries();
-
 	Type m_type;
-
-	Archive(const Archive &) = delete;
-	Archive(Archive &&) noexcept = delete;
-	const Archive & operator = (const Archive &) = delete;
-	const Archive & operator = (Archive &&) noexcept = delete;
 };
 
 #endif // _ARCHIVE_H_

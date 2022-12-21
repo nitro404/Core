@@ -122,6 +122,19 @@ Archive * SevenZipArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
-void SevenZipArchive::Entry::clearParentArchive() {
-	m_parentArchive = nullptr;
+bool SevenZipArchive::Entry::setParentArchive(Archive * archive) {
+	if(archive == nullptr) {
+		m_parentArchive = nullptr;
+		return true;
+	}
+
+	SevenZipArchive * sevenZipArchive = dynamic_cast<SevenZipArchive *>(archive);
+
+	if(sevenZipArchive == nullptr) {
+		return false;
+	}
+
+	m_parentArchive = sevenZipArchive;
+
+	return true;
 }

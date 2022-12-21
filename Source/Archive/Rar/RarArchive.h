@@ -36,7 +36,7 @@ public:
 
 	protected:
 		virtual Archive * getParentArchive() const override;
-		virtual void clearParentArchive() override;
+		virtual bool setParentArchive(Archive * archive) override;
 
 	private:
 		Entry(uint64_t index, RarArchive * parentArchive);
@@ -62,15 +62,13 @@ public:
 	virtual size_t numberOfEntries() const override;
 	virtual size_t numberOfFiles() const override;
 	virtual size_t numberOfDirectories() const override;
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static std::unique_ptr<RarArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<RarArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
 	static const std::string DEFAULT_FILE_EXTENSION;
-
-protected:
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 
 private:
 	using ArchiveHandle = std::unique_ptr<dmc_unrar_archive, std::function<void (dmc_unrar_archive *)>>;

@@ -101,7 +101,7 @@ public:
 	protected:
 		virtual bool isParentArchiveValid() const override;
 		virtual Archive * getParentArchive() const override;
-		virtual void clearParentArchive() override;
+		virtual bool setParentArchive(Archive * archive) override;
 
 	private:
 		using ZipFileHandle = std::unique_ptr<struct zip_file, std::function<void (struct zip_file *)>>;
@@ -157,9 +157,9 @@ public:
 	virtual size_t numberOfEntries() const override;
 	virtual size_t numberOfFiles() const override;
 	virtual size_t numberOfDirectories() const override;
-	std::weak_ptr<Entry> addFile(const std::string & filePath, const std::string & entryDirectoryPath = {}, bool overwrite = true);
-	std::weak_ptr<Entry> addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite = true);
-	std::weak_ptr<Entry> addDirectory(const std::string & entryDirectoryPath);
+	std::shared_ptr<Entry> addFile(const std::string & filePath, const std::string & entryDirectoryPath = {}, bool overwrite = true);
+	std::shared_ptr<Entry> addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite = true);
+	std::shared_ptr<Entry> addDirectory(const std::string & entryDirectoryPath);
 	static std::string formatDirectoryPath(const std::string & directoryPath);
 	size_t removeEntry(Entry & entry);
 	size_t removeEntry(size_t index);
@@ -173,13 +173,11 @@ public:
 	bool close();
 	bool reopen(bool verifyConsistency = false);
 	bool save();
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static const std::string DEFAULT_FILE_EXTENSION;
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
-
-protected:
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 
 private:
 	class SourceBuffer final {

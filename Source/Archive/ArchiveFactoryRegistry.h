@@ -16,6 +16,7 @@ public:
 
 	bool hasFactory(const std::string & fileExtension) const;
 	bool setFactory(const std::string & fileExtension, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
+	size_t setFactory(const std::vector<std::string> & fileExtensions, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
 	void assignFactories();
 	bool removeFactory(const std::string & fileExtension);
 	void resetFactories();

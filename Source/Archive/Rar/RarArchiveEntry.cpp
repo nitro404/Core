@@ -162,8 +162,21 @@ Archive * RarArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
-void RarArchive::Entry::clearParentArchive() {
-	m_parentArchive = nullptr;
+bool RarArchive::Entry::setParentArchive(Archive * archive) {
+	if(archive == nullptr) {
+		m_parentArchive = nullptr;
+		return true;
+	}
+
+	RarArchive * rarArchive = dynamic_cast<RarArchive *>(archive);
+
+	if(rarArchive == nullptr) {
+		return false;
+	}
+
+	m_parentArchive = rarArchive;
+
+	return true;
 }
 
 dmc_unrar_archive * RarArchive::Entry::getRawParentArchiveHandle() const {
