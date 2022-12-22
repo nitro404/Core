@@ -21,91 +21,35 @@ bool NullsoftScriptableInstallSystemArchive::Entry::isDirectory() const {
 return false;
 }
 
-bool NullsoftScriptableInstallSystemArchive::Entry::isInSubdirectory() const {
-	return isInSubdirectory(getPath());
-}
-
-bool NullsoftScriptableInstallSystemArchive::Entry::isInSubdirectory(std::string_view path) {
-	if(path.empty()) {
-		return false;
-	}
-
-	return path.find_first_of("/") < path.length() - 1;
-}
-
-std::string NullsoftScriptableInstallSystemArchive::Entry::getName() const {
-	std::string filePath(getPath());
-
-	if(isFile()) {
-		return std::string(Utilities::getFileName(filePath));
-	}
-
-	return std::string(Utilities::getFileName(Utilities::trimTrailingPathSeparator(filePath)));
-}
-
 std::string NullsoftScriptableInstallSystemArchive::Entry::getPath() const {
 	return m_path;
-}
-
-std::vector<std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry>> NullsoftScriptableInstallSystemArchive::Entry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
-	if(!isParentArchiveValid() || !isDirectory()) {
-		return {};
-	}
-
-	std::vector<std::weak_ptr<Entry>> children;
-	const std::vector<std::shared_ptr<Entry>> & entries = m_parentArchive->getEntries();
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
-		if(*i == nullptr || (*i).get() == this) {
-			continue;
-		}
-
-		const std::string & currentPath = (*i)->getPath();
-		size_t firstPathSeparatorIndex = currentPath.find_first_of("/");
-
-		std::string entryBasePath;
-
-		if(firstPathSeparatorIndex != std::string::npos && firstPathSeparatorIndex != currentPath.length() - 1) {
-			entryBasePath = Utilities::addTrailingPathSeparator(Utilities::getFilePath(Utilities::trimTrailingPathSeparator(currentPath)));
-		}
-
-		if(entryBasePath.empty()) {
-			continue;
-		}
-
-		std::string path(getPath());
-
-		if(includeSubdirectories) {
-			if(entryBasePath.length() < path.length()) {
-				continue;
-			}
-
-			if(Utilities::areStringsEqual(std::string_view(entryBasePath.data(), path.length()), path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-		else {
-			if(Utilities::areStringsEqual(entryBasePath, path, caseSensitive)) {
-				children.push_back(*i);
-			}
-		}
-	}
-
-	return children;
 }
 
 uint64_t NullsoftScriptableInstallSystemArchive::Entry::getIndex() const {
 	return m_index;
 }
 
+bool NullsoftScriptableInstallSystemArchive::Entry::hasComment() const {
+	return false;
+}
+
+std::string NullsoftScriptableInstallSystemArchive::Entry::getComment() const {
+	return {};
+}
+
+uint64_t NullsoftScriptableInstallSystemArchive::Entry::getCompressedSize() const {
+// TODO:
+return 0;
+}
+
+uint64_t NullsoftScriptableInstallSystemArchive::Entry::getUncompressedSize() const {
+// TODO:
+return 0;
+}
+
 std::chrono::time_point<std::chrono::system_clock> NullsoftScriptableInstallSystemArchive::Entry::getDate() const {
 // TODO:
 return {};
-}
-
-uint64_t NullsoftScriptableInstallSystemArchive::Entry::getInflatedSize() const {
-// TODO:
-return 0;
 }
 
 std::unique_ptr<ByteBuffer> NullsoftScriptableInstallSystemArchive::Entry::getData() const {
@@ -130,14 +74,23 @@ bool NullsoftScriptableInstallSystemArchive::Entry::writeTo(const std::string & 
 	return data->writeTo(Utilities::joinPaths(directoryPath, path), overwrite);
 }
 
-NullsoftScriptableInstallSystemArchive * NullsoftScriptableInstallSystemArchive::Entry::getParentArchive() const {
+Archive * NullsoftScriptableInstallSystemArchive::Entry::getParentArchive() const {
 	return m_parentArchive;
 }
 
-void NullsoftScriptableInstallSystemArchive::Entry::clearParentArchive() {
-	m_parentArchive = nullptr;
-}
+bool NullsoftScriptableInstallSystemArchive::Entry::setParentArchive(Archive * archive) {
+	if(archive == nullptr) {
+		m_parentArchive = nullptr;
+		return true;
+	}
 
-bool NullsoftScriptableInstallSystemArchive::Entry::isParentArchiveValid() const {
-	return m_parentArchive != nullptr;
+	NullsoftScriptableInstallSystemArchive * nsisArchive = dynamic_cast<NullsoftScriptableInstallSystemArchive *>(archive);
+
+	if(nsisArchive == nullptr) {
+		return false;
+	}
+
+	m_parentArchive = nsisArchive;
+
+	return true;
 }

@@ -24,6 +24,8 @@ static constexpr uint8_t NSIS_OUTPUT_DIRECTORY = 22;
 static constexpr uint8_t NSIS_225_SPECIAL_OUTPUT_DIRECTORY = 29; // NSIS 2.04 - 2.25
 static constexpr uint8_t NSIS_226_SPECIAL_OUTPUT_DIRECTORY = 31; // NSIS 2.26+
 
+const std::string NullsoftScriptableInstallSystemArchive::DEFAULT_FILE_EXTENSION("exe");
+
 enum class MethodType : uint8_t {
 	Copy,
 	Deflate,
@@ -31,7 +33,7 @@ enum class MethodType : uint8_t {
 	LZMA
 };
 
-enum class Type : uint8_t {
+enum class NSISType : uint8_t {
 	NSIS2,
 	NSIS3,
 	Park1, // Park 2.46.1
@@ -140,7 +142,7 @@ enum class Command : uint8_t {
 };
 
 struct VersionInformation final {
-	Type type = Type::NSIS2;
+	NSISType type = NSISType::NSIS2;
 	bool isNSIS200 = false;
 	bool isNSIS225 = false;
 };
@@ -271,7 +273,7 @@ static bool isBZip2(const ByteBuffer & data) {
 	}
 
 	return data[data.getReadOffset()    ] == 0x31 &&
-	       data[data.getReadOffset() + 1] < 14;
+		   data[data.getReadOffset() + 1] < 14;
 }
 
 static bool isLZMA(const ByteBuffer & data, uint32_t & dictionarySize, size_t readOffset) {
@@ -288,10 +290,10 @@ static bool isLZMA(const ByteBuffer & data, uint32_t & dictionarySize, size_t re
 	dictionarySize = optionalDictionarySize.value();
 
 	return  data[readOffset    ]         == 0x5D &&
-	        data[readOffset + 1]         == 0x00 &&
-	        data[readOffset + 2]         == 0x00 &&
-	        data[readOffset + 5]         == 0x00 &&
-	       (data[readOffset + 6] & 0x80) == 0x00;
+		    data[readOffset + 1]         == 0x00 &&
+		    data[readOffset + 2]         == 0x00 &&
+		    data[readOffset + 5]         == 0x00 &&
+		   (data[readOffset + 6] & 0x80) == 0x00;
 
 }
 
@@ -318,8 +320,8 @@ static bool isLZMA(const ByteBuffer & data, uint32_t & dictionarySize, bool & fi
 	return false;
 }
 
-NullsoftScriptableInstallSystemArchive::NullsoftScriptableInstallSystemArchive(const std::string & filePath)
-	: m_filePath(filePath)
+NullsoftScriptableInstallSystemArchive::NullsoftScriptableInstallSystemArchive()
+	: Archive(Type::NSIS)
 	, m_numberOfFiles(0)
 	, m_numberOfDirectories(0) { }
 
@@ -329,22 +331,20 @@ NullsoftScriptableInstallSystemArchive::~NullsoftScriptableInstallSystemArchive(
 	}
 }
 
+std::string NullsoftScriptableInstallSystemArchive::getDefaultFileExtension() const {
+	return DEFAULT_FILE_EXTENSION;
+}
+
 std::string NullsoftScriptableInstallSystemArchive::getFilePath() const {
 	return m_filePath;
 }
 
-uint64_t NullsoftScriptableInstallSystemArchive::getInflatedSize() const {
-	uint64_t inflatedSize = 0;
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.cbegin(); i != m_entries.cend(); ++i) {
-		inflatedSize += (*i)->getInflatedSize();
-	}
-
-	return inflatedSize;
+bool NullsoftScriptableInstallSystemArchive::hasComment() const {
+	return false;
 }
 
-size_t NullsoftScriptableInstallSystemArchive::numberOfEntries() const {
-	return m_entries.size();
+std::string NullsoftScriptableInstallSystemArchive::getComment() const {
+	return {};
 }
 
 size_t NullsoftScriptableInstallSystemArchive::numberOfFiles() const {
@@ -355,87 +355,11 @@ size_t NullsoftScriptableInstallSystemArchive::numberOfDirectories() const {
 	return m_numberOfDirectories;
 }
 
-bool NullsoftScriptableInstallSystemArchive::hasEntry(const Entry & entry) const {
-	return entry.getParentArchive() == this &&
-			 entry.getIndex() < m_entries.size() &&
-			 m_entries[entry.getIndex()] != nullptr &&
-			 m_entries[entry.getIndex()].get() == &entry;
-}
+std::vector<std::shared_ptr<ArchiveEntry>> NullsoftScriptableInstallSystemArchive::getEntries() const {
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(m_entries.size());
+	std::copy(std::begin(m_entries), std::end(m_entries), std::begin(entries));
 
-bool NullsoftScriptableInstallSystemArchive::hasEntry(const std::string & entryPath, bool caseSensitive) const {
-	return indexOfEntry(entryPath, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-bool NullsoftScriptableInstallSystemArchive::hasEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
-}
-
-size_t NullsoftScriptableInstallSystemArchive::indexOfEntry(const std::string & entryPath, bool caseSensitive) const {
-	if(entryPath.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getPath()), Utilities::trimTrailingPathSeparator(entryPath), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-size_t NullsoftScriptableInstallSystemArchive::indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	if(entryName.empty()) {
-		return std::numeric_limits<size_t>::max();
-	}
-
-	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		if(*i == nullptr) {
-			continue;
-		}
-
-		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
-			continue;
-		}
-
-		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getName()), Utilities::trimTrailingPathSeparator(entryName), caseSensitive)) {
-			return i - m_entries.begin();
-		}
-	}
-
-	return std::numeric_limits<size_t>::max();
-}
-
-const std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry> NullsoftScriptableInstallSystemArchive::getEntry(const std::string & entryPath, bool caseSensitive) const {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry> NullsoftScriptableInstallSystemArchive::getEntry(const std::string & entryPath, bool caseSensitive) {
-	return getEntry(indexOfEntry(entryPath, caseSensitive));
-}
-
-std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry> NullsoftScriptableInstallSystemArchive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
-	return getEntry(indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive));
-}
-
-const std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry> NullsoftScriptableInstallSystemArchive::getEntry(size_t index) const {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
-}
-
-std::weak_ptr<NullsoftScriptableInstallSystemArchive::Entry> NullsoftScriptableInstallSystemArchive::getEntry(size_t index) {
-	if(index >= m_entries.size()) {
-		return std::weak_ptr<Entry>();
-	}
-
-	return m_entries[index];
+	return entries;
 }
 
 std::string NullsoftScriptableInstallSystemArchive::toDebugString(bool includeDate) const {
@@ -445,13 +369,15 @@ std::string NullsoftScriptableInstallSystemArchive::toDebugString(bool includeDa
 	stringStream << fmt::format("Number of Entries: {} (Files: {}, Directories: {})\n", numberOfEntries(), m_numberOfFiles, m_numberOfDirectories);
 
 	for(std::vector<std::shared_ptr<Entry>>::const_iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getInflatedSize());
+		if(i != m_entries.begin()) {
+			stringStream << "\n";
+		}
+
+		stringStream << fmt::format("{}. '{}' Size: {}", (*i)->getIndex(), (*i)->getPath(), (*i)->getUncompressedSize());
 
 		if(includeDate) {
 			stringStream << fmt::format(" Date: {}", Utilities::timePointToString((*i)->getDate()));
 		}
-
-		stringStream << "\n";
 	}
 
 	return stringStream.str();
@@ -561,8 +487,8 @@ bool BlockHeader::parse(const ByteBuffer & data, uint8_t bhoSize) {
 	return true;
 }
 
-static Command getConvertedCommand(uint32_t commandID, Type type, bool unicode, bool logCommandEnabled) {
-	if(type < Type::Park1) {
+static Command getConvertedCommand(uint32_t commandID, NSISType type, bool unicode, bool logCommandEnabled) {
+	if(type < NSISType::Park1) {
 		if(!logCommandEnabled) {
 			return magic_enum::enum_value<Command>(commandID);
 		}
@@ -582,7 +508,7 @@ static Command getConvertedCommand(uint32_t commandID, Type type, bool unicode, 
 		return magic_enum::enum_value<Command>(commandID);
 	}
 
-	if(type >= Type::Park2) {
+	if(type >= NSISType::Park2) {
 		if(commandID == magic_enum::enum_integer(Command::RegisterDynamicLinkLibrary)) {
 			return Command::GetFontVersion;
 		}
@@ -590,7 +516,7 @@ static Command getConvertedCommand(uint32_t commandID, Type type, bool unicode, 
 		commandID--;
 	}
 
-	if(type >= Type::Park3) {
+	if(type >= NSISType::Park3) {
 		if(commandID == magic_enum::enum_integer(Command::RegisterDynamicLinkLibrary)) {
 			return Command::GetFontName;
 		}
@@ -627,7 +553,7 @@ static Command getConvertedCommand(uint32_t commandID, Type type, bool unicode, 
 	return magic_enum::enum_value<Command>(commandID);
 }
 
-static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, Type type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters) {
+static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, NSISType type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters) {
 	if(stringPosition >= numberOfStringCharacters) {
 		return -1;
 	}
@@ -649,7 +575,7 @@ static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, Typ
 			return -1;
 		}
 
-		if(type >= Type::Park1) {
+		if(type >= NSISType::Park1) {
 			if(optionalCode.value() != PARK_CODE) {
 				return -1;
 			}
@@ -677,7 +603,7 @@ static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, Typ
 		return -1;
 	}
 
-	if(type == Type::NSIS3) {
+	if(type == NSISType::NSIS3) {
 		if(optionalCode.value() != NSIS3_CODE_VARIABLE) {
 			return -1;
 		}
@@ -701,7 +627,7 @@ static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, Typ
 	return (optionalValueA.value() & 0x7F) | (static_cast<uint32_t>(optionalValueB.value() & 0x7F) << 7);
 }
 
-static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, Type type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters, uint32_t * offset) {
+static int32_t GetVarIndex(const ByteBuffer & data, uint32_t stringPosition, NSISType type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters, uint32_t * offset) {
 // TODO: implement me later:
 return -1;
 
@@ -741,7 +667,7 @@ return -1;
 */
 }
 
-static int32_t GetVarIndexFinished(const ByteBuffer & data, uint32_t stringPosition, uint8_t endCharacter, Type type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters, uint32_t * offset = nullptr) {
+static int32_t GetVarIndexFinished(const ByteBuffer & data, uint32_t stringPosition, uint8_t endCharacter, NSISType type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters, uint32_t * offset = nullptr) {
 	if(offset != nullptr) {
 		*offset = 0;
 	}
@@ -781,7 +707,7 @@ static int32_t GetVarIndexFinished(const ByteBuffer & data, uint32_t stringPosit
 
 	return variableIndex;
 }
-static bool isCommandParameterString(const ByteBuffer & data, uint32_t stringPosition, uint8_t index, Type type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters) {
+static bool isCommandParameterString(const ByteBuffer & data, uint32_t stringPosition, uint8_t index, NSISType type, bool unicode, uint32_t stringsOffset, uint32_t numberOfStringCharacters) {
 	if(index > 0x7FFF) {
 		return false;
 	}
@@ -789,7 +715,7 @@ static bool isCommandParameterString(const ByteBuffer & data, uint32_t stringPos
 	return GetVarIndexFinished(data, stringPosition, 0, type, unicode, stringsOffset, numberOfStringCharacters) == index;
 }
 
-static std::optional<Command> getBadCommand(const ByteBuffer & data, uint32_t numberOfEntries, Type type, bool unicode, bool logCommandEnabled) {
+static std::optional<Command> getBadCommand(const ByteBuffer & data, uint32_t numberOfEntries, NSISType type, bool unicode, bool logCommandEnabled) {
 	std::optional<uint32_t> optionalCommandID;
 	Command command = Command::InvalidOperationCode;
 	std::optional<Command> badCommand;
@@ -813,7 +739,7 @@ static std::optional<Command> getBadCommand(const ByteBuffer & data, uint32_t nu
 		}
 
 		if(command == Command::ReservedOperationCode ||
-		   (type != Type::NSIS3 && command == Command::GetOperatingSystemInformation)) {
+		   (type != NSISType::NSIS3 && command == Command::GetOperatingSystemInformation)) {
 			badCommand = command;
 			continue;
 		}
@@ -938,7 +864,7 @@ static VersionInformation detectVersion(const ByteBuffer & data, bool unicode, b
 						optionalVersion = data.readUnsignedShort();
 
 						if(optionalVersion.has_value() && (optionalVersion.value() & 0x8080) == 0x8080) {
-							versionInformation.type = Type::NSIS3;
+							versionInformation.type = NSISType::NSIS3;
 							isStrongNSIS = true;
 							break;
 						}
@@ -947,7 +873,7 @@ static VersionInformation detectVersion(const ByteBuffer & data, bool unicode, b
 			}
 
 			if(!isStrongNSIS) {
-				versionInformation.type = Type::Park1;
+				versionInformation.type = NSISType::Park1;
 				isStrongPark = true;
 			}
 		}
@@ -964,7 +890,7 @@ static VersionInformation detectVersion(const ByteBuffer & data, bool unicode, b
 						optionalVersion = data.readByte();
 
 						if(optionalVersion.has_value() && (optionalVersion.value() & 0x80) != 0) {
-							versionInformation.type = Type::NSIS3;
+							versionInformation.type = NSISType::NSIS3;
 							isStrongNSIS = true;
 							break;
 						}
@@ -976,7 +902,7 @@ static VersionInformation detectVersion(const ByteBuffer & data, bool unicode, b
 
 	data.setReadOffset(initialReadOffset);
 
-	if(versionInformation.type == Type::NSIS2 && !unicode) {
+	if(versionInformation.type == NSISType::NSIS2 && !unicode) {
 		Command command = Command::InvalidOperationCode;
 		std::optional<uint32_t> optionalCommandParameter;
 		uint32_t commandParameters[NUMBER_OF_COMMAND_PARAMETERS];
@@ -1095,17 +1021,17 @@ spdlog::error("Failed to read command ID.");
 			wasParkVersionDetected = true;
 		}
 		else if(commandMask != 0) {
-			Type newType = versionInformation.type;
+			NSISType newType = versionInformation.type;
 
 			if(unicode) {
 				switch(commandMask) {
 					case 1 << 3: {
-						newType = Type::Park2;
+						newType = NSISType::Park2;
 						break;
 					}
 
 					case 1 << 4: {
-						newType = Type::Park3;
+						newType = NSISType::Park3;
 						break;
 					}
 				}
@@ -1113,12 +1039,12 @@ spdlog::error("Failed to read command ID.");
 			else {
 				switch(commandMask) {
 					case 1 << 1: {
-						newType = Type::Park2;
+						newType = NSISType::Park2;
 						break;
 					}
 
 					case 1 << 2: {
-						newType = Type::Park3;
+						newType = NSISType::Park3;
 						break;
 					}
 				}
@@ -1142,17 +1068,17 @@ data.setReadOffset(initialReadOffset);
 	}
 
 	if(isStrongPark && !wasParkVersionDetected && !optionalBadCommand.has_value() || optionalBadCommand < Command::SectionSet) {
-		versionInformation.type = Type::Park3;
+		versionInformation.type = NSISType::Park3;
 		logCommandEnabled = true;
 		optionalBadCommand = getBadCommand(data, numberOfEntries, versionInformation.type, unicode, logCommandEnabled);
 
 		if(optionalBadCommand > Command::InvalidOperationCode && optionalBadCommand < Command::SectionSet) {
-			versionInformation.type = Type::Park2;
+			versionInformation.type = NSISType::Park2;
 			logCommandEnabled = false;
 			optionalBadCommand = getBadCommand(data, numberOfEntries, versionInformation.type, unicode, logCommandEnabled);
 
 			if(optionalBadCommand > Command::InvalidOperationCode && optionalBadCommand < Command::SectionSet) {
-				versionInformation.type = Type::Park1;
+				versionInformation.type = NSISType::Park1;
 				optionalBadCommand = getBadCommand(data, numberOfEntries, versionInformation.type, unicode, logCommandEnabled);
 			}
 		}
@@ -1174,16 +1100,28 @@ data.setReadOffset(initialReadOffset);
 }
 
 std::unique_ptr<NullsoftScriptableInstallSystemArchive> NullsoftScriptableInstallSystemArchive::readFrom(const std::string & filePath) {
-	static constexpr size_t NSIS_STEP = 512;
-	static constexpr size_t NSIS_SIGNATURE_OFFSET = 4;
-	static constexpr size_t NSIS_FIRST_HEADER_SIZE = 4 * 7;
-
 	std::unique_ptr<ByteBuffer> data(ByteBuffer::readFrom(filePath, Endianness::LittleEndian));
 
 	if(data == nullptr) {
 spdlog::error("failed to read installer");
 		return nullptr;
 	}
+
+	std::unique_ptr<NullsoftScriptableInstallSystemArchive> nsisArchive(createFrom(std::move(data)));
+
+	if(nsisArchive == nullptr) {
+		return nullptr;
+	}
+
+	nsisArchive->m_filePath = filePath;
+
+	return nsisArchive;
+}
+
+std::unique_ptr<NullsoftScriptableInstallSystemArchive> NullsoftScriptableInstallSystemArchive::createFrom(std::unique_ptr<ByteBuffer> data) {
+	static constexpr size_t NSIS_STEP = 512;
+	static constexpr size_t NSIS_SIGNATURE_OFFSET = 4;
+	static constexpr size_t NSIS_FIRST_HEADER_SIZE = 4 * 7;
 
 	size_t startOffset = 0;
 	uint64_t pePosition = std::numeric_limits<uint64_t>::max();
@@ -1394,7 +1332,7 @@ spdlog::info("readOffsetB: {} dataStreamOffset: {} solid: {}", data->getReadOffs
 
 spdlog::info("readOffsetC: {} headerCompressed: {} compressedHeaderSize: {}", data->getReadOffset(), headerCompressed, compressedHeaderSize);
 
-	ByteBuffer decompressedData;
+	std::unique_ptr<ByteBuffer> decompressedData;
 
 // TODO: implement decompressor:
 	if(headerCompressed) {
@@ -1450,7 +1388,7 @@ spdlog::info("max size exceeded");
 }
 //*/
 
-		if(decompressedData.isEmpty()) {
+		if(decompressedData->isEmpty()) {
 // TODO: err:
 spdlog::error("DECOMPRESSION FAILED!");
 			return nullptr;
@@ -1460,7 +1398,7 @@ spdlog::error("DECOMPRESSION FAILED!");
 spdlog::info("DECOMPRESSED!!");
 
 		if(solid) {
-			std::optional<uint32_t> optionalHeaderSize(decompressedData.getUnsignedInteger(decompressedData.getReadOffset()));
+			std::optional<uint32_t> optionalHeaderSize(decompressedData->getUnsignedInteger(decompressedData->getReadOffset()));
 
 			if(optionalHeaderSize != firstHeader.headerSize) {
 // TODO: err:
@@ -1481,19 +1419,19 @@ spdlog::error("failed to read uncompressed data");
 			return nullptr;
 		}
 
-		decompressedData = std::move(uncompressedData.value());
+		decompressedData = std::make_unique<ByteBuffer>(uncompressedData.value());
 	}
 
 // TODO: temp:
-spdlog::info("got decompressed data! size: {}", decompressedData.getSize());
+spdlog::info("got decompressed data! size: {}", decompressedData->getSize());
 
 	bool is64Bit = false;
 
-	if(decompressedData.getSize() >= 4 + (12 * 8)) {
+	if(decompressedData->getSize() >= 4 + (12 * 8)) {
 		is64Bit = true;
 
 		for(size_t i = 0; i < 8; i++) {
-			if(decompressedData.getUnsignedInteger(decompressedData.getReadOffset() + (4 + 12) * (i + 4)) != 0) {
+			if(decompressedData->getUnsignedInteger(decompressedData->getReadOffset() + (4 + 12) * (i + 4)) != 0) {
 				is64Bit = false;
 				break;
 			}
@@ -1505,13 +1443,13 @@ spdlog::info("got decompressed data! size: {}", decompressedData.getSize());
 // TODO: debugging:
 spdlog::info("64bit: {} bhoSize: {}", is64Bit ? "Y" : "N", bhoSize);
 
-	if(decompressedData.getSize() < 4 + static_cast<size_t>(bhoSize * 8)) {
+	if(decompressedData->getSize() < 4 + static_cast<size_t>(bhoSize * 8)) {
 // TODO: err:
 spdlog::error("Invalid decompressed data size.");
 		return nullptr;
 	}
 
-	if(!decompressedData.skipReadBytes(4 + static_cast<size_t>(bhoSize * 2))) {
+	if(!decompressedData->skipReadBytes(4 + static_cast<size_t>(bhoSize * 2))) {
 		spdlog::error("Data truncated, missing entries block header.");
 
 		return nullptr;
@@ -1519,7 +1457,7 @@ spdlog::error("Invalid decompressed data size.");
 
 	bool unicode = false;
 	bool logCommandEnabled = false;
-	Type type = Type::NSIS2;
+	NSISType type = NSISType::NSIS2;
 	Command command = Command::InvalidOperationCode;
 	uint32_t numberOfStringCharacters = 0;
 	BlockHeader entriesBlockHeader;
@@ -1542,7 +1480,7 @@ original block offset: 20
 [2022-10-13 16:50:11.881] [info] offset #10: 4433
 [2022-10-13 16:50:11.881] [info] offset #11: 4453
 */
-spdlog::info("original block offset: {}", decompressedData.getReadOffset());
+spdlog::info("original block offset: {}", decompressedData->getReadOffset());
 //decompressedData.setReadOffset(4381); // TODO: test override offset
 /*bool bruteForceTest = false;
 size_t testOffset = 0;
@@ -1557,32 +1495,32 @@ break;
 }
 }*/
 
-	if(!entriesBlockHeader.parse(decompressedData, bhoSize)) {
+	if(!entriesBlockHeader.parse(*decompressedData, bhoSize)) {
 // TODO: err:
 spdlog::error("Failed to parse entries block header.");
 		return nullptr;
 	}
 
-	decompressedData.skipReadBytes(bhoSize);
+	decompressedData->skipReadBytes(bhoSize);
 
-	if(!stringsBlockHeader.parse(decompressedData, bhoSize)) {
+	if(!stringsBlockHeader.parse(*decompressedData, bhoSize)) {
 // TODO: err:
 spdlog::error("Failed to parse strings block header.");
 		return nullptr;
 	}
 
-	decompressedData.skipReadBytes(bhoSize);
+	decompressedData->skipReadBytes(bhoSize);
 
-	if(!languageTablesBlockHeader.parse(decompressedData, bhoSize)) {
+	if(!languageTablesBlockHeader.parse(*decompressedData, bhoSize)) {
 // TODO: err:
 spdlog::error("Failed to parse language tables block header.");
 		return nullptr;
 	}
 
-	decompressedData.skipReadBytes(bhoSize);
+	decompressedData->skipReadBytes(bhoSize);
 
 // TODO: debugging:
-spdlog::info("block headers parsed - remaining: {}", decompressedData.getSize() - decompressedData.getReadOffset());
+spdlog::info("block headers parsed - remaining: {}", decompressedData->getSize() - decompressedData->getReadOffset());
 
 // TODO: brute force debugging:
 /*if(bruteForceTest) {
@@ -1595,16 +1533,16 @@ break;
 }
 }*/
 
-	decompressedData.setReadOffset(entriesBlockHeader.offset);
+	decompressedData->setReadOffset(entriesBlockHeader.offset);
 
 	if(entriesBlockHeader.offset == 0 ||
 	   stringsBlockHeader.offset == 0 ||
 	   languageTablesBlockHeader.offset == 0 ||
-	   entriesBlockHeader.offset > decompressedData.getSize() ||
-	   stringsBlockHeader.offset > decompressedData.getSize() ||
-	   languageTablesBlockHeader.offset > decompressedData.getSize()) {
+	   entriesBlockHeader.offset > decompressedData->getSize() ||
+	   stringsBlockHeader.offset > decompressedData->getSize() ||
+	   languageTablesBlockHeader.offset > decompressedData->getSize()) {
 // TODO: err
-spdlog::error("invalid block header offset - decompressedDataSize: {}", decompressedData.getSize());
+spdlog::error("invalid block header offset - decompressedDataSize: {}", decompressedData->getSize());
 spdlog::info("stringsOffset: {} languageTablesOffset: {} entriesOffset: {}",  stringsBlockHeader.offset, languageTablesBlockHeader.offset, entriesBlockHeader.offset);
 spdlog::info("stringsNum: {} languageTablesNum: {} entriesNum: {}", stringsBlockHeader.num, languageTablesBlockHeader.num, entriesBlockHeader.num);
 //if(bruteForceTest) continue;
@@ -1627,14 +1565,14 @@ spdlog::error("invalid string table size");
 		return nullptr;
 	}
 
-	if(decompressedData.getUnsignedByte(decompressedData.getReadOffset() + stringsBlockHeader.offset + stringTableSize - 1) != 0) {
+	if(decompressedData->getUnsignedByte(decompressedData->getReadOffset() + stringsBlockHeader.offset + stringTableSize - 1) != 0) {
 // TODO: err
 spdlog::error("some random undocumented check failed");
 //if(bruteForceTest) continue;
 		return nullptr;
 	}
 
-	unicode = decompressedData.getUnsignedInteger(decompressedData.getReadOffset() + stringsBlockHeader.offset) == 0;
+	unicode = decompressedData->getUnsignedInteger(decompressedData->getReadOffset() + stringsBlockHeader.offset) == 0;
 	numberOfStringCharacters = stringTableSize;
 
 	if(unicode) {
@@ -1647,7 +1585,7 @@ spdlog::error("string table size check failed");
 
 		numberOfStringCharacters >>= 1;
 
-		if(decompressedData.getUnsignedByte(decompressedData.getReadOffset() + stringsBlockHeader.offset + stringTableSize - 2) != 0) {
+		if(decompressedData->getUnsignedByte(decompressedData->getReadOffset() + stringsBlockHeader.offset + stringTableSize - 2) != 0) {
 // TODO: err
 spdlog::error("other random undocumented check failed");
 //if(bruteForceTest) continue;
@@ -1656,14 +1594,14 @@ spdlog::error("other random undocumented check failed");
 	}
 
 	if(entriesBlockHeader.num > (1 << 25) ||
-	   entriesBlockHeader.num * static_cast<size_t>(COMMAND_SIZE) > decompressedData.getSize() - entriesBlockHeader.offset) {
+	   entriesBlockHeader.num * static_cast<size_t>(COMMAND_SIZE) > decompressedData->getSize() - entriesBlockHeader.offset) {
 // TODO: err
 spdlog::error("invalid entries block header count");
 //if(bruteForceTest) continue;
 		return nullptr;
 	}
 
-	VersionInformation versionInformation = detectVersion(decompressedData, unicode, logCommandEnabled, entriesBlockHeader.num, entriesBlockHeader.offset, stringsBlockHeader.offset, numberOfStringCharacters);
+	VersionInformation versionInformation = detectVersion(*decompressedData, unicode, logCommandEnabled, entriesBlockHeader.num, entriesBlockHeader.offset, stringsBlockHeader.offset, numberOfStringCharacters);
 
 // TODO: debugging:
 spdlog::info("version: {} 200: {} 223: {}", magic_enum::enum_name(versionInformation.type), versionInformation.isNSIS200 ? "Y" : "N", versionInformation.isNSIS225 ? "Y" : "N");
@@ -1690,9 +1628,9 @@ break;
 	uint32_t commandParameters[NUMBER_OF_COMMAND_PARAMETERS];
 
 	for(size_t i = 0; i < entriesBlockHeader.num; i++) {
-		decompressedData.setReadOffset(entriesBlockHeader.offset + (i * COMMAND_SIZE));
+		decompressedData->setReadOffset(entriesBlockHeader.offset + (i * COMMAND_SIZE));
 
-		std::optional<uint32_t> optionalCommandID = decompressedData.readUnsignedInteger();
+		std::optional<uint32_t> optionalCommandID = decompressedData->readUnsignedInteger();
 
 		if(!optionalCommandID.has_value()) {
 			spdlog::error("Failed to read command ID #{} from entries block.", i + 1);
@@ -1701,7 +1639,7 @@ break;
 		command = getConvertedCommand(optionalCommandID.value(), type, unicode, logCommandEnabled);
 
 		for(size_t j = 0; j < NUMBER_OF_COMMAND_PARAMETERS; j++) {
-			std::optional<uint32_t> optionalCommandParameter(decompressedData.readUnsignedInteger());
+			std::optional<uint32_t> optionalCommandParameter(decompressedData->readUnsignedInteger());
 
 			if(!optionalCommandParameter.has_value()) {
 				return nullptr;
@@ -1721,7 +1659,7 @@ break;
 				uint32_t parameter0 = commandParameters[0];
 				uint32_t offset = std::numeric_limits<uint32_t>::max();
 
-				int32_t variableIndex = GetVarIndex(decompressedData, parameter0, versionInformation.type, unicode, stringsBlockHeader.offset, numberOfStringCharacters, &offset);
+				int32_t variableIndex = GetVarIndex(*decompressedData, parameter0, versionInformation.type, unicode, stringsBlockHeader.offset, numberOfStringCharacters, &offset);
 
 				if(variableIndex == specialOutputDirectoryVariableIndex ||
 				   variableIndex == NSIS_OUTPUT_DIRECTORY) {
@@ -1764,7 +1702,7 @@ break;
 				//spec_outdir_U.Empty();
 				//spec_outdir_A.Empty();
 
-				if(isCommandParameterString(decompressedData, commandParameters[1], NSIS_OUTPUT_DIRECTORY, versionInformation.type, unicode, stringsBlockHeader.offset, numberOfStringCharacters) &&
+				if(isCommandParameterString(*decompressedData, commandParameters[1], NSIS_OUTPUT_DIRECTORY, versionInformation.type, unicode, stringsBlockHeader.offset, numberOfStringCharacters) &&
 				   commandParameters[2] == 0 &&
 				   commandParameters[3] == 0) {
 					//spec_outdir_U = UPrefixes.Back(); // outdir_U;
@@ -1796,13 +1734,5 @@ break;
 	spdlog::info("end");
 
 // TODO:
-	return std::unique_ptr<NullsoftScriptableInstallSystemArchive>(new NullsoftScriptableInstallSystemArchive(filePath));
-}
-
-const std::vector<std::shared_ptr<NullsoftScriptableInstallSystemArchive::Entry>> & NullsoftScriptableInstallSystemArchive::getEntries() const {
-	return m_entries;
-}
-
-std::vector<std::shared_ptr<NullsoftScriptableInstallSystemArchive::Entry>> & NullsoftScriptableInstallSystemArchive::getEntries() {
-	return m_entries;
+	return std::unique_ptr<NullsoftScriptableInstallSystemArchive>(new NullsoftScriptableInstallSystemArchive());
 }

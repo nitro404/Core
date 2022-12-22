@@ -1,43 +1,37 @@
 #ifndef _NULLSOFT_SCRIPTABLE_INSTALL_SYSTEM_ARCHIVE_H_
 #define _NULLSOFT_SCRIPTABLE_INSTALL_SYSTEM_ARCHIVE_H_
 
-#include "ByteBuffer.h"
+#include "Archive/Archive.h"
 
-#include <chrono>
-#include <memory>
-#include <string>
-#include <vector>
-
-class NullsoftScriptableInstallSystemArchive final {
+class NullsoftScriptableInstallSystemArchive final : public Archive {
 	friend class Entry;
 
 public:
-	class Entry final {
+	class Entry final : public ArchiveEntry {
 		friend class NullsoftScriptableInstallSystemArchive;
 
 	public:
-		~Entry();
+		virtual ~Entry();
 
-		bool isFile() const;
-		bool isDirectory() const;
-		bool isInSubdirectory() const;
-		static bool isInSubdirectory(std::string_view path);
-		std::string getName() const;
-		std::string getPath() const;
-		std::vector<std::weak_ptr<Entry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
-		uint64_t getIndex() const;
-		std::chrono::time_point<std::chrono::system_clock> getDate() const;
-		uint64_t getInflatedSize() const;
-		std::unique_ptr<ByteBuffer> getData() const;
-		uint32_t getCRC32() const;
-		bool writeTo(const std::string & directoryPath, bool overwrite = false) const;
+		virtual bool isFile() const override;
+		virtual bool isDirectory() const override;
+		virtual std::string getPath() const override;
+		virtual uint64_t getIndex() const override;
+		virtual bool hasComment() const override;
+		virtual std::string getComment() const override;
+		virtual std::chrono::time_point<std::chrono::system_clock> getDate() const override;
+		virtual uint64_t getCompressedSize() const override;
+		virtual uint64_t getUncompressedSize() const override;
+		virtual std::unique_ptr<ByteBuffer> getData() const override;
+		virtual uint32_t getCRC32() const override;
+		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const override;
+
+	protected:
+		virtual Archive * getParentArchive() const override;
+		virtual bool setParentArchive(Archive * archive) override;
 
 	private:
 		Entry(uint64_t index, NullsoftScriptableInstallSystemArchive * parentArchive);
-
-		NullsoftScriptableInstallSystemArchive * getParentArchive() const;
-		void clearParentArchive();
-		bool isParentArchiveValid() const;
 
 		uint64_t m_index;
 		std::string m_path;
@@ -49,33 +43,25 @@ public:
 		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
-	~NullsoftScriptableInstallSystemArchive();
+	virtual ~NullsoftScriptableInstallSystemArchive();
 
-	std::string getFilePath() const;
-	uint64_t getInflatedSize() const;
-	size_t numberOfEntries() const;
-	size_t numberOfFiles() const;
-	size_t numberOfDirectories() const;
-	bool hasEntry(const Entry & entry) const;
-	bool hasEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	bool hasEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	size_t indexOfEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	size_t indexOfFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false) const;
-	std::weak_ptr<Entry> getEntry(const std::string & entryPath, bool caseSensitive = false);
-	std::weak_ptr<Entry> getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false) const;
-	const std::weak_ptr<Entry> getEntry(size_t index) const;
-	std::weak_ptr<Entry> getEntry(size_t index);
-	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false) const;
-	std::string toDebugString(bool includeDate = false) const;
+	virtual std::string getDefaultFileExtension() const override;
+	virtual std::string getFilePath() const override;
+	virtual bool hasComment() const override;
+	virtual std::string getComment() const override;
+	virtual size_t numberOfEntries() const override;
+	virtual size_t numberOfFiles() const override;
+	virtual size_t numberOfDirectories() const override;
+	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
+	virtual std::string toDebugString(bool includeDate = false) const override;
 
 	static std::unique_ptr<NullsoftScriptableInstallSystemArchive> readFrom(const std::string & filePath);
+	static std::unique_ptr<NullsoftScriptableInstallSystemArchive> createFrom(std::unique_ptr<ByteBuffer> data);
+
+	static const std::string DEFAULT_FILE_EXTENSION;
 
 private:
-	NullsoftScriptableInstallSystemArchive(const std::string & filePath);
-
-	const std::vector<std::shared_ptr<Entry>> & getEntries() const;
-	std::vector<std::shared_ptr<Entry>> & getEntries();
+	NullsoftScriptableInstallSystemArchive();
 
 	std::string m_filePath;
 	std::vector<std::shared_ptr<Entry>> m_entries;

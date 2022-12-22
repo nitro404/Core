@@ -14,6 +14,7 @@ class Archive {
 
 public:
 	enum class Type {
+		NSIS,
 		Rar,
 		SevenZip,
 		Tar,
