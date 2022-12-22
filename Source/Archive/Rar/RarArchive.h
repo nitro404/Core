@@ -2,14 +2,10 @@
 #define _RAR_ARCHIVE_H_
 
 #include "Archive/Archive.h"
-#include "ByteBuffer.h"
 
 #include <dmc_unrar/dmc_unrar.h>
 
-#include <chrono>
 #include <functional>
-#include <memory>
-#include <string>
 
 class RarArchive final : public Archive {
 	friend class Entry;

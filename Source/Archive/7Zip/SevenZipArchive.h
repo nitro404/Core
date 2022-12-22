@@ -2,15 +2,11 @@
 #define _SEVEN_ZIP_ARCHIVE_H_
 
 #include "Archive/Archive.h"
-#include "ByteBuffer.h"
 
 #include <SevenZip/C/7z.h>
 #include <SevenZip/C/7zFile.h>
 
-#include <chrono>
 #include <functional>
-#include <memory>
-#include <string>
 
 class SevenZipArchive final : public Archive {
 	friend class Entry;

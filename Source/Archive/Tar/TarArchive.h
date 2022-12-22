@@ -3,9 +3,7 @@
 
 #include "Archive/Archive.h"
 
-#include <chrono>
 #include <functional>
-#include <memory>
 
 class TarArchive : public Archive {
 	friend class Entry;

@@ -3,16 +3,11 @@
 
 #include "Archive/Archive.h"
 #include "BitmaskOperators.h"
-#include "ByteBuffer.h"
 
 #include <magic_enum.hpp>
 #include <zip.h>
 
-#include <chrono>
 #include <functional>
-#include <memory>
-#include <string>
-#include <vector>
 
 class ZipArchive final : public Archive {
 	friend class Entry;
