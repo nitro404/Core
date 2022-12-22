@@ -347,6 +347,10 @@ std::string NullsoftScriptableInstallSystemArchive::getComment() const {
 	return {};
 }
 
+size_t NullsoftScriptableInstallSystemArchive::numberOfEntries() const {
+	return m_entries.size();
+}
+
 size_t NullsoftScriptableInstallSystemArchive::numberOfFiles() const {
 	return m_numberOfFiles;
 }
