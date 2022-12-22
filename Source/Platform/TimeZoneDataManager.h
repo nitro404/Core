@@ -12,10 +12,10 @@ public:
 	virtual ~TimeZoneDataManager();
 
 	bool isInitialized() const;
-	bool initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate = false);
+	bool initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 
 protected:
-	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate = false);
+	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 
 private:
 	static std::string getCurrentTimeZoneDatabaseVersion(const std::string & dataDirectoryPath);
@@ -23,7 +23,7 @@ private:
 	static std::string getLatestTimeZoneDatabaseVersion();
 	static std::string getTimeZoneDatabaseDownloadURL(const std::string & timeZoneDatabaseVersion);
 	static std::string getLatestTimeZoneDatabaseDownloadURL();
-	static bool updateTimeZoneDatabase(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate = false);
+	static bool updateTimeZoneDatabase(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 
 	bool m_initialized;
 

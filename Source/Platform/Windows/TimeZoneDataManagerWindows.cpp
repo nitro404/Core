@@ -14,9 +14,13 @@ TimeZoneDataManagerWindows::TimeZoneDataManagerWindows() { }
 
 TimeZoneDataManagerWindows::~TimeZoneDataManagerWindows() { }
 
-bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate) {
+bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
 	std::string windowsTimeZoneFilePath(Utilities::joinPaths(dataDirectoryPath, WINDOWS_TIMEZONE_DATA_FILE_NAME));
 	bool windowsTimeZoneDataFileExists = std::filesystem::is_regular_file(std::filesystem::path(windowsTimeZoneFilePath));
+
+	if(windowsTimeZoneDataFileExists && !shouldUpdate && !forceUpdate) {
+		return true;
+	}
 
 	std::string windowsTimeZoneFileETag;
 
@@ -48,6 +52,11 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 	}
 	else if(response->getStatusCode() == magic_enum::enum_integer(HTTPStatusCode::NotModified)) {
 		spdlog::debug("Windows time zone data file is already up to date!");
+
+		if(updated != nullptr) {
+			*updated = true;
+		}
+
 		return true;
 	}
 	else if(response->isFailureStatusCode()) {
@@ -61,6 +70,10 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 	if(!response->getBody()->writeTo(windowsTimeZoneFilePath, true)) {
 		spdlog::error("Failed to write Windows time zone data file to: '{}'.", windowsTimeZoneFilePath);
 		return windowsTimeZoneDataFileExists;
+	}
+
+	if(updated != nullptr) {
+		*updated = true;
 	}
 
 	fileETags.emplace(WINDOWS_TIMEZONE_DATA_FILE_NAME, response->getETag());

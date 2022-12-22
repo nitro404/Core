@@ -8,7 +8,7 @@ public:
 	TimeZoneDataManagerWindows();
 	virtual ~TimeZoneDataManagerWindows();
 
-	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate = false) override;
+	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr) override;
 
 private:
 	TimeZoneDataManagerWindows(const TimeZoneDataManagerWindows &) = delete;

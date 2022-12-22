@@ -47,16 +47,20 @@ bool TimeZoneDataManager::isInitialized() const {
 	return m_initialized;
 }
 
-bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate) {
+bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
 	if(m_initialized) {
 		return true;
 	}
 
-	if(!platformInitialize(dataDirectoryPath, fileETags, forceUpdate)) {
+	if(!platformInitialize(dataDirectoryPath, fileETags, shouldUpdate, forceUpdate, updated)) {
 		return false;
 	}
 
-	if(!updateTimeZoneDatabase(dataDirectoryPath, fileETags, forceUpdate)) {
+	if(!updateTimeZoneDatabase(dataDirectoryPath, fileETags, shouldUpdate, forceUpdate, updated)) {
+		if(updated != nullptr) {
+			*updated = false;
+		}
+
 		return false;
 	}
 
@@ -67,7 +71,7 @@ bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std:
 	return true;
 }
 
-bool TimeZoneDataManager::platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate) {
+bool TimeZoneDataManager::platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
 	return true;
 }
 
@@ -169,8 +173,12 @@ std::string TimeZoneDataManager::getLatestTimeZoneDatabaseDownloadURL() {
 	return getTimeZoneDatabaseDownloadURL(getLatestTimeZoneDatabaseVersion());
 }
 
-bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool forceUpdate) {
+bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
 	bool allTimeZoneDatabaseFilesExist = doAllTimeZoneDatabaseFilesExist(dataDirectoryPath);
+
+	if(allTimeZoneDatabaseFilesExist && !shouldUpdate && !forceUpdate) {
+		return true;
+	}
 
 	std::string latestTimeZoneDatabaseVersion(getLatestTimeZoneDatabaseVersion());
 
@@ -180,6 +188,11 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 
 	if(Utilities::areStringsEqualIgnoreCase(getCurrentTimeZoneDatabaseVersion(dataDirectoryPath), latestTimeZoneDatabaseVersion)) {
 		spdlog::debug("Latest '{}' Internet Assigned Numbers Authority time zone database files are already installed!", latestTimeZoneDatabaseVersion);
+
+		if(updated != nullptr) {
+			*updated = true;
+		}
+
 		return true;
 	}
 
@@ -208,6 +221,11 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 	}
 	else if(latestTimeZoneDatabaseResponse->getStatusCode() == magic_enum::enum_integer(HTTPStatusCode::NotModified)) {
 		spdlog::debug("Internet Assigned Numbers Authority time zone database is already up to date with version '{}'!", latestTimeZoneDatabaseVersion);
+
+		if(updated != nullptr) {
+			*updated = true;
+		}
+
 		return true;
 	}
 	else if(latestTimeZoneDatabaseResponse->isFailureStatusCode()) {
@@ -228,6 +246,10 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 	if(latestTimeZoneDatabaseArchive->extractAllEntries(dataDirectoryPath, true) == 0) {
 		spdlog::error("Failed to extract Internet Assigned Numbers Authority time zone database archive '{}' to directory: '{}'!", latestTimeZoneDatabaseArchiveFileName, dataDirectoryPath);
 		return allTimeZoneDatabaseFilesExist;
+	}
+
+	if(updated != nullptr) {
+		*updated = true;
 	}
 
 	fileETags.emplace(latestTimeZoneDatabaseArchiveFileName, latestTimeZoneDatabaseResponse->getETag());
