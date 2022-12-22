@@ -3,8 +3,6 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-#include <SevenZip/C/7z.h>
-
 #include <spdlog/spdlog.h>
 
 SevenZipArchive::Entry::Entry(uint64_t index, SevenZipArchive * parentArchive)

@@ -14,6 +14,8 @@ set(CORE_SOURCE_FILES
 	Archive/ArchiveFactoryRegistry.cpp
 	Archive/7Zip/SevenZipArchive.cpp
 	Archive/7Zip/SevenZipArchiveEntry.cpp
+	Archive/NSIS/NullsoftScriptableInstallSystemArchive.cpp
+	Archive/NSIS/NullsoftScriptableInstallSystemArchiveEntry.cpp
 	Archive/Rar/RarArchive.cpp
 	Archive/Rar/RarArchiveEntry.cpp
 	Archive/Tar/CompressedTarArchive.cpp
@@ -94,6 +96,7 @@ set(CORE_HEADER_FILES
 	Archive/ArchiveEntry.h
 	Archive/ArchiveFactoryRegistry.h
 	Archive/7Zip/SevenZipArchive.h
+	Archive/NSIS/NullsoftScriptableInstallSystemArchive.h
 	Archive/Rar/RarArchive.h
 	Archive/Tar/CompressedTarArchive.h
 	Archive/Tar/TarArchive.h
