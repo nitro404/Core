@@ -8,7 +8,7 @@
 
 namespace Utilities {
 
-	enum class TimePointFormat {
+	enum class TimeFormat {
 		Default,
 		ISO8601
 	};
@@ -17,9 +17,9 @@ namespace Utilities {
 	std::tm getUTCTime(bool * error);
 	std::optional<std::tm> getLocalTime();
 	std::optional<std::tm> getUTCTime();
-	std::chrono::time_point<std::chrono::system_clock> parseTimePointFromString(const std::string & time, bool * error);
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> parseTimePointFromString(const std::string & time);
-	std::string timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint, TimePointFormat format = TimePointFormat::Default);
+	std::chrono::time_point<std::chrono::system_clock> parseTimePointFromString(const std::string & time, std::optional<TimeFormat> formatHint, bool * error);
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> parseTimePointFromString(const std::string & time, std::optional<TimeFormat> formatHint = {});
+	std::string timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint, TimeFormat format = TimeFormat::Default);
 
 }
 

@@ -456,7 +456,7 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 		timeZone = deviceInfoBridge->getTimeZone();
 	}
 
-	rapidjson::Value sentAtValue(Utilities::timePointToString(std::chrono::system_clock::now(), Utilities::TimePointFormat::ISO8601).c_str(), allocator);
+	rapidjson::Value sentAtValue(Utilities::timePointToString(std::chrono::system_clock::now(), Utilities::TimeFormat::ISO8601).c_str(), allocator);
 	payloadDocument->AddMember(rapidjson::StringRef("sentAt"), sentAtValue, allocator);
 
 	rapidjson::Value contextValue(rapidjson::kObjectType);
@@ -621,7 +621,7 @@ bool SegmentAnalytics::addEventDataToValue(const SegmentAnalyticEvent & analytic
 		outputValue.AddMember(rapidjson::StringRef("type"), typeValue, allocator);
 	}
 
-	rapidjson::Value timeStampValue(Utilities::timePointToString(analyticEvent.getTimestamp(), Utilities::TimePointFormat::ISO8601).c_str(), allocator);
+	rapidjson::Value timeStampValue(Utilities::timePointToString(analyticEvent.getTimestamp(), Utilities::TimeFormat::ISO8601).c_str(), allocator);
 	outputValue.AddMember(rapidjson::StringRef("timestamp"), timeStampValue, allocator);
 
 	if(analyticEvent.hasUserID()) {
