@@ -28,7 +28,7 @@ const std::string NullsoftScriptableInstallSystemArchive::DEFAULT_FILE_EXTENSION
 
 enum class MethodType : uint8_t {
 	Copy,
-	Deflate,
+	ZLib,
 	BZip2,
 	LZMA
 };
@@ -254,7 +254,7 @@ static std::optional<ByteBuffer::CompressionMethod> methodTypeToCompressionMetho
 		case MethodType::Copy:
 			break;
 
-		case MethodType::Deflate:
+		case MethodType::ZLib:
 			return ByteBuffer::CompressionMethod::ZLib;
 
 		case MethodType::BZip2:
@@ -1262,7 +1262,7 @@ spdlog::info("headerSize: {} dataSize: {} totalSize: {}", firstHeader.headerSize
 	bool solid = true;
 	bool filterFlag = false;
 	uint32_t dictionarySize = 1;
-	MethodType methodType = MethodType::Deflate;
+	MethodType methodType = MethodType::ZLib;
 	std::optional<uint32_t> optionalCompressedHeaderSize(data->getUnsignedInteger(data->getReadOffset()));
 
 	if(!optionalCompressedHeaderSize.has_value()) {
@@ -1292,14 +1292,14 @@ spdlog::error("failed to read compressed header size value");
 			methodType = MethodType::BZip2;
 		}
 		else {
-			methodType = MethodType::Deflate;
+			methodType = MethodType::ZLib;
 		}
 	}
 	else if(isBZip2(*data)) {
 		methodType = MethodType::BZip2;
 	}
 	else {
-		methodType = MethodType::Deflate;
+		methodType = MethodType::ZLib;
 	}
 
 spdlog::info("method: {} solid: {}", magic_enum::enum_name(methodType), solid ? "Y" : "N");
@@ -1310,16 +1310,26 @@ spdlog::info("method: {} solid: {}", magic_enum::enum_name(methodType), solid ? 
 // readOffset: 35852 (lzma delta: 16)
 // expected lzma identifier index: 35868
 // brute force lzma identifier:
-/*uint32_t tempDictionarySize = 0;
+if(methodType == MethodType::LZMA) {
+uint32_t tempDictionarySize = 0;
 for(size_t i = 0; i < data->getSize(); i++) {
-	if(Utilities::isLZMA(*data, tempDictionarySize, i)) {
+	if(isLZMA(*data, tempDictionarySize, i)) {
 		spdlog::info("lzma identifier found at {}", i);
 	}
-}*/
+}}//*/
 // #2
 // sigOffset: 34816 (lzma delta: 32)
 // readOffset: 34828 (lzma delta: 20)
 // expected lzma identifier: 34848
+if(methodType == MethodType::BZip2) {
+for(size_t i = 0; i < data->getSize() - 1; i++) {
+	if((*data)[i] == 'B' && (*data)[i + 1] == 'Z') {
+		spdlog::info("bzip2 magic: {}", i);
+	}
+}
+spdlog::info("done bzip2 magic");
+}
+//*/
 
 	static constexpr uint32_t NSIS_COMPRESSED_MASK = 1 << 31;
 
@@ -1348,11 +1358,8 @@ spdlog::error("invalid compression method");
 			return nullptr;
 		}
 
-		decompressedData = data->decompressed(optionalCompressionMethod.value(), data->getReadOffset(), firstHeader.dataSize - NSIS_FIRST_HEADER_SIZE - (solid ? 0 : 4));
-
 // TODO: brute force lzma decompression test:
 /*
-ByteBuffer decompressedData;
 size_t offset = data->getReadOffset();
 size_t iterations = 1;
 size_t iteration = 0;
@@ -1367,7 +1374,7 @@ spdlog::info("iteration: {} maxSize: {}", iteration, maxSize);
 
 		decompressedData = data->decompressed(optionalCompressionMethod.value(), offset, currentSize);
 
-		if(decompressedData.isNotEmpty()) {
+		if(decompressedData != nullptr) {
 spdlog::info("wut?");
 			break;
 		}
@@ -1380,7 +1387,7 @@ spdlog::info("max size exceeded");
 		currentSize++;
 	}
 
-	if(decompressedData.isNotEmpty()) {
+	if(decompressedData->isNotEmpty()) {
 		break;
 	}
 
@@ -1391,6 +1398,12 @@ spdlog::info("max size exceeded");
 	}
 }
 //*/
+
+		decompressedData = data->decompressed(optionalCompressionMethod.value(), data->getReadOffset(), firstHeader.dataSize - NSIS_FIRST_HEADER_SIZE - (solid ? 0 : 4));
+
+		if(decompressedData == nullptr) {
+			return nullptr;
+		}
 
 		if(decompressedData->isEmpty()) {
 // TODO: err:
