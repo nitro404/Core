@@ -75,9 +75,9 @@ hunter_config(libzip
 )
 
 hunter_config(magic_enum
-	URL "https://github.com/Telefrag-Software/magic_enum/archive/refs/heads/hunter-0.7.3.1.zip"
-	VERSION "0.7.3.1"
-	SHA1 "3e7181abeb7b2778a18fa4ae73d8a57db6d5ff1c"
+	URL "https://codeload.github.com/Neargye/magic_enum/zip/tags/v0.8.2"
+	VERSION "0.8.2"
+	SHA1 "aea0008df68137b5555b7e9aa0eb7652d6f85793"
 )
 
 hunter_config(RapidJSON
