@@ -81,9 +81,9 @@ hunter_config(magic_enum
 )
 
 hunter_config(RapidJSON
-	URL "https://github.com/Telefrag-Software/rapidjson/archive/refs/heads/hunter-1.1.0.1.zip"
-	VERSION "1.1.0.1"
-	SHA1 "626bc8a7d738c0ab5648f1c7c86e06ed7d760c1a"
+	URL "https://github.com/Telefrag-Software/rapidjson/archive/refs/heads/hunter-1.1.0.2.zip"
+	VERSION "1.1.0.2"
+	SHA1 "8becaf473da8d71dcaab641cea55723b400d7116"
 )
 
 hunter_config(SevenZip
