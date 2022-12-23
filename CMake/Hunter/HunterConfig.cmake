@@ -115,6 +115,12 @@ hunter_config(ZLIB
 	SHA1 "1189eb8d6a0d8f5b2cd676f09661f4864cc85896"
 )
 
+hunter_config(zstd
+	URL "https://codeload.github.com/facebook/zstd/zip/tags/v1.5.2"
+	VERSION "1.5.2"
+	SHA1 "f52fc3920828076655386f14da4e3bf4dba6467e"
+)
+
 # cURL Dependencies
 hunter_config(c-ares
 	VERSION "1.14.0-p0"

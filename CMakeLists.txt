@@ -67,4 +67,5 @@ target_link_libraries(
 			tidy::tidy-static
 			tinyxml2::tinyxml2
 			ZLIB::zlib
+			zstd::libzstd_static
 )
