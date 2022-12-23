@@ -64,9 +64,14 @@ hunter_config(liblzma
 )
 
 hunter_config(libzip
-	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.8.0.2.zip"
-	VERSION "1.8.0.2"
-	SHA1 "fe21a3d2e4724774506c431c7d1e2095629fb68e"
+	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.9.2.1.zip"
+	VERSION "1.9.2.1"
+	SHA1 "a8981f9ac94783fbd9927e2a01a4f2dab17bdfcf"
+	CMAKE_ARGS
+		BUILD_TOOLS=OFF
+		BUILD_REGRESS=OFF
+		BUILD_EXAMPLES=OFF
+		BUILD_DOC=OFF
 )
 
 hunter_config(magic_enum
