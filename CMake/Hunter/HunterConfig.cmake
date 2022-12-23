@@ -22,9 +22,9 @@ hunter_config(CURL
 )
 
 hunter_config(date
-	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.1.1.zip"
-	VERSION "3.0.1.1"
-	SHA1 "18061fdb7b6ddcc09aff2c28a5cc6ff0d4cd651f"
+	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.1.2.zip"
+	VERSION "3.0.1.2"
+	SHA1 "5046f9fc6b9b0b4432807659c1f21c4638da0fcb"
 	CMAKE_ARGS
 		BUILD_TZ_LIB=ON
 		USE_SYSTEM_TZ_DB=OFF
