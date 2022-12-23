@@ -44,9 +44,9 @@ hunter_config(double-conversion
 )
 
 hunter_config(fmt
-	URL "https://github.com/Telefrag-Software/fmt/archive/refs/heads/hunter-8.0.1.zip"
-	VERSION "8.0.1"
-	SHA1 "b5cd7cca9bda1490d76843dad25f9c585b37a5cb"
+	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/9.1.0"
+	VERSION "9.1.0"
+	SHA1 "acc663874d9f9362b1b2f3cab49b3d9fe254854c"
 )
 
 hunter_config(GTest
@@ -88,9 +88,9 @@ hunter_config(SevenZip
 )
 
 hunter_config(spdlog
-	URL "https://github.com/Telefrag-Software/spdlog/archive/refs/heads/hunter-1.8.5.1.zip"
-	VERSION "1.8.5.1"
-	SHA1 "37aa29d005449fa4f3cef7264b3796f72b59acc3"
+	URL "https://github.com/Telefrag-Software/spdlog/archive/refs/heads/hunter-1.11.0.0.zip"
+	VERSION "1.11.0.0"
+	SHA1 "5fdb178952d99d6bcc9d9e77ca443817ba4b0ea6"
 )
 
 hunter_config(tidy

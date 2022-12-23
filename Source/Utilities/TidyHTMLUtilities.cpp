@@ -76,7 +76,7 @@ std::string Utilities::tidyHTML(const std::string & html) {
 	}
 
 	if(result > 0) {
-		spdlog::debug("Tidy HTML diagnostics: {}", errorBuffer->bp);
+		spdlog::debug("Tidy HTML diagnostics: {}", reinterpret_cast<const char *>(errorBuffer->bp));
 	}
 
 	return std::string(reinterpret_cast<const char *>(outputBuffer->bp), outputBuffer->size);
