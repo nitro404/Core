@@ -58,6 +58,7 @@ target_link_libraries(
 			double-conversion::double-conversion
 			fmt::fmt
 			LibLZMA::LibLZMA
+			Libssh2::libssh2
 			libzip::zip
 			magic_enum::magic_enum
 			RapidJSON::rapidjson

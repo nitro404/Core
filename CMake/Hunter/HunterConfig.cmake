@@ -13,9 +13,9 @@ hunter_config(CryptoPP
 )
 
 hunter_config(CURL
-	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-7.81.0.6.zip"
-	VERSION "7.81.0.6"
-	SHA1 "22ea0a7d6e770da57926ed43ac1c2c8dea3d4a89"
+	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-7.87.0.0.zip"
+	VERSION "7.87.0.0"
+	SHA1 "1665f94819bef1e21e2622771e13acf527e3fc25"
 	CMAKE_ARGS
 		CURL_USE_OPENSSL=ON
 		BUILD_SHARED_LIBS=OFF
@@ -113,6 +113,19 @@ hunter_config(ZLIB
 	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.2.13.1.zip"
 	VERSION "1.2.13.1"
 	SHA1 "1189eb8d6a0d8f5b2cd676f09661f4864cc85896"
+)
+
+# cURL Dependencies
+hunter_config(c-ares
+	VERSION "1.14.0-p0"
+)
+
+hunter_config(Libssh2
+	VERSION "1.9.0-p0"
+)
+
+hunter_config(OpenSSL
+	VERSION "1.1.1o"
 )
 
 include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)
