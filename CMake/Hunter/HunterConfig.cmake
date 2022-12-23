@@ -99,9 +99,9 @@ hunter_config(spdlog
 )
 
 hunter_config(tidy
-	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.2.zip"
-	VERSION "5.8.0.2"
-	SHA1 "51d9e9329db1eeaf1ffafd075f6d4370b5b9d81d"
+	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.9.20.zip"
+	VERSION "5.9.20"
+	SHA1 "9f7d9f291c2c5f8d9203ed72890e9353eca09c01"
 	CMAKE_ARGS
 		BUILD_SHARED_LIB=OFF
 		SUPPORT_CONSOLE_APP=OFF
