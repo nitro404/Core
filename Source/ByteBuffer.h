@@ -28,7 +28,8 @@ public:
 		BZip2,
 		LZMA,
 		XZ,
-		ZLib
+		ZLib,
+		ZStandard
 	};
 
 	ByteBuffer(Endianness endianness = DEFAULT_ENDIANNESS);

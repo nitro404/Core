@@ -13,6 +13,7 @@
 #include <double-conversion/ieee.h>
 #include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
+#include <zstd.h>
 
 #include <bitset>
 #include <filesystem>
@@ -1624,6 +1625,23 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 
 			break;
 		}
+		case CompressionMethod::ZStandard: {
+			size_t uncompressedSize = ZSTD_getFrameContentSize(m_data.data() + offset, size);
+
+			if(uncompressedSize == ZSTD_CONTENTSIZE_UNKNOWN || uncompressedSize == ZSTD_CONTENTSIZE_ERROR) {
+				spdlog::error("Failed to determine decompressed Zstandard data size.");
+				return nullptr;
+			}
+
+			decompressedData->resize(uncompressedSize);
+
+			if(ZSTD_isError(ZSTD_decompress(decompressedData->getRawData(), decompressedData->getSize(), m_data.data() + offset, size))) {
+				spdlog::error("Failed to decompress Zstandard data.");
+				return nullptr;
+			}
+
+			return decompressedData;
+		}
 	}
 
 	return nullptr;
@@ -1785,6 +1803,23 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 			}
 
 			break;
+		}
+		case CompressionMethod::ZStandard: {
+			size_t maximumCompressedSize = ZSTD_compressBound(size);
+
+			compressedData->resize(maximumCompressedSize);
+
+			// TODO: Allow Zstandard compression level to be customizable:
+			size_t compressedSize = ZSTD_compress(compressedData->getRawData(), compressedData->getSize(), m_data.data() + offset, size, ZSTD_CLEVEL_DEFAULT);
+
+			if(ZSTD_isError(compressedSize)) {
+				spdlog::error("Failed to compress Zstandard data.");
+				return nullptr;
+			}
+
+			compressedData->resize(compressedSize);
+
+			return compressedData;
 		}
 	}
 

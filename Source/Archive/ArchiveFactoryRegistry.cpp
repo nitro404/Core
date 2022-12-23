@@ -7,6 +7,7 @@
 #include "Archive/Tar/TarGZipArchive.h"
 #include "Archive/Tar/TarLZMAArchive.h"
 #include "Archive/Tar/TarXZArchive.h"
+#include "Archive/Tar/TarZStandardArchive.h"
 #include "Archive/Zip/ZipArchive.h"
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
@@ -121,6 +122,12 @@ void ArchiveFactoryRegistry::assignStandardFactories() {
 		return TarXZArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarXZArchive::readFrom(filePath);
+	});
+
+	setFactory(TarZStandardArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+		return TarZStandardArchive::createFrom(std::move(buffer));
+	}, [](const std::string & filePath) {
+		return TarZStandardArchive::readFrom(filePath);
 	});
 
 	setFactory(ZipArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {

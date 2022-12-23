@@ -22,6 +22,7 @@ set(CORE_SOURCE_FILES
 	Archive/Tar/TarLZMAArchive.cpp
 	Archive/Tar/TarUtilities.cpp
 	Archive/Tar/TarXZArchive.cpp
+	Archive/Tar/TarZStandardArchive.cpp
 	Archive/Zip/ZipArchive.cpp
 	Archive/Zip/ZipArchiveEntry.cpp
 	Archive/Zip/ZipArchiveSourceBuffer.cpp
@@ -98,6 +99,7 @@ set(CORE_HEADER_FILES
 	Archive/Tar/TarLZMAArchive.h
 	Archive/Tar/TarUtilities.h
 	Archive/Tar/TarXZArchive.h
+	Archive/Tar/TarZStandardArchive.h
 	Archive/Zip/ZipArchive.h
 	Archive/Zip/ZipUtilities.h
 	Arguments/ArgumentCollection.h
