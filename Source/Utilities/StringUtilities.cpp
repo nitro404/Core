@@ -1155,3 +1155,28 @@ std::optional<int8_t> Utilities::compareVersions(const std::string & v1, const s
 		index++;
 	}
 }
+
+std::string_view Utilities::readLine(std::string_view data, size_t & offset) {
+	if(data.empty() || offset >= data.length()) {
+		return {};
+	}
+
+	bool hasCarriageReturn = false;
+	size_t newLineIndex = data.find_first_of("\n", offset);
+
+	if(newLineIndex == std::string::npos) {
+		std::string_view line(data.data() + offset, data.length() - offset);
+		offset = data.length();
+
+		return line;
+	}
+	else if(newLineIndex != 0 && data[newLineIndex - 1] == '\r') {
+		hasCarriageReturn = true;
+		newLineIndex--;
+	}
+
+	std::string_view line(data.data() + offset, newLineIndex - offset);
+	offset = newLineIndex + (hasCarriageReturn ? 2 : 1);
+
+	return line;
+}

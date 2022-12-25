@@ -76,6 +76,7 @@ namespace Utilities {
 	std::optional<double> parseDouble(const std::string & data);
 	std::optional<std::vector<std::string>> parseVersion(const std::string & value, bool trimTrailingZeroes = false);
 	std::optional<int8_t> compareVersions(const std::string & v1, const std::string & v2, bool caseSensitive = false);
+	std::string_view readLine(std::string_view data, size_t & offset);
 
 }
 
