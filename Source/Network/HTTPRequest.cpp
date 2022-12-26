@@ -27,7 +27,7 @@ HTTPRequest::HTTPRequest(HTTPRequest::Method method, const std::string & url, HT
 
 HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
 	: HTTPTransfer(request)
-	, HTTPRequestSettings()
+	, HTTPRequestSettings(request)
 	, m_method(request.m_method)
 	, m_url(std::move(request.m_url))
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
@@ -41,7 +41,7 @@ HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
 
 HTTPRequest::HTTPRequest(const HTTPRequest & request)
 	: HTTPTransfer(request)
-	, HTTPRequestSettings()
+	, HTTPRequestSettings(request)
 	, m_method(request.m_method)
 	, m_url(request.m_url)
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)

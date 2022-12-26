@@ -78,6 +78,10 @@ void HTTPService::setConfiguration(const HTTPConfiguration & configuration) {
 		m_networkTimeout = configuration.networkTimeout.value();
 	}
 
+	if(configuration.transferTimeout.has_value()) {
+		m_transferTimeout = configuration.transferTimeout.value();
+	}
+
 	if(configuration.maximumRedirects.has_value()) {
 		m_maximumRedirects = configuration.maximumRedirects.value();
 	}

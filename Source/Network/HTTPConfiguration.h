@@ -10,6 +10,7 @@ struct HTTPConfiguration {
 	std::string baseURL;
 	std::optional<std::chrono::seconds> connectionTimeout;
 	std::optional<std::chrono::seconds> networkTimeout;
+	std::optional<std::chrono::seconds> transferTimeout;
 	std::optional<int64_t> maximumRedirects;
 };
 

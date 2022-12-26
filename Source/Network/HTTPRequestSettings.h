@@ -6,7 +6,7 @@
 
 class HTTPRequestSettings {
 public:
-	HTTPRequestSettings(std::chrono::seconds connectionTimeout = std::chrono::seconds(0), std::chrono::seconds networkTimeout = std::chrono::seconds(0));
+	HTTPRequestSettings(std::chrono::seconds connectionTimeout = std::chrono::seconds(0), std::chrono::seconds networkTimeout = std::chrono::seconds(0), std::chrono::seconds transferTimeout = std::chrono::seconds(0), int64_t maximumRedirects = DEFAULT_MAXIMUM_REDIRECTS);
 	HTTPRequestSettings(HTTPRequestSettings && timeout) noexcept;
 	HTTPRequestSettings(const HTTPRequestSettings & timeout);
 	HTTPRequestSettings & operator = (HTTPRequestSettings && timeout) noexcept;
@@ -19,6 +19,9 @@ public:
 	bool hasNetworkTimeout() const;
 	std::chrono::seconds getNetworkTimeout() const;
 	void setNetworkTimeout(std::chrono::seconds timeout);
+	bool hasTransferTimeout() const;
+	std::chrono::seconds getTransferTimeout() const;
+	void setTransferTimeout(std::chrono::seconds timeout);
 	int64_t getMaximumRedirects() const;
 	void setMaximumRedirects(int64_t maximumRedirects);
 
@@ -30,6 +33,7 @@ public:
 protected:
 	std::chrono::seconds m_connectionTimeout;
 	std::chrono::seconds m_networkTimeout;
+	std::chrono::seconds m_transferTimeout;
 	int64_t m_maximumRedirects;
 	mutable std::recursive_mutex m_requestSettingsMutex;
 };

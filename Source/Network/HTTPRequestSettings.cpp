@@ -4,19 +4,22 @@ using namespace std::chrono_literals;
 
 const int64_t HTTPRequestSettings::DEFAULT_MAXIMUM_REDIRECTS = 10L;
 
-HTTPRequestSettings::HTTPRequestSettings(std::chrono::seconds connectionTimeout, std::chrono::seconds networkTimeout)
+HTTPRequestSettings::HTTPRequestSettings(std::chrono::seconds connectionTimeout, std::chrono::seconds networkTimeout, std::chrono::seconds transferTimeout, int64_t maximumRedirects )
 	: m_connectionTimeout(connectionTimeout)
 	, m_networkTimeout(networkTimeout)
+	, m_transferTimeout(transferTimeout)
 	, m_maximumRedirects(DEFAULT_MAXIMUM_REDIRECTS) { }
 
 HTTPRequestSettings::HTTPRequestSettings(HTTPRequestSettings && requestSettings) noexcept
 	: m_connectionTimeout(requestSettings.m_connectionTimeout)
 	, m_networkTimeout(requestSettings.m_networkTimeout)
+	, m_transferTimeout(requestSettings.m_transferTimeout)
 	, m_maximumRedirects(requestSettings.m_maximumRedirects) { }
 
 HTTPRequestSettings::HTTPRequestSettings(const HTTPRequestSettings & requestSettings)
 	: m_connectionTimeout(requestSettings.m_connectionTimeout)
 	, m_networkTimeout(requestSettings.m_networkTimeout)
+	, m_transferTimeout(requestSettings.m_transferTimeout)
 	, m_maximumRedirects(requestSettings.m_maximumRedirects) { }
 
 HTTPRequestSettings & HTTPRequestSettings::operator = (HTTPRequestSettings && requestSettings) noexcept {
@@ -26,6 +29,7 @@ HTTPRequestSettings & HTTPRequestSettings::operator = (HTTPRequestSettings && re
 
 		m_connectionTimeout = requestSettings.m_connectionTimeout;
 		m_networkTimeout = requestSettings.m_networkTimeout;
+		m_transferTimeout = requestSettings.m_transferTimeout;
 		m_maximumRedirects = requestSettings.m_maximumRedirects;
 	}
 
@@ -38,6 +42,7 @@ HTTPRequestSettings & HTTPRequestSettings::operator = (const HTTPRequestSettings
 
 	m_connectionTimeout = requestSettings.m_connectionTimeout;
 	m_networkTimeout = requestSettings.m_networkTimeout;
+	m_transferTimeout = requestSettings.m_transferTimeout;
 	m_maximumRedirects = requestSettings.m_maximumRedirects;
 
 	return *this;
@@ -79,6 +84,24 @@ void HTTPRequestSettings::setNetworkTimeout(std::chrono::seconds timeout) {
 	std::lock_guard<std::recursive_mutex> lock(m_requestSettingsMutex);
 
 	m_networkTimeout = timeout;
+}
+
+bool HTTPRequestSettings::hasTransferTimeout() const {
+	std::lock_guard<std::recursive_mutex> lock(m_requestSettingsMutex);
+
+	return m_transferTimeout != 0ms;
+}
+
+std::chrono::seconds HTTPRequestSettings::getTransferTimeout() const {
+	std::lock_guard<std::recursive_mutex> lock(m_requestSettingsMutex);
+
+	return m_transferTimeout;
+}
+
+void HTTPRequestSettings::setTransferTimeout(std::chrono::seconds timeout) {
+	std::lock_guard<std::recursive_mutex> lock(m_requestSettingsMutex);
+
+	m_transferTimeout = timeout;
 }
 
 int64_t HTTPRequestSettings::getMaximumRedirects() const {

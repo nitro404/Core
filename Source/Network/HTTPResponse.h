@@ -20,7 +20,7 @@ class HTTPResponse final : public HTTPTransfer {
 	friend class HTTPService;
 
 public:
-	enum class State: uint8_t {
+	enum class State : uint16_t {
 		None = 0,
 		Connecting = 1,
 		ReceivingHeaders = 1 << 1,
@@ -29,9 +29,10 @@ public:
 		Aborted = 1 << 4,
 		ConnectionTimedOut = 1 << 5,
 		NetworkTimedOut = 1 << 6,
-		Error = 1 << 7,
+		TransferTimedOut = 1 << 7,
+		Error = 1 << 8,
 		Receiving = ReceivingData | ReceivingHeaders,
-		TimedOut = ConnectionTimedOut | NetworkTimedOut,
+		TimedOut = ConnectionTimedOut | NetworkTimedOut | TransferTimedOut,
 		Failed = Aborted | TimedOut | Error,
 		Done = Completed | Failed
 	};
@@ -102,6 +103,7 @@ private:
 	bool onTransferCompleted(bool success);
 	bool onConnectionTimedOut();
 	bool onNetworkTimedOut();
+	bool onTransferTimedOut();
 	bool onTransferAborted();
 	bool onTransferError(const std::string & errorMessage);
 
@@ -111,6 +113,7 @@ private:
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_connectionInitiatedSteadyTimePoint;
 	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_connectionEstablishedSystemTimePoint;
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_connectionEstablishedSteadyTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_lastDataReceivedSteadyTimePoint;
 	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_transferCompletedSystemTimePoint;
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_transferCompletedSteadyTimePoint;
 	std::string m_localIPAddress;

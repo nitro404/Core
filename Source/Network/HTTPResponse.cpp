@@ -384,6 +384,8 @@ size_t HTTPResponse::receiveData(const char * data, size_t size, size_t numberOf
 	size_t dataSize = size * numberOfBytes;
 	response->appendData(data, dataSize);
 
+	response->m_lastDataReceivedSteadyTimePoint = std::chrono::steady_clock::now();
+
 	return dataSize;
 }
 
@@ -397,6 +399,8 @@ size_t HTTPResponse::receiveHeader(const char * data, size_t size, size_t number
 	if(response->isReadOnly()) {
 		return 0u;
 	}
+
+	response->m_lastDataReceivedSteadyTimePoint = std::chrono::steady_clock::now();
 
 	response->setState(State::ReceivingHeaders);
 
@@ -616,40 +620,31 @@ bool HTTPResponse::checkTimeouts() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(m_state == State::Connecting) {
-		if(m_request->getConnectionTimeout() == 0s) {
-			return false;
+		if(m_request->getConnectionTimeout() != 0s) {
+			std::optional<std::chrono::milliseconds> connectionTimeElapsed(getConnectionTimeElapsed());
+
+			if(connectionTimeElapsed.has_value() && connectionTimeElapsed.value() > m_request->getConnectionTimeout()) {
+				onConnectionTimedOut();
+				return true;
+			}
 		}
-
-		std::optional<std::chrono::milliseconds> connectionTimeElapsed(getConnectionTimeElapsed());
-
-		if(!connectionTimeElapsed.has_value()) {
-			return false;
-		}
-
-		if(connectionTimeElapsed.value() > m_request->getConnectionTimeout()) {
-			onConnectionTimedOut();
-			return true;
-		}
-
-		return false;
 	}
 	else if(Any(m_state & State::Receiving)) {
-		if(m_request->getNetworkTimeout() == 0s) {
-			return false;
+		if(m_request->getNetworkTimeout() != 0s) {
+			if(m_lastDataReceivedSteadyTimePoint.has_value() && std::chrono::steady_clock::now() - m_lastDataReceivedSteadyTimePoint.value() > m_request->getNetworkTimeout()) {
+				onNetworkTimedOut();
+				return true;
+			}
 		}
 
-		std::optional<std::chrono::milliseconds> dataTransferTimeElapsed(getDataTransferTimeElapsed());
+		if(m_request->getTransferTimeout() != 0s) {
+			std::optional<std::chrono::milliseconds> dataTransferTimeElapsed(getDataTransferTimeElapsed());
 
-		if(!dataTransferTimeElapsed.has_value()) {
-			return false;
+			if(dataTransferTimeElapsed.has_value() && dataTransferTimeElapsed.value() > m_request->getTransferTimeout()) {
+				onTransferTimedOut();
+				return true;
+			}
 		}
-
-		if(dataTransferTimeElapsed.value() > m_request->getNetworkTimeout()) {
-			onNetworkTimedOut();
-			return true;
-		}
-
-		return false;
 	}
 
 	return false;
@@ -766,6 +761,22 @@ bool HTTPResponse::onNetworkTimedOut() {
 		return false;
 	}
 
+	m_errorMessage = fmt::format("Request timed out with no data received for {} seconds.", m_request->getNetworkTimeout().count());
+
+	setState(State::NetworkTimedOut);
+
+	m_promise.set_value(m_request->getResponse());
+
+	return true;
+}
+
+bool HTTPResponse::onTransferTimedOut() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(isDone()) {
+		return false;
+	}
+
 	if(getDataTransferTimeElapsed().has_value()) {
 		m_errorMessage = fmt::format("Request data transfer timed out after {} milliseconds.", getDataTransferTimeElapsed().value().count());
 	}
@@ -773,7 +784,7 @@ bool HTTPResponse::onNetworkTimedOut() {
 		m_errorMessage = fmt::format("Request data transfer timed out.");
 	}
 
-	setState(State::NetworkTimedOut);
+	setState(State::TransferTimedOut);
 
 	m_promise.set_value(m_request->getResponse());
 
