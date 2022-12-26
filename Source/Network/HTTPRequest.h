@@ -65,9 +65,11 @@ public:
 	bool setIfMatchETag(const std::string & eTag);
 	bool clearIfMatchETag();
 	bool isRequestInitiated() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getRequestInitiatedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getRequestInitiatedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getRequestInitiatedSteadyTimePoint() const;
 	bool isTransferStarted() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferStartedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferStartedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getTransferStartedSteadyTimePoint() const;
 	std::shared_ptr<HTTPResponse> getResponse() const;
 
 	// HTTPResponse aliases
@@ -81,11 +83,14 @@ public:
 	bool isFailure() const;
 	bool isDone() const;
 	bool isConnectionInitiated() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionInitiatedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionInitiatedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getConnectionInitiatedSteadyTimePoint() const;
 	bool isConnectionEstablished() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionEstablishedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionEstablishedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getConnectionEstablishedSteadyTimePoint() const;
 	bool isTransferCompleted() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferCompletedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferCompletedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getTransferCompletedSteadyTimePoint() const;
 	std::optional<std::chrono::milliseconds> getConnectionTimeElapsed() const;
 	std::optional<std::chrono::milliseconds> getDataTransferTimeElapsed() const;
 	std::optional<std::chrono::milliseconds> getRequestDuration() const;
@@ -107,8 +112,10 @@ private:
 	Method m_method;
 	std::string m_url;
 	EncodingTypes m_acceptedEncodingTypes;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_requestInitiatedTimePoint;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_transferStartedTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_requestInitiatedSystemTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_requestInitiatedSteadyTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_transferStartedSystemTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_transferStartedSteadyTimePoint;
 	HTTPUtilities::CURLStringList m_rawHTTPHeaderList;
 	std::shared_ptr<HTTPResponse> m_response;
 	HTTPUtilities::CURLEasyHandle m_curlEasyHandle;

@@ -174,7 +174,8 @@ protected:
 private:
 	bool m_initialized;
 	bool m_started;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_sessionStartTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_sessionSystemStartTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_sessionSteadyStartTimePoint;
 	std::string m_writeKey;
 	bool m_includeIPAddress;
 	std::string m_ipAddress;

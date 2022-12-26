@@ -73,12 +73,12 @@ bool SegmentAnalyticsCURL::flush(std::chrono::milliseconds waitForDuration) {
 		if(!m_queuedEvents.empty() || !m_analyticEventTransfers.empty()) {
 			lock.unlock();
 
-			std::chrono::time_point<std::chrono::system_clock> flushStartTimePoint = std::chrono::system_clock::now();
+			std::chrono::time_point<std::chrono::steady_clock> flushStartTimePoint = std::chrono::steady_clock::now();
 
 			std::unique_lock<std::recursive_mutex> flushLock(m_flushMutex);
 			m_flushWaitCondition.wait_for(flushLock, waitForDuration);
 
-			std::chrono::milliseconds flushWaitDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - flushStartTimePoint);
+			std::chrono::milliseconds flushWaitDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - flushStartTimePoint);
 
 			spdlog::debug("Waited for {} ms to flush pending analytic events.", flushWaitDuration.count());
 		}

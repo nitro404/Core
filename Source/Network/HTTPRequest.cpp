@@ -31,8 +31,10 @@ HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
 	, m_method(request.m_method)
 	, m_url(std::move(request.m_url))
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
-	, m_requestInitiatedTimePoint(request.m_requestInitiatedTimePoint)
-	, m_transferStartedTimePoint(request.m_transferStartedTimePoint)
+	, m_requestInitiatedSystemTimePoint(request.m_requestInitiatedSystemTimePoint)
+	, m_requestInitiatedSteadyTimePoint(request.m_requestInitiatedSteadyTimePoint)
+	, m_transferStartedSystemTimePoint(request.m_transferStartedSystemTimePoint)
+	, m_transferStartedSteadyTimePoint(request.m_transferStartedSteadyTimePoint)
 	, m_rawHTTPHeaderList(std::move(request.m_rawHTTPHeaderList))
 	, m_response(request.m_response)
 	, m_curlEasyHandle(std::move(request.m_curlEasyHandle)) { }
@@ -43,8 +45,10 @@ HTTPRequest::HTTPRequest(const HTTPRequest & request)
 	, m_method(request.m_method)
 	, m_url(request.m_url)
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
-	, m_requestInitiatedTimePoint(request.m_requestInitiatedTimePoint)
-	, m_transferStartedTimePoint(request.m_transferStartedTimePoint)
+	, m_requestInitiatedSystemTimePoint(request.m_requestInitiatedSystemTimePoint)
+	, m_requestInitiatedSteadyTimePoint(request.m_requestInitiatedSteadyTimePoint)
+	, m_transferStartedSystemTimePoint(request.m_transferStartedSystemTimePoint)
+	, m_transferStartedSteadyTimePoint(request.m_transferStartedSteadyTimePoint)
 	, m_rawHTTPHeaderList(HTTPUtilities::copyCURLStringList(request.m_rawHTTPHeaderList))
 	, m_response(request.m_response) { }
 
@@ -59,8 +63,10 @@ HTTPRequest & HTTPRequest::operator = (HTTPRequest && request) noexcept {
 		m_method = request.m_method;
 		m_url = std::move(request.m_url);
 		m_acceptedEncodingTypes = request.m_acceptedEncodingTypes;
-		m_requestInitiatedTimePoint = request.m_requestInitiatedTimePoint;
-		m_transferStartedTimePoint = request.m_transferStartedTimePoint;
+		m_requestInitiatedSystemTimePoint = request.m_requestInitiatedSystemTimePoint;
+		m_requestInitiatedSteadyTimePoint = request.m_requestInitiatedSteadyTimePoint;
+		m_transferStartedSystemTimePoint = request.m_transferStartedSystemTimePoint;
+		m_transferStartedSteadyTimePoint = request.m_transferStartedSteadyTimePoint;
 		m_rawHTTPHeaderList = std::move(request.m_rawHTTPHeaderList);
 		m_response = request.m_response;
 		m_curlEasyHandle = std::move(request.m_curlEasyHandle);
@@ -79,8 +85,10 @@ HTTPRequest & HTTPRequest::operator = (const HTTPRequest & request) {
 	m_method = request.m_method;
 	m_url = request.m_url;
 	m_acceptedEncodingTypes = request.m_acceptedEncodingTypes;
-	m_requestInitiatedTimePoint = request.m_requestInitiatedTimePoint;
-	m_transferStartedTimePoint = request.m_transferStartedTimePoint;
+	m_requestInitiatedSystemTimePoint = request.m_requestInitiatedSystemTimePoint;
+	m_requestInitiatedSteadyTimePoint = request.m_requestInitiatedSteadyTimePoint;
+	m_transferStartedSystemTimePoint = request.m_transferStartedSystemTimePoint;
+	m_transferStartedSteadyTimePoint = request.m_transferStartedSteadyTimePoint;
 	m_rawHTTPHeaderList = HTTPUtilities::copyCURLStringList(request.m_rawHTTPHeaderList);
 	m_response = request.m_response;
 
@@ -252,25 +260,37 @@ bool HTTPRequest::clearIfMatchETag() {
 bool HTTPRequest::isRequestInitiated() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_requestInitiatedTimePoint.has_value();
+	return m_requestInitiatedSystemTimePoint.has_value();
 }
 
-std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getRequestInitiatedTimePoint() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getRequestInitiatedSystemTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_requestInitiatedTimePoint;
+	return m_requestInitiatedSystemTimePoint;
+}
+
+std::optional<std::chrono::time_point<std::chrono::steady_clock>> HTTPRequest::getRequestInitiatedSteadyTimePoint() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_requestInitiatedSteadyTimePoint;
 }
 
 bool HTTPRequest::isTransferStarted() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_transferStartedTimePoint.has_value();
+	return m_transferStartedSystemTimePoint.has_value();
 }
 
-std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getTransferStartedTimePoint() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getTransferStartedSystemTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_transferStartedTimePoint;
+	return m_transferStartedSystemTimePoint;
+}
+
+std::optional<std::chrono::time_point<std::chrono::steady_clock>> HTTPRequest::getTransferStartedSteadyTimePoint() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_transferStartedSteadyTimePoint;
 }
 
 std::shared_ptr<HTTPResponse> HTTPRequest::getResponse() const {
@@ -289,7 +309,8 @@ bool HTTPRequest::setResponse(std::shared_ptr<HTTPResponse> response) {
 	}
 
 	m_response = response;
-	m_requestInitiatedTimePoint = std::chrono::system_clock::now();
+	m_requestInitiatedSystemTimePoint = std::chrono::system_clock::now();
+	m_requestInitiatedSteadyTimePoint = std::chrono::steady_clock::now();
 	m_readOnly = true;
 
 	return true;
@@ -395,14 +416,24 @@ bool HTTPRequest::isConnectionInitiated() const {
 	return m_response->isConnectionInitiated();
 }
 
-std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getConnectionInitiatedTimePoint() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getConnectionInitiatedSystemTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(m_response == nullptr) {
 		return {};
 	}
 
-	return m_response->getConnectionInitiatedTimePoint();
+	return m_response->getConnectionInitiatedSystemTimePoint();
+}
+
+std::optional<std::chrono::time_point<std::chrono::steady_clock>> HTTPRequest::getConnectionInitiatedSteadyTimePoint() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_response == nullptr) {
+		return {};
+	}
+
+	return m_response->getConnectionInitiatedSteadyTimePoint();
 }
 
 bool HTTPRequest::isConnectionEstablished() const {
@@ -415,14 +446,24 @@ bool HTTPRequest::isConnectionEstablished() const {
 	return m_response->isConnectionEstablished();
 }
 
-std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getConnectionEstablishedTimePoint() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getConnectionEstablishedSystemTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(m_response == nullptr) {
 		return {};
 	}
 
-	return m_response->getConnectionEstablishedTimePoint();
+	return m_response->getConnectionEstablishedSystemTimePoint();
+}
+
+std::optional<std::chrono::time_point<std::chrono::steady_clock>> HTTPRequest::getConnectionEstablishedSteadyTimePoint() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_response == nullptr) {
+		return {};
+	}
+
+	return m_response->getConnectionEstablishedSteadyTimePoint();
 }
 
 bool HTTPRequest::isTransferCompleted() const {
@@ -435,14 +476,24 @@ bool HTTPRequest::isTransferCompleted() const {
 	return m_response->isTransferCompleted();
 }
 
-std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getTransferCompletedTimePoint() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>> HTTPRequest::getTransferCompletedSystemTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(m_response == nullptr) {
 		return {};
 	}
 
-	return m_response->getTransferCompletedTimePoint();
+	return m_response->getTransferCompletedSystemTimePoint();
+}
+
+std::optional<std::chrono::time_point<std::chrono::steady_clock>> HTTPRequest::getTransferCompletedSteadyTimePoint() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_response == nullptr) {
+		return {};
+	}
+
+	return m_response->getTransferCompletedSteadyTimePoint();
 }
 
 std::optional<std::chrono::milliseconds> HTTPRequest::getConnectionTimeElapsed() const {
@@ -502,7 +553,7 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 		HTTPHeaders::USER_AGENT_HEADER_NAME
 	};
 
-	if(!m_requestInitiatedTimePoint.has_value() || m_transferStartedTimePoint.has_value() || m_response == nullptr || curlMultiHandle == nullptr) {
+	if(!m_requestInitiatedSystemTimePoint.has_value() || m_transferStartedSystemTimePoint.has_value() || m_response == nullptr || curlMultiHandle == nullptr) {
 		return false;
 	}
 
@@ -708,7 +759,8 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 		return false;
 	}
 
-	m_transferStartedTimePoint = std::chrono::system_clock::now();
+	m_transferStartedSystemTimePoint = std::chrono::system_clock::now();
+	m_transferStartedSteadyTimePoint = std::chrono::steady_clock::now();
 
 	return true;
 }

@@ -76,7 +76,8 @@ bool SegmentAnalytics::initialize(const Configuration & configuration) {
 		return false;
 	}
 
-	m_sessionStartTimePoint = std::chrono::system_clock::now();
+	m_sessionSystemStartTimePoint = std::chrono::system_clock::now();
+	m_sessionSteadyStartTimePoint = std::chrono::steady_clock::now();
 
 	m_initialized = true;
 
@@ -156,17 +157,17 @@ std::string SegmentAnalytics::getPreviousApplicationBuild() const {
 std::optional<std::chrono::time_point<std::chrono::system_clock>> SegmentAnalytics::getSessionStartedTimePoint() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_sessionStartTimePoint;
+	return m_sessionSystemStartTimePoint;
 }
 
 std::optional<std::chrono::milliseconds> SegmentAnalytics::getSessionDuration() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	if(!m_sessionStartTimePoint.has_value()) {
+	if(!m_sessionSystemStartTimePoint.has_value()) {
 		return {};
 	}
 
-	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - m_sessionStartTimePoint.value());
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_sessionSteadyStartTimePoint.value());
 }
 
 bool SegmentAnalytics::shouldIncludeIPAddress() const {

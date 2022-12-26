@@ -57,11 +57,14 @@ public:
 	bool isFailure() const;
 	bool isDone() const;
 	bool isConnectionInitiated() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionInitiatedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionInitiatedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getConnectionInitiatedSteadyTimePoint() const;
 	bool isConnectionEstablished() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionEstablishedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getConnectionEstablishedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getConnectionEstablishedSteadyTimePoint() const;
 	bool isTransferCompleted() const;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferCompletedTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> getTransferCompletedSystemTimePoint() const;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getTransferCompletedSteadyTimePoint() const;
 	std::optional<std::chrono::milliseconds> getConnectionTimeElapsed() const;
 	std::optional<std::chrono::milliseconds> getDataTransferTimeElapsed() const;
 	std::optional<std::chrono::milliseconds> getRequestDuration() const;
@@ -104,9 +107,12 @@ private:
 
 	uint16_t m_statusCode;
 	State m_state;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_connectionInitiatedTimePoint;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_connectionEstablishedTimePoint;
-	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_transferCompletedTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_connectionInitiatedSystemTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_connectionInitiatedSteadyTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_connectionEstablishedSystemTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_connectionEstablishedSteadyTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_transferCompletedSystemTimePoint;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_transferCompletedSteadyTimePoint;
 	std::string m_localIPAddress;
 	std::string m_primaryIPAddress;
 	std::string m_lastReceivedHeaderName;
