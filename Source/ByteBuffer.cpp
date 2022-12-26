@@ -31,37 +31,39 @@ const ByteBuffer::HashFormat ByteBuffer::DEFAULT_HASH_FORMAT = HashFormat::Hexad
 const ByteBuffer ByteBuffer::EMPTY_BYTE_BUFFER;
 
 ByteBuffer::ByteBuffer(Endianness endianness)
-	: m_data()
+	: m_data(std::make_unique<std::vector<uint8_t>>())
 	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(0) { }
 
 ByteBuffer::ByteBuffer(size_t initialCapacity, Endianness endianness)
-	: m_data(initialCapacity)
+	: m_data(std::make_unique<std::vector<uint8_t>>(initialCapacity))
 	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(0) { }
 
 ByteBuffer::ByteBuffer(const uint8_t * data, size_t size, Endianness endianness)
-	: m_endianness(endianness)
+	: m_data(std::make_unique<std::vector<uint8_t>>())
+	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(size) {
 	if(data != nullptr) {
-		m_data.assign(data, data + size);
+		m_data->assign(data, data + size);
 	}
 }
 
 ByteBuffer::ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness)
-	: m_data(data)
+	: m_data(std::make_unique<std::vector<uint8_t>>(data))
 	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(data.size()) { }
 
 ByteBuffer::ByteBuffer(const std::string & data, Endianness endianness)
-	: m_endianness(endianness)
+	: m_data(std::make_unique<std::vector<uint8_t>>())
+	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(data.size()) {
-	m_data.assign(data.data(), data.data() + data.length());
+	m_data->assign(data.data(), data.data() + data.length());
 }
 
 ByteBuffer::ByteBuffer(ByteBuffer && buffer) noexcept
@@ -71,13 +73,13 @@ ByteBuffer::ByteBuffer(ByteBuffer && buffer) noexcept
 	, m_writeOffset(buffer.m_writeOffset) { }
 
 ByteBuffer::ByteBuffer(const ByteBuffer & buffer)
-	: m_data(buffer.m_data)
+	: m_data(std::make_unique<std::vector<uint8_t>>(*buffer.m_data))
 	, m_endianness(buffer.m_endianness)
 	, m_readOffset(buffer.m_readOffset)
 	, m_writeOffset(buffer.m_writeOffset) { }
 
 ByteBuffer & ByteBuffer::operator = (const char * data) {
-	m_data.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + Utilities::stringLength(data)));
+	m_data->assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + Utilities::stringLength(data)));
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -85,7 +87,7 @@ ByteBuffer & ByteBuffer::operator = (const char * data) {
 }
 
 ByteBuffer & ByteBuffer::operator = (const std::vector<uint8_t> & data) {
-	m_data = data;
+	*m_data = data;
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -93,7 +95,7 @@ ByteBuffer & ByteBuffer::operator = (const std::vector<uint8_t> & data) {
 }
 
 ByteBuffer & ByteBuffer::operator = (const std::string & data) {
-	m_data.assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
+	m_data->assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -112,7 +114,7 @@ ByteBuffer & ByteBuffer::operator = (ByteBuffer && buffer) noexcept {
 }
 
 ByteBuffer & ByteBuffer::operator = (const ByteBuffer & buffer) {
-	m_data = buffer.m_data;
+	m_data->assign(buffer.m_data->data(), buffer.m_data->data() + buffer.m_data->size());
 	m_endianness = buffer.m_endianness;
 	m_readOffset = buffer.m_readOffset;
 	m_writeOffset = buffer.m_writeOffset;
@@ -123,27 +125,27 @@ ByteBuffer & ByteBuffer::operator = (const ByteBuffer & buffer) {
 ByteBuffer::~ByteBuffer() = default;
 
 const std::vector<uint8_t> & ByteBuffer::getData() const {
-	return m_data;
+	return *m_data;
 }
 
 std::vector<uint8_t> & ByteBuffer::getData() {
-	return m_data;
+	return *m_data;
 }
 
 const uint8_t * ByteBuffer::getRawData() const {
-	return m_data.data();
+	return m_data->data();
 }
 
 uint8_t * ByteBuffer::getRawData() {
-	return m_data.data();
+	return m_data->data();
 }
 
 void ByteBuffer::setData(const uint8_t * data, size_t size) {
 	if(data == nullptr) {
-		m_data.clear();
+		m_data->clear();
 	}
 	else {
-		m_data.assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + size));
+		m_data->assign(reinterpret_cast<const uint8_t *>(data), reinterpret_cast<const uint8_t *>(data + size));
 	}
 
 	m_readOffset = 0;
@@ -151,59 +153,59 @@ void ByteBuffer::setData(const uint8_t * data, size_t size) {
 }
 
 void ByteBuffer::setData(const std::vector<uint8_t> & data) {
-	m_data = data;
+	m_data->assign(data.data(), data.data() + data.size());
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
 
 void ByteBuffer::setData(const std::string & data) {
-	m_data.assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
+	m_data->assign(reinterpret_cast<const uint8_t *>(data.data()), reinterpret_cast<const uint8_t *>(data.data() + data.length()));
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
 
 void ByteBuffer::setData(const ByteBuffer & buffer) {
-	m_data = buffer.m_data;
+	m_data->assign(buffer.m_data->data(), buffer.m_data->data() + buffer.m_data->size());
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
 
 bool ByteBuffer::isEmpty() const {
-	return m_data.empty();
+	return m_data->empty();
 }
 
 bool ByteBuffer::isNotEmpty() const {
-	return !m_data.empty();
+	return !m_data->empty();
 }
 
 bool ByteBuffer::isFull() const {
-	return m_data.size() == m_data.max_size();
+	return m_data->size() == m_data->max_size();
 }
 
 size_t ByteBuffer::getSize() const {
-	return m_data.size();
+	return m_data->size();
 }
 
 size_t ByteBuffer::getCapacity() const {
-	return m_data.capacity();
+	return m_data->capacity();
 }
 
 void ByteBuffer::resize(size_t size, uint8_t value) {
-	m_data.resize(size, value);
+	m_data->resize(size, value);
 }
 
 bool ByteBuffer::reserve(size_t capacity) {
-	if(capacity < m_data.size()) {
+	if(capacity < m_data->size()) {
 		return false;
 	}
 
-	m_data.reserve(capacity);
+	m_data->reserve(capacity);
 
 	return true;
 }
 
 void ByteBuffer::shrinkToFit() {
-	m_data.shrink_to_fit();
+	m_data->shrink_to_fit();
 }
 
 Endianness ByteBuffer::getEndianness() const {
@@ -219,25 +221,25 @@ void ByteBuffer::fill(uint8_t value, size_t start, size_t end) {
 		return;
 	}
 
-	memset(m_data.data() + (start * sizeof(uint8_t)), 0, ((end < m_data.size() ? end : m_data.size() - 1) - start + 1) * sizeof(uint8_t));
+	memset(m_data->data() + (start * sizeof(uint8_t)), 0, ((end < m_data->size() ? end : m_data->size() - 1) - start + 1) * sizeof(uint8_t));
 }
 
 void ByteBuffer::reverse(size_t start, size_t end) {
-	if(m_data.size() < 2) {
+	if(m_data->size() < 2) {
 		return;
 	}
 
-	size_t size = m_data.size();
+	size_t size = m_data->size();
 	size_t max = end < size ? end : size - 1;
 	size_t middle = ((end - start) / 2) + 1;
 
 	for(size_t i = start; i < middle; i++) {
-		std::swap(m_data[i], m_data[size - i]);
+		std::swap((*m_data)[i], (*m_data)[size - i]);
 	}
 }
 
 void ByteBuffer::clear() {
-	m_data.clear();
+	m_data->clear();
 }
 
 std::string ByteBuffer::getMD5(HashFormat hashFormat) const {
@@ -280,11 +282,11 @@ size_t ByteBuffer::getReadOffset() const {
 }
 
 void ByteBuffer::setReadOffset(size_t offset) const {
-	m_readOffset = offset > m_data.size() ? m_data.size() : offset;
+	m_readOffset = offset > m_data->size() ? m_data->size() : offset;
 }
 
 bool ByteBuffer::canReadBytes(size_t numberOfBytes) const {
-	return m_data.size() - m_readOffset >= numberOfBytes;
+	return m_data->size() - m_readOffset >= numberOfBytes;
 }
 
 bool ByteBuffer::skipReadBytes(size_t numberOfBytes) const {
@@ -298,11 +300,11 @@ bool ByteBuffer::skipReadBytes(size_t numberOfBytes) const {
 }
 
 size_t ByteBuffer::getRemainingBytes() const {
-	return m_data.size() - m_readOffset;
+	return m_data->size() - m_readOffset;
 }
 
 bool ByteBuffer::isEndOfBuffer() const {
-	return m_readOffset >= m_data.size();
+	return m_readOffset >= m_data->size();
 }
 
 void ByteBuffer::resetReadOffset() const {
@@ -332,7 +334,7 @@ bool ByteBuffer::skipWriteBytes(size_t numberOfBytes) const {
 }
 
 int8_t ByteBuffer::getByte(size_t offset, bool * error) const {
-	if(offset + sizeof(int8_t) > m_data.size()) {
+	if(offset + sizeof(int8_t) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -340,7 +342,7 @@ int8_t ByteBuffer::getByte(size_t offset, bool * error) const {
 		return 0;
 	}
 
-	return static_cast<int8_t>(m_data[offset]);
+	return static_cast<int8_t>((*m_data)[offset]);
 }
 
 std::optional<int8_t> ByteBuffer::getByte(size_t offset) const {
@@ -356,7 +358,7 @@ std::optional<int8_t> ByteBuffer::getByte(size_t offset) const {
 }
 
 uint8_t ByteBuffer::getUnsignedByte(size_t offset, bool * error) const {
-	if(offset + sizeof(uint8_t) > m_data.size()) {
+	if(offset + sizeof(uint8_t) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -364,7 +366,7 @@ uint8_t ByteBuffer::getUnsignedByte(size_t offset, bool * error) const {
 		return 0;
 	}
 
-	return m_data[offset];
+	return (*m_data)[offset];
 }
 
 std::optional<uint8_t> ByteBuffer::getUnsignedByte(size_t offset) const {
@@ -396,7 +398,7 @@ std::optional<int16_t> ByteBuffer::getShort(size_t offset) const {
 }
 
 uint16_t ByteBuffer::getUnsignedShort(size_t offset, bool * error) const {
-	if(offset + sizeof(uint16_t) > m_data.size()) {
+	if(offset + sizeof(uint16_t) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -406,14 +408,14 @@ uint16_t ByteBuffer::getUnsignedShort(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint16_t>(
-			(static_cast<uint16_t>(m_data[offset    ]       )) << 8 |
-			(static_cast<uint16_t>(m_data[offset + 1] & 0xff))
+			(static_cast<uint16_t>((*m_data)[offset    ]       )) << 8 |
+			(static_cast<uint16_t>((*m_data)[offset + 1] & 0xff))
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint16_t>(
-			(static_cast<uint16_t>(m_data[offset + 1]       )) << 8 |
-			(static_cast<uint16_t>(m_data[offset    ] & 0xff))
+			(static_cast<uint16_t>((*m_data)[offset + 1]       )) << 8 |
+			(static_cast<uint16_t>((*m_data)[offset    ] & 0xff))
 		));
 	}
 }
@@ -447,7 +449,7 @@ std::optional<int32_t> ByteBuffer::getInteger(size_t offset) const {
 }
 
 uint32_t ByteBuffer::getUnsignedInteger(size_t offset, bool * error) const {
-	if(offset + sizeof(uint32_t) > m_data.size()) {
+	if(offset + sizeof(uint32_t) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -457,18 +459,18 @@ uint32_t ByteBuffer::getUnsignedInteger(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint32_t>(
-			(static_cast<uint32_t>(m_data[offset    ]       )) << 24 |
-			(static_cast<uint32_t>(m_data[offset + 1] & 0xff)) << 16 |
-			(static_cast<uint32_t>(m_data[offset + 2] & 0xff)) << 8  |
-			(static_cast<uint32_t>(m_data[offset + 3] & 0xff))
+			(static_cast<uint32_t>((*m_data)[offset    ]       )) << 24 |
+			(static_cast<uint32_t>((*m_data)[offset + 1] & 0xff)) << 16 |
+			(static_cast<uint32_t>((*m_data)[offset + 2] & 0xff)) << 8  |
+			(static_cast<uint32_t>((*m_data)[offset + 3] & 0xff))
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint32_t>(
-			(static_cast<uint32_t>(m_data[offset + 3]       )) << 24 |
-			(static_cast<uint32_t>(m_data[offset + 2] & 0xff)) << 16 |
-			(static_cast<uint32_t>(m_data[offset + 1] & 0xff)) << 8  |
-			(static_cast<uint32_t>(m_data[offset    ] & 0xff))
+			(static_cast<uint32_t>((*m_data)[offset + 3]       )) << 24 |
+			(static_cast<uint32_t>((*m_data)[offset + 2] & 0xff)) << 16 |
+			(static_cast<uint32_t>((*m_data)[offset + 1] & 0xff)) << 8  |
+			(static_cast<uint32_t>((*m_data)[offset    ] & 0xff))
 		));
 	}
 }
@@ -502,7 +504,7 @@ std::optional<int64_t> ByteBuffer::getLong(size_t offset) const {
 }
 
 uint64_t ByteBuffer::getUnsignedLong(size_t offset, bool * error) const {
-	if(offset + sizeof(uint64_t) > m_data.size()) {
+	if(offset + sizeof(uint64_t) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -512,26 +514,26 @@ uint64_t ByteBuffer::getUnsignedLong(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint64_t>(
-			(static_cast<uint64_t>(m_data[offset    ]       )) << 56 |
-			(static_cast<uint64_t>(m_data[offset + 1] & 0xff)) << 48 |
-			(static_cast<uint64_t>(m_data[offset + 2] & 0xff)) << 40 |
-			(static_cast<uint64_t>(m_data[offset + 3] & 0xff)) << 32 |
-			(static_cast<uint64_t>(m_data[offset + 4] & 0xff)) << 24 |
-			(static_cast<uint64_t>(m_data[offset + 5] & 0xff)) << 16 |
-			(static_cast<uint64_t>(m_data[offset + 6] & 0xff)) << 8  |
-			(static_cast<uint64_t>(m_data[offset + 7] & 0xff))
+			(static_cast<uint64_t>((*m_data)[offset    ]       )) << 56 |
+			(static_cast<uint64_t>((*m_data)[offset + 1] & 0xff)) << 48 |
+			(static_cast<uint64_t>((*m_data)[offset + 2] & 0xff)) << 40 |
+			(static_cast<uint64_t>((*m_data)[offset + 3] & 0xff)) << 32 |
+			(static_cast<uint64_t>((*m_data)[offset + 4] & 0xff)) << 24 |
+			(static_cast<uint64_t>((*m_data)[offset + 5] & 0xff)) << 16 |
+			(static_cast<uint64_t>((*m_data)[offset + 6] & 0xff)) << 8  |
+			(static_cast<uint64_t>((*m_data)[offset + 7] & 0xff))
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint64_t>(
-			static_cast<uint64_t>((m_data[offset + 7]       )) << 56 |
-			static_cast<uint64_t>((m_data[offset + 6] & 0xff)) << 48 |
-			static_cast<uint64_t>((m_data[offset + 5] & 0xff)) << 40 |
-			static_cast<uint64_t>((m_data[offset + 4] & 0xff)) << 32 |
-			static_cast<uint64_t>((m_data[offset + 3] & 0xff)) << 24 |
-			static_cast<uint64_t>((m_data[offset + 2] & 0xff)) << 16 |
-			static_cast<uint64_t>((m_data[offset + 1] & 0xff)) << 8  |
-			static_cast<uint64_t>((m_data[offset    ] & 0xff))
+			static_cast<uint64_t>(((*m_data)[offset + 7]       )) << 56 |
+			static_cast<uint64_t>(((*m_data)[offset + 6] & 0xff)) << 48 |
+			static_cast<uint64_t>(((*m_data)[offset + 5] & 0xff)) << 40 |
+			static_cast<uint64_t>(((*m_data)[offset + 4] & 0xff)) << 32 |
+			static_cast<uint64_t>(((*m_data)[offset + 3] & 0xff)) << 24 |
+			static_cast<uint64_t>(((*m_data)[offset + 2] & 0xff)) << 16 |
+			static_cast<uint64_t>(((*m_data)[offset + 1] & 0xff)) << 8  |
+			static_cast<uint64_t>(((*m_data)[offset    ] & 0xff))
 		));
 	}
 }
@@ -581,7 +583,7 @@ std::optional<double> ByteBuffer::getDouble(size_t offset) const {
 }
 
 std::string ByteBuffer::getString(size_t length, size_t offset, bool * error) const {
-	if(offset + (length * sizeof(uint8_t)) > m_data.size()) {
+	if(offset + (length * sizeof(uint8_t)) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -592,13 +594,13 @@ std::string ByteBuffer::getString(size_t length, size_t offset, bool * error) co
 	size_t actualLength = length;
 
 	for(size_t i = 0; i < length; i++) {
-		if(m_data[(offset + i) * sizeof(uint8_t)] == 0) {
+		if((*m_data)[(offset + i) * sizeof(uint8_t)] == 0) {
 			actualLength = i;
 			break;
 		}
 	}
 
-	return std::string(reinterpret_cast<const char *>(m_data.data() + (offset * sizeof(uint8_t))), actualLength);
+	return std::string(reinterpret_cast<const char *>(m_data->data() + (offset * sizeof(uint8_t))), actualLength);
 }
 
 std::optional<std::string> ByteBuffer::getString(size_t length, size_t offset) const {
@@ -622,7 +624,7 @@ std::string ByteBuffer::getNullTerminatedString(size_t offset, bool * error) con
 		return std::string();
 	}
 
-	return std::string(reinterpret_cast<const char *>(m_data.data() + (offset * sizeof(uint8_t))));
+	return std::string(reinterpret_cast<const char *>(m_data->data() + (offset * sizeof(uint8_t))));
 }
 
 std::optional<std::string> ByteBuffer::getNullTerminatedString(size_t offset) const {
@@ -638,7 +640,7 @@ std::optional<std::string> ByteBuffer::getNullTerminatedString(size_t offset) co
 }
 
 std::vector<uint8_t> ByteBuffer::getBytes(size_t numberOfBytes, size_t offset, bool * error) const {
-	if(offset + (numberOfBytes * sizeof(uint8_t)) > m_data.size()) {
+	if(offset + (numberOfBytes * sizeof(uint8_t)) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -646,7 +648,7 @@ std::vector<uint8_t> ByteBuffer::getBytes(size_t numberOfBytes, size_t offset, b
 		return std::vector<uint8_t>();
 	}
 
-	const uint8_t * rawDataStart = m_data.data() + (offset * sizeof(uint8_t));
+	const uint8_t * rawDataStart = m_data->data() + (offset * sizeof(uint8_t));
 
 	return std::vector<uint8_t>(rawDataStart, rawDataStart + (numberOfBytes * sizeof(uint8_t)));
 }
@@ -1032,7 +1034,7 @@ bool ByteBuffer::putByte(int8_t value, size_t offset) {
 		return false;
 	}
 
-	m_data[offset] = static_cast<uint8_t>(value);
+	(*m_data)[offset] = static_cast<uint8_t>(value);
 
 	return true;
 }
@@ -1042,7 +1044,7 @@ bool ByteBuffer::putUnsignedByte(uint8_t value, size_t offset) {
 		return false;
 	}
 
-	m_data[offset] = value;
+	(*m_data)[offset] = value;
 
 	return true;
 }
@@ -1059,12 +1061,12 @@ bool ByteBuffer::putUnsignedShort(uint16_t value, size_t offset) {
 	uint16_t bigEndianValue = toBigEndian(value);
 
 	if(m_endianness == Endianness::BigEndian) {
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue);
 	}
 	else {
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
 	}
 
 	return true;
@@ -1082,16 +1084,16 @@ bool ByteBuffer::putUnsignedInteger(uint32_t value, size_t offset) {
 	uint32_t bigEndianValue = toBigEndian(value);
 
 	if(m_endianness == Endianness::BigEndian) {
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue >> 24);
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 16);
-		m_data[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset + 3] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 24);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 16);
+		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue);
 	}
 	else {
-		m_data[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		m_data[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
+		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
 	}
 
 	return true;
@@ -1109,24 +1111,24 @@ bool ByteBuffer::putUnsignedLong(uint64_t value, size_t offset) {
 	uint64_t bigEndianValue = toBigEndian(value);
 
 	if(m_endianness == Endianness::BigEndian) {
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue >> 56);
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 48);
-		m_data[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 40);
-		m_data[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 32);
-		m_data[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 24);
-		m_data[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 16);
-		m_data[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset + 7] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 56);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 48);
+		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 40);
+		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 32);
+		(*m_data)[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 24);
+		(*m_data)[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 16);
+		(*m_data)[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset + 7] = static_cast<uint8_t>(bigEndianValue);
 	}
 	else {
-		m_data[offset + 7] = static_cast<uint8_t>(bigEndianValue >> 56);
-		m_data[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 48);
-		m_data[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 40);
-		m_data[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 32);
-		m_data[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		m_data[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		m_data[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		m_data[offset    ] = static_cast<uint8_t>(bigEndianValue);
+		(*m_data)[offset + 7] = static_cast<uint8_t>(bigEndianValue >> 56);
+		(*m_data)[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 48);
+		(*m_data)[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 40);
+		(*m_data)[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 32);
+		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
+		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
+		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
+		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
 	}
 
 	return true;
@@ -1153,7 +1155,7 @@ bool ByteBuffer::putBytes(const uint8_t * data, size_t size, size_t offset) {
 		return false;
 	}
 
-	memcpy(m_data.data() + (offset * sizeof(uint8_t)), data, size);
+	memcpy(m_data->data() + (offset * sizeof(uint8_t)), data, size);
 
 	return true;
 }
@@ -1163,25 +1165,25 @@ bool ByteBuffer::putBytes(const std::vector<uint8_t> data, size_t offset) {
 }
 
 bool ByteBuffer::putBytes(const ByteBuffer & buffer, size_t offset) {
-	return putBytes(buffer.m_data.data(), buffer.m_data.size(), offset);
+	return putBytes(buffer.m_data->data(), buffer.m_data->size(), offset);
 }
 
 bool ByteBuffer::insertByte(int8_t value, size_t offset) {
-	if(checkOverflow(m_data.size(), sizeof(int8_t))) {
+	if(checkOverflow(m_data->size(), sizeof(int8_t))) {
 		return false;
 	}
 
-	m_data.insert(m_data.begin() + offset, static_cast<uint8_t>(value));
+	m_data->insert(m_data->begin() + offset, static_cast<uint8_t>(value));
 
 	return true;
 }
 
 bool ByteBuffer::insertUnsignedByte(uint8_t value, size_t offset) {
-	if(checkOverflow(m_data.size(), sizeof(uint8_t))) {
+	if(checkOverflow(m_data->size(), sizeof(uint8_t))) {
 		return false;
 	}
 
-	m_data.insert(m_data.begin() + offset, value);
+	m_data->insert(m_data->begin() + offset, value);
 
 	return true;
 }
@@ -1191,7 +1193,7 @@ bool ByteBuffer::insertShort(int16_t value, size_t offset) {
 }
 
 bool ByteBuffer::insertUnsignedShort(uint16_t value, size_t offset) {
-	if(checkOverflow(m_data.size(), sizeof(uint16_t))) {
+	if(checkOverflow(m_data->size(), sizeof(uint16_t))) {
 		return false;
 	}
 
@@ -1207,7 +1209,7 @@ bool ByteBuffer::insertUnsignedShort(uint16_t value, size_t offset) {
 		data[0] = static_cast<uint8_t>(bigEndianValue);
 	}
 
-	m_data.insert(m_data.begin() + offset, data, data + sizeof(uint16_t));
+	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint16_t));
 
 	return true;
 }
@@ -1217,7 +1219,7 @@ bool ByteBuffer::insertInteger(int32_t value, size_t offset) {
 }
 
 bool ByteBuffer::insertUnsignedInteger(uint32_t value, size_t offset) {
-	if(checkOverflow(m_data.size(), sizeof(uint32_t))) {
+	if(checkOverflow(m_data->size(), sizeof(uint32_t))) {
 		return false;
 	}
 
@@ -1237,7 +1239,7 @@ bool ByteBuffer::insertUnsignedInteger(uint32_t value, size_t offset) {
 		data[0] = static_cast<uint8_t>(bigEndianValue);
 	}
 
-	m_data.insert(m_data.begin() + offset, data, data + sizeof(uint32_t));
+	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint32_t));
 
 	return true;
 }
@@ -1247,7 +1249,7 @@ bool ByteBuffer::insertLong(int64_t value, size_t offset) {
 }
 
 bool ByteBuffer::insertUnsignedLong(uint64_t value, size_t offset) {
-	if(checkOverflow(m_data.size(), sizeof(uint64_t))) {
+	if(checkOverflow(m_data->size(), sizeof(uint64_t))) {
 		return false;
 	}
 
@@ -1275,7 +1277,7 @@ bool ByteBuffer::insertUnsignedLong(uint64_t value, size_t offset) {
 		data[0] = static_cast<uint8_t>(bigEndianValue);
 	}
 
-	m_data.insert(m_data.begin() + offset, data, data + sizeof(uint64_t));
+	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint64_t));
 
 	return true;
 }
@@ -1297,11 +1299,11 @@ bool ByteBuffer::insertNullTerminatedString(const std::string & value, size_t of
 }
 
 bool ByteBuffer::insertBytes(const uint8_t * data, size_t size, size_t offset) {
-	if(data == nullptr || checkOverflow(m_data.size(), size * sizeof(uint8_t))) {
+	if(data == nullptr || checkOverflow(m_data->size(), size * sizeof(uint8_t))) {
 		return false;
 	}
 
-	m_data.insert(m_data.begin() + offset, data, data + (size * sizeof(uint8_t)));
+	m_data->insert(m_data->begin() + offset, data, data + (size * sizeof(uint8_t)));
 
 	return true;
 }
@@ -1311,7 +1313,7 @@ bool ByteBuffer::insertBytes(const std::vector<uint8_t> data, size_t offset) {
 }
 
 bool ByteBuffer::insertBytes(const ByteBuffer & buffer, size_t offset) {
-	return insertBytes(buffer.m_data.data(), buffer.m_data.size(), offset);
+	return insertBytes(buffer.m_data->data(), buffer.m_data->size(), offset);
 }
 
 bool ByteBuffer::writeByte(int8_t value) {
@@ -1469,7 +1471,7 @@ bool ByteBuffer::writeBytes(const ByteBuffer & buffer) {
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::clone() const {
-	std::unique_ptr<ByteBuffer> copy(std::make_unique<ByteBuffer>(m_data, m_endianness));
+	std::unique_ptr<ByteBuffer> copy(std::make_unique<ByteBuffer>(*m_data, m_endianness));
 	copy->m_readOffset = m_readOffset;
 	copy->m_writeOffset = m_writeOffset;
 
@@ -1477,11 +1479,11 @@ std::unique_ptr<ByteBuffer> ByteBuffer::clone() const {
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::copyOfRange(size_t start, size_t end) const {
-	if(start >= end || end >= m_data.size()) {
+	if(start >= end || end >= m_data->size()) {
 		return nullptr;
 	}
 
-	return std::make_unique<ByteBuffer>(m_data.data() + (start * sizeof(uint8_t)), end - start + 1);
+	return std::make_unique<ByteBuffer>(m_data->data() + (start * sizeof(uint8_t)), end - start + 1);
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompressionMethod, size_t offset, size_t size) const {
@@ -1490,11 +1492,11 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 	}
 
 	if(size == std::numeric_limits<size_t>::max()) {
-		size = m_data.size();
+		size = m_data->size();
 	}
 
-	if(size > m_data.size() - offset) {
-		size = m_data.size() - offset;
+	if(size > m_data->size() - offset) {
+		size = m_data->size() - offset;
 	}
 
 	if(size == 0) {
@@ -1515,7 +1517,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
 
-			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data->data())) + offset;
 			bZip2Stream->avail_in = size;
 			bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
 			bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1560,7 +1562,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 
-			lzmaStream->next_in = m_data.data() + offset;
+			lzmaStream->next_in = m_data->data() + offset;
 			lzmaStream->avail_in = size;
 			lzmaStream->next_out = outputBuffer;
 			lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1598,7 +1600,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int zLibResult = Z_OK;
 
-			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data->data())) + offset;
 			zLibStream->avail_in = size;
 			zLibStream->next_out = reinterpret_cast<Bytef *>(outputBuffer);
 			zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1626,7 +1628,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 			break;
 		}
 		case CompressionMethod::ZStandard: {
-			size_t uncompressedSize = ZSTD_getFrameContentSize(m_data.data() + offset, size);
+			size_t uncompressedSize = ZSTD_getFrameContentSize(m_data->data() + offset, size);
 
 			if(uncompressedSize == ZSTD_CONTENTSIZE_UNKNOWN || uncompressedSize == ZSTD_CONTENTSIZE_ERROR) {
 				spdlog::error("Failed to determine decompressed Zstandard data size.");
@@ -1635,7 +1637,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::decompressed(CompressionMethod decompres
 
 			decompressedData->resize(uncompressedSize);
 
-			if(ZSTD_isError(ZSTD_decompress(decompressedData->getRawData(), decompressedData->getSize(), m_data.data() + offset, size))) {
+			if(ZSTD_isError(ZSTD_decompress(decompressedData->getRawData(), decompressedData->getSize(), m_data->data() + offset, size))) {
 				spdlog::error("Failed to decompress Zstandard data.");
 				return nullptr;
 			}
@@ -1653,11 +1655,11 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 	}
 
 	if(size == std::numeric_limits<size_t>::max()) {
-		size = m_data.size();
+		size = m_data->size();
 	}
 
-	if(size > m_data.size() - offset) {
-		size = m_data.size() - offset;
+	if(size > m_data->size() - offset) {
+		size = m_data->size() - offset;
 	}
 
 	if(size == 0) {
@@ -1678,7 +1680,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 			int result = BZ_OK;
 
-			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			bZip2Stream->next_in = reinterpret_cast<char *>(const_cast<uint8_t *>(m_data->data())) + offset;
 			bZip2Stream->avail_in = size;
 			bZip2Stream->next_out = reinterpret_cast<char *>(outputBuffer);
 			bZip2Stream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1739,7 +1741,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 
-			lzmaStream->next_in = m_data.data() + offset;
+			lzmaStream->next_in = m_data->data() + offset;
 			lzmaStream->avail_in = size;
 			lzmaStream->next_out = outputBuffer;
 			lzmaStream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1777,7 +1779,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 			static constexpr uint64_t OUTPUT_BUFFER_SIZE = 4096;
 			uint8_t outputBuffer[OUTPUT_BUFFER_SIZE];
 
-			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data.data())) + offset;
+			zLibStream->next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(m_data->data())) + offset;
 			zLibStream->avail_in = size;
 			zLibStream->next_out = outputBuffer;
 			zLibStream->avail_out = OUTPUT_BUFFER_SIZE;
@@ -1810,7 +1812,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 			compressedData->resize(maximumCompressedSize);
 
 			// TODO: Allow Zstandard compression level to be customizable:
-			size_t compressedSize = ZSTD_compress(compressedData->getRawData(), compressedData->getSize(), m_data.data() + offset, size, ZSTD_CLEVEL_DEFAULT);
+			size_t compressedSize = ZSTD_compress(compressedData->getRawData(), compressedData->getSize(), m_data->data() + offset, size, ZSTD_CLEVEL_DEFAULT);
 
 			if(ZSTD_isError(compressedSize)) {
 				spdlog::error("Failed to compress Zstandard data.");
@@ -1827,17 +1829,17 @@ std::unique_ptr<ByteBuffer> ByteBuffer::compressed(CompressionMethod compression
 }
 
 std::string ByteBuffer::toString() const {
-	return std::string(reinterpret_cast<const char *>(m_data.data()), m_data.size());
+	return std::string(reinterpret_cast<const char *>(m_data->data()), m_data->size());
 }
 
 std::string_view ByteBuffer::toStringView() const {
-	return std::string_view(reinterpret_cast<const char *>(m_data.data()), m_data.size());
+	return std::string_view(reinterpret_cast<const char *>(m_data->data()), m_data->size());
 }
 
 std::string ByteBuffer::toBinary() const {
 	std::stringstream binaryStream;
 
-	for(std::vector<uint8_t>::const_iterator it = m_data.begin(); it != m_data.end(); ++it) {
+	for(std::vector<uint8_t>::const_iterator it = m_data->begin(); it != m_data->end(); ++it) {
 		binaryStream << std::bitset<8>(*it).to_string();
 	}
 
@@ -1845,13 +1847,13 @@ std::string ByteBuffer::toBinary() const {
 }
 
 std::string ByteBuffer::toHexadecimal(bool uppercase) const {
-	std::string hex(m_data.size() * 2, '\0');
+	std::string hex(m_data->size() * 2, '\0');
 
 	uint8_t modifier = uppercase ? 0x0 : 0x20;
 
-	for(size_t i = 0; i < m_data.size(); i++) {
-		hex[ i * 2     ] = BASE_16_CHARACTERS[m_data[i] >> 4]   | modifier;
-		hex[(i * 2) + 1] = BASE_16_CHARACTERS[m_data[i] & 0x0f] | modifier;
+	for(size_t i = 0; i < m_data->size(); i++) {
+		hex[ i * 2     ] = BASE_16_CHARACTERS[(*m_data)[i] >> 4]   | modifier;
+		hex[(i * 2) + 1] = BASE_16_CHARACTERS[(*m_data)[i] & 0x0f] | modifier;
 	}
 
 	return hex;
@@ -1860,17 +1862,17 @@ std::string ByteBuffer::toHexadecimal(bool uppercase) const {
 std::string ByteBuffer::toBase64() const {
 	static constexpr char PADDING_CHARACTER = '=';
 
-	size_t length = (((m_data.size() / 3) + ((m_data.size() % 3 != 0) ? 1 : 0))) * 4;
+	size_t length = (((m_data->size() / 3) + ((m_data->size() % 3 != 0) ? 1 : 0))) * 4;
 	std::string base64(length, '\0');
 	uint32_t value = 0;
 	size_t i = 0;
 	size_t offset = 0;
 
-	if(m_data.size() >= 3) {
-		for(; i < m_data.size() - 2; i += 3) {
-			value = static_cast<uint8_t>(m_data[i    ]) << 16 |
-					static_cast<uint8_t>(m_data[i + 1]) <<  8 |
-					static_cast<uint8_t>(m_data[i + 2]);
+	if(m_data->size() >= 3) {
+		for(; i < m_data->size() - 2; i += 3) {
+			value = static_cast<uint8_t>((*m_data)[i    ]) << 16 |
+					static_cast<uint8_t>((*m_data)[i + 1]) <<  8 |
+					static_cast<uint8_t>((*m_data)[i + 2]);
 
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 18) & 0x3f];
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 12) & 0x3f];
@@ -1879,9 +1881,9 @@ std::string ByteBuffer::toBase64() const {
 		}
 	}
 
-	switch(m_data.size() % 3) {
+	switch(m_data->size() % 3) {
 		case 1:
-			value = static_cast<uint8_t>(m_data[i]) << 16;
+			value = static_cast<uint8_t>((*m_data)[i]) << 16;
 
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 18) & 0x3f];
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 12) & 0x3f];
@@ -1890,8 +1892,8 @@ std::string ByteBuffer::toBase64() const {
 			break;
 
 		case 2:
-			value = static_cast<uint8_t>(m_data[i    ]) << 16 |
-					static_cast<uint8_t>(m_data[i + 1]) <<  8;
+			value = static_cast<uint8_t>((*m_data)[i    ]) << 16 |
+					static_cast<uint8_t>((*m_data)[i + 1]) <<  8;
 
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 18) & 0x3f];
 			base64[offset++] = BASE_64_CHARACTERS[(value >> 12) & 0x3f];
@@ -1918,7 +1920,7 @@ ByteBuffer ByteBuffer::fromBinary(const std::string & binary, bool * error) {
 	buffer.resize(size);
 
 	for(size_t i = 0; i < size; i++) {
-		buffer.m_data[i] = static_cast<uint8_t>(std::bitset<8>(binary, i * 8, 8).to_ulong());
+		(*buffer.m_data)[i] = static_cast<uint8_t>(std::bitset<8>(binary, i * 8, 8).to_ulong());
 	}
 
 	return buffer;
@@ -1982,7 +1984,7 @@ ByteBuffer ByteBuffer::fromHexadecimal(const std::string & hexadecimal, bool * e
 			}
 		}
 
-		buffer.m_data[offset++] = value;
+		(*buffer.m_data)[offset++] = value;
 	}
 
 	return buffer;
@@ -2115,7 +2117,7 @@ bool ByteBuffer::writeTo(const std::string & filePath, bool overwrite, bool crea
 		return false;
 	}
 
-	fileStream.write(reinterpret_cast<const char *>(m_data.data()), m_data.size());
+	fileStream.write(reinterpret_cast<const char *>(m_data->data()), m_data->size());
 
 	fileStream.close();
 
@@ -2139,7 +2141,7 @@ std::unique_ptr<ByteBuffer> ByteBuffer::readFrom(const std::string & filePath, E
 	buffer->resize(size);
 
 	fileStream.seekg(0, std::ios::beg);
-	fileStream.read(reinterpret_cast<char *>(buffer->m_data.data()), size);
+	fileStream.read(reinterpret_cast<char *>(buffer->m_data->data()), size);
 	fileStream.close();
 
 	return buffer;
@@ -2174,7 +2176,7 @@ bool ByteBuffer::writeCString(const std::string & value) {
 }
 
 bool ByteBuffer::checkOverflow(size_t baseSize, size_t additionalBytes) const {
-	return m_data.max_size() - baseSize < additionalBytes;
+	return m_data->max_size() - baseSize < additionalBytes;
 }
 
 bool ByteBuffer::autoResize(size_t baseSize, size_t additionalBytes) {
@@ -2184,7 +2186,7 @@ bool ByteBuffer::autoResize(size_t baseSize, size_t additionalBytes) {
 
 	size_t minimumSize = baseSize + additionalBytes;
 
-	if(minimumSize > m_data.size()) {
+	if(minimumSize > m_data->size()) {
 		resize(minimumSize, 0);
 	}
 
@@ -2196,23 +2198,23 @@ ByteBuffer ByteBuffer::operator + (const ByteBuffer & buffer) const {
 }
 
 ByteBuffer ByteBuffer::operator + (const std::vector<uint8_t> & buffer) const {
-	size_t size = m_data.size() + buffer.size();
+	size_t size = m_data->size() + buffer.size();
 
 	// check for overflow
-	if(size < m_data.size()) {
+	if(size < m_data->size()) {
 		return ByteBuffer();
 	}
 
 	ByteBuffer newBuffer(size);
 	newBuffer.resize(size, 0);
-	memcpy(newBuffer.m_data.data(), m_data.data(), m_data.size());
-	memcpy(newBuffer.m_data.data(), buffer.data(), buffer.size());
+	memcpy(newBuffer.m_data->data(), m_data->data(), m_data->size());
+	memcpy(newBuffer.m_data->data(), buffer.data(), buffer.size());
 
 	return newBuffer;
 }
 
 void ByteBuffer::operator += (const ByteBuffer & buffer) {
-	writeBytes(buffer.m_data.data(), buffer.m_data.size());
+	writeBytes(buffer.m_data->data(), buffer.m_data->size());
 }
 
 void ByteBuffer::operator += (const std::vector<uint8_t> & data) {
@@ -2220,13 +2222,13 @@ void ByteBuffer::operator += (const std::vector<uint8_t> & data) {
 }
 
 uint8_t ByteBuffer::operator [] (size_t index) const {
-	return m_data[index];
+	return (*m_data)[index];
 }
 
 bool ByteBuffer::operator == (const ByteBuffer & byteBuffer) const {
-	return m_data == byteBuffer.m_data;
+	return *m_data == *byteBuffer.m_data;
 }
 
 bool ByteBuffer::operator != (const ByteBuffer & byteBuffer) const {
-	return m_data != byteBuffer.m_data;
+	return *m_data != *byteBuffer.m_data;
 }

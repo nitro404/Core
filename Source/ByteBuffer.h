@@ -269,7 +269,7 @@ private:
 	bool checkOverflow(size_t baseSize, size_t additionalBytes) const;
 	bool autoResize(size_t baseSize, size_t additionalBytes);
 
-	std::vector<uint8_t> m_data;
+	std::unique_ptr<std::vector<uint8_t>> m_data;
 	Endianness m_endianness;
 	mutable size_t m_readOffset;
 	mutable size_t m_writeOffset;
@@ -277,14 +277,14 @@ private:
 
 template <size_t N>
 ByteBuffer::ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness)
-	: m_data(data)
+	: m_data(std::make_unique<std::vector<uint8_t>(data))
 	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(data.size()) { }
 
 template <size_t N>
 ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
-	m_data = data;
+	m_data = std::make_unique<std::vector<uint8_t>(data);
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -293,7 +293,7 @@ ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
 
 template <size_t N>
 void ByteBuffer::setData(const std::array<uint8_t, N> & data) {
-	m_data = data;
+	m_data = std::make_unique<std::vector<uint8_t>(data);
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }
@@ -305,7 +305,7 @@ std::string ByteBuffer::getHash(HashFormat hashFormat) const {
 	}
 
 	A hash;
-	hash.Update(m_data.data(), m_data.size());
+	hash.Update(m_data->data(), m_data->size());
 	ByteBuffer digest(hash.DigestSize());
 	digest.resize(hash.DigestSize());
 	hash.Final(digest.getRawData());
@@ -324,7 +324,7 @@ std::string ByteBuffer::getHash(HashFormat hashFormat) const {
 
 template <size_t N>
 std::array<uint8_t, N> ByteBuffer::getBytes(size_t offset, bool * error) const {
-	if(offset + (N * sizeof(uint8_t)) > m_data.size()) {
+	if(offset + (N * sizeof(uint8_t)) > m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -333,7 +333,7 @@ std::array<uint8_t, N> ByteBuffer::getBytes(size_t offset, bool * error) const {
 	}
 
 	std::array<uint8_t, N> bytes;
-	std::vector<uint8_t>::const_iterator dataStart(m_data.begin() + (offset * sizeof(uint8_t)));
+	std::vector<uint8_t>::const_iterator dataStart(m_data->begin() + (offset * sizeof(uint8_t)));
 	std::copy(dataStart, dataStart + (N * sizeof(uint8_t)), bytes.begin());
 
 	return bytes;
