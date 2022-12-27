@@ -141,18 +141,12 @@ bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 		spdlog::debug("Updating Rar entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
 	}
 
-	if(formattedDestinationFilePath.find_first_of("/") != std::string::npos) {
-		std::string destinationFileBasePath(Utilities::getFilePath(formattedDestinationFilePath));
+	std::error_code errorCode;
+	Utilities::createDirectoryStructureForFilePath(formattedDestinationFilePath, errorCode);
 
-		if(!destinationFileBasePath.empty() && !std::filesystem::exists(std::filesystem::path(destinationFileBasePath))) {
-			std::error_code errorCode;
-			std::filesystem::create_directories(destinationFileBasePath, errorCode);
-
-			if(errorCode) {
-				spdlog::error("Failed to create Rar archive file entry extraction destination directory structure for path '{}': {}", destinationFileBasePath, errorCode.message());
-				return false;
-			}
-		}
+	if(errorCode) {
+		spdlog::error("Failed to create Rar archive file entry extraction destination directory structure for file path '{}': {}", formattedDestinationFilePath, errorCode.message());
+		return false;
 	}
 
 	return isSuccess(dmc_unrar_extract_file_to_path(getRawParentArchiveHandle(), m_index, formattedDestinationFilePath.c_str(), nullptr, true), fmt::format("Failed to extract file '{}' to '{}'!", filePath, directoryPath));

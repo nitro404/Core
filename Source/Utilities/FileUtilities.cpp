@@ -337,3 +337,19 @@ std::string Utilities::getFileHash(const std::string & filePath, ByteBuffer::Has
 
 	return fileData.getHash(hashType, hashFormat);
 }
+
+void Utilities::createDirectoryStructureForFilePath(const std::string & filePath, std::error_code & errorCode) {
+	if(filePath.find_first_of("/\\") == std::string::npos) {
+		return;
+	}
+
+	std::filesystem::path baseFilePath(Utilities::getFilePath(filePath));
+
+	if(!baseFilePath.empty() && !std::filesystem::is_directory(std::filesystem::path(baseFilePath))) {
+		std::filesystem::create_directories(baseFilePath, errorCode);
+
+		if(errorCode) {
+			return;
+		}
+	}
+}

@@ -219,7 +219,7 @@ size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwr
 	if(!directoryPath.empty()) {
 		std::filesystem::path outputDirectoryPath(directoryPath);
 
-		if(!std::filesystem::is_directory(outputDirectoryPath)) {
+		if(!directoryPath.empty() && !std::filesystem::is_directory(outputDirectoryPath)) {
 			std::filesystem::create_directories(outputDirectoryPath, errorCode);
 
 			if(errorCode) {
