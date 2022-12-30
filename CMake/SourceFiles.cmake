@@ -1,3 +1,5 @@
+include_guard()
+
 set(CORE_SOURCE_FILES
 	Analytics/Segment/SegmentAnalyticEvent.cpp
 	Analytics/Segment/SegmentAnalytics.cpp
@@ -45,6 +47,7 @@ set(CORE_SOURCE_FILES
 	GitHub/GitHubService.cpp
 	Point.cpp
 	Rectangle.cpp
+	LibraryInformation.cpp
 	Location/FreeGeoIPGeoLocationService.cpp
 	Location/GeoLocationService.cpp
 	Logging/LogSystem.cpp
@@ -118,6 +121,7 @@ set(CORE_HEADER_FILES
 	Factory/FactoryRegistry.h
 	Point.h
 	Rectangle.h
+	LibraryInformation.h
 	Location/FreeGeoIPGeoLocationService.h
 	Location/GeoLocation.h
 	Location/GeoLocationService.h
