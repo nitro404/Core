@@ -367,6 +367,20 @@ std::optional<Date> Date::unpack(uint32_t packedValue, ByteOrder byteOrder, Endi
 	return date;
 }
 
+Date Date::unpack(uint32_t packedValue, bool * error, ByteOrder byteOrder, Endianness endianness) {
+	std::optional<Date> optionalDate(unpack(packedValue, byteOrder, endianness));
+
+	if(!optionalDate.has_value()) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	return std::move(optionalDate.value());
+}
+
 rapidjson::Value Date::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
 	rapidjson::Value dateValue(rapidjson::kObjectType);
 
@@ -390,6 +404,20 @@ std::optional<Date> Date::parseFrom(const rapidjson::Value & dateValue) {
 	return date;
 }
 
+Date Date::parseFrom(const rapidjson::Value & dateValue, bool * error) {
+	std::optional<Date> optionalDate(parseFrom(dateValue));
+
+	if(!optionalDate.has_value()) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	return std::move(optionalDate.value());
+}
+
 std::string Date::toString() const {
 	return fmt::format("{} {}, {}", getMonthName(), m_day, m_year);
 }
@@ -402,6 +430,20 @@ std::optional<Date> Date::parseFrom(const std::string & data) {
 	}
 
 	return date;
+}
+
+Date Date::parseFrom(const std::string & data, bool * error) {
+	std::optional<Date> optionalDate(parseFrom(data));
+
+	if(!optionalDate.has_value()) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	return std::move(optionalDate.value());
 }
 
 bool Date::isValid() const {

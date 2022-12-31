@@ -3,8 +3,15 @@
 #include "Dimension.h"
 #include "Math/Vector2.h"
 #include "Point.h"
+#include "Utilities/RapidJSONUtilities.h"
 
 #include <fmt/core.h>
+#include <spdlog/spdlog.h>
+
+static constexpr const char * JSON_X_POSITION_PROPERTY_NAME = "x";
+static constexpr const char * JSON_Y_POSITION_PROPERTY_NAME = "y";
+static constexpr const char * JSON_WIDTH_PROPERTY_NAME = "width";
+static constexpr const char * JSON_HEIGHT_PROPERTY_NAME = "height";
 
 const Rect Rect::Zero(0, 0, 0, 0);
 
@@ -210,6 +217,90 @@ Rect Rect::unioned(const Rect & rectangle) const {
 	if(ty2 > std::numeric_limits<int32_t>::max()) { ty2 = std::numeric_limits<int32_t>::max(); }
 
 	return Rect(tx1, ty1, static_cast<uint32_t>(tx2), static_cast<uint32_t>(ty2));
+}
+
+rapidjson::Value Rect::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
+	rapidjson::Value rectangleValue(rapidjson::kObjectType);
+
+	rectangleValue.AddMember(rapidjson::StringRef(JSON_X_POSITION_PROPERTY_NAME), rapidjson::Value(x), allocator);
+	rectangleValue.AddMember(rapidjson::StringRef(JSON_Y_POSITION_PROPERTY_NAME), rapidjson::Value(y), allocator);
+	rectangleValue.AddMember(rapidjson::StringRef(JSON_WIDTH_PROPERTY_NAME), rapidjson::Value(w), allocator);
+	rectangleValue.AddMember(rapidjson::StringRef(JSON_HEIGHT_PROPERTY_NAME), rapidjson::Value(h), allocator);
+
+	return rectangleValue;
+}
+
+Rect Rect::parseFrom(const rapidjson::Value & rectangleValue, bool * error) {
+	if(!rectangleValue.IsObject()) {
+		spdlog::error("Invalid rectangle type: '{}', expected 'object'.", Utilities::typeToString(rectangleValue.GetType()));
+		return {};
+	}
+
+	// parse x position
+	if(!rectangleValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
+		spdlog::error("Rectangle is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & xPositionValue = rectangleValue[JSON_X_POSITION_PROPERTY_NAME];
+
+	if(!xPositionValue.IsInt()) {
+		spdlog::error("Rectangle has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
+		return {};
+	}
+
+	// parse y position
+	if(!rectangleValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
+		spdlog::error("Rectangle is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & yPositionValue = rectangleValue[JSON_Y_POSITION_PROPERTY_NAME];
+
+	if(!yPositionValue.IsInt()) {
+		spdlog::error("Rectangle has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
+		return {};
+	}
+
+	// parse width
+	if(!rectangleValue.HasMember(JSON_WIDTH_PROPERTY_NAME)) {
+		spdlog::error("Rectangle is missing '{}' property'.", JSON_WIDTH_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & widthValue = rectangleValue[JSON_WIDTH_PROPERTY_NAME];
+
+	if(!widthValue.IsUint()) {
+		spdlog::error("Rectangle has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_WIDTH_PROPERTY_NAME, Utilities::typeToString(widthValue.GetType()));
+		return {};
+	}
+
+	// parse height
+	if(!rectangleValue.HasMember(JSON_HEIGHT_PROPERTY_NAME)) {
+		spdlog::error("Rectangle is missing '{}' property'.", JSON_HEIGHT_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & heightValue = rectangleValue[JSON_HEIGHT_PROPERTY_NAME];
+
+	if(!heightValue.IsUint()) {
+		spdlog::error("Rectangle has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_HEIGHT_PROPERTY_NAME, Utilities::typeToString(heightValue.GetType()));
+		return {};
+	}
+
+	return Rect(xPositionValue.GetInt(), yPositionValue.GetInt(), widthValue.GetUint(), heightValue.GetUint());
+}
+
+std::optional<Rect> Rect::parseFrom(const rapidjson::Value & rectangleValue) {
+	bool error = false;
+
+	Rect rectangle(parseFrom(rectangleValue, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return rectangle;
 }
 
 std::string Rect::toString() const {

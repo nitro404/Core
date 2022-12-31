@@ -1,7 +1,10 @@
 #ifndef _DIMENSION_H_
 #define _DIMENSION_H_
 
+#include <rapidjson/document.h>
+
 #include <cstdint>
+#include <optional>
 #include <string>
 
 class Dimension final {
@@ -26,6 +29,9 @@ public:
 	uint64_t pack() const;
 	static Dimension unpack(uint64_t packedDimension);
 
+	rapidjson::Value toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const;
+	static Dimension parseFrom(const rapidjson::Value & dimensionValue, bool * error);
+	static std::optional<Dimension> parseFrom(const rapidjson::Value & dimensionValue);
 	std::string toString() const;
 
 	uint32_t operator [] (size_t index) const;

@@ -1,6 +1,12 @@
 #include "Dimension.h"
 
+#include "Utilities/RapidJSONUtilities.h"
+
 #include <fmt/core.h>
+#include <spdlog/spdlog.h>
+
+static constexpr const char * JSON_WIDTH_PROPERTY_NAME = "width";
+static constexpr const char * JSON_HEIGHT_PROPERTY_NAME = "height";
 
 const Dimension Dimension::Zero(0, 0);
 
@@ -71,6 +77,62 @@ uint64_t Dimension::pack() const {
 
 Dimension Dimension::unpack(uint64_t packedDimension) {
 	return Dimension(packedDimension);
+}
+
+rapidjson::Value Dimension::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
+	rapidjson::Value dimensionValue(rapidjson::kObjectType);
+
+	dimensionValue.AddMember(rapidjson::StringRef(JSON_WIDTH_PROPERTY_NAME), rapidjson::Value(w), allocator);
+	dimensionValue.AddMember(rapidjson::StringRef(JSON_HEIGHT_PROPERTY_NAME), rapidjson::Value(h), allocator);
+
+	return dimensionValue;
+}
+
+Dimension Dimension::parseFrom(const rapidjson::Value & dimensionValue, bool * error) {
+	if(!dimensionValue.IsObject()) {
+		spdlog::error("Invalid dimension type: '{}', expected 'object'.", Utilities::typeToString(dimensionValue.GetType()));
+		return {};
+	}
+
+	// parse width
+	if(!dimensionValue.HasMember(JSON_WIDTH_PROPERTY_NAME)) {
+		spdlog::error("Dimension is missing '{}' property'.", JSON_WIDTH_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & widthValue = dimensionValue[JSON_WIDTH_PROPERTY_NAME];
+
+	if(!widthValue.IsUint()) {
+		spdlog::error("Dimension has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_WIDTH_PROPERTY_NAME, Utilities::typeToString(widthValue.GetType()));
+		return {};
+	}
+
+	// parse height
+	if(!dimensionValue.HasMember(JSON_HEIGHT_PROPERTY_NAME)) {
+		spdlog::error("Dimension is missing '{}' property'.", JSON_HEIGHT_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & heightValue = dimensionValue[JSON_HEIGHT_PROPERTY_NAME];
+
+	if(!heightValue.IsUint()) {
+		spdlog::error("Dimension has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_HEIGHT_PROPERTY_NAME, Utilities::typeToString(heightValue.GetType()));
+		return {};
+	}
+
+	return Dimension(widthValue.GetUint(), heightValue.GetUint());
+}
+
+std::optional<Dimension> Dimension::parseFrom(const rapidjson::Value & dimensionValue) {
+	bool error = false;
+
+	Dimension dimension(parseFrom(dimensionValue, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return dimension;
 }
 
 std::string Dimension::toString() const {

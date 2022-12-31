@@ -1,7 +1,10 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
+#include <rapidjson/document.h>
+
 #include <cstdint>
+#include <optional>
 #include <string>
 
 class Point final {
@@ -23,6 +26,9 @@ public:
 
 	float distanceBetween(const Point & point) const;
 
+	rapidjson::Value toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const;
+	static Point parseFrom(const rapidjson::Value & pointValue, bool * error);
+	static std::optional<Point> parseFrom(const rapidjson::Value & pointValue);
 	std::string toString() const;
 
 	bool operator == (const Point & point) const;

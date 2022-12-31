@@ -62,12 +62,15 @@ public:
 
 	int32_t pack(ByteOrder byteOrder = DEFAULT_BYTE_ORDER, Endianness endianness = DEFAULT_ENDIANNESS) const;
 	static std::optional<Date> unpack(uint32_t packedValue, ByteOrder byteOrder = DEFAULT_BYTE_ORDER, Endianness endianness = DEFAULT_ENDIANNESS);
+	static Date unpack(uint32_t packedValue, bool * error, ByteOrder byteOrder = DEFAULT_BYTE_ORDER, Endianness endianness = DEFAULT_ENDIANNESS);
 
 	rapidjson::Value toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const;
 	static std::optional<Date> parseFrom(const rapidjson::Value & dateValue);
+	static Date parseFrom(const rapidjson::Value & dateValue, bool * error);
 
 	std::string toString() const;
 	static std::optional<Date> parseFrom(const std::string & data);
+	static Date parseFrom(const std::string & data, bool * error);
 
 	bool isValid() const;
 	static bool isValid(const Date * date);

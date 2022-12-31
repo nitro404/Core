@@ -1,7 +1,13 @@
 #ifndef _RECTANGLE_H_
 #define _RECTANGLE_H_
 
+#include "Dimension.h"
+#include "Point.h"
+
+#include <rapidjson/document.h>
+
 #include <cstdint>
+#include <optional>
 #include <string>
 
 class Point;
@@ -48,6 +54,9 @@ public:
 
 	Rect unioned(const Rect & rectangle) const;
 
+	rapidjson::Value toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const;
+	static Rect parseFrom(const rapidjson::Value & rectangleValue, bool * error);
+	static std::optional<Rect> parseFrom(const rapidjson::Value & rectangleValue);
 	std::string toString() const;
 
 	bool operator == (const Rect & rectangle) const;
@@ -56,6 +65,11 @@ public:
 	static const Rect Zero;
 
 	union {
+		struct {
+			Point position;
+			Dimension size;
+		};
+
 		struct {
 			int32_t x, y;
 			uint32_t w, h;

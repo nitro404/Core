@@ -1,8 +1,14 @@
 #include "Point.h"
 
+#include "Utilities/RapidJSONUtilities.h"
+
 #include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 #include <cmath>
+
+static constexpr const char * JSON_X_POSITION_PROPERTY_NAME = "x";
+static constexpr const char * JSON_Y_POSITION_PROPERTY_NAME = "y";
 
 const Point Point::Zero(0, 0);
 
@@ -61,6 +67,62 @@ Point Point::unpack(uint64_t packedPoint) {
 
 float Point::distanceBetween(const Point & point) const {
 	return sqrt(pow(point.x - x, 2) + pow(point.y - y, 2));
+}
+
+rapidjson::Value Point::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
+	rapidjson::Value pointValue(rapidjson::kObjectType);
+
+	pointValue.AddMember(rapidjson::StringRef(JSON_X_POSITION_PROPERTY_NAME), rapidjson::Value(x), allocator);
+	pointValue.AddMember(rapidjson::StringRef(JSON_Y_POSITION_PROPERTY_NAME), rapidjson::Value(y), allocator);
+
+	return pointValue;
+}
+
+Point Point::parseFrom(const rapidjson::Value & pointValue, bool * error) {
+	if(!pointValue.IsObject()) {
+		spdlog::error("Invalid point type: '{}', expected 'object'.", Utilities::typeToString(pointValue.GetType()));
+		return {};
+	}
+
+	// parse x position
+	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
+		spdlog::error("Point is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & xPositionValue = pointValue[JSON_X_POSITION_PROPERTY_NAME];
+
+	if(!xPositionValue.IsInt()) {
+		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
+		return {};
+	}
+
+	// parse y position
+	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
+		spdlog::error("Point is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		return {};
+	}
+
+	const rapidjson::Value & yPositionValue = pointValue[JSON_Y_POSITION_PROPERTY_NAME];
+
+	if(!yPositionValue.IsInt()) {
+		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
+		return {};
+	}
+
+	return Point(xPositionValue.GetInt(), yPositionValue.GetInt());
+}
+
+std::optional<Point> Point::parseFrom(const rapidjson::Value & pointValue) {
+	bool error = false;
+
+	Point point(parseFrom(pointValue, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return point;
 }
 
 std::string Point::toString() const {
