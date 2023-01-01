@@ -3,6 +3,7 @@
 #include "Application/ComponentRegistry.h"
 #include "Archive/ArchiveFactoryRegistry.h"
 #include "GitHub/GitHubService.h"
+#include "LibraryInformation.h"
 #include "Network/HTTPService.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Platform/TimeZoneDataManager.h"
@@ -45,6 +46,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<HTTPService>([]() {
 		return std::make_unique<HTTPService>();
+	});
+
+	setFactory<LibraryInformation>([]() {
+		return std::make_unique<LibraryInformation>();
 	});
 
 	setFactory<SegmentAnalytics>([]() {
