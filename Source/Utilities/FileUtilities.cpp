@@ -173,7 +173,12 @@ std::string Utilities::truncateFileName(std::string_view filePath, size_t maxLen
 		return std::string();
 	}
 
-	std::string basePath(Utilities::getFilePath(filePath));
+	std::string basePath;
+
+	if(filePath.find_first_of("/\\") != std::string::npos) {
+		basePath = Utilities::getFilePath(filePath);
+	}
+
 	std::string fileName(Utilities::getFileName(filePath));
 
 	if(fileName.empty()) {
