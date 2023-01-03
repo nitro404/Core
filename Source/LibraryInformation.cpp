@@ -50,13 +50,13 @@ size_t LibraryInformation::numberOfLibraries() const {
 }
 
 bool LibraryInformation::hasLibrary(const std::string & name) const {
-	return std::find_if(m_libraryInformation.cbegin(), m_libraryInformation.cend(), [name](const VersionData & versionData) {
+	return std::find_if(m_libraryInformation.cbegin(), m_libraryInformation.cend(), [&name](const VersionData & versionData) {
 		return Utilities::areStringsEqualIgnoreCase(versionData.name, name);
 	}) != m_libraryInformation.cend();
 }
 
 size_t LibraryInformation::indexOfLibrary(const std::string & name) const {
-	std::vector<VersionData>::const_iterator libraryInformationIterator = std::find_if(m_libraryInformation.cbegin(), m_libraryInformation.cend(), [name](const VersionData & versionData) {
+	std::vector<VersionData>::const_iterator libraryInformationIterator = std::find_if(m_libraryInformation.cbegin(), m_libraryInformation.cend(), [&name](const VersionData & versionData) {
 		return Utilities::areStringsEqualIgnoreCase(versionData.name, name);
 	});
 

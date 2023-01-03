@@ -41,8 +41,8 @@ size_t GitHubReleaseCollection::numberOfReleases() const {
 }
 
 bool GitHubReleaseCollection::hasRelease(const GitHubRelease & release) const {
-	return std::find_if(std::begin(m_releases), std::end(m_releases), [release](const std::shared_ptr<GitHubRelease> & currentRelease) {
-		return release == *currentRelease;
+	return std::find_if(std::begin(m_releases), std::end(m_releases), [&release](const std::shared_ptr<GitHubRelease> & currentRelease) {
+		return currentRelease.get() == &release;
 	}) != std::end(m_releases);
 }
 
@@ -53,19 +53,19 @@ bool GitHubReleaseCollection::hasReleaseWithID(uint64_t id) const {
 }
 
 bool GitHubReleaseCollection::hasReleaseWithName(const std::string & releaseName, bool caseSensitive) const {
-	return std::find_if(std::begin(m_releases), std::end(m_releases), [releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	return std::find_if(std::begin(m_releases), std::end(m_releases), [&releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(releaseName, currentRelease->getReleaseName(), caseSensitive);
 	}) != std::end(m_releases);
 }
 
 bool GitHubReleaseCollection::hasReleaseWithTag(const std::string & tagName, bool caseSensitive) const {
-	return std::find_if(std::begin(m_releases), std::end(m_releases), [tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	return std::find_if(std::begin(m_releases), std::end(m_releases), [&tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(tagName, currentRelease->getTagName(), caseSensitive);
 	}) != std::end(m_releases);
 }
 
 size_t GitHubReleaseCollection::indexOfRelease(const GitHubRelease & release) const {
-	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [release](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&release](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return release == *currentRelease;
 	});
 
@@ -89,7 +89,7 @@ size_t GitHubReleaseCollection::indexOfReleaseWithID(uint64_t id) const {
 }
 
 size_t GitHubReleaseCollection::indexOfReleaseWithName(const std::string & releaseName, bool caseSensitive) const {
-	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(releaseName, currentRelease->getReleaseName(), caseSensitive);
 	});
 
@@ -101,7 +101,7 @@ size_t GitHubReleaseCollection::indexOfReleaseWithName(const std::string & relea
 }
 
 size_t GitHubReleaseCollection::indexOfReleaseWithTag(const std::string & tagName, bool caseSensitive) const {
-	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(tagName, currentRelease->getTagName(), caseSensitive);
 	});
 
@@ -133,7 +133,7 @@ std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithID(uint64_
 }
 
 std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithName(const std::string & releaseName, bool caseSensitive) const {
-	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&releaseName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(releaseName, currentRelease->getReleaseName(), caseSensitive);
 	});
 
@@ -145,7 +145,7 @@ std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithName(const
 }
 
 std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithTag(const std::string & tagName, bool caseSensitive) const {
-	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&tagName, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return Utilities::areStringsEqual(tagName, currentRelease->getTagName(), caseSensitive);
 	});
 

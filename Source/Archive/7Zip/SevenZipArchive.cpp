@@ -287,7 +287,7 @@ SevenZipArchive::LookStreamHandle SevenZipArchive::createLookStreamHandle(ISzAll
 
 	lookStream->bufSize = LOOK_STREAM_BUFFER_SIZE;
 
-	return LookStreamHandle(lookStream, [allocator](CLookToRead2 * lookStreamHandle) {
+	return LookStreamHandle(lookStream, [&allocator](CLookToRead2 * lookStreamHandle) {
 		if(lookStreamHandle != nullptr) {
 			ISzAlloc_Free(&allocator, lookStreamHandle->buf);
 			delete lookStreamHandle;
@@ -299,7 +299,7 @@ SevenZipArchive::ArchiveHandle SevenZipArchive::createArchiveHandle(ISzAlloc & a
 	CSzArEx * archiveHandle = new CSzArEx();
 	SzArEx_Init(archiveHandle);
 
-	return ArchiveHandle(archiveHandle, [allocator](CSzArEx * archiveHandle) {
+	return ArchiveHandle(archiveHandle, [&allocator](CSzArEx * archiveHandle) {
 		if(archiveHandle != nullptr) {
 			SzArEx_Free(archiveHandle, &allocator);
 			delete archiveHandle;

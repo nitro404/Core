@@ -14,12 +14,12 @@ template<class T, class F>
 static inline std::pair<const std::type_index, AnyToJSONConverterFunction> toAnyToJSONConverter(const F & f) {
 	return {
 		std::type_index(typeid(T)),
-		[g = f](const std::any & any, std::optional<rapidjson::Value> & outputValue, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
+		[&f](const std::any & any, std::optional<rapidjson::Value> & outputValue, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
 			if constexpr(std::is_void_v<T>) {
-				g(outputValue, allowNull);
+				f(outputValue, allowNull);
 			}
 			else {
-				g(std::any_cast<const T &>(any), outputValue, allocator, allowNull);
+				f(std::any_cast<const T &>(any), outputValue, allocator, allowNull);
 			}
 		}
 	};
