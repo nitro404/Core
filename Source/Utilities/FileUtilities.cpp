@@ -73,6 +73,16 @@ std::string_view Utilities::getFilePath(std::string_view filePath) {
 	return std::string_view(filePath.data(), index);
 }
 
+std::string_view Utilities::getBasePath(std::string_view filePath) {
+	size_t index = filePath.find_last_of("/\\");
+
+	if(index == std::string::npos) {
+		return Utilities::emptyString;
+	}
+
+	return std::string_view(filePath.data(), index);
+}
+
 std::string_view Utilities::trimLeadingPathSeparator(std::string_view filePath) {
 	size_t pathStartIndex = filePath.find_first_not_of("/\\");
 
