@@ -83,6 +83,17 @@ std::string_view Utilities::getBasePath(std::string_view filePath) {
 	return std::string_view(filePath.data(), index);
 }
 
+std::string Utilities::getAbsoluteFilePath(std::string_view filePath, std::string_view defaultPath) {
+	std::error_code errorCode;
+	std::filesystem::path absoluteFilePath(std::filesystem::absolute(std::filesystem::path(filePath.empty() ? std::filesystem::current_path() : filePath), errorCode));
+
+	if(errorCode) {
+		return std::string(defaultPath);
+	}
+
+	return absoluteFilePath.string();
+}
+
 std::string_view Utilities::trimLeadingPathSeparator(std::string_view filePath) {
 	size_t pathStartIndex = filePath.find_first_not_of("/\\");
 

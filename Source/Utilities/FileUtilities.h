@@ -18,6 +18,7 @@ namespace Utilities {
 	std::string_view getFileName(std::string_view filePath);
 	std::string_view getFilePath(std::string_view filePath);
 	std::string_view getBasePath(std::string_view filePath);
+	std::string getAbsoluteFilePath(std::string_view filePath, std::string_view defaultPath = {});
 	std::string_view trimLeadingPathSeparator(std::string_view filePath);
 	std::string_view trimTrailingPathSeparator(std::string_view filePath);
 	std::string_view trimPathSeparators(std::string_view filePath);
