@@ -10,7 +10,11 @@ bool GeoLocationService::isInitialized() const {
 }
 
 bool GeoLocationService::initialize(const std::string & apiKey) {
-	if(m_initialized || apiKey.empty()) {
+	if(m_initialized) {
+		return true;
+	}
+
+	if(apiKey.empty()) {
 		return false;
 	}
 

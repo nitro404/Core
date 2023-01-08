@@ -44,7 +44,11 @@ bool HTTPService::isInitialized() const {
 bool HTTPService::initialize(const HTTPConfiguration & configuration, bool autoStart) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	if(m_initialized || !HTTPUtilities::isSuccess(curl_global_init(CURL_GLOBAL_DEFAULT))) {
+	if(m_initialized) {
+		return true;
+	}
+
+	if(!HTTPUtilities::isSuccess(curl_global_init(CURL_GLOBAL_DEFAULT))) {
 		return false;
 	}
 
