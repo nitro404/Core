@@ -21,5 +21,7 @@ SingletonManager & SingletonManager::getInstance() {
 }
 
 size_t SingletonManager::numberOfSingletons() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_singletons.size();
 }

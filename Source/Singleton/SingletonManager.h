@@ -4,6 +4,7 @@
 #include "Singleton.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 
 class SingletonManager final {
@@ -30,6 +31,7 @@ private:
 	SingletonManager();
 
 	SingletonMap m_singletons;
+	mutable std::recursive_mutex m_mutex;
 
 	SingletonManager(const SingletonManager &) = delete;
 	SingletonManager(SingletonManager &&) noexcept = delete;
@@ -39,6 +41,8 @@ private:
 
 template <class T>
 bool SingletonManager::hasSingleton() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
 
 	return i != m_singletons.end();
@@ -46,6 +50,8 @@ bool SingletonManager::hasSingleton() const {
 
 template <class T>
 const T * SingletonManager::getSingleton() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
 
 	if(i == m_singletons.end()) {
@@ -57,6 +63,8 @@ const T * SingletonManager::getSingleton() const {
 
 template <class T>
 T * SingletonManager::getSingleton() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
 
 	if(i == m_singletons.end()) {
@@ -68,6 +76,8 @@ T * SingletonManager::getSingleton() {
 
 template <class T>
 bool SingletonManager::registerSingleton(T * singleton) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(hasSingleton<T>()) {
 		return false;
 	}
@@ -79,6 +89,8 @@ bool SingletonManager::registerSingleton(T * singleton) {
 
 template <class T>
 bool SingletonManager::unregisterSingleton() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	SingletonMap::iterator i = m_singletons.find(typeid(T).name());
 
 	if(i == m_singletons.end()) {

@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 
 class FactoryRegistry final {
 public:
@@ -35,6 +36,7 @@ private:
 
 	FactoryMap m_factories;
 	bool m_defaultFactoriesAssigned;
+	mutable std::recursive_mutex m_mutex;
 
 	FactoryRegistry(const FactoryRegistry &) = delete;
 	FactoryRegistry(FactoryRegistry &&) noexcept = delete;
@@ -44,11 +46,15 @@ private:
 
 template <class T>
 bool FactoryRegistry::hasFactory() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_factories.find(typeid(T).name()) != m_factories.end();
 }
 
 template <class T>
 std::function<std::unique_ptr<T>()> FactoryRegistry::getFactory() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	FactoryMap::const_iterator factory(m_factories.find(typeid(T).name()));
 
 	if(factory == m_factories.end()) {
@@ -60,6 +66,8 @@ std::function<std::unique_ptr<T>()> FactoryRegistry::getFactory() const {
 
 template <class T>
 std::unique_ptr<T> FactoryRegistry::callFactory() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	FactoryMap::const_iterator factory(m_factories.find(typeid(T).name()));
 
 	if(factory == m_factories.end()) {
@@ -71,6 +79,8 @@ std::unique_ptr<T> FactoryRegistry::callFactory() const {
 
 template <class T>
 void FactoryRegistry::setFactory(std::function<std::unique_ptr<T>()> factory) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(factory == nullptr) {
 		m_factories.erase(typeid(T).name());
 	}

@@ -5,6 +5,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 
 class ComponentRegistry final {
 public:
@@ -117,6 +118,8 @@ private:
 	std::map<uint64_t, std::unique_ptr<Component>> m_components;
 	std::map<uint64_t, std::unique_ptr<GlobalComponent>> m_globalComponents;
 	bool m_globalComponentsRegistered;
+	mutable std::recursive_mutex m_componentMutex;
+	mutable std::recursive_mutex m_globalComponentMutex;
 
 	ComponentRegistry(const ComponentRegistry &) = delete;
 	ComponentRegistry(ComponentRegistry &&) noexcept = delete;
@@ -126,6 +129,8 @@ private:
 
 template <class T>
 uint64_t ComponentRegistry::addComponent(T ** component) {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	if(component == nullptr) {
 		return 0;
 	}
@@ -140,6 +145,8 @@ uint64_t ComponentRegistry::addComponent(T ** component) {
 
 template <class T>
 uint64_t ComponentRegistry::addComponent(std::unique_ptr<T> component) {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	if(component == nullptr) {
 		return 0;
 	}
@@ -154,6 +161,8 @@ uint64_t ComponentRegistry::addComponent(std::unique_ptr<T> component) {
 
 template <class T>
 uint64_t ComponentRegistry::addComponent(std::unique_ptr<T> * component) {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	if(component == nullptr) {
 		return 0;
 	}

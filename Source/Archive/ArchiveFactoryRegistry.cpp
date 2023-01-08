@@ -18,10 +18,14 @@ ArchiveFactoryRegistry::ArchiveFactoryRegistry()
 ArchiveFactoryRegistry::~ArchiveFactoryRegistry() { }
 
 bool ArchiveFactoryRegistry::hasFactory(const std::string & fileExtension) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_archiveFactories.find(ArchiveFactoryRegistry::formatFileExtension(fileExtension)) != m_archiveFactories.end();
 }
 
 bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(fileExtension.empty() || createArchiveFunction == nullptr || readArchiveFunction == nullptr) {
 		return false;
 	}
@@ -41,6 +45,8 @@ bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::
 }
 
 size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileExtensions, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	size_t numberOfFactoriesSet = 0;
 
 	for(const std::string & fileExtension : fileExtensions) {
@@ -53,10 +59,14 @@ size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileE
 }
 
 bool ArchiveFactoryRegistry::areDefaultFactoriesAssigned() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_defaultFactoriesAssigned;
 }
 
 void ArchiveFactoryRegistry::assignDefaultFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(m_defaultFactoriesAssigned) {
 		return;
 	}
@@ -67,6 +77,8 @@ void ArchiveFactoryRegistry::assignDefaultFactories() {
 }
 
 bool ArchiveFactoryRegistry::removeFactory(const std::string & fileExtension) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(fileExtension.empty()) {
 		return false;
 	}
@@ -89,10 +101,14 @@ bool ArchiveFactoryRegistry::removeFactory(const std::string & fileExtension) {
 }
 
 void ArchiveFactoryRegistry::resetFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	m_archiveFactories.clear();
 }
 
 void ArchiveFactoryRegistry::assignStandardFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	setFactory(RarArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
 		return RarArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
@@ -149,6 +165,8 @@ void ArchiveFactoryRegistry::assignStandardFactories() {
 }
 
 std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & fileExtension) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(fileExtension.empty()) {
 		return nullptr;
 	}
@@ -169,6 +187,8 @@ std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_p
 }
 
 std::unique_ptr<Archive> ArchiveFactoryRegistry::readArchiveFrom(const std::string & filePath) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(filePath.empty()) {
 		return nullptr;
 	}

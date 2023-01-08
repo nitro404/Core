@@ -29,14 +29,20 @@ FactoryRegistry & FactoryRegistry::getInstance() {
 }
 
 void FactoryRegistry::resetFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	m_factories.clear();
 }
 
 bool FactoryRegistry::areDefaultFactoriesAssigned() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_defaultFactoriesAssigned;
 }
 
 void FactoryRegistry::assignDefaultFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(m_defaultFactoriesAssigned) {
 		return;
 	}
@@ -51,6 +57,8 @@ void FactoryRegistry::assignDefaultFactories() {
 }
 
 void FactoryRegistry::assignStandardFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	setFactory<IPAddressService>([]() {
 		return std::make_unique<IpifyIPAddressService>();
 	});

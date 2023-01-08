@@ -22,30 +22,44 @@ ComponentRegistry & ComponentRegistry::getInstance() {
 }
 
 size_t ComponentRegistry::numberOfComponents() const {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	return m_components.size();
 }
 
 bool ComponentRegistry::hasComponent(uint64_t id) const {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	return m_components.find(id) != m_components.end();
 }
 
 bool ComponentRegistry::deleteComponent(uint64_t id) {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	return m_components.erase(id) != 0;
 }
 
 void ComponentRegistry::deleteAllComponents() {
+	std::lock_guard<std::recursive_mutex> lock(m_componentMutex);
+
 	m_components.clear();
 }
 
 size_t ComponentRegistry::numberOfGlobalComponents() const {
+	std::lock_guard<std::recursive_mutex> lock(m_globalComponentMutex);
+
 	return m_globalComponents.size();
 }
 
 bool ComponentRegistry::hasGlobalComponent(uint64_t id) const {
+	std::lock_guard<std::recursive_mutex> lock(m_globalComponentMutex);
+
 	return m_globalComponents.find(id) != m_globalComponents.end();
 }
 
 uint64_t ComponentRegistry::addGlobalComponent(std::unique_ptr<GlobalComponent> globalComponent) {
+	std::lock_guard<std::recursive_mutex> lock(m_globalComponentMutex);
+
 	if(globalComponent == nullptr) {
 		return 0;
 	}
@@ -57,10 +71,14 @@ uint64_t ComponentRegistry::addGlobalComponent(std::unique_ptr<GlobalComponent> 
 }
 
 bool ComponentRegistry::deleteGlobalComponent(uint64_t id) {
+	std::lock_guard<std::recursive_mutex> lock(m_globalComponentMutex);
+
 	return m_globalComponents.erase(id) != 0;
 }
 
 void ComponentRegistry::deleteAllGlobalComponents() {
+	std::lock_guard<std::recursive_mutex> lock(m_globalComponentMutex);
+
 	m_globalComponents.clear();
 }
 

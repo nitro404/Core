@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -39,6 +40,7 @@ private:
 
 	ArchiveFactoryMap m_archiveFactories;
 	bool m_defaultFactoriesAssigned;
+	mutable std::recursive_mutex m_mutex;
 
 	ArchiveFactoryRegistry(const ArchiveFactoryRegistry &) = delete;
 	ArchiveFactoryRegistry(ArchiveFactoryRegistry &&) noexcept = delete;

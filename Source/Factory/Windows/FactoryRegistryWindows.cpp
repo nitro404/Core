@@ -6,6 +6,8 @@
 #include "Platform/Windows/TimeZoneDataManagerWindows.h"
 
 void FactoryRegistry::assignPlatformFactories() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	setFactory<LogSystem>([]() {
 		return std::make_unique<LogSystemWindows>();
 	});
