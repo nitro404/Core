@@ -12,7 +12,8 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-ArchiveFactoryRegistry::ArchiveFactoryRegistry() { }
+ArchiveFactoryRegistry::ArchiveFactoryRegistry()
+	: m_defaultFactoriesAssigned(false) { }
 
 ArchiveFactoryRegistry::~ArchiveFactoryRegistry() { }
 
@@ -51,8 +52,18 @@ size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileE
 	return numberOfFactoriesSet;
 }
 
-void ArchiveFactoryRegistry::assignFactories() {
+bool ArchiveFactoryRegistry::areDefaultFactoriesAssigned() const {
+	return m_defaultFactoriesAssigned;
+}
+
+void ArchiveFactoryRegistry::assignDefaultFactories() {
+	if(m_defaultFactoriesAssigned) {
+		return;
+	}
+
 	assignStandardFactories();
+
+	m_defaultFactoriesAssigned = true;
 }
 
 bool ArchiveFactoryRegistry::removeFactory(const std::string & fileExtension) {

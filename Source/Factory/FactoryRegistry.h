@@ -21,8 +21,9 @@ public:
 	std::unique_ptr<T> callFactory() const;
 	template <class T>
 	void setFactory(std::function<std::unique_ptr<T>()> factory);
-	void assignFactories();
 	void resetFactories();
+	bool areDefaultFactoriesAssigned() const;
+	void assignDefaultFactories();
 
 private:
 	typedef std::map<std::string, std::unique_ptr<Factory>> FactoryMap;
@@ -33,6 +34,7 @@ private:
 	void assignPlatformFactories();
 
 	FactoryMap m_factories;
+	bool m_defaultFactoriesAssigned;
 
 	FactoryRegistry(const FactoryRegistry &) = delete;
 	FactoryRegistry(FactoryRegistry &&) noexcept = delete;

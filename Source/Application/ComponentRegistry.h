@@ -2,11 +2,14 @@
 #define _COMPONENT_REGISTRY_H_
 
 #include <cstdint>
-#include <memory>
+#include <functional>
 #include <map>
+#include <memory>
 
 class ComponentRegistry final {
 public:
+	class GlobalComponent;
+
 	~ComponentRegistry();
 
 	static ComponentRegistry & getInstance();
@@ -21,6 +24,15 @@ public:
 	uint64_t addComponent(std::unique_ptr<T> * component);
 	bool deleteComponent(uint64_t id);
 	void deleteAllComponents();
+
+	size_t numberOfGlobalComponents() const;
+	bool hasGlobalComponent(uint64_t id) const;
+	uint64_t addGlobalComponent(std::unique_ptr<GlobalComponent> globalComponent);
+	bool deleteGlobalComponent(uint64_t id);
+	void deleteAllGlobalComponents();
+
+	bool areGlobalComponentsRegistered() const;
+	bool registerGlobalComponents();
 
 private:
 	class Component {
@@ -84,9 +96,27 @@ private:
 		const ExternalUniqueComponent<T> & operator = (const ExternalUniqueComponent<T> &) = delete;
 	};
 
+	class GlobalComponent final : public Component {
+	public:
+		GlobalComponent(std::function<void()> destroyFunction);
+		virtual ~GlobalComponent();
+
+	private:
+		std::function<void()> m_destroyFunction;
+
+		GlobalComponent(const GlobalComponent &) = delete;
+		GlobalComponent(GlobalComponent &&) noexcept = delete;
+		const GlobalComponent & operator = (GlobalComponent &&) noexcept = delete;
+		const GlobalComponent & operator = (const GlobalComponent &) = delete;
+	};
+
 	ComponentRegistry();
 
+	bool registerStandardGlobalComponents();
+
 	std::map<uint64_t, std::unique_ptr<Component>> m_components;
+	std::map<uint64_t, std::unique_ptr<GlobalComponent>> m_globalComponents;
+	bool m_globalComponentsRegistered;
 
 	ComponentRegistry(const ComponentRegistry &) = delete;
 	ComponentRegistry(ComponentRegistry &&) noexcept = delete;

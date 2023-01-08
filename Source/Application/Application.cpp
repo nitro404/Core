@@ -6,12 +6,7 @@
 #include "Logging/LogSystem.h"
 
 Application::Application() {
-	FactoryRegistry::getInstance().assignFactories();
-	ArchiveFactoryRegistry::getInstance()->assignFactories();
-
-	LogSystem::getInstance();
+	FactoryRegistry::getInstance().assignDefaultFactories();
 }
 
-Application::~Application() {
-	ComponentRegistry::getInstance().deleteAllComponents();
-}
+Application::~Application() { }

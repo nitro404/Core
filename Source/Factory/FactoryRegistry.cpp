@@ -4,6 +4,7 @@
 #include "Archive/ArchiveFactoryRegistry.h"
 #include "GitHub/GitHubService.h"
 #include "LibraryInformation.h"
+#include "Logging/LogSystem.h"
 #include "Network/HTTPService.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Platform/TimeZoneDataManager.h"
@@ -12,7 +13,8 @@
 
 static std::unique_ptr<FactoryRegistry> s_factoryRegistryInstance;
 
-FactoryRegistry::FactoryRegistry() { }
+FactoryRegistry::FactoryRegistry()
+	: m_defaultFactoriesAssigned(false) { }
 
 FactoryRegistry::~FactoryRegistry() = default;
 
@@ -26,9 +28,26 @@ FactoryRegistry & FactoryRegistry::getInstance() {
 	return *s_factoryRegistryInstance;
 }
 
-void FactoryRegistry::assignFactories() {
+void FactoryRegistry::resetFactories() {
+	m_factories.clear();
+}
+
+bool FactoryRegistry::areDefaultFactoriesAssigned() const {
+	return m_defaultFactoriesAssigned;
+}
+
+void FactoryRegistry::assignDefaultFactories() {
+	if(m_defaultFactoriesAssigned) {
+		return;
+	}
+
 	assignStandardFactories();
 	assignPlatformFactories();
+
+	LogSystem::getInstance();
+	ArchiveFactoryRegistry::getInstance()->assignDefaultFactories();
+
+	m_defaultFactoriesAssigned = true;
 }
 
 void FactoryRegistry::assignStandardFactories() {
@@ -63,8 +82,4 @@ void FactoryRegistry::assignStandardFactories() {
 	setFactory<ArchiveFactoryRegistry>([]() {
 		return std::make_unique<ArchiveFactoryRegistry>();
 	});
-}
-
-void FactoryRegistry::resetFactories() {
-	m_factories.clear();
 }
