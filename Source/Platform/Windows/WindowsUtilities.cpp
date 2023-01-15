@@ -213,7 +213,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 	// Initialize COM
 	result = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if(FAILED(result)) {
-		printf("Failed to initialize COM library: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
+		spdlog::error("Failed to initialize COM library: {}", WindowsUtilities::getErrorMessage(result));
 
 		if(error != nullptr) {
 			*error = true;
@@ -238,7 +238,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 			nullptr);                    // Reserved
 
 		if(FAILED(result) && result != RPC_E_TOO_LATE) {
-			printf("Failed to initialize security: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
+			spdlog::error("Failed to initialize security: {}", WindowsUtilities::getErrorMessage(result));
 
 			CoUninitialize();
 
@@ -262,7 +262,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 		IID_IWbemLocator, (LPVOID *) &locator);
 
 	if(FAILED(result)) {
-		printf("Failed to create IWbemLocator object: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
+		spdlog::error("Failed to create IWbemLocator object: {}", WindowsUtilities::getErrorMessage(result));
 
 		CoUninitialize();
 
@@ -290,7 +290,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 		&service);               // Pointer to IWbemServices proxy
 
 	if(FAILED(result)) {
-		printf("Could not connect: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
+		spdlog::error("Could not connect: {}", WindowsUtilities::getErrorMessage(result));
 
 		locator->Release();
 		CoUninitialize();
@@ -314,7 +314,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 		EOAC_NONE);                  // Proxy capabilities
 
 	if(FAILED(result)) {
-		printf("Could not set proxy blanket: %s\n", WindowsUtilities::getErrorMessage(result).c_str());
+		spdlog::error("Could not set proxy blanket: {}", WindowsUtilities::getErrorMessage(result));
 
 		service->Release();
 		locator->Release();
@@ -338,7 +338,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 		&enumerator);
 
 	if(FAILED(result)) {
-		printf("Query for '%s' failed: %s\n", providerClassName.c_str(), WindowsUtilities::getErrorMessage(result).c_str());
+		spdlog::error("Query for '{}' failed: {}", providerClassName, WindowsUtilities::getErrorMessage(result));
 
 		service->Release();
 		locator->Release();
