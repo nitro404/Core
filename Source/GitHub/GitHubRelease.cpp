@@ -168,26 +168,20 @@ size_t GitHubRelease::numberOfAssets() const {
 }
 
 bool GitHubRelease::hasAsset(const GitHubReleaseAsset & asset) const {
-	return std::find_if(std::begin(m_assets), std::end(m_assets), [&asset](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return asset == *currentAsset;
-	}) != std::end(m_assets);
+	return indexOfAsset(asset) != std::numeric_limits<size_t>::max();
 }
 
 bool GitHubRelease::hasAssetWithID(uint64_t id) const {
-	return std::find_if(std::begin(m_assets), std::end(m_assets), [id](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return id == currentAsset->getID();
-	}) != std::end(m_assets);
+	return indexOfAssetWithID(id) != std::numeric_limits<size_t>::max();
 }
 
 bool GitHubRelease::hasAssetWithFileName(const std::string & fileName, bool caseSensitive) const {
-	return std::find_if(std::begin(m_assets), std::end(m_assets), [&fileName, caseSensitive](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return Utilities::areStringsEqual(fileName, currentAsset->getFileName(), caseSensitive);
-	}) != std::end(m_assets);
+	return indexOfAssetWithFileName(fileName, caseSensitive) != std::numeric_limits<size_t>::max();
 }
 
 size_t GitHubRelease::indexOfAsset(const GitHubReleaseAsset & asset) const {
 	auto assetIterator = std::find_if(std::begin(m_assets), std::end(m_assets), [&asset](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return asset == *currentAsset;
+		return &asset == currentAsset.get();
 	});
 
 	if(assetIterator == std::end(m_assets)) {
@@ -230,27 +224,11 @@ std::shared_ptr<GitHubReleaseAsset> GitHubRelease::getAsset(size_t index) const 
 }
 
 std::shared_ptr<GitHubReleaseAsset> GitHubRelease::getAssetWithID(uint64_t id) const {
-	auto assetIterator = std::find_if(std::begin(m_assets), std::end(m_assets), [id](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return id == currentAsset->getID();
-	});
-
-	if(assetIterator == std::end(m_assets)) {
-		return nullptr;
-	}
-
-	return *assetIterator;
+	return getAsset(indexOfAssetWithID(id));
 }
 
 std::shared_ptr<GitHubReleaseAsset> GitHubRelease::getAssetWithFileName(const std::string & fileName, bool caseSensitive) const {
-	auto assetIterator = std::find_if(std::begin(m_assets), std::end(m_assets), [&fileName, caseSensitive](const std::shared_ptr<GitHubReleaseAsset> & currentAsset) {
-		return Utilities::areStringsEqual(fileName, currentAsset->getFileName(), caseSensitive);
-	});
-
-	if(assetIterator == std::end(m_assets)) {
-		return nullptr;
-	}
-
-	return *assetIterator;
+	return getAsset(indexOfAssetWithFileName(fileName, caseSensitive));
 }
 
 void GitHubRelease::updateParent() {
