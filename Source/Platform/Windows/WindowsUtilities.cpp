@@ -211,7 +211,7 @@ std::vector<std::map<std::string, std::any>> WindowsUtilities::getWindowsManagem
 	HRESULT result;
 
 	// Initialize COM
-	result = CoInitializeEx(0, COINIT_MULTITHREADED);
+	result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 	if(FAILED(result)) {
 		spdlog::error("Failed to initialize COM library: {}", WindowsUtilities::getErrorMessage(result));
 
