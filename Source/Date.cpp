@@ -264,8 +264,7 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 		}
 
 		if(!propertyHandled) {
-			spdlog::error("Date has unexpected property '{}'.", i->name.GetString());
-			return false;
+			spdlog::warn("Date has unexpected property '{}'.", i->name.GetString());
 		}
 	}
 

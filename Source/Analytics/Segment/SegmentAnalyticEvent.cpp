@@ -386,6 +386,24 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 		return nullptr;
 	}
 
+	// check for unhandled segment analytics data properties
+	bool propertyHandled = false;
+
+	for(rapidjson::Value::ConstMemberIterator i = analyticEventValue.MemberBegin(); i != analyticEventValue.MemberEnd(); ++i) {
+		propertyHandled = false;
+
+		for(const std::string_view propertyName : JSON_SEGMENT_ANALYTIC_EVENT_PROPERTY_NAMES) {
+			if(i->name.GetString() == propertyName) {
+				propertyHandled = true;
+				break;
+			}
+		}
+
+		if(!propertyHandled) {
+			spdlog::warn("Segment analytic event has unexpected property: '{}'.", i->name.GetString());
+		}
+	}
+
 	// parse analytic event ID
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME)) {
 		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME);

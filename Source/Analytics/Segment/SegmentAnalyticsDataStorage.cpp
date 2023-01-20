@@ -396,8 +396,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 		}
 
 		if(!propertyHandled) {
-			spdlog::error("Segment analytics data has unexpected property: '{}'.", i->name.GetString());
-			return false;
+			spdlog::warn("Segment analytics data has unexpected property: '{}'.", i->name.GetString());
 		}
 	}
 
