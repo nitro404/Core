@@ -1310,6 +1310,7 @@ spdlog::info("method: {} solid: {}", magic_enum::enum_name(methodType), solid ? 
 // readOffset: 35852 (lzma delta: 16)
 // expected lzma identifier index: 35868
 // brute force lzma identifier:
+/*
 if(methodType == MethodType::LZMA) {
 uint32_t tempDictionarySize = 0;
 for(size_t i = 0; i < data->getSize(); i++) {
@@ -1321,6 +1322,7 @@ for(size_t i = 0; i < data->getSize(); i++) {
 // sigOffset: 34816 (lzma delta: 32)
 // readOffset: 34828 (lzma delta: 20)
 // expected lzma identifier: 34848
+/*
 if(methodType == MethodType::BZip2) {
 for(size_t i = 0; i < data->getSize() - 1; i++) {
 	if((*data)[i] == 'B' && (*data)[i + 1] == 'Z') {
@@ -1441,6 +1443,8 @@ spdlog::error("failed to read uncompressed data");
 
 // TODO: temp:
 spdlog::info("got decompressed data! size: {}", decompressedData->getSize());
+
+decompressedData->writeTo("../Misc/DECOMPRESSED_DATA.BIN", true);
 
 	bool is64Bit = false;
 
