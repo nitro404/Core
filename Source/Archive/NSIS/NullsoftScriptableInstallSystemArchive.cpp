@@ -301,7 +301,11 @@ static bool isLZMA(const ByteBuffer & data, uint32_t & dictionarySize, bool & fi
 // TODO: temp:
 //spdlog::info("lzma check index {}", data.getReadOffset());
 
-	if(isLZMA(data, dictionarySize, data.getReadOffset())) {
+	size_t readOffset = data.getReadOffset();
+
+	if(isLZMA(data, dictionarySize, readOffset)) {
+spdlog::info("lzma index A {}", readOffset);
+
 		filterFlag = true;
 		return true;
 	}
@@ -310,9 +314,9 @@ static bool isLZMA(const ByteBuffer & data, uint32_t & dictionarySize, bool & fi
 		return false;
 	}
 
-	size_t readOffset = data.getReadOffset();
+	if(data[readOffset] <= 1 && isLZMA(data, dictionarySize, readOffset + 1)) {
+spdlog::info("lzma index B {}", readOffset + 1);
 
-	if(data[readOffset] <= 1 && isLZMA(data, dictionarySize, data.getReadOffset() + 1)) {
 		filterFlag = true;
 		return true;
 	}
@@ -1324,9 +1328,17 @@ for(size_t i = 0; i < data->getSize(); i++) {
 // expected lzma identifier: 34848
 /*
 if(methodType == MethodType::BZip2) {
-for(size_t i = 0; i < data->getSize() - 1; i++) {
-	if((*data)[i] == 'B' && (*data)[i + 1] == 'Z') {
-		spdlog::info("bzip2 magic: {}", i);
+for(size_t i = 0; i < data->getSize() - 3; i++) {
+	if((*data)[i + 0] == 10 &&
+	   (*data)[i + 1] == 11 &&
+	   (*data)[i + 2] == 12 &&
+	   (*data)[i + 3] == 13) {
+		spdlog::info("@@@ bzip2 magic: {}", i);
+	}
+
+	if((*data)[i + 0] == 11 &&
+	   (*data)[i + 1] == 31) {
+		spdlog::info("@@@ nsis bzip2 magic: {}", i);
 	}
 }
 spdlog::info("done bzip2 magic");
@@ -1400,6 +1412,8 @@ spdlog::info("max size exceeded");
 	}
 }
 //*/
+
+spdlog::info("remaining data: {} (should be none)", data->getSize() - (data->getReadOffset() + (firstHeader.dataSize - NSIS_FIRST_HEADER_SIZE - (solid ? 0 : 4))));
 
 		decompressedData = data->decompressed(optionalCompressionMethod.value(), data->getReadOffset(), firstHeader.dataSize - NSIS_FIRST_HEADER_SIZE - (solid ? 0 : 4));
 
