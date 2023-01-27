@@ -35,6 +35,9 @@ private:
 	typedef std::map<std::string, ArchiveFactoryData> ArchiveFactoryMap;
 
 	void assignStandardFactories();
+	void assignPlatformFactories();
+
+	ArchiveFactoryMap::const_iterator getArchiveFactoryForFilePath(const std::string & filePath) const;
 
 	static std::string formatFileExtension(const std::string & fileExtension);
 

@@ -162,6 +162,14 @@ set(CORE_HEADER_FILES
 )
 
 set(CORE_SOURCE_FILES_WINDOWS
+	Archive/NSIS/ArchiveBufferInputStream.cpp
+	Archive/NSIS/ArchiveExtractFileCallback.cpp
+	Archive/NSIS/ArchiveFileBufferOutputCallback.cpp
+	Archive/NSIS/ArchiveFileBufferOutputStream.cpp
+	Archive/NSIS/ArchiveOpenCallback.cpp
+	Archive/NSIS/NullsoftScriptableInstallSystemArchive.cpp
+	Archive/NSIS/NullsoftScriptableInstallSystemArchiveEntry.cpp
+	Archive/Windows/ArchiveFactoryRegistryWindows.cpp
 	Factory/Windows/FactoryRegistryWindows.cpp
 	Logging/Windows/LogSinkWindows.cpp
 	Logging/Windows/LogSystemWindows.cpp
@@ -174,6 +182,12 @@ set(CORE_SOURCE_FILES_WINDOWS
 )
 
 set(CORE_HEADER_FILES_WINDOWS
+	Archive/NSIS/ArchiveBufferInputStream.h
+	Archive/NSIS/ArchiveExtractFileCallback.h
+	Archive/NSIS/ArchiveFileBufferOutputCallback.h
+	Archive/NSIS/ArchiveFileBufferOutputStream.h
+	Archive/NSIS/ArchiveOpenCallback.h
+	Archive/NSIS/NullsoftScriptableInstallSystemArchive.h
 	Logging/Windows/LogSinkWindows.h
 	Logging/Windows/LogSystemWindows.h
 	Platform/Windows/DeviceInformationBridgeWindows.h

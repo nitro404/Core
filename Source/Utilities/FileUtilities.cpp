@@ -23,14 +23,24 @@ const char Utilities::newLine[] = "\n";
 
 #endif // _WIN32
 
-size_t getFileExtensionSeparatorIndex(std::string_view filePath) {
+size_t getFileExtensionSeparatorIndex(std::string_view filePath, bool useLastPeriod = true) {
 	size_t pathSeparatorIndex = filePath.find_last_of("/\\");
 
 	if(pathSeparatorIndex == std::numeric_limits<size_t>::max()) {
 		pathSeparatorIndex = 0;
 	}
 
-	return filePath.find_first_of(".", pathSeparatorIndex + 1);
+	if(!useLastPeriod) {
+		return filePath.find_first_of(".", pathSeparatorIndex + 1);
+	}
+
+	size_t fileExtensionSeparatorIndex = std::string_view(filePath.data() + pathSeparatorIndex + 1, filePath.size() - pathSeparatorIndex - 1).find_last_of(".");
+
+	if(fileExtensionSeparatorIndex == std::string::npos) {
+		return std::string::npos;
+	}
+
+	return fileExtensionSeparatorIndex + pathSeparatorIndex + 1;
 }
 
 bool Utilities::startsWithPathSeparator(std::string_view filePath) {
@@ -149,8 +159,8 @@ std::string Utilities::addTrailingPathSeparator(std::string_view filePath, char 
 	return std::string(filePath) + pathSeparator;
 }
 
-std::string_view Utilities::getFileExtension(std::string_view filePath) {
-	size_t index = getFileExtensionSeparatorIndex(filePath);
+std::string_view Utilities::getFileExtension(std::string_view filePath, bool useLastPeriod) {
+	size_t index = getFileExtensionSeparatorIndex(filePath, useLastPeriod);
 
 	if(index == std::string::npos) {
 		return std::string_view();
@@ -159,8 +169,8 @@ std::string_view Utilities::getFileExtension(std::string_view filePath) {
 	return std::string_view(filePath.data() + index + 1, filePath.length() - (index + 1));
 }
 
-std::string_view Utilities::getFileNameNoExtension(std::string_view filePath) {
-	size_t index = getFileExtensionSeparatorIndex(filePath);
+std::string_view Utilities::getFileNameNoExtension(std::string_view filePath, bool useLastPeriod) {
+	size_t index = getFileExtensionSeparatorIndex(filePath, useLastPeriod);
 
 	if(index == std::string::npos) {
 		return filePath;

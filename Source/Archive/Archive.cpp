@@ -207,7 +207,7 @@ std::shared_ptr<ArchiveEntry> Archive::getEntry(size_t index) {
 	return entries[index];
 }
 
-size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwrite) const {
+size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwrite) {
 	if(!isOpen()) {
 		return 0;
 	}

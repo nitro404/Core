@@ -44,28 +44,33 @@ if(WIN32)
 		PUBLIC
 			NOMINMAX
 	)
+
+	set(CORE_LIBRARIES_WINDOWS
+		SevenZip::SevenZipCPP
+	)
 endif()
 
-target_link_libraries(
-	${PROJECT_NAME}
-		PUBLIC
-			BZip2::bz2
-			cryptopp-static
-			CURL::libcurl
-			date::date
-			date::date-tz
-			dmc_unrar::dmc_unrar
-			double-conversion::double-conversion
-			fmt::fmt
-			LibLZMA::LibLZMA
-			Libssh2::libssh2
-			libzip::zip
-			magic_enum::magic_enum
-			RapidJSON::rapidjson
-			SevenZip::SevenZip
-			spdlog::spdlog
-			tidy::tidy-static
-			tinyxml2::tinyxml2
-			ZLIB::zlib
-			zstd::libzstd_static
+set(CORE_LIBRARIES
+	BZip2::bz2
+	cryptopp-static
+	CURL::libcurl
+	date::date
+	date::date-tz
+	dmc_unrar::dmc_unrar
+	double-conversion::double-conversion
+	fmt::fmt
+	LibLZMA::LibLZMA
+	Libssh2::libssh2
+	libzip::zip
+	magic_enum::magic_enum
+	RapidJSON::rapidjson
+	SevenZip::SevenZip
+	spdlog::spdlog
+	tidy::tidy-static
+	tinyxml2::tinyxml2
+	ZLIB::zlib
+	zstd::libzstd_static
+	${CORE_LIBRARIES_${PLATFORM_UPPER}}
 )
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CORE_LIBRARIES})

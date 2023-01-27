@@ -1,5 +1,9 @@
 include_guard()
 
+if(WIN32)
+	set(BUILD_7Z_CPP_LIB ON)
+endif()
+
 hunter_config(BZip2
 	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.8.zip"
 	VERSION "1.0.8"
@@ -87,9 +91,11 @@ hunter_config(RapidJSON
 )
 
 hunter_config(SevenZip
-	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.1.zip"
-	VERSION "21.7.0.1"
-	SHA1 "68e5db5849b3b09d3612324fae99e582144a69dd"
+	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.2.zip"
+	VERSION "21.7.0.2"
+	SHA1 "0286aef04c00a928c264008188eda25efb23c389"
+	CMAKE_ARGS
+		BUILD_CPP_LIB=${BUILD_7Z_CPP_LIB}
 )
 
 hunter_config(spdlog

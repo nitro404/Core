@@ -412,7 +412,7 @@ uint32_t ZipArchive::Entry::getCRC32() const {
 	return m_crc32;
 }
 
-bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) const {
+bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
 	std::unique_ptr<ByteBuffer> data(getData());
 
 	if(data == nullptr) {

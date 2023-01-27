@@ -24,8 +24,8 @@ namespace Utilities {
 	std::string_view trimPathSeparators(std::string_view filePath);
 	std::string addLeadingPathSeparator(std::string_view filePath, char pathSeparator = '/');
 	std::string addTrailingPathSeparator(std::string_view filePath, char pathSeparator = '/');
-	std::string_view getFileExtension(std::string_view filePath);
-	std::string_view getFileNameNoExtension(std::string_view filePath);
+	std::string_view getFileExtension(std::string_view filePath, bool useLastPeriod = true);
+	std::string_view getFileNameNoExtension(std::string_view filePath, bool useLastPeriod = true);
 	bool hasFileExtension(std::string_view filePath, std::string_view extension, bool caseSensitive = false);
 	std::string replaceFileExtension(std::string_view filePath, std::string_view extension);
 	std::string reverseFileExtension(std::string_view filePath);

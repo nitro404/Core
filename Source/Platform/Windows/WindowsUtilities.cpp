@@ -79,7 +79,117 @@ std::optional<std::string> WindowsUtilities::getRegistryEntry(const std::string 
 	return registryEntry;
 }
 
-std::any WindowsUtilities::variantToAny(VARIANT variant, bool * error) {
+std::string WindowsUtilities::getVariantTypeName(const VARIANT & variant) {
+	return getVariantTypeName(variant.vt);
+}
+
+std::string WindowsUtilities::getVariantTypeName(VARTYPE variantType) {
+	switch(variantType) {
+		case VT_BOOL:
+			return "Boolean";
+		case VT_I1:
+			return "Signed Byte";
+		case VT_UI1:
+			return "Unsigned Byte";
+		case VT_I2:
+			return "Signed Short";
+		case VT_UI2:
+			return "Unsigned Short";
+		case VT_INT:
+		case VT_I4:
+			return "Signed Integer";
+		case VT_UINT:
+		case VT_UI4:
+			return "Unsigned Integer";
+		case VT_I8:
+			return "Signed Long";
+		case VT_UI8:
+			return "Unsigned Long";
+		case VT_R4:
+			return "Float";
+		case VT_R8:
+			return "Double";
+		case VT_CY:
+			return "Currency";
+		case VT_DATE:
+			return "Date";
+		case VT_BSTR:
+			return "Wide String";
+		case VT_DECIMAL:
+			return "Decimal";
+		case VT_EMPTY:
+			return "Empty";
+		case VT_NULL:
+			return "Null";
+		case VT_VOID:
+			return "Void";
+		case VT_VARIANT:
+			return "Variant";
+		case VT_UNKNOWN:
+			return "Unknown";
+		case VT_DISPATCH:
+			return "Dispatch";
+		case VT_ERROR:
+			return "Error";
+		case VT_HRESULT:
+			return "Result Handle";
+		case VT_PTR:
+			return "Pointer";
+		case VT_SAFEARRAY:
+			return "Safe Array";
+		case VT_CARRAY:
+			return "Array Pointer";
+		case VT_USERDEFINED:
+			return "User Defined";
+		case VT_LPSTR:
+			return "Null Terminated String";
+		case VT_LPWSTR:
+			return "Wide Null-Terminated String";
+		case VT_RECORD:
+			return "Record";
+		case VT_INT_PTR:
+			return "Integer Pointer";
+		case VT_UINT_PTR:
+			return "Unsigned Integer Pointer";
+		case VT_FILETIME:
+			return "File Time";
+		case VT_BLOB:
+			return "Blob";
+		case VT_STREAM:
+			return "Stream";
+		case VT_STORAGE:
+			return "Storage";
+		case VT_STREAMED_OBJECT:
+			return "Streamed Object";
+		case VT_STORED_OBJECT:
+			return "Stored Object";
+		case VT_BLOB_OBJECT:
+			return "Blob Object";
+		case VT_CF:
+			return "Clipboard Format";
+		case VT_CLSID:
+			return "Class Identifier";
+		case VT_VERSIONED_STREAM:
+			return "Versioned Stream";
+		case VT_BSTR_BLOB:
+			return "BSTR Blob";
+		case VT_VECTOR:
+			return "Vector";
+		case VT_ARRAY:
+			return "Array";
+		case VT_BYREF:
+			return "Void Pointer";
+		case VT_RESERVED:
+			return "Reserved";
+		case VT_ILLEGAL: {
+			return "Illegal";
+		}
+	}
+
+	return {};
+}
+
+std::any WindowsUtilities::variantToAny(const VARIANT & variant, bool * error) {
 	std::any any;
 
 	switch(variant.vt) {

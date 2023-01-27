@@ -17,7 +17,9 @@ namespace WindowsUtilities {
 	std::string getErrorMessage(HRESULT result);
 	std::string getRegistryEntry(const std::string & key, const std::string & entryName, bool * error);
 	std::optional<std::string> getRegistryEntry(const std::string & key, const std::string & entryName);
-	std::any variantToAny(VARIANT variant, bool * error = nullptr);
+	std::string getVariantTypeName(const VARIANT & variant);
+	std::string getVariantTypeName(VARTYPE variantType);
+	std::any variantToAny(const VARIANT & variant, bool * error = nullptr);
 	std::vector<std::map<std::string, std::any>> getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames, bool * error);
 	std::optional<std::vector<std::map<std::string, std::any>>> getWindowsManagementInstrumentationEntries(const std::string & providerClassName, const std::vector<std::string> & propertyNames);
 	std::any getWindowsManagementInstrumentationEntry(const std::string & providerClassName, const std::string & propertyName, bool * error = nullptr);

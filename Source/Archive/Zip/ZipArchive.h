@@ -3,16 +3,11 @@
 
 #include "Archive/Archive.h"
 #include "BitmaskOperators.h"
-#include "ByteBuffer.h"
 
 #include <magic_enum.hpp>
 #include <zip.h>
 
-#include <chrono>
 #include <functional>
-#include <memory>
-#include <string>
-#include <vector>
 
 class ZipArchive final : public Archive {
 	friend class Entry;
@@ -92,7 +87,7 @@ public:
 		EncryptionMethod getEncryptionMethod() const;
 		bool setEncryptionMethod(EncryptionMethod encryptionMethod);
 		virtual uint32_t getCRC32() const override;
-		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const override;
+		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) override;
 
 	protected:
 		virtual bool isParentArchiveValid() const override;

@@ -171,7 +171,7 @@ uint32_t TarArchive::Entry::getCRC32() const {
 	return m_checksum;
 }
 
-bool TarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) const {
+bool TarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
 	if(!isParentArchiveValid() || isDirectory()) {
 		return false;
 	}

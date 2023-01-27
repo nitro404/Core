@@ -568,6 +568,22 @@ int32_t Utilities::compareStringsIgnoreCase(std::string_view s1, std::string_vie
 	return Utilities::compareStrings(s1, s2, false);
 }
 
+bool Utilities::startsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {
+	if(value.length() < suffix.length()) {
+		return false;
+	}
+
+	return Utilities::compareStrings(std::string_view(value.data(), suffix.length()), suffix, caseSensitive);
+}
+
+bool Utilities::endsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {
+	if(value.length() < suffix.length()) {
+		return false;
+	}
+
+	return Utilities::compareStrings(std::string_view(value.data() + value.length() - suffix.length(), suffix.length()), suffix, caseSensitive);
+}
+
 bool Utilities::isComment(std::string_view data, std::string_view comment) {
 	if(comment.empty()) {
 		return false;

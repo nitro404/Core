@@ -106,7 +106,7 @@ uint32_t SevenZipArchive::Entry::getCRC32() const {
 	return m_parentArchive->getRawArchiveHandle()->CRCs.Vals[m_index];
 }
 
-bool SevenZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) const {
+bool SevenZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
 	std::unique_ptr<ByteBuffer> data(getData());
 	std::string path(getPath());
 

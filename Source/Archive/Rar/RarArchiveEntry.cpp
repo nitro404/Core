@@ -128,7 +128,7 @@ uint32_t RarArchive::Entry::getCRC32() const {
 	return statistics == nullptr || !statistics->has_crc ? 0 : statistics->crc;
 }
 
-bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) const {
+bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
 	if(!isParentArchiveValid() || isDirectory()) {
 		return false;
 	}

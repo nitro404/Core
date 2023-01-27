@@ -72,6 +72,7 @@ void ArchiveFactoryRegistry::assignDefaultFactories() {
 	}
 
 	assignStandardFactories();
+	assignPlatformFactories();
 
 	m_defaultFactoriesAssigned = true;
 }
@@ -164,48 +165,52 @@ void ArchiveFactoryRegistry::assignStandardFactories() {
 	});
 }
 
-std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & fileExtension) {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-	if(fileExtension.empty()) {
-		return nullptr;
-	}
-
-	std::string formattedFileExtension(formatFileExtension(fileExtension));
-
-	if(formattedFileExtension.empty()) {
-		return nullptr;
-	}
-
-	ArchiveFactoryMap::const_iterator factoryDataIterator(m_archiveFactories.find(formattedFileExtension));
-
-	if(factoryDataIterator == m_archiveFactories.cend()) {
-		return nullptr;
-	}
-
-	return factoryDataIterator->second.createArchiveFunction(std::move(buffer));
-}
-
-std::unique_ptr<Archive> ArchiveFactoryRegistry::readArchiveFrom(const std::string & filePath) {
+ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry::getArchiveFactoryForFilePath(const std::string & filePath) const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(filePath.empty()) {
-		return nullptr;
+		return m_archiveFactories.cend();
 	}
 
 	std::string formattedFileExtension(formatFileExtension(std::string(Utilities::getFileExtension(filePath))));
 
 	if(formattedFileExtension.empty()) {
+		return m_archiveFactories.cend();
+	}
+
+	ArchiveFactoryMap::const_iterator archiveFactoryIterator(m_archiveFactories.find(formattedFileExtension));
+
+	if(archiveFactoryIterator != m_archiveFactories.cend()) {
+		return archiveFactoryIterator;
+	}
+
+	return std::find_if(m_archiveFactories.cbegin(), m_archiveFactories.cend(), [&filePath](const auto & archiveFactory) {
+		return Utilities::endsWith(filePath, archiveFactory.first);
+	});
+}
+
+std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePath) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePath));
+
+	if(archiveFactoryIterator == m_archiveFactories.cend()) {
 		return nullptr;
 	}
 
-	ArchiveFactoryMap::const_iterator factoryDataIterator(m_archiveFactories.find(formattedFileExtension));
+	return archiveFactoryIterator->second.createArchiveFunction(std::move(buffer));
+}
 
-	if(factoryDataIterator == m_archiveFactories.cend()) {
+std::unique_ptr<Archive> ArchiveFactoryRegistry::readArchiveFrom(const std::string & filePath) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePath));
+
+	if(archiveFactoryIterator == m_archiveFactories.cend()) {
 		return nullptr;
 	}
 
-	return factoryDataIterator->second.readArchiveFunction(filePath);
+	return archiveFactoryIterator->second.readArchiveFunction(filePath);
 }
 
 std::string ArchiveFactoryRegistry::formatFileExtension(const std::string & fileExtension) {

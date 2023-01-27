@@ -2,15 +2,11 @@
 #define _SEVEN_ZIP_ARCHIVE_H_
 
 #include "Archive/Archive.h"
-#include "ByteBuffer.h"
 
 #include <SevenZip/C/7z.h>
 #include <SevenZip/C/7zFile.h>
 
-#include <chrono>
 #include <functional>
-#include <memory>
-#include <string>
 
 class SevenZipArchive final : public Archive {
 	friend class Entry;
@@ -33,7 +29,7 @@ public:
 		virtual uint64_t getUncompressedSize() const override;
 		virtual std::unique_ptr<ByteBuffer> getData() const override;
 		virtual uint32_t getCRC32() const override;
-		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const override;
+		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) override;
 
 	protected:
 		virtual Archive * getParentArchive() const override;

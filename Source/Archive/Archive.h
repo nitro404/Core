@@ -14,6 +14,7 @@ class Archive {
 
 public:
 	enum class Type {
+		NSIS,
 		Rar,
 		SevenZip,
 		Tar,
@@ -50,7 +51,7 @@ public:
 	const std::shared_ptr<ArchiveEntry> getEntry(size_t index) const;
 	std::shared_ptr<ArchiveEntry> getEntry(size_t index);
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const = 0;
-	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false) const;
+	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false);
 	void updateParentArchive();
 	virtual std::string toDebugString(bool includeDate = false) const = 0;
 

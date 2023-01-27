@@ -37,7 +37,7 @@ public:
 	virtual uint64_t getUncompressedSize() const = 0;
 	virtual std::unique_ptr<ByteBuffer> getData() const = 0;
 	virtual uint32_t getCRC32() const = 0;
-	virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) const = 0;
+	virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) = 0;
 
 	static bool isDirectory(std::string_view path);
 
