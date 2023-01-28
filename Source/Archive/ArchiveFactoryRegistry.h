@@ -23,7 +23,7 @@ public:
 	bool areDefaultFactoriesAssigned() const;
 	void assignDefaultFactories();
 
-	std::unique_ptr<Archive> createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & fileExtension);
+	std::unique_ptr<Archive> createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePathOrExtension);
 	std::unique_ptr<Archive> readArchiveFrom(const std::string & filePath);
 
 private:
@@ -37,7 +37,7 @@ private:
 	void assignStandardFactories();
 	void assignPlatformFactories();
 
-	ArchiveFactoryMap::const_iterator getArchiveFactoryForFilePath(const std::string & filePath) const;
+	ArchiveFactoryMap::const_iterator getArchiveFactoryForFilePath(const std::string & filePathOrExtension) const;
 
 	static std::string formatFileExtension(const std::string & fileExtension);
 

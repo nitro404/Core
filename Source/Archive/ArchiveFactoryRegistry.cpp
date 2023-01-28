@@ -165,17 +165,17 @@ void ArchiveFactoryRegistry::assignStandardFactories() {
 	});
 }
 
-ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry::getArchiveFactoryForFilePath(const std::string & filePath) const {
+ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry::getArchiveFactoryForFilePath(const std::string & filePathOrExtension) const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	if(filePath.empty()) {
+	if(filePathOrExtension.empty()) {
 		return m_archiveFactories.cend();
 	}
 
-	std::string formattedFileExtension(formatFileExtension(std::string(Utilities::getFileExtension(filePath))));
+	std::string formattedFileExtension(formatFileExtension(std::string(Utilities::getFileExtension(filePathOrExtension))));
 
 	if(formattedFileExtension.empty()) {
-		return m_archiveFactories.cend();
+		formattedFileExtension = filePathOrExtension;
 	}
 
 	ArchiveFactoryMap::const_iterator archiveFactoryIterator(m_archiveFactories.find(formattedFileExtension));
@@ -184,15 +184,15 @@ ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry
 		return archiveFactoryIterator;
 	}
 
-	return std::find_if(m_archiveFactories.cbegin(), m_archiveFactories.cend(), [&filePath](const auto & archiveFactory) {
-		return Utilities::endsWith(filePath, archiveFactory.first);
+	return std::find_if(m_archiveFactories.cbegin(), m_archiveFactories.cend(), [&filePathOrExtension](const auto & archiveFactory) {
+		return Utilities::endsWith(filePathOrExtension, archiveFactory.first);
 	});
 }
 
-std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePath) {
+std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePathOrExtension) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePath));
+	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePathOrExtension));
 
 	if(archiveFactoryIterator == m_archiveFactories.cend()) {
 		return nullptr;
