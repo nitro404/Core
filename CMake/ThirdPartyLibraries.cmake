@@ -1,5 +1,10 @@
 include_guard()
 
+set(BOOST_COMPONENTS
+	random
+)
+
+hunter_add_package(Boost COMPONENTS ${BOOST_COMPONENTS})
 hunter_add_package(BZip2)
 hunter_add_package(CryptoPP)
 hunter_add_package(CURL)
@@ -20,6 +25,7 @@ hunter_add_package(tinyxml2)
 hunter_add_package(ZLIB)
 hunter_add_package(zstd)
 
+find_package(Boost CONFIG REQUIRED ${BOOST_COMPONENTS})
 find_package(BZip2 CONFIG REQUIRED)
 find_package(CryptoPP CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)

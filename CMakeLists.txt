@@ -50,7 +50,12 @@ if(WIN32)
 	)
 endif()
 
+foreach(_BOOST_COMPONENT ${BOOST_COMPONENTS})
+	list(APPEND BOOST_LIBRARIES Boost::${_BOOST_COMPONENT})
+endforeach()
+
 set(CORE_LIBRARIES
+	${BOOST_LIBRARIES}
 	BZip2::bz2
 	cryptopp-static
 	CURL::libcurl

@@ -4,6 +4,10 @@ if(WIN32)
 	set(BUILD_7Z_CPP_LIB ON)
 endif()
 
+hunter_config(Boost
+	VERSION "1.80.0"
+)
+
 hunter_config(BZip2
 	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.8.zip"
 	VERSION "1.0.8"
