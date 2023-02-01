@@ -510,7 +510,7 @@ bool Utilities::areStringsEqual(std::string_view s1, std::string_view s2, bool c
 		return false;
 	}
 
-	return Utilities::compareStrings(s1, s2) == 0;
+	return Utilities::compareStrings(s1, s2, caseSensitive) == 0;
 }
 
 int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive) {
