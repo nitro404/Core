@@ -58,6 +58,18 @@ std::string ArchiveEntry::getName() const {
 	return std::string(Utilities::getFileName(Utilities::trimTrailingPathSeparator(filePath)));
 }
 
+std::string ArchiveEntry::getBasePath() const {
+	return std::string(Utilities::getBasePath(getPath()));
+}
+
+std::string ArchiveEntry::getFileExtension(bool useLastPeriod) const {
+	if(!isFile()) {
+		return {};
+	}
+
+	return std::string(Utilities::getFileExtension(getPath(), useLastPeriod));
+}
+
 std::vector<std::shared_ptr<ArchiveEntry>> ArchiveEntry::getChildren(bool includeSubdirectories, bool caseSensitive) const {
 	if(!isParentArchiveValid() || !isDirectory()) {
 		return {};
@@ -103,6 +115,10 @@ std::vector<std::shared_ptr<ArchiveEntry>> ArchiveEntry::getChildren(bool includ
 	}
 
 	return children;
+}
+
+bool ArchiveEntry::writeToDirectory(const std::string & directoryPath, bool overwrite) {
+	return writeToFile(Utilities::joinPaths(directoryPath, getPath()), overwrite);
 }
 
 bool ArchiveEntry::hasComment() const {

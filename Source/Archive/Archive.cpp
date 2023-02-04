@@ -207,19 +207,98 @@ std::shared_ptr<ArchiveEntry> Archive::getEntry(size_t index) {
 	return entries[index];
 }
 
-size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwrite) {
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getRootEntries() const {
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> rootEntries;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(!entry->isDirectory() && !entry->isInSubdirectory()) {
+			rootEntries.push_back(entry);
+		}
+	}
+
+	return rootEntries;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithName(const std::string & entryName, bool caseSensitive) const {
+	if(entryName.empty()) {
+		return {};
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesWithName;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqual(entry->getName(), entryName, caseSensitive)) {
+			entriesWithName.push_back(entry);
+		}
+	}
+
+	return entriesWithName;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesInDirectory(const std::string & directoryPath, bool includeSubdirectories, bool caseSensitive) const {
+	if(directoryPath.empty()) {
+		return getRootEntries();
+	}
+
+	std::string_view formattedDirectoryPath;
+
+	if(directoryPath[0] == '/' || directoryPath[0] == '\\') {
+		formattedDirectoryPath = directoryPath.substr(0, directoryPath.length() - 1);
+	}
+	else {
+		formattedDirectoryPath = directoryPath;
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesInDirectory;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		std::string entryBasePath(entry->getBasePath());
+
+		if(includeSubdirectories) {
+			if(entryBasePath.length() < formattedDirectoryPath.length()) {
+				continue;
+			}
+
+			if(Utilities::areStringsEqual(entryBasePath.substr(0, formattedDirectoryPath.length()), formattedDirectoryPath, caseSensitive)) {
+				entriesInDirectory.push_back(entry);
+			}
+		}
+		else {
+			if(Utilities::areStringsEqual(entryBasePath, formattedDirectoryPath, caseSensitive)) {
+				entriesInDirectory.push_back(entry);
+			}
+		}
+	}
+
+	return entriesInDirectory;
+}
+
+size_t Archive::extractAllEntries(const std::string & destionationDirectoryPath, bool overwrite) {
 	if(!isOpen()) {
 		return 0;
 	}
 
-	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
-
 	std::error_code errorCode;
 
-	if(!directoryPath.empty()) {
-		std::filesystem::path outputDirectoryPath(directoryPath);
+	if(!destionationDirectoryPath.empty()) {
+		std::filesystem::path outputDirectoryPath(destionationDirectoryPath);
 
-		if(!directoryPath.empty() && !std::filesystem::is_directory(outputDirectoryPath)) {
+		if(!destionationDirectoryPath.empty() && !std::filesystem::is_directory(outputDirectoryPath)) {
 			std::filesystem::create_directories(outputDirectoryPath, errorCode);
 
 			if(errorCode) {
@@ -229,16 +308,17 @@ size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwr
 		}
 	}
 
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
 	size_t numberOfExtractedFileEntries = 0;
 
-	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
-		if(*i == nullptr) {
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
 			continue;
 		}
 
-		std::filesystem::path currentEntryDestinationPath(Utilities::joinPaths(directoryPath, (*i)->getPath()));
+		std::filesystem::path currentEntryDestinationPath(Utilities::joinPaths(destionationDirectoryPath, entry->getPath()));
 
-		if((*i)->isDirectory()) {
+		if(entry->isDirectory()) {
 			if(!std::filesystem::is_directory(currentEntryDestinationPath)) {
 				std::filesystem::create_directories(currentEntryDestinationPath, errorCode);
 
@@ -248,13 +328,66 @@ size_t Archive::extractAllEntries(const std::string & directoryPath, bool overwr
 				}
 			}
 		}
-		else if((*i)->isFile()) {
+		else if(entry->isFile()) {
 			if(!overwrite && std::filesystem::is_regular_file(currentEntryDestinationPath)) {
 				spdlog::warn("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?", currentEntryDestinationPath.string());
 				continue;
 			}
 
-			if((*i)->writeTo(directoryPath, overwrite)) {
+			if(entry->writeToDirectory(destionationDirectoryPath, overwrite)) {
+				numberOfExtractedFileEntries++;
+
+				spdlog::debug("Extracted file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, numberOfFiles(), currentEntryDestinationPath.string());
+			}
+		}
+	}
+
+	return numberOfExtractedFileEntries;
+}
+
+size_t Archive::extractAllEntriesInSubdirectory(const std::string & destionationDirectoryPath, const std::string & archiveSubdirectory, bool relativeToSubdirectory, bool includeSubdirectories, bool overwrite, bool caseSensitive) {
+	if(!isOpen()) {
+		return 0;
+	}
+
+	std::error_code errorCode;
+
+	if(!destionationDirectoryPath.empty()) {
+		std::filesystem::path outputDirectoryPath(destionationDirectoryPath);
+
+		if(!destionationDirectoryPath.empty() && !std::filesystem::is_directory(outputDirectoryPath)) {
+			std::filesystem::create_directories(outputDirectoryPath, errorCode);
+
+			if(errorCode) {
+				spdlog::error("Cannot extract files from archive subdirectory '{}', output directory '{}' creation failed: {}", archiveSubdirectory, outputDirectoryPath.string(), errorCode.message());
+				return false;
+			}
+		}
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesInDirectory(getEntriesInDirectory(archiveSubdirectory, includeSubdirectories, caseSensitive));
+	size_t numberOfExtractedFileEntries = 0;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entriesInDirectory) {
+		std::filesystem::path currentEntryDestinationPath(Utilities::joinPaths(destionationDirectoryPath, relativeToSubdirectory ? entry->getPath().substr(archiveSubdirectory.length()) : entry->getPath()));
+
+		if(entry->isDirectory()) {
+			if(!std::filesystem::is_directory(currentEntryDestinationPath)) {
+				std::filesystem::create_directories(currentEntryDestinationPath, errorCode);
+
+				if(errorCode) {
+					spdlog::error("Cannot extract files from archive subdirectory '{}', entry directory '{}' creation failed: {}", archiveSubdirectory, currentEntryDestinationPath.string(), errorCode.message());
+					return false;
+				}
+			}
+		}
+		else if(entry->isFile()) {
+			if(!overwrite && std::filesystem::is_regular_file(currentEntryDestinationPath)) {
+				spdlog::warn("Skipping extraction of file from archive, destination file '{}' already exists! Did you intend to specify the overwrite flag?", currentEntryDestinationPath.string());
+				continue;
+			}
+
+			if(entry->writeToFile(currentEntryDestinationPath.string(), overwrite)) {
 				numberOfExtractedFileEntries++;
 
 				spdlog::debug("Extracted file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, numberOfFiles(), currentEntryDestinationPath.string());

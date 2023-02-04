@@ -29,7 +29,7 @@ public:
 		virtual uint64_t getUncompressedSize() const override;
 		virtual std::unique_ptr<ByteBuffer> getData() const override;
 		virtual uint32_t getCRC32() const override;
-		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) override;
+		virtual bool writeToFile(const std::string & filePath, bool overwrite = false) override;
 
 	protected:
 		virtual Archive * getParentArchive() const override;

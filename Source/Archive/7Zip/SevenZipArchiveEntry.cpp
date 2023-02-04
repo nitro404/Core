@@ -106,16 +106,15 @@ uint32_t SevenZipArchive::Entry::getCRC32() const {
 	return m_parentArchive->getRawArchiveHandle()->CRCs.Vals[m_index];
 }
 
-bool SevenZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
+bool SevenZipArchive::Entry::writeToFile(const std::string & filePath, bool overwrite) {
 	std::unique_ptr<ByteBuffer> data(getData());
-	std::string path(getPath());
 
 	if(data == nullptr) {
-		spdlog::error("Failed to obtain 7-Zip entry file data when writing entry '{}' to directory: '{}'.", path, directoryPath);
+		spdlog::error("Failed to obtain 7-Zip entry file data when writing entry to file: '{}'.", filePath);
 		return false;
 	}
 
-	return data->writeTo(Utilities::joinPaths(directoryPath, path), overwrite);
+	return data->writeTo(filePath, overwrite);
 }
 
 Archive * SevenZipArchive::Entry::getParentArchive() const {

@@ -1,5 +1,6 @@
 #include "ArchiveExtractFileCallback.h"
 
+#include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
 #include <SevenZip/CPP/Windows/FileDir.h>
@@ -9,13 +10,16 @@
 
 #include <spdlog/spdlog.h>
 
-ArchiveExtractFileCallback::ArchiveExtractFileCallback(NullsoftScriptableInstallSystemArchive::Entry & entry, const std::string & outputDirectoryPath, bool overwrite)
+ArchiveExtractFileCallback::ArchiveExtractFileCallback(NullsoftScriptableInstallSystemArchive::Entry & entry, const std::string & outputFilePath, bool overwrite)
 	: m_entry(entry)
 	, m_outFileStreamSpec(nullptr)
-	, m_outputDirectoryPath(FString(outputDirectoryPath.c_str()))
+	, m_outputFilePath(FString(outputFilePath.c_str()))
 	, m_overwrite(overwrite)
 	, m_extractMode(true) {
-	NWindows::NFile::NName::NormalizeDirPathPrefix(m_outputDirectoryPath);
+	FString outputFileBasePath(std::string(Utilities::getBasePath(Utilities::wideStringToString(m_outputFilePath.GetBuf()))).c_str());
+	std::string outputFileName(Utilities::getFileName(Utilities::wideStringToString(m_outputFilePath.GetBuf())));
+	NWindows::NFile::NName::NormalizeDirPathPrefix(outputFileBasePath);
+	m_outputFilePath = Utilities::joinPaths(Utilities::wideStringToString(outputFileBasePath.GetBuf()), outputFileName).c_str();
 }
 
 ArchiveExtractFileCallback::~ArchiveExtractFileCallback() { }
@@ -75,14 +79,13 @@ STDMETHODIMP ArchiveExtractFileCallback::GetStream(UInt32 index, ISequentialOutS
 		}
 	}
 
-	UString filePath(m_entry.getPath().c_str());
-	int pathSeparatorIndex = filePath.ReverseFind_PathSepar();
+	int pathSeparatorIndex = m_outputFilePath.ReverseFind_PathSepar();
 
 	if(pathSeparatorIndex >= 0) {
-		NWindows::NFile::NDir::CreateComplexDir(m_outputDirectoryPath + us2fs(filePath.Left(pathSeparatorIndex)));
+		NWindows::NFile::NDir::CreateComplexDir(FString(std::string(Utilities::getBasePath(Utilities::wideStringToString(m_outputFilePath.GetBuf()))).c_str()));
 	}
 
-	FString fullProcessedPath = m_outputDirectoryPath + us2fs(filePath);
+	FString fullProcessedPath = m_outputFilePath;
 	m_diskFilePath = fullProcessedPath;
 
 	if(m_entry.isDirectory()) {

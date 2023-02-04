@@ -157,12 +157,10 @@ uint32_t NullsoftScriptableInstallSystemArchive::Entry::getCRC32() const {
 	return 0;
 }
 
-bool NullsoftScriptableInstallSystemArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
+bool NullsoftScriptableInstallSystemArchive::Entry::writeToFile(const std::string & filePath, bool overwrite) {
 	if(!isParentArchiveValid()) {
 		return false;
 	}
-
-	std::string path(getPath());
 
 	const CMyComPtr<IInArchive> & archiveHandle = getParentArchiveHandle();
 
@@ -170,10 +168,10 @@ bool NullsoftScriptableInstallSystemArchive::Entry::writeTo(const std::string & 
 		static_cast<UInt32>(m_index)
 	};
 
-	HRESULT result = archiveHandle->Extract(fileIndicies, 1, false, CMyComPtr<IArchiveExtractCallback>(new ArchiveExtractFileCallback(*this, directoryPath, overwrite)));
+	HRESULT result = archiveHandle->Extract(fileIndicies, 1, false, CMyComPtr<IArchiveExtractCallback>(new ArchiveExtractFileCallback(*this, filePath, overwrite)));
 
 	if(result != S_OK) {
-		spdlog::error("Failed to extract NSIS installer file '{}' to directory: '{}'.", Utilities::getFileName(path), directoryPath);
+		spdlog::error("Failed to extract NSIS installer file to: '{}'.", filePath);
 		return false;
 	}
 

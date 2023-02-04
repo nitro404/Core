@@ -87,7 +87,7 @@ public:
 		EncryptionMethod getEncryptionMethod() const;
 		bool setEncryptionMethod(EncryptionMethod encryptionMethod);
 		virtual uint32_t getCRC32() const override;
-		virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) override;
+		virtual bool writeToFile(const std::string & filePath, bool overwrite = false) override;
 
 	protected:
 		virtual bool isParentArchiveValid() const override;

@@ -412,19 +412,18 @@ uint32_t ZipArchive::Entry::getCRC32() const {
 	return m_crc32;
 }
 
-bool ZipArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
+bool ZipArchive::Entry::writeToFile(const std::string & filePath, bool overwrite) {
 	std::unique_ptr<ByteBuffer> data(getData());
 
 	if(data == nullptr) {
-		spdlog::error("Failed to obtain zip entry file data when writing entry '{}' to directory: '{}'.", m_path, directoryPath);
+		spdlog::error("Failed to obtain zip entry file data when writing entry to file: '{}'.", filePath);
 		return false;
 	}
 
-	std::string destinationFilePath(Utilities::joinPaths(directoryPath, m_path));
-	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(destinationFilePath, "\\", "/"), "//", "/"));
+	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(filePath, "\\", "/"), "//", "/"));
 
-	if(destinationFilePath != formattedDestinationFilePath) {
-		spdlog::debug("Updating zip entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
+	if(filePath != formattedDestinationFilePath) {
+		spdlog::debug("Updating zip entry file extraction path from '{}' to '{}'.", filePath, formattedDestinationFilePath);
 	}
 
 	return data->writeTo(formattedDestinationFilePath, overwrite);

@@ -171,27 +171,25 @@ uint32_t TarArchive::Entry::getCRC32() const {
 	return m_checksum;
 }
 
-bool TarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
+bool TarArchive::Entry::writeToFile(const std::string & filePath, bool overwrite) {
 	if(!isParentArchiveValid() || isDirectory()) {
 		return false;
 	}
 
-	std::string filePath(getPath());
-	std::string destinationFilePath(Utilities::joinPaths(directoryPath, filePath));
-	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(destinationFilePath, "\\", "/"), "//", "/"));
+	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(filePath, "\\", "/"), "//", "/"));
 
-	if(destinationFilePath != formattedDestinationFilePath) {
-		spdlog::debug("Updating tar archive entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
+	if(filePath != formattedDestinationFilePath) {
+		spdlog::debug("Updating tar archive entry file extraction path from '{}' to '{}'.", filePath, formattedDestinationFilePath);
 	}
 
 	std::unique_ptr<ByteBuffer> data(getData());
 
 	if(data == nullptr) {
-		spdlog::error("Failed to obtain tar archive entry file data when writing entry '{}' to directory: '{}'.", filePath, directoryPath);
+		spdlog::error("Failed to obtain tar archive entry file data when writing entry to file: '{}'.", filePath);
 		return false;
 	}
 
-	return data->writeTo(destinationFilePath, overwrite);
+	return data->writeTo(filePath, overwrite);
 }
 
 uint32_t TarArchive::Entry::getFileMode() const {

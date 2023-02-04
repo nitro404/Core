@@ -128,17 +128,15 @@ uint32_t RarArchive::Entry::getCRC32() const {
 	return statistics == nullptr || !statistics->has_crc ? 0 : statistics->crc;
 }
 
-bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrite) {
+bool RarArchive::Entry::writeToFile(const std::string & filePath, bool overwrite) {
 	if(!isParentArchiveValid() || isDirectory()) {
 		return false;
 	}
 
-	std::string filePath(getPath());
-	std::string destinationFilePath(Utilities::joinPaths(directoryPath, filePath));
-	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(destinationFilePath, "\\", "/"), "//", "/"));
+	std::string formattedDestinationFilePath(Utilities::replaceAll(Utilities::replaceAll(filePath, "\\", "/"), "//", "/"));
 
-	if(destinationFilePath != formattedDestinationFilePath) {
-		spdlog::debug("Updating Rar entry file extraction path from '{}' to '{}'.", destinationFilePath, formattedDestinationFilePath);
+	if(filePath != formattedDestinationFilePath) {
+		spdlog::debug("Updating Rar entry file extraction path from '{}' to '{}'.", filePath, formattedDestinationFilePath);
 	}
 
 	std::error_code errorCode;
@@ -149,7 +147,7 @@ bool RarArchive::Entry::writeTo(const std::string & directoryPath, bool overwrit
 		return false;
 	}
 
-	return isSuccess(dmc_unrar_extract_file_to_path(getRawParentArchiveHandle(), m_index, formattedDestinationFilePath.c_str(), nullptr, true), fmt::format("Failed to extract file '{}' to '{}'!", filePath, directoryPath));
+	return isSuccess(dmc_unrar_extract_file_to_path(getRawParentArchiveHandle(), m_index, formattedDestinationFilePath.c_str(), nullptr, true), fmt::format("Failed to extract file to: '{}'!", filePath));
 }
 
 Archive * RarArchive::Entry::getParentArchive() const {

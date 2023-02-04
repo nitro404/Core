@@ -28,6 +28,8 @@ public:
 	static bool isInSubdirectory(std::string_view path);
 	std::string getName() const;
 	virtual std::string getPath() const = 0;
+	std::string getBasePath() const;
+	std::string getFileExtension(bool useLastPeriod = true) const;
 	std::vector<std::shared_ptr<ArchiveEntry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
 	virtual uint64_t getIndex() const = 0;
 	virtual bool hasComment() const;
@@ -37,7 +39,8 @@ public:
 	virtual uint64_t getUncompressedSize() const = 0;
 	virtual std::unique_ptr<ByteBuffer> getData() const = 0;
 	virtual uint32_t getCRC32() const = 0;
-	virtual bool writeTo(const std::string & directoryPath, bool overwrite = false) = 0;
+	bool writeToDirectory(const std::string & directoryPath, bool overwrite = false);
+	virtual bool writeToFile(const std::string & filePath, bool overwrite = false) = 0;
 
 	static bool isDirectory(std::string_view path);
 

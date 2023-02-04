@@ -51,7 +51,11 @@ public:
 	const std::shared_ptr<ArchiveEntry> getEntry(size_t index) const;
 	std::shared_ptr<ArchiveEntry> getEntry(size_t index);
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const = 0;
-	size_t extractAllEntries(const std::string & directoryPath, bool overwrite = false);
+	std::vector<std::shared_ptr<ArchiveEntry>> getRootEntries() const;
+	std::vector<std::shared_ptr<ArchiveEntry>> getEntriesWithName(const std::string & entryName, bool caseSensitive = false) const;
+	std::vector<std::shared_ptr<ArchiveEntry>> getEntriesInDirectory(const std::string & directoryPath, bool includeSubdirectories = true, bool caseSensitive = false) const;
+	size_t extractAllEntries(const std::string & destinationDirectoryPath, bool overwrite = false);
+	size_t extractAllEntriesInSubdirectory(const std::string & destionationDirectoryPath, const std::string & archiveSubdirectory, bool relativeToSubdirectory = true, bool includeSubdirectories = true, bool overwrite = false, bool caseSensitive = false);
 	void updateParentArchive();
 	virtual std::string toDebugString(bool includeDate = false) const = 0;
 

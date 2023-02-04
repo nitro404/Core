@@ -14,7 +14,7 @@ class ArchiveExtractFileCallback final : public IArchiveExtractCallback,
 										 public ICryptoGetTextPassword,
 										 public CMyUnknownImp {
 public:
-	ArchiveExtractFileCallback(NullsoftScriptableInstallSystemArchive::Entry & entry, const std::string & outputDirectoryPath, bool overwrite);
+	ArchiveExtractFileCallback(NullsoftScriptableInstallSystemArchive::Entry & entry, const std::string & outputFilePath, bool overwrite);
 	virtual ~ArchiveExtractFileCallback();
 
 	void setPassword(const std::string & password);
@@ -38,7 +38,7 @@ private:
 	NullsoftScriptableInstallSystemArchive::Entry & m_entry;
 	COutFileStream * m_outFileStreamSpec;
 	CMyComPtr<ISequentialOutStream> m_outFileStream;
-	FString m_outputDirectoryPath;
+	FString m_outputFilePath;
 	bool m_overwrite;
 	FString m_diskFilePath;
 	bool m_extractMode;
