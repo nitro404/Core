@@ -564,9 +564,9 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 	HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_DEBUGFUNCTION, &HTTPRequest::debugCallback), fmt::format("Failed to set cURL debug function on request #{}.", m_id));
 
 	// enable verbose output for debug configurations
-#if _DEBUG
-	HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_VERBOSE, 1L), fmt::format("Failed to enable cURL verbose output mode on request #{}.", m_id));
-#endif // _DEBUG
+	if(m_verboseLoggingEnabled) {
+		HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_VERBOSE, 1L), fmt::format("Failed to enable cURL verbose output mode on request #{}.", m_id));
+	}
 
 	// disable signals
 	if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_NOSIGNAL, 1L), fmt::format("Failed to disable cURL from installing signal handlers for request #{}.", m_id))) {

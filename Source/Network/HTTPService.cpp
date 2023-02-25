@@ -289,6 +289,7 @@ std::shared_ptr<HTTPRequest> HTTPService::createRequest(HTTPRequest::Method meth
 	newRequest->setConnectionTimeout(m_connectionTimeout);
 	newRequest->setNetworkTimeout(m_networkTimeout);
 	newRequest->setMaximumRedirects(m_maximumRedirects);
+	newRequest->setVerboseLoggingEnabled(m_verboseLoggingEnabled);
 
 	if(hasUserAgent()) {
 		newRequest->setUserAgent(m_userAgent);
