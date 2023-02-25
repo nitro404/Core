@@ -99,6 +99,10 @@ SevenZipArchive::~SevenZipArchive() {
 	for(std::vector<std::shared_ptr<SevenZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
 		(*i)->clearParentArchive();
 	}
+
+	m_archive.reset();
+	m_lookStream.reset();
+	m_archiveStream.reset();
 }
 
 std::string SevenZipArchive::getDefaultFileExtension() const {
