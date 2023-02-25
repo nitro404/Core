@@ -559,6 +559,10 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 
 	m_curlEasyHandle = HTTPUtilities::createCURLEasyHandle();
 
+	HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_DEBUGDATA, this), fmt::format("Failed to set cURL debug data on request #{}.", m_id));
+
+	HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_DEBUGFUNCTION, &HTTPRequest::debugCallback), fmt::format("Failed to set cURL debug function on request #{}.", m_id));
+
 	// enable verbose output for debug configurations
 #if _DEBUG
 	HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_VERBOSE, 1L), fmt::format("Failed to enable cURL verbose output mode on request #{}.", m_id));
@@ -765,6 +769,44 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 	m_transferStartedSteadyTimePoint = std::chrono::steady_clock::now();
 
 	return true;
+}
+
+int HTTPRequest::debugCallback(CURL * handle, curl_infotype type, char * data, size_t size, void * userData) {
+	if(userData == nullptr) {
+		return 0;
+	}
+
+	return reinterpret_cast<HTTPRequest *>(userData)->debugCallbackHelper(handle, type, data, size);
+}
+
+int HTTPRequest::debugCallbackHelper(CURL * handle, curl_infotype type, char * data, size_t size) {
+	if(handle == nullptr) {
+		return 0;
+	}
+
+	switch(type) {
+		case CURLINFO_TEXT: {
+			if(data != nullptr) {
+				std::string_view text(data, size);
+				size_t textEndIndex = text.find_last_not_of("\r\n");
+				spdlog::debug("cURL: {}", text.substr(0, textEndIndex != std::string::npos ? textEndIndex + 1 : text.length()));
+			}
+
+			break;
+		}
+
+		case CURLINFO_HEADER_IN:
+		case CURLINFO_HEADER_OUT:
+		case CURLINFO_DATA_IN:
+		case CURLINFO_DATA_OUT:
+		case CURLINFO_SSL_DATA_IN:
+		case CURLINFO_SSL_DATA_OUT:
+		case CURLINFO_END: {
+			break;
+		}
+	}
+
+	return 0;
 }
 
 HTTPUtilities::CURLEasyHandle & HTTPRequest::getCURLEasyHandle() {

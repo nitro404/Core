@@ -107,6 +107,8 @@ private:
 
 	bool setResponse(std::shared_ptr<HTTPResponse> response);
 	bool startTransfer(const HTTPConfiguration & configuration, HTTPUtilities::CURLMultiHandle & curlMultiHandle);
+	static int debugCallback(CURL * handle, curl_infotype type, char * data, size_t size, void * userData);
+	int debugCallbackHelper(CURL * handle, curl_infotype type, char * data, size_t size);
 	HTTPUtilities::CURLEasyHandle & getCURLEasyHandle();
 
 	Method m_method;
