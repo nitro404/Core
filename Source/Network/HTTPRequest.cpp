@@ -636,6 +636,8 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 		formattedURL = m_url;
 	}
 
+	formattedURL = Utilities::replaceAll(formattedURL, " ", "%20");
+
 	if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_URL, formattedURL.c_str()), fmt::format("Failed to set cURL request #{} URL to '{}'.", m_id, m_url))) {
 		return false;
 	}
