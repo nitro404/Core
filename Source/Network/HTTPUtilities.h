@@ -22,6 +22,7 @@ namespace HTTPUtilities {
 	CURLEasyHandle createCURLEasyHandle();
 	CURLMultiHandle createCURLMultiHandle();
 	CURLSharedHandle createCURLSharedHandle();
+	std::string easyEscape(CURL * handle, std::string_view url);
 	CURLStringList createCURLStringList();
 	bool appendToCURLStringList(CURLStringList & curlStringList, const std::string & string);
 	CURLStringList copyCURLStringList(const CURLStringList & curlStringList);

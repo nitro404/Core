@@ -76,6 +76,18 @@ HTTPUtilities::CURLSharedHandle HTTPUtilities::createCURLSharedHandle() {
 	});
 }
 
+std::string HTTPUtilities::easyEscape(CURL * handle, std::string_view url) {
+	if(handle == nullptr || url.empty()) {
+		return {};
+	}
+
+	std::unique_ptr<char, std::function<void (char *)>> escapedURL(curl_easy_escape(handle, url.data(), url.length()), [](char * escapedURL) {
+		curl_free(escapedURL);
+	});
+
+	return std::string(escapedURL.get());
+}
+
 HTTPUtilities::CURLStringList HTTPUtilities::createCURLStringList() {
 	return CURLStringList(nullptr, [](curl_slist * curlStringList) {
 		curl_slist_free_all(curlStringList);
