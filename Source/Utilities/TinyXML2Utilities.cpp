@@ -236,8 +236,28 @@ static void findMatchingXMLElementsHelper(const tinyxml2::XMLElement * element, 
 	}
 }
 
+bool Utilities::doesXMLElementHaveID(const tinyxml2::XMLElement * element, const std::string & id) {
+	return xmlElementIDMatcher(element, id);
+}
+
+bool Utilities::doesXMLElementHaveAttributeValue(const tinyxml2::XMLElement * element, const std::string & attributeName, const std::string & attributeValue) {
+	return xmlElementAttributeValueMatcher(element, attributeName, attributeValue);
+}
+
 bool Utilities::doesXMLElementHaveClassName(const tinyxml2::XMLElement * element, const std::string & className) {
 	return xmlElementClassNameMatcher(element, className);
+}
+
+bool Utilities::doesXMLElementHaveClassNames(const tinyxml2::XMLElement * element, const std::vector<std::string> & classNames) {
+	return xmlElementClassNamesMatcher(element, classNames);
+}
+
+bool Utilities::doesXMLElementHaveFullText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive) {
+	return xmlElementFullTextMatcher(element, text, caseSensitive);
+}
+
+bool Utilities::doesXMLElementContainText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive) {
+	return xmlElementContainsTextMatcher(element, text, caseSensitive);
 }
 
 std::vector<std::string> Utilities::getXMLElementClassNames(const tinyxml2::XMLElement * element) {

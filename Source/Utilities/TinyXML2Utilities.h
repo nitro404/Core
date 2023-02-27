@@ -8,7 +8,12 @@
 
 namespace Utilities {
 
+	bool doesXMLElementHaveID(const tinyxml2::XMLElement * element, const std::string & id);
+	bool doesXMLElementHaveAttributeValue(const tinyxml2::XMLElement * element, const std::string & attributeName, const std::string & attributeValue);
 	bool doesXMLElementHaveClassName(const tinyxml2::XMLElement * element, const std::string & className);
+	bool doesXMLElementHaveClassNames(const tinyxml2::XMLElement * element, const std::vector<std::string> & classNames);
+	bool doesXMLElementHaveFullText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive = false);
+	bool doesXMLElementContainText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive = false);
 	std::vector<std::string> getXMLElementClassNames(const tinyxml2::XMLElement * element);
 	const tinyxml2::XMLElement * findXMLElementWithID(const tinyxml2::XMLElement * element, const std::string & id);
 	const tinyxml2::XMLElement * findFirstXMLElementWithName(const tinyxml2::XMLElement * element, const std::string & name, bool caseSensitive = false);
