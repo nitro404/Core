@@ -376,3 +376,22 @@ std::vector<const tinyxml2::XMLElement *> Utilities::findXMLElementsContainingTe
 
 	return matchingElements;
 }
+
+std::string Utilities::documentToString(const tinyxml2::XMLDocument * document) {
+	if(document == nullptr) {
+		return {};
+	}
+
+	return elementToString(document->RootElement());
+}
+
+std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
+	if(element == nullptr) {
+		return {};
+	}
+
+	tinyxml2::XMLPrinter xmlPrinter;
+	element->Accept(&xmlPrinter);
+
+	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize());
+}
