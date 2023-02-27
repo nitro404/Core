@@ -7,15 +7,17 @@
 #include <iomanip>
 #include <map>
 #include <sstream>
+#include <vector>
 
 namespace Utilities {
 
 	static const std::string DEFAULT_TIME_FORMAT_STRING("%B %e, %Y %X");
-	static const std::string ISO8601_TIME_FORMAT_STRING("%Y-%m-%dT%H:%M:%SZ");
+	static const std::string ISO8601_TIME_FORMAT_STRING_A("%Y-%m-%dT%H:%M:%SZ");
+	static const std::string ISO8601_DATE_FORMAT_STRING_B("%Y-%m-%dT%H:%M:%S%Ez");
 
-	static const std::map<TimeFormat, std::string> TIME_FORMAT_STRINGS = {
-		{ TimeFormat::Default, DEFAULT_TIME_FORMAT_STRING },
-		{ TimeFormat::ISO8601, ISO8601_TIME_FORMAT_STRING }
+	static const std::map<TimeFormat, std::vector<std::string>> TIME_FORMAT_STRINGS = {
+		{ TimeFormat::Default, { DEFAULT_TIME_FORMAT_STRING } },
+		{ TimeFormat::ISO8601, { ISO8601_TIME_FORMAT_STRING_A, ISO8601_DATE_FORMAT_STRING_B } }
 	};
 
 #if !defined(WINDOWS)
@@ -97,25 +99,40 @@ namespace Utilities {
 	}
 
 	std::chrono::time_point<std::chrono::system_clock> parseTimePointFromString(const std::string & time, std::optional<TimeFormat> formatHint, bool * error) {
-		if(formatHint.has_value()) {
-			std::map<TimeFormat, std::string>::const_iterator timeFormatStringIterator(TIME_FORMAT_STRINGS.find(formatHint.value()));
+		bool currentError = false;
 
-			if(timeFormatStringIterator != TIME_FORMAT_STRINGS.end()) {
-				return parseTimePointFromString(time, timeFormatStringIterator->second, error);
+		if(formatHint.has_value()) {
+			std::map<TimeFormat, std::vector<std::string>>::const_iterator timeFormatStringIterator(TIME_FORMAT_STRINGS.find(formatHint.value()));
+
+			for(const std::string & formatString : timeFormatStringIterator->second) {
+				if(timeFormatStringIterator != TIME_FORMAT_STRINGS.end()) {
+					std::chrono::time_point<std::chrono::system_clock> timePoint(parseTimePointFromString(time, formatString, &currentError));
+
+					if(!currentError) {
+						return timePoint;
+					}
+
+					currentError = false;
+				}
 			}
 		}
 
 		std::chrono::time_point<std::chrono::system_clock> systemTime;
-		bool currentError = false;
 
-		for(std::map<TimeFormat, std::string>::const_iterator i = TIME_FORMAT_STRINGS.cbegin(); i != TIME_FORMAT_STRINGS.cend(); ++i) {
-			systemTime = parseTimePointFromString(time, i->second, &currentError);
-
-			if(!currentError) {
-				return systemTime;
+		for(std::map<TimeFormat, std::vector<std::string>>::const_iterator i = TIME_FORMAT_STRINGS.cbegin(); i != TIME_FORMAT_STRINGS.cend(); ++i) {
+			if(formatHint.has_value() && i->first == formatHint.value()) {
+				continue;
 			}
 
-			currentError = false;
+			for(const std::string & formatString : i->second) {
+				systemTime = parseTimePointFromString(time, formatString, &currentError);
+
+				if(!currentError) {
+					return systemTime;
+				}
+
+				currentError = false;
+			}
 		}
 
 		if(error != nullptr) {
@@ -138,13 +155,13 @@ namespace Utilities {
 	}
 
 	std::string timePointToString(std::chrono::time_point<std::chrono::system_clock> timePoint, TimeFormat format) {
-		std::map<TimeFormat, std::string>::const_iterator timeFormatStringIterator(TIME_FORMAT_STRINGS.find(format));
+		std::map<TimeFormat, std::vector<std::string>>::const_iterator timeFormatStringIterator(TIME_FORMAT_STRINGS.find(format));
 
 		if(timeFormatStringIterator == TIME_FORMAT_STRINGS.end()) {
 			return {};
 		}
 
-		return date::format(timeFormatStringIterator->second, timePoint);
+		return date::format(timeFormatStringIterator->second[0], timePoint);
 	}
 
 }
