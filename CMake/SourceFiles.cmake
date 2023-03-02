@@ -31,6 +31,9 @@ set(CORE_SOURCE_FILES
 	Archive/Zip/ZipUtilities.cpp
 	Arguments/ArgumentCollection.cpp
 	Arguments/ArgumentParser.cpp
+	Bitbucket/BitbucketDownload.cpp
+	Bitbucket/BitbucketDownloadCollection.cpp
+	Bitbucket/BitbucketService.cpp
 	ByteBuffer.cpp
 	Colour.cpp
 	Compression/BZip2Utilities.cpp
@@ -107,6 +110,9 @@ set(CORE_HEADER_FILES
 	Archive/Zip/ZipUtilities.h
 	Arguments/ArgumentCollection.h
 	Arguments/ArgumentParser.h
+	Bitbucket/BitbucketDownload.cpp
+	Bitbucket/BitbucketDownloadCollection.cpp
+	Bitbucket/BitbucketService.cpp
 	BitmaskOperators.h
 	ByteBuffer.h
 	Colour.h
@@ -119,6 +125,10 @@ set(CORE_HEADER_FILES
 	Endianness.h
 	Factory/Factory.h
 	Factory/FactoryRegistry.h
+	GitHub/GitHubRelease.h
+	GitHub/GitHubReleaseAsset.h
+	GitHub/GitHubReleaseCollection.h
+	GitHub/GitHubService.h
 	Point.h
 	Rectangle.h
 	LibraryInformation.h

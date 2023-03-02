@@ -9,7 +9,7 @@
 
 class GitHubRelease;
 
-class GitHubReleaseAsset {
+class GitHubReleaseAsset final {
 	friend class GitHubRelease;
 
 public:

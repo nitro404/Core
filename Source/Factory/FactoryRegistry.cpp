@@ -2,6 +2,7 @@
 
 #include "Application/ComponentRegistry.h"
 #include "Archive/ArchiveFactoryRegistry.h"
+#include "Bitbucket/BitbucketService.h"
 #include "GitHub/GitHubService.h"
 #include "LibraryInformation.h"
 #include "Logging/LogSystem.h"
@@ -58,6 +59,10 @@ void FactoryRegistry::assignDefaultFactories() {
 
 void FactoryRegistry::assignStandardFactories() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	setFactory<BitbucketService>([]() {
+		return std::make_unique<BitbucketService>();
+	});
 
 	setFactory<IPAddressService>([]() {
 		return std::make_unique<IpifyIPAddressService>();
