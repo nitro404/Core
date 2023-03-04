@@ -59,6 +59,10 @@ spdlog::level::level_enum LogSystem::getLevel() const {
 void LogSystem::setLevel(spdlog::level::level_enum level) {
 	std::lock_guard lock(m_mutex);
 
+	if(level == spdlog::level::level_enum::n_levels) {
+		return;
+	}
+
 	if(m_previousLevel.has_value()) {
 		m_previousLevel = level;
 	}
@@ -67,11 +71,15 @@ void LogSystem::setLevel(spdlog::level::level_enum level) {
 	}
 }
 
-spdlog::level::level_enum LogSystem::getFlushlevel() const {
+spdlog::level::level_enum LogSystem::getFlushLevel() const {
 	return m_logger->flush_level();
 }
 
 void LogSystem::setFlushLevel(spdlog::level::level_enum level) {
+	if(level == spdlog::level::level_enum::n_levels) {
+		return;
+	}
+
 	m_logger->flush_on(level);
 }
 

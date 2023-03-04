@@ -20,7 +20,7 @@ public:
 	void setEnabled(bool enabled);
 	spdlog::level::level_enum getLevel() const;
 	void setLevel(spdlog::level::level_enum level);
-	spdlog::level::level_enum getFlushlevel() const;
+	spdlog::level::level_enum getFlushLevel() const;
 	void setFlushLevel(spdlog::level::level_enum level);
 	void setPattern(const std::string & pattern);
 	void flush();
