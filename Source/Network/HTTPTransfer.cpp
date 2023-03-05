@@ -3,6 +3,7 @@
 #include "HTTPService.h"
 #include "Utilities/RapidJSONUtilities.h"
 #include "Utilities/StringUtilities.h"
+#include "XML/CustomIndentationXMLPrinter.h"
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -216,7 +217,7 @@ bool HTTPTransfer::setBody(const tinyxml2::XMLDocument & xmlDocument, bool updat
 		return false;
 	}
 
-	tinyxml2::XMLPrinter printer;
+	CustomIndentationXMLPrinter printer;
 	xmlDocument.Print(&printer);
 	m_body->setData(printer.CStr());
 

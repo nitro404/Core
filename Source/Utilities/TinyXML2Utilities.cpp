@@ -1,6 +1,7 @@
 #include "TinyXML2Utilities.h"
 
 #include "Utilities/StringUtilities.h"
+#include "XML/CustomIndentationXMLPrinter.h"
 
 #include <fmt/core.h>
 
@@ -410,7 +411,7 @@ std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
 		return {};
 	}
 
-	tinyxml2::XMLPrinter xmlPrinter;
+	CustomIndentationXMLPrinter xmlPrinter;
 	element->Accept(&xmlPrinter);
 
 	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize());

@@ -85,6 +85,7 @@ set(CORE_SOURCE_FILES
 	Utilities/TimeUtilities.cpp
 	Utilities/TinyXML2Utilities.cpp
 	Utilities/Utilities.cpp
+	XML/CustomIndentationXMLPrinter.cpp
 )
 
 set(CORE_HEADER_FILES
@@ -169,6 +170,7 @@ set(CORE_HEADER_FILES
 	Utilities/TimeUtilities.h
 	Utilities/TinyXML2Utilities.h
 	Utilities/Utilities.h
+	XML/CustomIndentationXMLPrinter.h
 )
 
 set(CORE_SOURCE_FILES_WINDOWS
