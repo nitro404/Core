@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 
+#include <filesystem>
 #include <functional>
 
 static bool xmlElementAttributeValueMatcher(const tinyxml2::XMLElement * element, const std::string & attributeName, const std::string attributeValue) {
@@ -415,4 +416,34 @@ std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
 	element->Accept(&xmlPrinter);
 
 	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize());
+}
+
+bool Utilities::saveXMLDocumentToFile(const tinyxml2::XMLDocument * document, const std::string & filePath, bool overwrite, bool compact, const std::string & indentation) {
+	if(document == nullptr || filePath.empty() || (!overwrite && std::filesystem::is_regular_file(std::filesystem::path(filePath)))) {
+		return false;
+	}
+
+	FILE * file = nullptr;
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
+	const errno_t error = fopen_s(&file, filePath.c_str(), "wb");
+
+	if(error) {
+		return false;
+	}
+#else
+	file = fopen(filePath.c_str(), "wb");
+#endif
+
+	if(file == nullptr) {
+		return false;
+	}
+
+	CustomIndentationXMLPrinter printer(file, compact, 0, indentation);
+
+	document->Print(&printer);
+
+	fclose(file);
+
+	return true;
 }

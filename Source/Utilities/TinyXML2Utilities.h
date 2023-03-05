@@ -30,6 +30,7 @@ namespace Utilities {
 	std::vector<const tinyxml2::XMLElement *> findXMLElementsContainingText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive = false);
 	std::string documentToString(const tinyxml2::XMLDocument * document);
 	std::string elementToString(const tinyxml2::XMLElement * element);
+	bool saveXMLDocumentToFile(const tinyxml2::XMLDocument * document, const std::string & filePath, bool overwrite = false, bool compact = false, const std::string & indentation = "\t");
 
 }
 
