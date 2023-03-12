@@ -16,10 +16,13 @@ class ProcessWindows final : public Process {
 public:
 	virtual ~ProcessWindows();
 
+	void onProcessTerminated(bool timedOut);
+
+	// Process Virtuals
 	virtual bool isRunning() const override;
 	virtual void wait() override;
 	virtual bool waitFor(std::chrono::milliseconds duration) override;
-	virtual void terminate() override;
+	virtual void doTerminate() override;
 	virtual uint64_t getNativeExitCode() const override;
 
 	static DWORD getWindowsProcessPriority(Process::Priority priority);
@@ -31,8 +34,9 @@ private:
 
 	STARTUPINFO m_startupInfo;
 	PROCESS_INFORMATION m_processInfo;
-	bool m_running;
-	uint64_t m_exitCode;
+	HANDLE m_waitHandle;
+	std::atomic<bool> m_running;
+	std::atomic<uint64_t> m_exitCode;
 };
 
 #endif // _PROCESS_WINDOWS_H_

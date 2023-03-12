@@ -1,13 +1,25 @@
 #include "ProcessWindows.h"
 
+void CALLBACK onProcessExited(LPVOID context, BOOLEAN timedOut) {
+	reinterpret_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
+}
+
 ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_INFORMATION & processInfo)
 	: Process()
 	, m_startupInfo(startupInfo)
 	, m_processInfo(processInfo)
 	, m_running(true)
-	, m_exitCode(0) { }
+	, m_exitCode(0) {
+	RegisterWaitForSingleObject(&m_waitHandle, m_processInfo.hProcess, onProcessExited, this, INFINITE, WT_EXECUTEONLYONCE);
+}
 
 ProcessWindows::~ProcessWindows() {
+	UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE);
+
+	cleanup();
+}
+
+void ProcessWindows::onProcessTerminated(bool timedOut) {
 	cleanup();
 }
 
@@ -48,7 +60,7 @@ bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
 	return false;
 }
 
-void ProcessWindows::terminate() {
+void ProcessWindows::doTerminate() {
 	cleanup();
 }
 
@@ -66,6 +78,8 @@ void ProcessWindows::cleanup() {
 
 	CloseHandle(m_processInfo.hProcess);
 	CloseHandle(m_processInfo.hThread);
+
+	notifyTerminated();
 }
 
 uint64_t ProcessWindows::getNativeExitCode() const {
