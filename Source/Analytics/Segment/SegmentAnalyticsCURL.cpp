@@ -5,6 +5,7 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/RapidJSONUtilities.h"
 #include "Utilities/StringUtilities.h"
+#include "Utilities/ThreadUtilities.h"
 
 #include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
@@ -277,6 +278,8 @@ bool SegmentAnalyticsCURL::start() {
 			delete analyticEventThread;
 		}
 	});
+
+	Utilities::setThreadName(*m_analyticEventThread, "Segment Analytics Event Thread");
 
 	return true;
 }

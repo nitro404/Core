@@ -166,6 +166,7 @@ set(CORE_HEADER_FILES
 	Utilities/NumberUtilities.h
 	Utilities/RapidJSONUtilities.h
 	Utilities/StringUtilities.h
+	Utilities/ThreadUtilities.h
 	Utilities/TidyHTMLUtilities.h
 	Utilities/TimeUtilities.h
 	Utilities/TinyXML2Utilities.h
@@ -190,6 +191,7 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Platform/Windows/ProcessWindows.cpp
 	Platform/Windows/TimeZoneDataManagerWindows.cpp
 	Platform/Windows/WindowsUtilities.cpp
+	Utilities/Windows/ThreadUtilitiesWindows.cpp
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 

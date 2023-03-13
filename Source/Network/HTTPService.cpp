@@ -2,6 +2,7 @@
 
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
+#include "Utilities/ThreadUtilities.h"
 
 #include <spdlog/spdlog.h>
 
@@ -117,6 +118,8 @@ bool HTTPService::start() {
 			delete httpThread;
 		}
 	});
+
+	Utilities::setThreadName(*m_httpThread, "HTTP Thread");
 
 	return true;
 }
@@ -266,6 +269,8 @@ std::future<bool> HTTPService::updateCertificateAuthorityCertificate(bool force)
 			delete caCertUpdateThread;
 		}
 	});
+
+	Utilities::setThreadName(*m_caCertUpdateThread, "CACert Update Thread");
 
 	return caCertUpdatedPromise->get_future();
 }
