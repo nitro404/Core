@@ -24,6 +24,7 @@ TidyBufferHandle createTidyBufferHandle() {
 
 	return TidyBufferHandle(tidyBuffer, [](TidyBuffer * tidyBufferHandle) {
 		tidyBufFree(tidyBufferHandle);
+		delete tidyBufferHandle;
 	});
 }
 
