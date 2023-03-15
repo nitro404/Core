@@ -275,7 +275,13 @@ std::optional<std::chrono::milliseconds> HTTPResponse::getDataTransferTimeElapse
 std::optional<std::chrono::milliseconds> HTTPResponse::getRequestDuration() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	std::optional<std::chrono::time_point<std::chrono::steady_clock>> requestInitiatedSteadyTimePoint(m_request->getRequestInitiatedSteadyTimePoint());
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return 0ms;
+	}
+
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> requestInitiatedSteadyTimePoint(request->getRequestInitiatedSteadyTimePoint());
 
 	if(!requestInitiatedSteadyTimePoint.has_value() || !m_transferCompletedSteadyTimePoint.has_value()) {
 		return 0ms;
@@ -347,7 +353,13 @@ std::string HTTPResponse::getLastModifiedDate() const {
 std::shared_ptr<HTTPRequest> HTTPResponse::getRequest() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_request;
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
+	return request;
 }
 
 bool HTTPResponse::hasETag() const {
@@ -619,28 +631,34 @@ bool HTTPResponse::setState(State state) {
 bool HTTPResponse::checkTimeouts() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
 	if(m_state == State::Connecting) {
-		if(m_request->getConnectionTimeout() != 0s) {
+		if(request->getConnectionTimeout() != 0s) {
 			std::optional<std::chrono::milliseconds> connectionTimeElapsed(getConnectionTimeElapsed());
 
-			if(connectionTimeElapsed.has_value() && connectionTimeElapsed.value() > m_request->getConnectionTimeout()) {
+			if(connectionTimeElapsed.has_value() && connectionTimeElapsed.value() > request->getConnectionTimeout()) {
 				onConnectionTimedOut();
 				return true;
 			}
 		}
 	}
 	else if(Any(m_state & State::Receiving)) {
-		if(m_request->getNetworkTimeout() != 0s) {
-			if(m_lastDataReceivedSteadyTimePoint.has_value() && std::chrono::steady_clock::now() - m_lastDataReceivedSteadyTimePoint.value() > m_request->getNetworkTimeout()) {
+		if(request->getNetworkTimeout() != 0s) {
+			if(m_lastDataReceivedSteadyTimePoint.has_value() && std::chrono::steady_clock::now() - m_lastDataReceivedSteadyTimePoint.value() > request->getNetworkTimeout()) {
 				onNetworkTimedOut();
 				return true;
 			}
 		}
 
-		if(m_request->getTransferTimeout() != 0s) {
+		if(request->getTransferTimeout() != 0s) {
 			std::optional<std::chrono::milliseconds> dataTransferTimeElapsed(getDataTransferTimeElapsed());
 
-			if(dataTransferTimeElapsed.has_value() && dataTransferTimeElapsed.value() > m_request->getTransferTimeout()) {
+			if(dataTransferTimeElapsed.has_value() && dataTransferTimeElapsed.value() > request->getTransferTimeout()) {
 				onTransferTimedOut();
 				return true;
 			}
@@ -696,9 +714,15 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 		return false;
 	}
 
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
 	int64_t responseCode = 0L;
 
-	if(HTTPUtilities::isSuccess(curl_easy_getinfo(m_request->getCURLEasyHandle().get(), CURLINFO_RESPONSE_CODE, &responseCode))) {
+	if(HTTPUtilities::isSuccess(curl_easy_getinfo(request->getCURLEasyHandle().get(), CURLINFO_RESPONSE_CODE, &responseCode))) {
 		m_statusCode = static_cast<uint16_t>(responseCode);
 	}
 	else {
@@ -707,19 +731,19 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 
 	char * localIPAddress = nullptr;
 
-	if(HTTPUtilities::isSuccess(curl_easy_getinfo(m_request->getCURLEasyHandle().get(), CURLINFO_LOCAL_IP, &localIPAddress))) {
+	if(HTTPUtilities::isSuccess(curl_easy_getinfo(request->getCURLEasyHandle().get(), CURLINFO_LOCAL_IP, &localIPAddress))) {
 		m_localIPAddress = localIPAddress;
 	}
 
 	char * primaryIPAddress = nullptr;
 
-	if(HTTPUtilities::isSuccess(curl_easy_getinfo(m_request->getCURLEasyHandle().get(), CURLINFO_PRIMARY_IP, &primaryIPAddress))) {
+	if(HTTPUtilities::isSuccess(curl_easy_getinfo(request->getCURLEasyHandle().get(), CURLINFO_PRIMARY_IP, &primaryIPAddress))) {
 		m_primaryIPAddress = primaryIPAddress;
 	}
 
 	std::optional<uint64_t> contentLength(getContentLength());
 
-	if(m_request->getMethod() != HTTPRequest::Method::Head &&
+	if(request->getMethod() != HTTPRequest::Method::Head &&
 	   contentLength.has_value() &&
 	   m_body->getSize() != contentLength.value()) {
 		onTransferError(fmt::format("Response size {} does not match '{}' header value of: {}.", m_body->getSize(), HTTPHeaders::CONTENT_LENGTH_HEADER_NAME, contentLength.value()));
@@ -727,7 +751,7 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 	else {
 		setState(State::Completed);
 
-		m_promise.set_value(m_request->getResponse());
+		m_promise.set_value(request->getResponse());
 	}
 
 	return true;
@@ -740,6 +764,12 @@ bool HTTPResponse::onConnectionTimedOut() {
 		return false;
 	}
 
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
 	if(getConnectionTimeElapsed().has_value()) {
 		m_errorMessage = fmt::format("Request connection timed out after {} milliseconds.", getConnectionTimeElapsed().value().count());
 	}
@@ -749,7 +779,7 @@ bool HTTPResponse::onConnectionTimedOut() {
 
 	setState(State::ConnectionTimedOut);
 
-	m_promise.set_value(m_request->getResponse());
+	m_promise.set_value(request->getResponse());
 
 	return true;
 }
@@ -761,11 +791,17 @@ bool HTTPResponse::onNetworkTimedOut() {
 		return false;
 	}
 
-	m_errorMessage = fmt::format("Request timed out with no data received for {} seconds.", m_request->getNetworkTimeout().count());
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
+	m_errorMessage = fmt::format("Request timed out with no data received for {} seconds.", request->getNetworkTimeout().count());
 
 	setState(State::NetworkTimedOut);
 
-	m_promise.set_value(m_request->getResponse());
+	m_promise.set_value(request->getResponse());
 
 	return true;
 }
@@ -774,6 +810,12 @@ bool HTTPResponse::onTransferTimedOut() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(isDone()) {
+		return false;
+	}
+
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
 		return false;
 	}
 
@@ -786,7 +828,7 @@ bool HTTPResponse::onTransferTimedOut() {
 
 	setState(State::TransferTimedOut);
 
-	m_promise.set_value(m_request->getResponse());
+	m_promise.set_value(request->getResponse());
 
 	return true;
 }
@@ -798,7 +840,13 @@ bool HTTPResponse::onTransferAborted() {
 		return false;
 	}
 
-	m_promise.set_value(m_request->getResponse());
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
+	m_promise.set_value(request->getResponse());
 
 	return true;
 }
@@ -810,11 +858,17 @@ bool HTTPResponse::onTransferError(const std::string & errorMessage) {
 		return false;
 	}
 
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return false;
+	}
+
 	m_errorMessage = Utilities::trimString(errorMessage);
 
 	setState(State::Error);
 
-	m_promise.set_value(m_request->getResponse());
+	m_promise.set_value(request->getResponse());
 
 	return true;
 }

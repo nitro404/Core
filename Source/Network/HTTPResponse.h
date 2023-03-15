@@ -121,7 +121,7 @@ private:
 	std::string m_lastReceivedHeaderName;
 	size_t m_totalRawHeadersSize;
 	std::string m_errorMessage;
-	std::shared_ptr<HTTPRequest> m_request;
+	std::weak_ptr<HTTPRequest> m_request;
 	mutable std::promise<std::shared_ptr<HTTPResponse>> m_promise;
 };
 

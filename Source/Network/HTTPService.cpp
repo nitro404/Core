@@ -522,11 +522,9 @@ void HTTPService::run() {
 			m_activeRequests.clear();
 		}
 
-		for(std::vector<std::weak_ptr<HTTPRequest>>::iterator i = m_requests.begin(); i != m_requests.end(); ++i) {
-			if(i->expired()) {
-				m_requests.erase(i);
-			}
-		}
+		std::vector<std::weak_ptr<HTTPRequest>>::const_iterator newRequestEnd(std::remove_if(m_requests.begin(), m_requests.end(), [](const std::weak_ptr<HTTPRequest> & request) {
+			return request.expired();
+		}));
 
 		while(!m_pendingRequests.empty() && !hasMaximumActiveRequests()) {
 			pendingRequest = m_pendingRequests.front();
