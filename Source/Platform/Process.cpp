@@ -1,13 +1,14 @@
 #include "Process.h"
 
 Process::Process()
-	: m_forceTerminated(false) {
-	notifyTerminated.connect([this]() {
+	: m_forceTerminated(false)
+	, m_terminatedConnection(notifyTerminated.connect([this]() {
 		terminated(getNativeExitCode(), m_forceTerminated);
-	});
-}
+	})) { }
 
-Process::~Process() { }
+Process::~Process() {
+	m_terminatedConnection.disconnect();
+}
 
 void Process::terminate() {
 	if(!isRunning()) {

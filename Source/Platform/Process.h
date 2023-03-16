@@ -40,6 +40,7 @@ protected:
 
 private:
 	std::atomic<bool> m_forceTerminated;
+	boost::signals2::connection m_terminatedConnection;
 };
 
 #endif // _PROCESS_H_
