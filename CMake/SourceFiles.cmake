@@ -76,6 +76,7 @@ set(CORE_SOURCE_FILES
 	Platform/TimeZoneDataManager.cpp
 	Script/Script.cpp
 	Script/ScriptArguments.cpp
+	Signal/SignalConnectionGroup.cpp
 	Singleton/SingletonManager.cpp
 	Utilities/FileUtilities.cpp
 	Utilities/NumberUtilities.cpp
@@ -160,6 +161,7 @@ set(CORE_HEADER_FILES
 	Platform/TimeZoneDataManager.h
 	Script/Script.h
 	Script/ScriptArguments.h
+	Signal/SignalConnectionGroup.h
 	Singleton/Singleton.h
 	Singleton/SingletonManager.h
 	Utilities/FileUtilities.h
