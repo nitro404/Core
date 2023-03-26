@@ -262,6 +262,20 @@ bool Utilities::doesXMLElementContainText(const tinyxml2::XMLElement * element, 
 	return xmlElementContainsTextMatcher(element, text, caseSensitive);
 }
 
+const tinyxml2::XMLElement * Utilities::getParentXMLElement(const tinyxml2::XMLElement * element) {
+	if(element == nullptr) {
+		return nullptr;
+	}
+
+	const tinyxml2::XMLNode * parentNode = element->Parent();
+
+	if(parentNode == nullptr) {
+		return nullptr;
+	}
+
+	return parentNode->ToElement();
+}
+
 std::vector<std::string> Utilities::getXMLElementClassNames(const tinyxml2::XMLElement * element) {
 	std::vector<std::string> elementClassNames;
 
