@@ -37,10 +37,10 @@ namespace Utilities {
 	std::string toSpongeCase(std::string_view string);
 	std::string toUpperCase(std::string_view string);
 	std::string swapCase(std::string_view string);
-	bool areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive = true);
-	int32_t compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive = true);
-	bool areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2);
-	int32_t compareStringsIgnoreCase(std::string_view s1, std::string_view s2);
+	bool areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive = true, bool ignoreCarriageReturn = false);
+	int32_t compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive = true, bool ignoreCarriageReturn = false);
+	bool areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn = false);
+	int32_t compareStringsIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn = false);
 	bool startsWith(std::string_view value, std::string_view suffix, bool caseSensitive = true);
 	bool endsWith(std::string_view value, std::string_view suffix, bool caseSensitive = true);
 	bool isComment(std::string_view data, std::string_view comment = "//");

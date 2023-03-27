@@ -505,32 +505,43 @@ std::string Utilities::swapCase(std::string_view string) {
 	return swapped;
 }
 
-bool Utilities::areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive) {
-	if(s1.length() != s2.length()) {
+bool Utilities::areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive, bool ignoreCarriageReturn) {
+	if(!ignoreCarriageReturn && s1.length() != s2.length()) {
 		return false;
 	}
 
-	return Utilities::compareStrings(s1, s2, caseSensitive) == 0;
+	return Utilities::compareStrings(s1, s2, caseSensitive, ignoreCarriageReturn) == 0;
 }
 
-int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive) {
+int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive, bool ignoreCarriageReturn) {
 	char a = '\0';
 	char b = '\0';
-	size_t index = 0;
+	size_t indexA = 0;
+	size_t indexB = 0;
 
 	while(true) {
-		if(index >= s1.length()) {
-			if(index < s2.length()) {
-				return s1.length() - s2.length();
+		if(ignoreCarriageReturn) {
+			while(indexA < s1.length() && s1[indexA] == '\r') {
+				indexA++;
+			}
+
+			while(indexB < s2.length() && s2[indexB] == '\r') {
+				indexB++;
+			}
+		}
+
+		if(indexA >= s1.length()) {
+			if(indexB < s2.length()) {
+				return ignoreCarriageReturn ? -1 : s1.length() - s2.length();
 			}
 			else {
 				return 0;
 			}
 		}
 
-		if(index >= s2.length()) {
-			if(index < s1.length()) {
-				return s1.length() - s2.length();
+		if(indexB >= s2.length()) {
+			if(indexA < s1.length()) {
+				return ignoreCarriageReturn ? 1 : s1.length() - s2.length();
 			}
 			else {
 				return 0;
@@ -538,15 +549,16 @@ int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool
 		}
 
 		if(caseSensitive) {
-			a = s1[index];
-			b = s2[index];
+			a = s1[indexA];
+			b = s2[indexB];
 		}
 		else {
-			a = std::tolower(s1[index]);
-			b = std::tolower(s2[index]);
+			a = std::tolower(s1[indexA]);
+			b = std::tolower(s2[indexB]);
 		}
 
-		index++;
+		indexA++;
+		indexB++;
 
 		if(a == b) {
 			continue;
@@ -556,16 +568,16 @@ int32_t Utilities::compareStrings(std::string_view s1, std::string_view s2, bool
 	}
 }
 
-bool Utilities::areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2) {
-	if(s1.length() != s2.length()) {
+bool Utilities::areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn) {
+	if(!ignoreCarriageReturn && s1.length() != s2.length()) {
 		return false;
 	}
 
-	return Utilities::compareStrings(s1, s2, false) == 0;
+	return Utilities::compareStrings(s1, s2, false, ignoreCarriageReturn) == 0;
 }
 
-int32_t Utilities::compareStringsIgnoreCase(std::string_view s1, std::string_view s2) {
-	return Utilities::compareStrings(s1, s2, false);
+int32_t Utilities::compareStringsIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn) {
+	return Utilities::compareStrings(s1, s2, false, ignoreCarriageReturn);
 }
 
 bool Utilities::startsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {
