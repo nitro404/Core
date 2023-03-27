@@ -418,7 +418,10 @@ std::string Utilities::documentToString(const tinyxml2::XMLDocument * document) 
 		return {};
 	}
 
-	return elementToString(document->RootElement());
+	CustomIndentationXMLPrinter xmlPrinter;
+	document->Accept(&xmlPrinter);
+
+	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
 }
 
 std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
@@ -429,7 +432,7 @@ std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
 	CustomIndentationXMLPrinter xmlPrinter;
 	element->Accept(&xmlPrinter);
 
-	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize());
+	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
 }
 
 bool Utilities::saveXMLDocumentToFile(const tinyxml2::XMLDocument * document, const std::string & filePath, bool overwrite, bool compact, const std::string & indentation) {
