@@ -2,10 +2,13 @@
 #include "Utilities/StringUtilities.h"
 #include "Utilities/ThreadUtilities.h"
 
+#include <spdlog/spdlog.h>
+
 #include <windows.h>
 
 #include <map>
 #include <memory>
+#include <optional>
 
 typedef HRESULT(WINAPI * GET_THREAD_DESCRIPTION_FUNCTION_TYPE)(HANDLE threadHandle, PWSTR * threadDescription);
 typedef HRESULT(WINAPI * SET_THREAD_DESCRIPTION_FUNCTION_TYPE)(HANDLE threadHandle, PCWSTR threadDescription);
@@ -71,37 +74,53 @@ static std::string getThreadNameFallback(std::thread & thread) {
 namespace Utilities {
 
 	std::string getThreadName(std::thread & thread) {
-		HMODULE kernelHandle = GetModuleHandle(KERNEL32_DLL_NAME);
+		static std::optional<GET_THREAD_DESCRIPTION_FUNCTION_TYPE> s_optionalGetThreadDescriptionFunction;
 
-		if(kernelHandle != 0) {
-			GET_THREAD_DESCRIPTION_FUNCTION_TYPE getThreadDescriptionFunction = reinterpret_cast<GET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, GET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
+		if(!s_optionalGetThreadDescriptionFunction.has_value()) {
+			HMODULE kernelHandle = GetModuleHandle(KERNEL32_DLL_NAME);
 
-			if(getThreadDescriptionFunction != nullptr) {
-				PWSTR threadNameData = nullptr;
-				HRESULT result = getThreadDescriptionFunction(thread.native_handle(), &threadNameData);
-
-				if(SUCCEEDED(result)) {
-					std::wstring threadName(threadNameData);
-
-					LocalFree(threadNameData);
-
-					return Utilities::wideStringToString(threadName);
-				}
+			if(kernelHandle != 0) {
+				s_optionalGetThreadDescriptionFunction = reinterpret_cast<GET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, GET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
 			}
+		}
+
+		if(s_optionalGetThreadDescriptionFunction.has_value() && s_optionalGetThreadDescriptionFunction.value() != nullptr) {
+			PWSTR threadNameData = nullptr;
+			HRESULT result = (*s_optionalGetThreadDescriptionFunction)(thread.native_handle(), &threadNameData);
+
+			if(FAILED(result)) {
+				spdlog::error("Failed to get thread name.");
+				return {};
+			}
+
+			std::wstring threadName(threadNameData);
+
+			LocalFree(threadNameData);
+
+			return Utilities::wideStringToString(threadName);
 		}
 
 		return getThreadNameFallback(thread);
 	}
 
 	void setThreadName(std::thread & thread, const std::string & threadName) {
-		HMODULE kernelHandle = GetModuleHandle(KERNEL32_DLL_NAME);
+		static std::optional<SET_THREAD_DESCRIPTION_FUNCTION_TYPE> optionalSetThreadDescriptionFunction = nullptr;
 
-		if(kernelHandle != 0) {
-			SET_THREAD_DESCRIPTION_FUNCTION_TYPE setThreadDescriptionFunction = reinterpret_cast<SET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, SET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
+		if(!optionalSetThreadDescriptionFunction.has_value()) {
+			HMODULE kernelHandle = GetModuleHandle(KERNEL32_DLL_NAME);
 
-			if(setThreadDescriptionFunction != nullptr && SUCCEEDED(setThreadDescriptionFunction(thread.native_handle(), Utilities::stringToWideString(threadName).data()))) {
+			if(kernelHandle != 0) {
+				optionalSetThreadDescriptionFunction = reinterpret_cast<SET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, SET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
+			}
+		}
+
+		if(optionalSetThreadDescriptionFunction.has_value() && optionalSetThreadDescriptionFunction.value() != nullptr) {
+			if(FAILED((*optionalSetThreadDescriptionFunction)(thread.native_handle(), Utilities::stringToWideString(threadName).data()))) {
+				spdlog::error("Failed to set thread name to '{}'.", threadName);
 				return;
 			}
+
+			return;
 		}
 
 		if(s_threadNames == nullptr) {
