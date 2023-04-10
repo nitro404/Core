@@ -585,7 +585,7 @@ bool Utilities::startsWith(std::string_view value, std::string_view suffix, bool
 		return false;
 	}
 
-	return Utilities::compareStrings(std::string_view(value.data(), suffix.length()), suffix, caseSensitive);
+	return Utilities::areStringsEqual(std::string_view(value.data(), suffix.length()), suffix, caseSensitive);
 }
 
 bool Utilities::endsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {
@@ -593,7 +593,7 @@ bool Utilities::endsWith(std::string_view value, std::string_view suffix, bool c
 		return false;
 	}
 
-	return Utilities::compareStrings(std::string_view(value.data() + value.length() - suffix.length(), suffix.length()), suffix, caseSensitive);
+	return Utilities::areStringsEqual(std::string_view(value.data() + value.length() - suffix.length(), suffix.length()), suffix, caseSensitive);
 }
 
 bool Utilities::isComment(std::string_view data, std::string_view comment) {

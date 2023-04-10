@@ -185,7 +185,7 @@ ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry
 	}
 
 	return std::find_if(m_archiveFactories.cbegin(), m_archiveFactories.cend(), [&filePathOrExtension](const auto & archiveFactory) {
-		return Utilities::endsWith(filePathOrExtension, archiveFactory.first);
+		return Utilities::endsWith(filePathOrExtension, archiveFactory.first, false);
 	});
 }
 

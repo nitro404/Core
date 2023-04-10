@@ -236,7 +236,7 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 
 	spdlog::debug("Latest Internet Assigned Numbers Authority time zone database archive file downloaded successfully after {} ms.", latestTimeZoneDatabaseResponse->getRequestDuration().value().count());
 
-	std::unique_ptr<Archive> latestTimeZoneDatabaseArchive(ArchiveFactoryRegistry::getInstance()->createArchiveFrom(latestTimeZoneDatabaseResponse->transferBody(), std::string(Utilities::getFileExtension(latestTimeZoneDatabaseDownloadURL))));
+	std::unique_ptr<Archive> latestTimeZoneDatabaseArchive(ArchiveFactoryRegistry::getInstance()->createArchiveFrom(latestTimeZoneDatabaseResponse->transferBody(), latestTimeZoneDatabaseDownloadURL));
 
 	if(latestTimeZoneDatabaseArchive == nullptr) {
 		spdlog::error("Failed to create archive handle from '{}' time zone database archive file!", latestTimeZoneDatabaseArchiveFileName);
