@@ -133,6 +133,49 @@ static const std::unordered_map<std::type_index, AnyToJSONConverterFunction> any
 	})
 };
 
+std::string Utilities::getParseErrorName(rapidjson::ParseErrorCode parseErrorCode) {
+	switch(parseErrorCode) {
+		case rapidjson::kParseErrorNone:
+			return "None";
+		case rapidjson::kParseErrorDocumentEmpty:
+			return "Document Empty";
+		case rapidjson::kParseErrorDocumentRootNotSingular:
+			return "Document Root Not Singular";
+		case rapidjson::kParseErrorValueInvalid:
+			return "Value Invalid";
+		case rapidjson::kParseErrorObjectMissName:
+			return "Object Missing Name";
+		case rapidjson::kParseErrorObjectMissColon:
+			return "Object Missing Colon";
+		case rapidjson::kParseErrorObjectMissCommaOrCurlyBracket:
+			return "Object Missing Comma or Curly Bracket";
+		case rapidjson::kParseErrorArrayMissCommaOrSquareBracket:
+			return "Array Missing Comma or Square Bracket";
+		case rapidjson::kParseErrorStringUnicodeEscapeInvalidHex:
+			return "String Unicode Escape Invalid Hexadecimal";
+		case rapidjson::kParseErrorStringUnicodeSurrogateInvalid:
+			return "String Unicode Surrogate Invalid";
+		case rapidjson::kParseErrorStringEscapeInvalid:
+			return "String Escape Invalid";
+		case rapidjson::kParseErrorStringMissQuotationMark:
+			return "String Missing Quotation Mark";
+		case rapidjson::kParseErrorStringInvalidEncoding:
+			return "String Invalid Encoding";
+		case rapidjson::kParseErrorNumberTooBig:
+			return "Number Too Big";
+		case rapidjson::kParseErrorNumberMissFraction:
+			return "Number Missing Fraction";
+		case rapidjson::kParseErrorNumberMissExponent:
+			return "Number Missing Exponent";
+		case rapidjson::kParseErrorTermination:
+			return "Termination";
+		case rapidjson::kParseErrorUnspecificSyntaxError:
+			return "Unspecific Syntax Error";
+	}
+
+	return {};
+}
+
 std::string_view Utilities::typeToString(rapidjson::Type type) {
 	switch(type) {
 		case rapidjson::kNullType:

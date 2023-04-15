@@ -12,6 +12,7 @@
 
 namespace Utilities {
 
+	std::string getParseErrorName(rapidjson::ParseErrorCode parseErrorCode);
 	std::string_view typeToString(rapidjson::Type type);
 	std::string valueToString(const rapidjson::Value & value, bool pretty = true);
 	std::optional<rapidjson::Value> anyToJSONValue(const std::any & value, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull = true);
