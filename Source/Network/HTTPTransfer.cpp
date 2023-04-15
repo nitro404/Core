@@ -7,6 +7,7 @@
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <spdlog/spdlog.h>
 #include <tinyxml2.h>
 
 static uint64_t s_transferIDCounter = 1;
@@ -128,6 +129,7 @@ std::unique_ptr<rapidjson::Document> HTTPTransfer::getBodyAsJSON() const {
 	std::unique_ptr<rapidjson::Document> jsonDocument(std::make_unique<rapidjson::Document>());
 
 	if(jsonDocument->Parse(reinterpret_cast<const char *>(m_body->getRawData()), m_body->getSize()).HasParseError()) {
+		spdlog::error("JSON parse error at offset {}: '{}'.", jsonDocument->GetErrorOffset(), Utilities::getParseErrorName(jsonDocument->GetParseError()));
 		return nullptr;
 	}
 
@@ -140,6 +142,7 @@ std::unique_ptr<tinyxml2::XMLDocument> HTTPTransfer::getBodyAsXML() const {
 	std::unique_ptr<tinyxml2::XMLDocument> xmlDocument(std::make_unique<tinyxml2::XMLDocument>());
 
 	if(xmlDocument->Parse(reinterpret_cast<const char *>(m_body->getRawData()), m_body->getSize()) != tinyxml2::XML_SUCCESS) {
+		spdlog::error("XML parse error: '{}'.", xmlDocument->ErrorStr());
 		return nullptr;
 	}
 
