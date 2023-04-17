@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <regex>
 
 #if _WIN32
@@ -388,4 +389,56 @@ void Utilities::createDirectoryStructureForFilePath(const std::string & filePath
 			return;
 		}
 	}
+}
+
+bool Utilities::areSymlinksSupported() {
+	static const std::string TEST_SYMLINK_NAME("TestSymlink");
+
+	static std::optional<bool> s_symlinksSupported;
+
+	if(!s_symlinksSupported.has_value()) {
+		if(std::filesystem::exists(TEST_SYMLINK_NAME)) {
+			if(!std::filesystem::is_symlink(TEST_SYMLINK_NAME)) {
+				spdlog::error("Failed to remove existing '{}' test symlink, unexpected file system entry type.", TEST_SYMLINK_NAME);
+				return false;
+			}
+
+			spdlog::debug("Removing existing test symlink: '{}'.", TEST_SYMLINK_NAME);
+
+			std::error_code errorCode;
+			std::filesystem::remove(std::filesystem::path(TEST_SYMLINK_NAME), errorCode);
+
+			if(errorCode) {
+				spdlog::warn("Failed to remove existing test symlink '{}': {}", TEST_SYMLINK_NAME, errorCode.message());
+			}
+		}
+
+		spdlog::debug("Creating test symlink '{}' to target '{}'.", TEST_SYMLINK_NAME, std::filesystem::current_path().string());
+
+		std::error_code errorCode;
+		std::filesystem::create_directory_symlink(std::filesystem::current_path(), TEST_SYMLINK_NAME, errorCode);
+
+		if(errorCode) {
+			s_symlinksSupported = false;
+
+			spdlog::warn("Failed to create test symlink '{}' to target '{}': {}", TEST_SYMLINK_NAME, std::filesystem::current_path().string(), errorCode.message());
+		}
+		else {
+			s_symlinksSupported = true;
+		}
+
+		errorCode.clear();
+
+		if(s_symlinksSupported == true) {
+			std::filesystem::remove(std::filesystem::path(TEST_SYMLINK_NAME), errorCode);
+
+			if(errorCode) {
+				spdlog::warn("Failed to remove test symlink '{}': {}", TEST_SYMLINK_NAME, errorCode.message());
+			}
+		}
+
+		spdlog::debug("Symbolic link creation is {}.", s_symlinksSupported.value() ? "supported" : "unsupported");
+	}
+
+	return s_symlinksSupported.value();
 }
