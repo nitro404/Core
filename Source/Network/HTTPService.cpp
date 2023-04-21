@@ -1,5 +1,6 @@
 #include "HTTPService.h"
 
+#include "Platform/DeviceInformationBridge.h"
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 #include "Utilities/ThreadUtilities.h"
@@ -250,6 +251,10 @@ void HTTPService::clearAuthorization() {
 
 std::future<bool> HTTPService::updateCertificateAuthorityCertificate(bool force) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+		return {};
+	}
 
 	if(m_caCertUpdateThread != nullptr && m_caCertUpdateThread->joinable()) {
 		m_updatingCACert = false;

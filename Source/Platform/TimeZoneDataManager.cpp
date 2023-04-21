@@ -2,6 +2,7 @@
 
 #include "Archive/ArchiveFactoryRegistry.h"
 #include "Network/HTTPService.h"
+#include "Platform/DeviceInformationBridge.h"
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
@@ -57,10 +58,6 @@ bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std:
 	}
 
 	if(!updateTimeZoneDatabase(dataDirectoryPath, fileETags, shouldUpdate, forceUpdate, updated)) {
-		if(updated != nullptr) {
-			*updated = false;
-		}
-
 		return false;
 	}
 
@@ -178,6 +175,10 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 
 	if(allTimeZoneDatabaseFilesExist && !shouldUpdate && !forceUpdate) {
 		return true;
+	}
+
+	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+		return allTimeZoneDatabaseFilesExist;
 	}
 
 	std::string latestTimeZoneDatabaseVersion(getLatestTimeZoneDatabaseVersion());

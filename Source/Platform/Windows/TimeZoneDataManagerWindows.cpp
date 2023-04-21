@@ -1,6 +1,7 @@
 #include "TimeZoneDataManagerWindows.h"
 
 #include "Network/HTTPService.h"
+#include "Platform/DeviceInformationBridge.h"
 #include "Utilities/FileUtilities.h"
 
 #include <spdlog/spdlog.h>
@@ -20,6 +21,10 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 
 	if(windowsTimeZoneDataFileExists && !shouldUpdate && !forceUpdate) {
 		return true;
+	}
+
+	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+		return windowsTimeZoneDataFileExists;
 	}
 
 	std::string windowsTimeZoneFileETag;
