@@ -117,6 +117,7 @@ protected:
 		bool clearPendingAnalyticEvents();
 		void reset();
 
+		static const std::string FILE_TYPE;
 		static const std::string FILE_FORMAT_VERSION;
 
 	private:

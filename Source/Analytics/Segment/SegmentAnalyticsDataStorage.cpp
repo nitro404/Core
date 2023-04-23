@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <fstream>
 
+static constexpr const char * JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME = "fileType";
 static constexpr const char * JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME = "fileFormatVersion";
 static constexpr const char * JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME = "previousSessionNumber";
 static constexpr const char * JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME = "previousApplicationVersion";
@@ -21,7 +22,8 @@ static constexpr const char * JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_N
 static constexpr const char * JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME = "anonymousID";
 static constexpr const char * JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME = "analyticEventIDCounter";
 static constexpr const char * JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME = "analyticEvents";
-static const std::array<std::string_view, 7> JSON_SEGMENT_PROPERTY_NAMES = {
+static const std::array<std::string_view, 8> JSON_SEGMENT_PROPERTY_NAMES = {
+	JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME,
 	JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME,
 	JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME,
 	JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME,
@@ -31,6 +33,7 @@ static const std::array<std::string_view, 7> JSON_SEGMENT_PROPERTY_NAMES = {
 	JSON_SEGMENT_ANALYTIC_EVENTS_PROPERTY_NAME
 };
 
+const std::string SegmentAnalytics::DataStorage::FILE_TYPE("Segment Analytics Cache");
 const std::string SegmentAnalytics::DataStorage::FILE_FORMAT_VERSION("1.0.0");
 
 SegmentAnalytics::DataStorage::DataStorage()
@@ -347,6 +350,9 @@ rapidjson::Document SegmentAnalytics::DataStorage::toJSON() const {
 	rapidjson::Document dataDocument(rapidjson::kObjectType);
 	rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator = dataDocument.GetAllocator();
 
+	rapidjson::Value fileTypeVersionValue(FILE_TYPE.c_str(), allocator);
+	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME), fileTypeVersionValue, allocator);
+
 	rapidjson::Value fileFormatVersionValue(FILE_FORMAT_VERSION.c_str(), allocator);
 	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME), fileFormatVersionValue, allocator);
 
@@ -398,6 +404,23 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 		if(!propertyHandled) {
 			spdlog::warn("Segment analytics data has unexpected property: '{}'.", i->name.GetString());
 		}
+	}
+
+	if(value.HasMember(JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME)) {
+		const rapidjson::Value & fileTypeValue = value[JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME];
+
+		if(!fileTypeValue.IsString()) {
+			spdlog::error("Invalid Segment analytics data file type type: '{}', expected: 'string'.", Utilities::typeToString(fileTypeValue.GetType()));
+			return false;
+		}
+
+		if(!Utilities::areStringsEqualIgnoreCase(fileTypeValue.GetString(), FILE_TYPE)) {
+			spdlog::error("Incorrect Segment analytics data file type: '{}', expected: '{}'.", fileTypeValue.GetString(), FILE_TYPE);
+			return false;
+		}
+	}
+	else {
+		spdlog::warn("Segment analytics JSON data is missing file type, and may fail to load correctly!");
 	}
 
 	if(value.HasMember(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME)) {
