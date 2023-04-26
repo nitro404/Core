@@ -71,7 +71,7 @@ std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string
 	return latestRelease;
 }
 
-std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::string & repositoryURL) const {
+std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::string & repositoryURL, bool includePreReleases, bool includeDrafts) const {
 	std::optional<RepositoryInformation> repositoryInfo(GitHubService::parseRepositoryURL(repositoryURL));
 
 	if(!repositoryInfo.has_value()) {
@@ -79,10 +79,10 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 		return nullptr;
 	}
 
-	return getReleases(repositoryInfo->repositoryName, repositoryInfo->organizationName);
+	return getReleases(repositoryInfo->repositoryName, repositoryInfo->organizationName, includePreReleases, includeDrafts);
 }
 
-std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::string & repositoryName, const std::string & organizationName) const {
+std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::string & repositoryName, const std::string & organizationName, bool includePreReleases, bool includeDrafts) const {
 	HTTPService * httpService = HTTPService::getInstance();
 
 	if(!httpService->isInitialized()) {
@@ -114,7 +114,7 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 		return nullptr;
 	}
 
-	std::unique_ptr<GitHubReleaseCollection> releaseCollection(GitHubReleaseCollection::parseFrom(*releaseCollectionDocument));
+	std::unique_ptr<GitHubReleaseCollection> releaseCollection(GitHubReleaseCollection::parseFrom(*releaseCollectionDocument, includePreReleases, includeDrafts));
 
 	if(!GitHubReleaseCollection::isValid(releaseCollection.get())) {
 		spdlog::error("Failed to parse '{}' releases from JSON data.", repositoryName);

@@ -56,6 +56,10 @@ bool GitHubReleaseCollection::hasReleaseWithTag(const std::string & tagName, boo
 	return indexOfReleaseWithTag(tagName, caseSensitive) != std::numeric_limits<size_t>::max();
 }
 
+bool GitHubReleaseCollection::hasReleaseWithTagVersion(const std::string & version, bool caseSensitive) const {
+	return indexOfReleaseWithTagVersion(version, caseSensitive) != std::numeric_limits<size_t>::max();
+}
+
 size_t GitHubReleaseCollection::indexOfRelease(const GitHubRelease & release) const {
 	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&release](const std::shared_ptr<GitHubRelease> & currentRelease) {
 		return &release == currentRelease.get();
@@ -104,6 +108,40 @@ size_t GitHubReleaseCollection::indexOfReleaseWithTag(const std::string & tagNam
 	return releaseIterator - std::begin(m_releases);
 }
 
+size_t GitHubReleaseCollection::indexOfReleaseWithTagVersion(const std::string & version, bool caseSensitive) const {
+	auto releaseIterator = std::find_if(std::begin(m_releases), std::end(m_releases), [&version, caseSensitive](const std::shared_ptr<GitHubRelease> & currentRelease) {
+		std::optional<uint8_t> optionalTagVersionComparison(Utilities::compareVersions(version, currentRelease->getTagName(), caseSensitive));
+
+		if(!optionalTagVersionComparison.has_value()) {
+			return false;
+		}
+
+		return optionalTagVersionComparison.value() == 0;
+	});
+
+	if(releaseIterator == std::end(m_releases)) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	return releaseIterator - std::begin(m_releases);
+}
+
+size_t GitHubReleaseCollection::indexOfLatestRelease() const {
+	if(m_releases.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	size_t latestReleaseIndex = 0;
+
+	for(size_t i = 0; i < m_releases.size(); i++) {
+		if(m_releases[i]->getPublishedTimestamp() > m_releases[latestReleaseIndex]->getPublishedTimestamp()) {
+			latestReleaseIndex = i;
+		}
+	}
+
+	return latestReleaseIndex;
+}
+
 std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getRelease(size_t index) const {
 	if(index >= m_releases.size()) {
 		return nullptr;
@@ -120,11 +158,39 @@ std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithName(const
 	return getRelease(indexOfReleaseWithName(releaseName, caseSensitive));
 }
 
+std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithTagVersion(const std::string & version, bool caseSensitive) const {
+	return getRelease(indexOfReleaseWithTagVersion(version, caseSensitive));
+}
+
 std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getReleaseWithTag(const std::string & tagName, bool caseSensitive) const {
 	return getRelease(indexOfReleaseWithTag(tagName, caseSensitive));
 }
 
-std::unique_ptr<GitHubReleaseCollection> GitHubReleaseCollection::parseFrom(const rapidjson::Value & releaseCollectionValue) {
+std::shared_ptr<GitHubRelease> GitHubReleaseCollection::getLatestRelease() const {
+	return getRelease(indexOfLatestRelease());
+}
+
+std::vector<std::string> GitHubReleaseCollection::getReleaseNames() const {
+	std::vector<std::string> releaseNames;
+
+	for(const std::shared_ptr<GitHubRelease> & release : m_releases) {
+		releaseNames.emplace_back(release->getReleaseName());
+	}
+
+	return releaseNames;
+}
+
+std::vector<std::string> GitHubReleaseCollection::getReleaseTagNames() const {
+	std::vector<std::string> releaseTags;
+
+	for(const std::shared_ptr<GitHubRelease> & release : m_releases) {
+		releaseTags.emplace_back(release->getTagName());
+	}
+
+	return releaseTags;
+}
+
+std::unique_ptr<GitHubReleaseCollection> GitHubReleaseCollection::parseFrom(const rapidjson::Value & releaseCollectionValue, bool includePreReleases, bool includeDrafts) {
 	if(!releaseCollectionValue.IsArray()) {
 		spdlog::error("Invalid GitHub release collection type: '{}', expected 'array'.", Utilities::typeToString(releaseCollectionValue.GetType()));
 		return nullptr;
@@ -144,6 +210,11 @@ std::unique_ptr<GitHubReleaseCollection> GitHubReleaseCollection::parseFrom(cons
 		if(newReleaseCollection->hasReleaseWithID(newRelease->getID())) {
 			spdlog::error("Encountered duplicate GitHub release #{} with ID: '{}'.", newReleaseCollection->m_releases.size() + 1, newRelease->getID());
 			return nullptr;
+		}
+
+		if((!includePreReleases && newRelease->isPreRelease()) ||
+		   (!includeDrafts && newRelease->isDraft())) {
+			continue;
 		}
 
 		newReleaseCollection->m_releases.push_back(newRelease);

@@ -15,8 +15,8 @@ public:
 
 	std::unique_ptr<GitHubRelease> getLatestRelease(const std::string & repositoryURL) const;
 	std::unique_ptr<GitHubRelease> getLatestRelease(const std::string & repositoryName, const std::string & organizationName) const;
-	std::unique_ptr<GitHubReleaseCollection> getReleases(const std::string & repositoryURL) const;
-	std::unique_ptr<GitHubReleaseCollection> getReleases(const std::string & repositoryName, const std::string & organizationName) const;
+	std::unique_ptr<GitHubReleaseCollection> getReleases(const std::string & repositoryURL, bool includePreReleases = false, bool includeDrafts = false) const;
+	std::unique_ptr<GitHubReleaseCollection> getReleases(const std::string & repositoryName, const std::string & organizationName, bool includePreReleases = false, bool includeDrafts = false) const;
 
 private:
 	struct RepositoryInformation {

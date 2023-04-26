@@ -26,7 +26,7 @@ public:
 	const std::string & getHTMLURL() const;
 	const std::string & getBody() const;
 	bool isDraft() const;
-	bool isPreRelease() const;;
+	bool isPreRelease() const;
 	std::chrono::time_point<std::chrono::system_clock> getCreatedTimestamp() const;
 	std::chrono::time_point<std::chrono::system_clock> getPublishedTimestamp() const;
 
