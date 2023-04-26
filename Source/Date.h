@@ -5,6 +5,7 @@
 
 #include <rapidjson/document.h>
 
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -36,6 +37,7 @@ public:
 
 	Date();
 	Date(uint8_t day, Month month, uint16_t year);
+	Date(std::chrono::time_point<std::chrono::system_clock> timestamp);
 	Date(const Date & date);
 	Date & operator = (const Date & date);
 	~Date();
@@ -56,6 +58,7 @@ public:
 
 	bool setValue(uint8_t day, Month month, uint16_t year);
 	bool setValue(uint8_t day, uint8_t month, uint16_t year);
+	bool setValue(std::chrono::time_point<std::chrono::system_clock> timestamp);
 	bool setValue(const std::string & data);
 	bool setValue(uint32_t packedValue, ByteOrder byteOrder = DEFAULT_BYTE_ORDER, Endianness endianness = DEFAULT_ENDIANNESS);
 	bool setValue(const rapidjson::Value & dateValue);

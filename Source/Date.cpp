@@ -4,6 +4,7 @@
 #include "Utilities/StringUtilities.h"
 #include "Utilities/TimeUtilities.h"
 
+#include <date/date.h>
 #include <fmt/core.h>
 #include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
@@ -59,6 +60,14 @@ Date::Date(uint8_t day, Date::Month month, uint16_t year)
 	: m_day(day)
 	, m_month(static_cast<uint8_t>(magic_enum::enum_integer(month)))
 	, m_year(year) { }
+
+
+Date::Date(std::chrono::time_point<std::chrono::system_clock> timestamp) {
+	date::year_month_day yearMonthDay(floor<date::days>(timestamp));
+	m_day = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.day()));
+	m_month = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.month()));
+	m_year = static_cast<uint16_t>(static_cast<int>(yearMonthDay.year()));
+}
 
 Date::Date(const Date & date)
 	: m_day(date.m_day)
@@ -173,6 +182,20 @@ bool Date::setValue(uint8_t day, uint8_t month, uint16_t year) {
 	}
 
 	return setValue(day, monthOptional.value(), year);
+}
+
+bool Date::setValue(std::chrono::time_point<std::chrono::system_clock> timestamp) {
+	date::year_month_day yearMonthDay(floor<date::days>(timestamp));
+
+	if(!yearMonthDay.ok()) {
+		return false;
+	}
+
+	m_day = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.day()));
+	m_month = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.month()));
+	m_year = static_cast<uint16_t>(static_cast<int>(yearMonthDay.year()));
+
+	return true;
 }
 
 bool Date::setValue(const std::string & data) {
