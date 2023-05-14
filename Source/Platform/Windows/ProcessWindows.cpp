@@ -16,6 +16,10 @@ ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_IN
 ProcessWindows::~ProcessWindows() {
 	UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE);
 
+	if(m_running) {
+		TerminateProcess(m_processInfo.hProcess, 0);
+	}
+
 	cleanup();
 }
 
@@ -41,17 +45,14 @@ bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
 	DWORD waitResult = WaitForSingleObject(m_processInfo.hProcess, duration.count());
 
 	switch(waitResult) {
-		case WAIT_ABANDONED: {
-			break;
-		}
 		case WAIT_OBJECT_0: {
 			cleanup();
 
 			return true;
 		}
-		case WAIT_TIMEOUT: {
-			break;
-		}
+
+		case WAIT_ABANDONED:
+		case WAIT_TIMEOUT:
 		case WAIT_FAILED: {
 			break;
 		}
@@ -61,6 +62,10 @@ bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
 }
 
 void ProcessWindows::doTerminate() {
+	if(m_running) {
+		TerminateProcess(m_processInfo.hProcess, 0);
+	}
+
 	cleanup();
 }
 

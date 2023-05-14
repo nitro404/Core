@@ -37,6 +37,9 @@ private:
 	HANDLE m_waitHandle;
 	std::atomic<bool> m_running;
 	std::atomic<uint64_t> m_exitCode;
+
+	ProcessWindows(const ProcessWindows &) = delete;
+	const ProcessWindows & operator = (const ProcessWindows &) = delete;
 };
 
 #endif // _PROCESS_WINDOWS_H_

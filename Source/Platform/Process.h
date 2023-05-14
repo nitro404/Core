@@ -41,6 +41,9 @@ protected:
 private:
 	std::atomic<bool> m_forceTerminated;
 	boost::signals2::connection m_terminatedConnection;
+
+	Process(const Process &) = delete;
+	const Process & operator = (const Process &) = delete;
 };
 
 #endif // _PROCESS_H_
