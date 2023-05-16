@@ -102,6 +102,10 @@ public:
 
 	static const EncodingTypes DEFAULT_ACCEPTED_ENCODING_TYPES;
 
+	boost::signals2::signal<void (HTTPRequest & /* request */, size_t /* numberOfBytesReceived */, size_t /* totalNumberOfBytes */)> progress;
+	boost::signals2::signal<void (HTTPRequest & /* request */)> completed;
+	boost::signals2::signal<void (HTTPRequest & /* request */)> failed;
+
 private:
 	HTTPRequest(Method method, const std::string & url, HTTPService * service);
 

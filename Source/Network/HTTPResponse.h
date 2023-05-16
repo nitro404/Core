@@ -4,6 +4,8 @@
 #include "BitmaskOperators.h"
 #include "HTTPTransfer.h"
 
+#include <boost/signals2.hpp>
+
 #include <chrono>
 #include <future>
 #include <memory>
@@ -44,6 +46,7 @@ public:
 	virtual ~HTTPResponse();
 
 	size_t getSize() const;
+	size_t getExpectedSize() const;
 	bool isSuccessStatusCode() const;
 	bool isFailureStatusCode() const;
 	uint16_t getStatusCode() const;
@@ -96,10 +99,14 @@ private:
 
 	bool setState(State state);
 	bool checkTimeouts();
+	bool appendHeader(const char * data, size_t size);
 	bool appendData(const char * data, size_t size);
 	void incrementTotalRawHeaderSizeBy(size_t size);
 	void setTotalRawHeaderSize(size_t size);
 	void resetTotalRawHeaderSize();
+	void notifyProgress();
+	void notifyCompleted();
+	void notifyFailed();
 	bool onTransferCompleted(bool success);
 	bool onConnectionTimedOut();
 	bool onNetworkTimedOut();
@@ -120,6 +127,7 @@ private:
 	std::string m_primaryIPAddress;
 	std::string m_lastReceivedHeaderName;
 	size_t m_totalRawHeadersSize;
+	size_t m_expectedSize;
 	std::string m_errorMessage;
 	std::weak_ptr<HTTPRequest> m_request;
 	mutable std::promise<std::shared_ptr<HTTPResponse>> m_promise;

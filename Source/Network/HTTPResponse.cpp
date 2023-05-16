@@ -15,6 +15,7 @@ HTTPResponse::HTTPResponse(HTTPService * service, std::shared_ptr<HTTPRequest> r
 	, m_statusCode(static_cast<uint16_t>(magic_enum::enum_integer(HTTPStatusCode::None)))
 	, m_state(State::None)
 	, m_totalRawHeadersSize(0u)
+	, m_expectedSize(0u)
 	, m_request(request) { }
 
 HTTPResponse::HTTPResponse(HTTPResponse && response) noexcept
@@ -31,6 +32,7 @@ HTTPResponse::HTTPResponse(HTTPResponse && response) noexcept
 	, m_primaryIPAddress(std::move(response.m_primaryIPAddress))
 	, m_lastReceivedHeaderName(std::move(response.m_lastReceivedHeaderName))
 	, m_totalRawHeadersSize(response.m_totalRawHeadersSize)
+	, m_expectedSize(response.m_expectedSize)
 	, m_errorMessage(std::move(response.m_errorMessage))
 	, m_request(response.m_request) { }
 
@@ -48,6 +50,7 @@ HTTPResponse::HTTPResponse(const HTTPResponse & response)
 	, m_primaryIPAddress(response.m_primaryIPAddress)
 	, m_lastReceivedHeaderName(response.m_lastReceivedHeaderName)
 	, m_totalRawHeadersSize(response.m_totalRawHeadersSize)
+	, m_expectedSize(response.m_expectedSize)
 	, m_errorMessage(response.m_errorMessage)
 	, m_request(response.m_request)  { }
 
@@ -70,6 +73,7 @@ HTTPResponse & HTTPResponse::operator = (HTTPResponse && response) noexcept {
 		m_primaryIPAddress = std::move(response.m_primaryIPAddress);
 		m_lastReceivedHeaderName = std::move(response.m_lastReceivedHeaderName);
 		m_totalRawHeadersSize = response.m_totalRawHeadersSize;
+		m_expectedSize = response.m_expectedSize;
 		m_errorMessage = std::move(response.m_errorMessage);
 		m_request = response.m_request;
 	}
@@ -95,6 +99,7 @@ HTTPResponse & HTTPResponse::operator = (const HTTPResponse & response) {
 	m_primaryIPAddress = response.m_primaryIPAddress;
 	m_lastReceivedHeaderName = response.m_lastReceivedHeaderName;
 	m_totalRawHeadersSize = response.m_totalRawHeadersSize;
+	m_expectedSize = response.m_expectedSize;
 	m_errorMessage = response.m_errorMessage;
 	m_request = response.m_request;
 
@@ -109,6 +114,12 @@ size_t HTTPResponse::getSize() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	return m_totalRawHeadersSize + m_body->getSize();
+}
+
+size_t HTTPResponse::getExpectedSize() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_expectedSize;
 }
 
 bool HTTPResponse::isSuccessStatusCode() const {
@@ -394,7 +405,10 @@ size_t HTTPResponse::receiveData(const char * data, size_t size, size_t numberOf
 	response->setState(State::ReceivingData);
 
 	size_t dataSize = size * numberOfBytes;
-	response->appendData(data, dataSize);
+
+	if(!response->appendData(data, dataSize)) {
+		return 0u;
+	}
 
 	response->m_lastDataReceivedSteadyTimePoint = std::chrono::steady_clock::now();
 
@@ -418,100 +432,8 @@ size_t HTTPResponse::receiveHeader(const char * data, size_t size, size_t number
 
 	size_t dataSize = size * numberOfBytes;
 
-	response->incrementTotalRawHeaderSizeBy(dataSize);
-
-	std::string_view header(data, dataSize);
-
-	if(header.find("HTTP") == 0) {
-		response->clearHeaders();
-		response->setTotalRawHeaderSize(dataSize);
-
-		size_t statusCodeSeparatorIndex = header.find(" ");
-
-		if(statusCodeSeparatorIndex == std::string::npos) {
-			response->onTransferError("Malformed HTTP response header received, missing status code!");
-			return 0u;
-		}
-
-		size_t statusNameSeparatorIndex = header.find(" ", statusCodeSeparatorIndex + 1);
-
-		if(statusNameSeparatorIndex == std::string::npos) {
-			response->onTransferError("Malformed HTTP response header received, missing status name!");
-			return 0u;
-		}
-
-		std::string statusCodeData(std::string(header.data() + statusCodeSeparatorIndex + 1, statusNameSeparatorIndex - statusCodeSeparatorIndex - 1));
-		std::optional<uint16_t> optionalStatusCode(Utilities::parseUnsignedShort(statusCodeData));
-
-		if(!optionalStatusCode.has_value()) {
-			response->onTransferError(fmt::format("Malformed HTTP response header received, invalid status code: '{}'!", statusCodeData));
-			return 0u;
-		}
-
-		response->setStatusCode(optionalStatusCode.value());
-	}
-	else if(header.find_first_of(" \t") == 0) {
-		size_t headerValueStartIndex = header.find_first_not_of(" \t");
-		size_t headerValueEndIndex = header.find_last_not_of("\r\n");
-
-		if(headerValueStartIndex == std::string::npos || headerValueEndIndex == std::string::npos) {
-			response->onTransferError("Received invalid folded header.");
-			return 0u;
-		}
-
-		std::string foldedHeaderValue(header.data() + headerValueStartIndex, headerValueEndIndex - headerValueStartIndex + 1);
-
-		if(response->m_lastReceivedHeaderName.empty()) {
-			response->onTransferError("Received unexpected folded header.");
-			return 0u;
-		}
-
-		response->setHeader(response->m_lastReceivedHeaderName, response->getHeaderValue(response->m_lastReceivedHeaderName) + foldedHeaderValue);
-	}
-	else {
-		size_t headerNameEndIndex = header.find_first_of(":");
-		size_t headerValueEndIndex = header.find_last_not_of("\r\n");
-
-		// ignore empty headers
-		if(headerValueEndIndex == std::string::npos) {
-			return dataSize;
-		}
-
-		if(headerNameEndIndex == std::string::npos) {
-			response->onTransferError(fmt::format("Malformed response header, missing separator: '{}'!", header));
-			return 0u;
-		}
-
-		size_t headerValueStartIndex = header.find_first_not_of(" \t", headerNameEndIndex + 1);
-
-		std::string headerName(header.data(), headerNameEndIndex);
-		std::string headerValue;
-
-		if(headerValueStartIndex != std::string::npos) {
-			headerValue = std::string(header.data() + headerValueStartIndex, headerValueEndIndex - headerValueStartIndex + 1);
-		}
-
-		if(!response->setHeader(headerName, headerValue)) {
-			response->onTransferError(fmt::format("Failed to set response header: '{}: {}'.", headerName, headerValue));
-			return 0u;
-		}
-
-		response->m_lastReceivedHeaderName = headerName;
-
-		// update body capacity based on content-length header when received
-		if(Utilities::areStringsEqualIgnoreCase(headerName, HTTPHeaders::CONTENT_LENGTH_HEADER_NAME)) {
-			std::optional<uint64_t> optionalContentLength(Utilities::parseUnsignedLong(headerValue));
-
-			if(!optionalContentLength.has_value()) {
-				response->onTransferError(fmt::format("Invalid '{}' header value: '{}'.", HTTPHeaders::CONTENT_LENGTH_HEADER_NAME, headerValue));
-				return 0u;
-			}
-
-			if(response->getRequest()->getMethod() != HTTPRequest::Method::Head &&
-			   optionalContentLength.value() > response->getBody()->getCapacity()) {
-				response->getBody()->reserve(optionalContentLength.value());
-			}
-		}
+	if(!response->appendHeader(data, dataSize)) {
+		return 0u;
 	}
 
 	return dataSize;
@@ -668,6 +590,113 @@ bool HTTPResponse::checkTimeouts() {
 	return false;
 }
 
+bool HTTPResponse::appendHeader(const char * data, size_t size) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	incrementTotalRawHeaderSizeBy(size);
+
+	std::string_view header(data, size);
+
+	if(header.find("HTTP") == 0) {
+		clearHeaders();
+		setTotalRawHeaderSize(size);
+
+		size_t statusCodeSeparatorIndex = header.find(" ");
+
+		if(statusCodeSeparatorIndex == std::string::npos) {
+			onTransferError("Malformed HTTP response header received, missing status code!");
+			return false;
+		}
+
+		size_t statusNameSeparatorIndex = header.find(" ", statusCodeSeparatorIndex + 1);
+
+		if(statusNameSeparatorIndex == std::string::npos) {
+			onTransferError("Malformed HTTP response header received, missing status name!");
+			return false;
+		}
+
+		std::string statusCodeData(std::string(header.data() + statusCodeSeparatorIndex + 1, statusNameSeparatorIndex - statusCodeSeparatorIndex - 1));
+		std::optional<uint16_t> optionalStatusCode(Utilities::parseUnsignedShort(statusCodeData));
+
+		if(!optionalStatusCode.has_value()) {
+			onTransferError(fmt::format("Malformed HTTP response header received, invalid status code: '{}'!", statusCodeData));
+			return false;
+		}
+
+		setStatusCode(optionalStatusCode.value());
+	}
+	else if(header.find_first_of(" \t") == 0) {
+		size_t headerValueStartIndex = header.find_first_not_of(" \t");
+		size_t headerValueEndIndex = header.find_last_not_of("\r\n");
+
+		if(headerValueStartIndex == std::string::npos || headerValueEndIndex == std::string::npos) {
+			onTransferError("Received invalid folded header.");
+			return false;
+		}
+
+		std::string foldedHeaderValue(header.data() + headerValueStartIndex, headerValueEndIndex - headerValueStartIndex + 1);
+
+		if(m_lastReceivedHeaderName.empty()) {
+			onTransferError("Received unexpected folded header.");
+			return false;
+		}
+
+		setHeader(m_lastReceivedHeaderName, getHeaderValue(m_lastReceivedHeaderName) + foldedHeaderValue);
+	}
+	else {
+		size_t headerNameEndIndex = header.find_first_of(":");
+		size_t headerValueEndIndex = header.find_last_not_of("\r\n");
+
+		// ignore empty headers
+		if(headerValueEndIndex == std::string::npos) {
+			return size;
+		}
+
+		if(headerNameEndIndex == std::string::npos) {
+			onTransferError(fmt::format("Malformed response header, missing separator: '{}'!", header));
+			return false;
+		}
+
+		size_t headerValueStartIndex = header.find_first_not_of(" \t", headerNameEndIndex + 1);
+
+		std::string headerName(header.data(), headerNameEndIndex);
+		std::string headerValue;
+
+		if(headerValueStartIndex != std::string::npos) {
+			headerValue = std::string(header.data() + headerValueStartIndex, headerValueEndIndex - headerValueStartIndex + 1);
+		}
+
+		if(!setHeader(headerName, headerValue)) {
+			onTransferError(fmt::format("Failed to set response header: '{}: {}'.", headerName, headerValue));
+			return false;
+		}
+
+		m_lastReceivedHeaderName = headerName;
+
+		// update body capacity based on content-length header when received
+		if(Utilities::areStringsEqualIgnoreCase(headerName, HTTPHeaders::CONTENT_LENGTH_HEADER_NAME)) {
+			std::optional<uint64_t> optionalContentLength(Utilities::parseUnsignedLong(headerValue));
+
+			if(!optionalContentLength.has_value()) {
+				onTransferError(fmt::format("Invalid '{}' header value: '{}'.", HTTPHeaders::CONTENT_LENGTH_HEADER_NAME, headerValue));
+				return false;
+			}
+
+			if(getRequest()->getMethod() != HTTPRequest::Method::Head) {
+				m_expectedSize = optionalContentLength.value();
+
+				if(m_expectedSize > getBody()->getCapacity()) {
+					getBody()->reserve(m_expectedSize);
+
+					notifyProgress();
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
 bool HTTPResponse::appendData(const char * data, size_t size) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
@@ -676,6 +705,8 @@ bool HTTPResponse::appendData(const char * data, size_t size) {
 	}
 
 	m_body->writeBytes(reinterpret_cast<const uint8_t *>(data), size);
+
+	notifyProgress();
 
 	return true;
 }
@@ -700,6 +731,36 @@ void HTTPResponse::resetTotalRawHeaderSize() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	setTotalRawHeaderSize(0);
+}
+
+void HTTPResponse::notifyProgress() {
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return;
+	}
+	
+	request->progress(*request, m_body->getSize(), m_expectedSize);
+}
+
+void HTTPResponse::notifyCompleted() {
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return;
+	}
+
+	request->completed(*request);
+}
+
+void HTTPResponse::notifyFailed() {
+	std::shared_ptr<HTTPRequest> request(m_request.lock());
+
+	if(request == nullptr) {
+		return;
+	}
+
+	request->failed(*request);
 }
 
 bool HTTPResponse::onTransferCompleted(bool success) {
@@ -752,6 +813,8 @@ bool HTTPResponse::onTransferCompleted(bool success) {
 		setState(State::Completed);
 
 		m_promise.set_value(request->getResponse());
+
+		notifyCompleted();
 	}
 
 	return true;
@@ -781,6 +844,8 @@ bool HTTPResponse::onConnectionTimedOut() {
 
 	m_promise.set_value(request->getResponse());
 
+	notifyFailed();
+
 	return true;
 }
 
@@ -802,6 +867,8 @@ bool HTTPResponse::onNetworkTimedOut() {
 	setState(State::NetworkTimedOut);
 
 	m_promise.set_value(request->getResponse());
+
+	notifyFailed();
 
 	return true;
 }
@@ -830,6 +897,8 @@ bool HTTPResponse::onTransferTimedOut() {
 
 	m_promise.set_value(request->getResponse());
 
+	notifyFailed();
+
 	return true;
 }
 
@@ -847,6 +916,8 @@ bool HTTPResponse::onTransferAborted() {
 	}
 
 	m_promise.set_value(request->getResponse());
+
+	notifyFailed();
 
 	return true;
 }
@@ -869,6 +940,8 @@ bool HTTPResponse::onTransferError(const std::string & errorMessage) {
 	setState(State::Error);
 
 	m_promise.set_value(request->getResponse());
+
+	notifyFailed();
 
 	return true;
 }
