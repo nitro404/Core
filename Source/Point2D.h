@@ -17,6 +17,37 @@ public:
 	Point2D & operator = (const Point2D & point);
 	~Point2D();
 
+	Point2D operator   + (int32_t c)         const;
+	Point2D operator   + (const Point2D & p) const;
+
+	void operator     += (int32_t c);
+	void operator     += (const Point2D & p);
+
+	Point2D operator   - ()                  const;
+
+	Point2D operator   - (int32_t c)         const;
+	Point2D operator   - (const Point2D & p) const;
+
+	void operator     -= (int32_t c);
+	void operator     -= (const Point2D & p);
+
+	Point2D operator   * (double c)          const;
+	Point2D operator   * (const Point2D & p) const;
+
+	void operator     *= (double c);
+	void operator     *= (const Point2D & p);
+
+	Point2D operator   / (double c)          const;
+	Point2D operator   / (const Point2D & p) const;
+
+	void operator     /= (double c);
+	void operator     /= (const Point2D & p);
+
+	int32_t operator  [] (size_t index)      const;
+
+	bool operator     == (const Point2D & p) const;
+	bool operator     != (const Point2D & p) const;
+
 	void setPoint(int32_t xPos, int32_t yPos);
 	void setPoint(const int32_t point[2]);
 	void setPoint(uint64_t packedPoint);
@@ -40,12 +71,7 @@ public:
 	static std::optional<Point2D> parseFrom(const rapidjson::Value & pointValue);
 	std::string toString() const;
 
-	bool operator == (const Point2D & point) const;
-	bool operator != (const Point2D & point) const;
-
-	static const Point2D Zero;
-
-	int32_t operator [] (size_t index) const;
+	static const Point2D ZERO;
 
 	union {
 		struct {
