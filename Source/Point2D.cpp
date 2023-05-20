@@ -1,5 +1,6 @@
 #include "Point2D.h"
 
+#include "ByteBuffer.h"
 #include "Utilities/RapidJSONUtilities.h"
 
 #include <fmt/core.h>
@@ -67,6 +68,107 @@ Point2D Point2D::unpack(uint64_t packedPoint) {
 
 float Point2D::distanceBetween(const Point2D & point) const {
 	return sqrt(pow(point.x - x, 2) + pow(point.y - y, 2));
+}
+
+Point2D Point2D::getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * error) {
+	if(offset + (sizeof(int32_t) * 2) > byteBuffer.getSize()) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	bool internalError = false;
+
+	Point2D value;
+
+	for(size_t i = 0; i < 2; i++) {
+		value.p[i] = byteBuffer.getInteger(offset + (sizeof(int32_t) * i), &internalError);
+
+		if(internalError) {
+			if(error != nullptr) {
+				*error = true;
+			}
+
+			return {};
+		}
+	}
+
+	return value;
+}
+
+std::optional<Point2D> Point2D::getFrom(const ByteBuffer & byteBuffer, size_t offset) {
+	bool error = false;
+
+	Point2D value = getFrom(byteBuffer, offset, &error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+Point2D Point2D::readFrom(const ByteBuffer & byteBuffer, bool * error) {
+	bool internalError = false;
+
+	Point2D value(getFrom(byteBuffer, byteBuffer.getReadOffset(), error));
+
+	if(internalError) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+	else {
+		byteBuffer.skipReadBytes(sizeof(int32_t) * 2);
+	}
+
+	return value;
+}
+
+std::optional<Point2D> Point2D::readFrom(const ByteBuffer & byteBuffer) {
+	bool error = false;
+
+	Point2D value(readFrom(byteBuffer, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+bool Point2D::putIn(ByteBuffer & byteBuffer, size_t offset) const {
+	for(size_t i = 0; i < 2; i++) {
+		if(!byteBuffer.putInteger(p[i], offset + (sizeof(int32_t) * i))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Point2D::insertIn(ByteBuffer & byteBuffer, size_t offset) const {
+	for(size_t i = 0; i < 2; i++) {
+		if(!byteBuffer.insertInteger(p[i], offset + (sizeof(int32_t) * i))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Point2D::writeTo(ByteBuffer & byteBuffer) const {
+	for(size_t i = 0; i < 2; i++) {
+		if(!byteBuffer.putUnsignedLong(p[i], byteBuffer.getWriteOffset())) {
+			return false;
+		}
+
+		byteBuffer.skipWriteBytes(sizeof(int32_t));
+	}
+
+	return true;
 }
 
 rapidjson::Value Point2D::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {

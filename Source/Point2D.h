@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 
+class ByteBuffer;
 class Point2D final {
 public:
 	Point2D(int32_t x = 0, int32_t y = 0);
@@ -25,6 +26,14 @@ public:
 	static Point2D unpack(uint64_t packedPoint);
 
 	float distanceBetween(const Point2D & point) const;
+
+	static Point2D getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * error);
+	static std::optional<Point2D> getFrom(const ByteBuffer & byteBuffer, size_t offset);
+	static Point2D readFrom(const ByteBuffer & byteBuffer, bool * error);
+	static std::optional<Point2D> readFrom(const ByteBuffer & byteBuffer);
+	bool putIn(ByteBuffer & byteBuffer, size_t offset) const;
+	bool insertIn(ByteBuffer & byteBuffer, size_t offset) const;
+	bool writeTo(ByteBuffer & byteBuffer) const;
 
 	rapidjson::Value toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const;
 	static Point2D parseFrom(const rapidjson::Value & pointValue, bool * error);
