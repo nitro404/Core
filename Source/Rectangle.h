@@ -2,7 +2,7 @@
 #define _RECTANGLE_H_
 
 #include "Dimension.h"
-#include "Point.h"
+#include "Point2D.h"
 
 #include <rapidjson/document.h>
 
@@ -10,8 +10,6 @@
 #include <optional>
 #include <string>
 
-class Point;
-class Dimension;
 class Vector2;
 
 class Rect final {
@@ -19,7 +17,7 @@ public:
 	Rect(int32_t xPos = 0, int32_t yPos = 0, uint32_t width = 0, uint32_t height = 0);
 	Rect(const int32_t p[2], const uint32_t d[2]);
 	Rect(int32_t xPos, int32_t yPos, const Dimension & dimensions);
-	Rect(const Point & position, uint32_t width = 0, uint32_t height = 0);
+	Rect(const Point2D & position, uint32_t width = 0, uint32_t height = 0);
 	Rect(uint64_t packedPosition, uint64_t packedDimension);
 	Rect(const Rect & rectangle);
 	Rect & operator = (const Rect & rectangle);
@@ -30,22 +28,22 @@ public:
 	uint64_t getPerimeter() const;
 	uint64_t getArea() const;
 
-	Point getPosition() const;
+	Point2D getPosition() const;
 	Dimension getDimensions() const;
 
-	Point getCenter() const;
+	Point2D getCenter() const;
 
-	Point getLeft() const;
-	Point getRight() const;
-	Point getTop() const;
-	Point getBottom() const;
+	Point2D getLeft() const;
+	Point2D getRight() const;
+	Point2D getTop() const;
+	Point2D getBottom() const;
 
-	Point getTopLeft() const;
-	Point getTopRight() const;
-	Point getBottomLeft() const;
-	Point getBottomRight() const;
+	Point2D getTopLeft() const;
+	Point2D getTopRight() const;
+	Point2D getBottomLeft() const;
+	Point2D getBottomRight() const;
 
-	bool contains(const Point & point) const;
+	bool contains(const Point2D & point) const;
 	bool contains(const Vector2 & point) const;
 	bool contains(const Rect & rectangle) const;
 
@@ -66,7 +64,7 @@ public:
 
 	union {
 		struct {
-			Point position;
+			Point2D position;
 			Dimension size;
 		};
 

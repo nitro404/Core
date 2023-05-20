@@ -1,8 +1,6 @@
 #include "Rectangle.h"
 
-#include "Dimension.h"
 #include "Math/Vector2.h"
-#include "Point.h"
 #include "Utilities/RapidJSONUtilities.h"
 
 #include <fmt/core.h>
@@ -33,7 +31,7 @@ Rect::Rect(int32_t xPos, int32_t yPos, const Dimension & dimensions)
 	, w(dimensions.w)
 	, h(dimensions.h) { }
 
-Rect::Rect(const Point & position, uint32_t width, uint32_t height)
+Rect::Rect(const Point2D & position, uint32_t width, uint32_t height)
 	: x(position.x)
 	, y(position.y)
 	, w(width)
@@ -78,51 +76,51 @@ uint64_t Rect::getArea() const {
 	return w * h;
 }
 
-Point Rect::getPosition() const {
-	return Point(x, y);
+Point2D Rect::getPosition() const {
+	return Point2D(x, y);
 }
 
 Dimension Rect::getDimensions() const {
 	return Dimension(w, h);
 }
 
-Point Rect::getCenter() const {
-	return Point(x + (w / 2), y + (h / 2));
+Point2D Rect::getCenter() const {
+	return Point2D(x + (w / 2), y + (h / 2));
 }
 
-Point Rect::getLeft() const {
-	return Point(x, y + (h / 2));
+Point2D Rect::getLeft() const {
+	return Point2D(x, y + (h / 2));
 }
 
-Point Rect::getRight() const {
-	return Point(x + w, y + (h / 2));
+Point2D Rect::getRight() const {
+	return Point2D(x + w, y + (h / 2));
 }
 
-Point Rect::getTop() const {
-	return Point(x + (w / 2), y + h);
+Point2D Rect::getTop() const {
+	return Point2D(x + (w / 2), y + h);
 }
 
-Point Rect::getBottom() const {
-	return Point(x + (w / 2), y);
+Point2D Rect::getBottom() const {
+	return Point2D(x + (w / 2), y);
 }
 
-Point Rect::getTopLeft() const {
-	return Point(x, y + h);
+Point2D Rect::getTopLeft() const {
+	return Point2D(x, y + h);
 }
 
-Point Rect::getTopRight() const {
-	return Point(x + w, y + h);
+Point2D Rect::getTopRight() const {
+	return Point2D(x + w, y + h);
 }
 
-Point Rect::getBottomLeft() const {
-	return Point(x, y);
+Point2D Rect::getBottomLeft() const {
+	return Point2D(x, y);
 }
 
-Point Rect::getBottomRight() const {
-	return Point(x + w, y);
+Point2D Rect::getBottomRight() const {
+	return Point2D(x + w, y);
 }
 
-bool Rect::contains(const Point & point) const {
+bool Rect::contains(const Point2D & point) const {
 	return point.x >= x     && point.y >= y &&
 		   point.x <= x + w && point.y <= y + h;
 }

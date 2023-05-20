@@ -48,7 +48,7 @@ set(CORE_SOURCE_FILES
 	GitHub/GitHubReleaseAsset.cpp
 	GitHub/GitHubReleaseCollection.cpp
 	GitHub/GitHubService.cpp
-	Point.cpp
+	Point2D.cpp
 	Rectangle.cpp
 	LibraryInformation.cpp
 	Location/FreeGeoIPGeoLocationService.cpp
@@ -131,7 +131,7 @@ set(CORE_HEADER_FILES
 	GitHub/GitHubReleaseAsset.h
 	GitHub/GitHubReleaseCollection.h
 	GitHub/GitHubService.h
-	Point.h
+	Point2D.h
 	Rectangle.h
 	LibraryInformation.h
 	Location/FreeGeoIPGeoLocationService.h

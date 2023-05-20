@@ -1,4 +1,4 @@
-#include "Point.h"
+#include "Point2D.h"
 
 #include "Utilities/RapidJSONUtilities.h"
 
@@ -10,66 +10,66 @@
 static constexpr const char * JSON_X_POSITION_PROPERTY_NAME = "x";
 static constexpr const char * JSON_Y_POSITION_PROPERTY_NAME = "y";
 
-const Point Point::Zero(0, 0);
+const Point2D Point2D::Zero(0, 0);
 
-Point::Point(int32_t xPos, int32_t yPos)
+Point2D::Point2D(int32_t xPos, int32_t yPos)
 	: x(xPos)
 	, y(yPos) { }
 
-Point::Point(const int32_t p[2])
+Point2D::Point2D(const int32_t p[2])
 	: x(p[0])
 	, y(p[1]) { }
 
-Point::Point(uint64_t packedPoint)
+Point2D::Point2D(uint64_t packedPoint)
 	: x(static_cast<int32_t>((packedPoint >> 32) & 0xffff))
 	, y(static_cast<int32_t>( packedPoint        & 0xffff)) { }
 
-Point::Point(const Point & point)
+Point2D::Point2D(const Point2D & point)
 	: x(point.x)
 	, y(point.y) { }
 
-Point & Point::operator = (const Point & point) {
+Point2D & Point2D::operator = (const Point2D & point) {
 	x = point.x;
 	y = point.y;
 
 	return *this;
 }
 
-Point::~Point() = default;
+Point2D::~Point2D() = default;
 
-void Point::setPoint(int32_t xPos, int32_t yPos) {
+void Point2D::setPoint(int32_t xPos, int32_t yPos) {
 	x = xPos;
 	y = yPos;
 }
 
-void Point::setPoint(const int32_t point[2]) {
+void Point2D::setPoint(const int32_t point[2]) {
 	x = point[0];
 	y = point[1];
 }
 
-void Point::setPoint(uint64_t packedPoint) {
+void Point2D::setPoint(uint64_t packedPoint) {
 	x = static_cast<int32_t>((packedPoint >> 32) & 0xffff);
 	y = static_cast<int32_t>( packedPoint        & 0xffff);
 }
 
-void Point::setPoint(const Point & point) {
+void Point2D::setPoint(const Point2D & point) {
 	x = point.x;
 	y = point.y;
 }
 
-uint64_t Point::pack() const {
+uint64_t Point2D::pack() const {
 	return static_cast<uint64_t>(x) << 32 | static_cast<uint64_t>(y);
 }
 
-Point Point::unpack(uint64_t packedPoint) {
-	return Point(packedPoint);
+Point2D Point2D::unpack(uint64_t packedPoint) {
+	return Point2D(packedPoint);
 }
 
-float Point::distanceBetween(const Point & point) const {
+float Point2D::distanceBetween(const Point2D & point) const {
 	return sqrt(pow(point.x - x, 2) + pow(point.y - y, 2));
 }
 
-rapidjson::Value Point::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
+rapidjson::Value Point2D::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator) const {
 	rapidjson::Value pointValue(rapidjson::kObjectType);
 
 	pointValue.AddMember(rapidjson::StringRef(JSON_X_POSITION_PROPERTY_NAME), rapidjson::Value(x), allocator);
@@ -78,7 +78,7 @@ rapidjson::Value Point::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAllo
 	return pointValue;
 }
 
-Point Point::parseFrom(const rapidjson::Value & pointValue, bool * error) {
+Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 	if(!pointValue.IsObject()) {
 		spdlog::error("Invalid point type: '{}', expected 'object'.", Utilities::typeToString(pointValue.GetType()));
 		return {};
@@ -86,37 +86,37 @@ Point Point::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse x position
 	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		spdlog::error("Point2D is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & xPositionValue = pointValue[JSON_X_POSITION_PROPERTY_NAME];
 
 	if(!xPositionValue.IsInt()) {
-		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
+		spdlog::error("Point2D has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
 		return {};
 	}
 
 	// parse y position
 	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		spdlog::error("Point2D is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
 		return {};
 	}
 
 	const rapidjson::Value & yPositionValue = pointValue[JSON_Y_POSITION_PROPERTY_NAME];
 
 	if(!yPositionValue.IsInt()) {
-		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
+		spdlog::error("Point2D has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
 		return {};
 	}
 
-	return Point(xPositionValue.GetInt(), yPositionValue.GetInt());
+	return Point2D(xPositionValue.GetInt(), yPositionValue.GetInt());
 }
 
-std::optional<Point> Point::parseFrom(const rapidjson::Value & pointValue) {
+std::optional<Point2D> Point2D::parseFrom(const rapidjson::Value & pointValue) {
 	bool error = false;
 
-	Point point(parseFrom(pointValue, &error));
+	Point2D point(parseFrom(pointValue, &error));
 
 	if(error) {
 		return {};
@@ -125,11 +125,11 @@ std::optional<Point> Point::parseFrom(const rapidjson::Value & pointValue) {
 	return point;
 }
 
-std::string Point::toString() const {
+std::string Point2D::toString() const {
 	return fmt::format("{}, {}", x, y);
 }
 
-int32_t Point::operator [] (size_t index) const {
+int32_t Point2D::operator [] (size_t index) const {
 	if(index > 1) {
 		return 0;
 	}
@@ -137,11 +137,11 @@ int32_t Point::operator [] (size_t index) const {
 	return p[index];
 }
 
-bool Point::operator == (const Point & point) const {
+bool Point2D::operator == (const Point2D & point) const {
 	return x == point.x &&
 		   y == point.y;
 }
 
-bool Point::operator != (const Point & point) const {
+bool Point2D::operator != (const Point2D & point) const {
 	return !operator == (point);
 }
