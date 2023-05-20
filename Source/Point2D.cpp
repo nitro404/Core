@@ -1,6 +1,7 @@
 #include "Point2D.h"
 
 #include "ByteBuffer.h"
+#include "Point3D.h"
 #include "Utilities/RapidJSONUtilities.h"
 
 #include <fmt/core.h>
@@ -40,29 +41,37 @@ Point2D::~Point2D() = default;
 
 Point2D Point2D::operator  + (int32_t c)         const { return Point2D(x + c,   y + c); }
 Point2D Point2D::operator  + (const Point2D & p) const { return Point2D(x + p.x, y + p.y); }
+Point2D Point2D::operator  + (const Point3D & p) const { return Point2D(x + p.x, y + p.y); }
 
 void Point2D::operator    += (int32_t c)               { x += c;   y += c; }
 void Point2D::operator    += (const Point2D & p)       { x += p.x; y += p.y; }
+void Point2D::operator    += (const Point3D & p)       { x += p.x; y += p.y; }
 
 Point2D Point2D::operator  - ()                  const { return Point2D(-x, -y); }
 
 Point2D Point2D::operator  - (int32_t c)         const { return Point2D(x - c,   y - c); }
 Point2D Point2D::operator  - (const Point2D & p) const { return Point2D(x - p.x, y - p.y); }
+Point2D Point2D::operator  - (const Point3D & p) const { return Point2D(x - p.x, y - p.y); }
 
 void Point2D::operator    -= (int32_t c)               { x -= c;   y -= c; }
 void Point2D::operator    -= (const Point2D & p)       { x -= p.x; y -= p.y; }
+void Point2D::operator    -= (const Point3D & p)       { x -= p.x; y -= p.y; }
 
 Point2D Point2D::operator  * (double c)          const { return Point2D(x * c,   y * c); }
 Point2D Point2D::operator  * (const Point2D & p) const { return Point2D(x * p.x, y * p.y); }
+Point2D Point2D::operator  * (const Point3D & p) const { return Point2D(x * p.x, y * p.y); }
 
 void Point2D::operator    *= (double c)                { x *= c;   y *= c; }
 void Point2D::operator    *= (const Point2D & p)       { x *= p.x; y *= p.y; }
+void Point2D::operator    *= (const Point3D & p)       { x *= p.x; y *= p.y; }
 
 Point2D Point2D::operator  / (double c)          const { return Point2D(  c == 0.0 ? 0.0 : x / c,     c == 0.0 ? 0.0 : y / c); }
 Point2D Point2D::operator  / (const Point2D & p) const { return Point2D(p.x == 0   ? 0   : x / p.x, p.y == 0   ? 0   : y / p.y); }
+Point2D Point2D::operator  / (const Point3D & p) const { return Point2D(p.x == 0   ? 0   : x / p.x, p.y == 0   ? 0   : y / p.y); }
 
 void Point2D::operator    /= (double c)                { x =   c == 0.0 ? 0.0 : x / c;   y =   c == 0.0 ? 0.0 : y / c; }
 void Point2D::operator    /= (const Point2D & p)       { x = p.x == 0   ? 0   : x / p.x; y = p.y == 0   ? 0   : y / p.y; }
+void Point2D::operator    /= (const Point3D & p)       { x = p.x == 0   ? 0   : x / p.x; y = p.y == 0   ? 0   : y / p.y; }
 
 int32_t Point2D::operator [] (size_t index) const {
 	if(index > 1) {

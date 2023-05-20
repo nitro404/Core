@@ -8,6 +8,8 @@
 #include <string>
 
 class ByteBuffer;
+class Point3D;
+
 class Point2D final {
 public:
 	Point2D(int32_t x = 0, int32_t y = 0);
@@ -19,29 +21,37 @@ public:
 
 	Point2D operator   + (int32_t c)         const;
 	Point2D operator   + (const Point2D & p) const;
+	Point2D operator   + (const Point3D & p) const;
 
 	void operator     += (int32_t c);
 	void operator     += (const Point2D & p);
+	void operator     += (const Point3D & p);
 
 	Point2D operator   - ()                  const;
 
 	Point2D operator   - (int32_t c)         const;
 	Point2D operator   - (const Point2D & p) const;
+	Point2D operator   - (const Point3D & p) const;
 
 	void operator     -= (int32_t c);
 	void operator     -= (const Point2D & p);
+	void operator     -= (const Point3D & p);
 
 	Point2D operator   * (double c)          const;
 	Point2D operator   * (const Point2D & p) const;
+	Point2D operator   * (const Point3D & p) const;
 
 	void operator     *= (double c);
 	void operator     *= (const Point2D & p);
+	void operator     *= (const Point3D & p);
 
 	Point2D operator   / (double c)          const;
 	Point2D operator   / (const Point2D & p) const;
+	Point2D operator   / (const Point3D & p) const;
 
 	void operator     /= (double c);
 	void operator     /= (const Point2D & p);
+	void operator     /= (const Point3D & p);
 
 	int32_t operator  [] (size_t index)      const;
 
