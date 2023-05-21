@@ -226,12 +226,22 @@ rapidjson::Value Point3D::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAl
 Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 	if(!pointValue.IsObject()) {
 		spdlog::error("Invalid point type: '{}', expected 'object'.", Utilities::typeToString(pointValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
 	// parse x position
 	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
 		spdlog::error("Point is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
@@ -239,12 +249,22 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	if(!xPositionValue.IsInt()) {
 		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
 	// parse y position
 	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
 		spdlog::error("Point is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
@@ -252,12 +272,22 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	if(!yPositionValue.IsInt()) {
 		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
 	// parse z position
 	if(!pointValue.HasMember(JSON_Z_POSITION_PROPERTY_NAME)) {
 		spdlog::error("Point is missing '{}' property'.", JSON_Z_POSITION_PROPERTY_NAME);
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
@@ -265,6 +295,11 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	if(!zPositionValue.IsInt()) {
 		spdlog::error("Point has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Z_POSITION_PROPERTY_NAME, Utilities::typeToString(zPositionValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 

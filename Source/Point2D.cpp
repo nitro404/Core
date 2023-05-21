@@ -239,12 +239,22 @@ rapidjson::Value Point2D::toJSON(rapidjson::MemoryPoolAllocator<rapidjson::CrtAl
 Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 	if(!pointValue.IsObject()) {
 		spdlog::error("Invalid point type: '{}', expected 'object'.", Utilities::typeToString(pointValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
 	// parse x position
 	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
 		spdlog::error("Point2D is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
@@ -252,12 +262,22 @@ Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	if(!xPositionValue.IsInt()) {
 		spdlog::error("Point2D has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_X_POSITION_PROPERTY_NAME, Utilities::typeToString(xPositionValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
 	// parse y position
 	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
 		spdlog::error("Point2D is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
@@ -265,6 +285,11 @@ Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	if(!yPositionValue.IsInt()) {
 		spdlog::error("Point2D has an invalid '{}' property type: '{}', expected integer 'number'.", JSON_Y_POSITION_PROPERTY_NAME, Utilities::typeToString(yPositionValue.GetType()));
+
+		if(error != nullptr) {
+			*error = true;
+		}
+
 		return {};
 	}
 
