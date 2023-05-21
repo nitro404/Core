@@ -12,7 +12,8 @@ class Point3D;
 
 class Point2D final {
 public:
-	Point2D(int32_t x = 0, int32_t y = 0);
+	Point2D();
+	Point2D(int32_t a, int32_t b);
 	Point2D(const int32_t p[2]);
 	Point2D(uint64_t packedPoint);
 	Point2D(const Point2D & point);

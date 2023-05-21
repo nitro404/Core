@@ -14,9 +14,13 @@ static constexpr const char * JSON_Y_POSITION_PROPERTY_NAME = "y";
 
 const Point2D Point2D::ZERO(0, 0);
 
-Point2D::Point2D(int32_t xPos, int32_t yPos)
-	: x(xPos)
-	, y(yPos) { }
+Point2D::Point2D()
+	: x(0)
+	, y(0) { }
+
+Point2D::Point2D(int32_t a, int32_t b)
+	: x(a)
+	, y(b) { }
 
 Point2D::Point2D(const int32_t p[2])
 	: x(p[0])
