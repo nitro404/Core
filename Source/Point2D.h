@@ -82,6 +82,7 @@ public:
 	static std::optional<Point2D> parseFrom(const rapidjson::Value & pointValue);
 	std::string toString() const;
 
+	static constexpr size_t SIZE_BYTES = (sizeof(int32_t) * 2);
 	static const Point2D ZERO;
 
 	union {

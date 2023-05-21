@@ -76,6 +76,7 @@ public:
 	static std::optional<Point3D> parseFrom(const rapidjson::Value & pointValue);
 	std::string toString() const;
 
+	static constexpr size_t SIZE_BYTES = (sizeof(int32_t) * 3);
 	static const Point3D ZERO;
 
 	union {

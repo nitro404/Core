@@ -113,7 +113,7 @@ double Point3D::distanceBetween(const Point3D & p) const {
 }
 
 Point3D Point3D::getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * error) {
-	if(offset + (sizeof(int32_t) * 3) > byteBuffer.getSize()) {
+	if(offset + SIZE_BYTES > byteBuffer.getSize()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -143,7 +143,7 @@ Point3D Point3D::getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * er
 std::optional<Point3D> Point3D::getFrom(const ByteBuffer & byteBuffer, size_t offset) {
 	bool error = false;
 
-	Point3D value = getFrom(byteBuffer, offset, &error);
+	Point3D value(getFrom(byteBuffer, offset, &error));
 
 	if(error) {
 		return {};
@@ -163,7 +163,7 @@ Point3D Point3D::readFrom(const ByteBuffer & byteBuffer, bool * error) {
 		}
 	}
 	else {
-		byteBuffer.skipReadBytes(sizeof(int32_t) * 3);
+		byteBuffer.skipReadBytes(SIZE_BYTES);
 	}
 
 	return value;

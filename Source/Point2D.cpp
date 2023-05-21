@@ -127,7 +127,7 @@ float Point2D::distanceBetween(const Point2D & point) const {
 }
 
 Point2D Point2D::getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * error) {
-	if(offset + (sizeof(int32_t) * 2) > byteBuffer.getSize()) {
+	if(offset + SIZE_BYTES > byteBuffer.getSize()) {
 		if(error != nullptr) {
 			*error = true;
 		}
@@ -157,7 +157,7 @@ Point2D Point2D::getFrom(const ByteBuffer & byteBuffer, size_t offset, bool * er
 std::optional<Point2D> Point2D::getFrom(const ByteBuffer & byteBuffer, size_t offset) {
 	bool error = false;
 
-	Point2D value = getFrom(byteBuffer, offset, &error);
+	Point2D value(getFrom(byteBuffer, offset, &error));
 
 	if(error) {
 		return {};
@@ -177,7 +177,7 @@ Point2D Point2D::readFrom(const ByteBuffer & byteBuffer, bool * error) {
 		}
 	}
 	else {
-		byteBuffer.skipReadBytes(sizeof(int32_t) * 2);
+		byteBuffer.skipReadBytes(SIZE_BYTES);
 	}
 
 	return value;
