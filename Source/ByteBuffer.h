@@ -69,7 +69,7 @@ public:
 	bool reserve(size_t capacity);
 	void shrinkToFit();
 	Endianness getEndianness() const;
-	void setEndianness(Endianness endianness);
+	void setEndianness(Endianness endianness) const;
 	void fill(uint8_t value, size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void reverse(size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void clear();
@@ -270,7 +270,7 @@ private:
 	bool autoResize(size_t baseSize, size_t additionalBytes);
 
 	std::unique_ptr<std::vector<uint8_t>> m_data;
-	Endianness m_endianness;
+	mutable Endianness m_endianness;
 	mutable size_t m_readOffset;
 	mutable size_t m_writeOffset;
 };

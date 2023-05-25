@@ -212,7 +212,7 @@ Endianness ByteBuffer::getEndianness() const {
 	return m_endianness;
 }
 
-void ByteBuffer::setEndianness(Endianness endianness) {
+void ByteBuffer::setEndianness(Endianness endianness) const {
 	m_endianness = endianness;
 }
 
