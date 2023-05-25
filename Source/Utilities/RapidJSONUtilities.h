@@ -23,6 +23,8 @@ namespace Utilities {
 	std::any jsonValueToAny(const rapidjson::Value & value);
 	std::vector<std::any> jsonArrayToAnyVector(const rapidjson::Value & value);
 	std::map<std::string, std::any> jsonObjectToAnyMap(const rapidjson::Value & value);
+	std::optional<rapidjson::Document> loadJSONDocumentFrom(const std::string & filePath);
+	bool saveJSONValueTo(const rapidjson::Value & jsonValue, const std::string & filePath, bool overwrite = true, bool createParentDirectories = true);
 
 }
 

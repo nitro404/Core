@@ -1,11 +1,17 @@
 #include "RapidJSONUtilities.h"
 
+#include "FileUtilities.h"
+
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <spdlog/spdlog.h>
 
+#include <filesystem>
 #include <functional>
+#include <fstream>
 #include <typeindex>
 
 using AnyToJSONConverterFunction = std::function<void (const std::any & any, std::optional<rapidjson::Value> & outputValue, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull)>;
@@ -394,4 +400,59 @@ std::map<std::string, std::any> Utilities::jsonObjectToAnyMap(const rapidjson::V
 	}
 
 	return anyMap;
+}
+
+std::optional<rapidjson::Document> Utilities::loadJSONDocumentFrom(const std::string & filePath) {
+	if(filePath.empty() || !std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return {};
+	}
+
+	std::ifstream fileStream(filePath);
+
+	if(!fileStream.is_open()) {
+		return {};
+	}
+
+	rapidjson::Document jsonDocument;
+	rapidjson::IStreamWrapper fileStreamWrapper(fileStream);
+
+	if(jsonDocument.ParseStream(fileStreamWrapper).HasParseError()) {
+		return {};
+	}
+
+	fileStream.close();
+
+	return jsonDocument;
+}
+
+bool Utilities::saveJSONValueTo(const rapidjson::Value & jsonValue, const std::string & filePath, bool overwrite, bool createParentDirectories) {
+	if(!overwrite && std::filesystem::exists(std::filesystem::path(filePath))) {
+		spdlog::warn("File '{}' already exists, use overwrite to force write.", filePath);
+		return false;
+	}
+
+	if(createParentDirectories) {
+		std::error_code errorCode;
+		Utilities::createDirectoryStructureForFilePath(filePath, errorCode);
+
+		if(errorCode) {
+			spdlog::error("Failed to create file destination directory structure for file path '{}': {}", filePath, errorCode.message());
+			return false;
+		}
+	}
+
+	std::ofstream fileStream(filePath);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	rapidjson::OStreamWrapper fileStreamWrapper(fileStream);
+	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> fileStreamWriter(fileStreamWrapper);
+	fileStreamWriter.SetIndent('\t', 1);
+	jsonValue.Accept(fileStreamWriter);
+
+	fileStream.close();
+
+	return true;
 }
