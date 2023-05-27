@@ -44,7 +44,7 @@ STDMETHODIMP ArchiveBufferInputStream::Read(void * data, UInt32 size, UInt32 * p
 		return E_INVALIDARG;
 	}
 
-	size_t numberOfBytesRead = std::min(static_cast<size_t>(size), m_data->getRemainingBytes());
+	size_t numberOfBytesRead = std::min(static_cast<size_t>(size), m_data->numberOfBytesRemaining());
 	std::memcpy(data, m_data->getRawData() + m_data->getReadOffset(), numberOfBytesRead);
 	m_data->skipReadBytes(numberOfBytesRead);
 

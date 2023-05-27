@@ -58,6 +58,13 @@ ByteBuffer::ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness)
 	, m_readOffset(0)
 	, m_writeOffset(data.size()) { }
 
+ByteBuffer::ByteBuffer(std::unique_ptr<std::vector<uint8_t>> data, Endianness endianness)
+	: m_data(data != nullptr ? std::move(data) : std::make_unique<std::vector<uint8_t>>())
+	, m_endianness(endianness)
+	, m_readOffset(0) {
+	m_writeOffset = m_data->size();
+}
+
 ByteBuffer::ByteBuffer(const std::string & data, Endianness endianness)
 	: m_data(std::make_unique<std::vector<uint8_t>>())
 	, m_endianness(endianness)
@@ -299,8 +306,20 @@ bool ByteBuffer::skipReadBytes(size_t numberOfBytes) const {
 	return true;
 }
 
-size_t ByteBuffer::getRemainingBytes() const {
+size_t ByteBuffer::numberOfBytesRemaining() const {
 	return m_data->size() - m_readOffset;
+}
+
+std::unique_ptr<ByteBuffer> ByteBuffer::getRemainingBytes() const {
+	size_t remainingBytesCount = numberOfBytesRemaining();
+
+	if(m_readOffset + (remainingBytesCount * sizeof(uint8_t)) > m_data->size()) {
+		return nullptr;
+	}
+
+	const uint8_t * rawDataStart = m_data->data() + (m_readOffset * sizeof(uint8_t));
+
+	return std::make_unique<ByteBuffer>(std::make_unique<std::vector<uint8_t>>(rawDataStart, rawDataStart + (remainingBytesCount * sizeof(uint8_t))));
 }
 
 bool ByteBuffer::isEndOfBuffer() const {

@@ -38,6 +38,7 @@ public:
 	template <size_t N>
 	ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const std::vector<uint8_t> & data, Endianness endianness = DEFAULT_ENDIANNESS);
+	ByteBuffer(std::unique_ptr<std::vector<uint8_t>> data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(const std::string & data, Endianness endianness = DEFAULT_ENDIANNESS);
 	ByteBuffer(ByteBuffer && buffer) noexcept;
 	ByteBuffer(const ByteBuffer & buffer);
@@ -85,7 +86,8 @@ public:
 	void setReadOffset(size_t offset) const;
 	bool canReadBytes(size_t numberOfBytes) const;
 	bool skipReadBytes(size_t numberOfBytes) const;
-	size_t getRemainingBytes() const;
+	size_t numberOfBytesRemaining() const;
+	std::unique_ptr<ByteBuffer> getRemainingBytes() const;
 	bool isEndOfBuffer() const;
 	void resetReadOffset() const;
 

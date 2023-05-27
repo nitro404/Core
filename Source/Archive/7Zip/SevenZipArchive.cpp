@@ -39,7 +39,7 @@ static const ByteBuffer * getByteBufferFromSeekInStreamInterface(const ISeekInSt
 static SRes readFromVirtualByteBufferFile(const ISeekInStream * seekInStreamInterface, void * outputBuffer, size_t * numberOfBytesToRead) {
 	const ByteBuffer * data = getByteBufferFromSeekInStreamInterface(seekInStreamInterface);
 
-	size_t numberOfBytesRead = std::min(*numberOfBytesToRead, data->getRemainingBytes());
+	size_t numberOfBytesRead = std::min(*numberOfBytesToRead, data->numberOfBytesRemaining());
 	std::memcpy(outputBuffer, data->getRawData() + data->getReadOffset(), numberOfBytesRead);
 	data->skipReadBytes(numberOfBytesRead);
 	*numberOfBytesToRead = numberOfBytesRead;
