@@ -2161,34 +2161,6 @@ std::unique_ptr<ByteBuffer> ByteBuffer::readFrom(const std::string & filePath, E
 	return buffer;
 }
 
-std::string ByteBuffer::getCString(size_t offset, bool * error) const {
-	return getNullTerminatedString(offset, error);
-}
-
-std::optional<std::string> ByteBuffer::getCString(size_t offset) const {
-	return getNullTerminatedString(offset);
-}
-
-std::string ByteBuffer::readCString(bool * error) const {
-	return readNullTerminatedString(error);
-}
-
-std::optional<std::string> ByteBuffer::readCString() const {
-	return readNullTerminatedString();
-}
-
-bool ByteBuffer::putCString(const std::string & value, size_t offset) {
-	return putNullTerminatedString(value, offset);
-}
-
-bool ByteBuffer::insertCString(const std::string & value, size_t offset) {
-	return insertNullTerminatedString(value, offset);
-}
-
-bool ByteBuffer::writeCString(const std::string & value) {
-	return writeNullTerminatedString(value);
-}
-
 bool ByteBuffer::checkOverflow(size_t baseSize, size_t additionalBytes) const {
 	return m_data->max_size() - baseSize < additionalBytes;
 }

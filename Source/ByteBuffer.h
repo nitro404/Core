@@ -239,21 +239,6 @@ public:
 	bool writeTo(const std::string & filePath, bool overwrite = false, bool createParentDirectories = true) const;
 	static std::unique_ptr<ByteBuffer> readFrom(const std::string & filePath, Endianness endianness = DEFAULT_ENDIANNESS);
 
-	[[deprecated("Use getNullTerminatedString(size_t, bool *) instead.")]]
-	std::string getCString(size_t offset, bool * error) const;
-	[[deprecated("Use getNullTerminatedString(size_t) instead.")]]
-	std::optional<std::string> getCString(size_t offset) const;
-	[[deprecated("Use readNullTerminatedString(bool *) instead.")]]
-	std::string readCString(bool * error) const;
-	[[deprecated("Use readNullTerminatedString() instead.")]]
-	std::optional<std::string> readCString() const;
-	[[deprecated("Use putNullTerminatedString(const std::string &, size_t) instead.")]]
-	bool putCString(const std::string & value, size_t offset);
-	[[deprecated("Use insertNullTerminatedString(const std::string &, size_t) instead.")]]
-	bool insertCString(const std::string & value, size_t offset);
-	[[deprecated("Use writeNullTerminatedString(const std::string &) instead.")]]
-	bool writeCString(const std::string & value);
-
 	ByteBuffer operator + (const ByteBuffer & buffer) const;
 	ByteBuffer operator + (const std::vector<uint8_t> & buffer) const;
 	void operator += (const ByteBuffer & buffer);
