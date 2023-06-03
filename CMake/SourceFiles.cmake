@@ -64,6 +64,7 @@ set(CORE_SOURCE_FILES
 	ByteBuffer.cpp
 	Colour.h
 	Colour.cpp
+	Colours.cpp
 	Compression/BZip2Utilities.h
 	Compression/BZip2Utilities.cpp
 	Compression/LZMAUtilities.h
