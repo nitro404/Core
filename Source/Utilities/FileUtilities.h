@@ -43,6 +43,7 @@ namespace Utilities {
 	std::string getFileHash(const std::string & filePath, ByteBuffer::HashType hashType, ByteBuffer::HashFormat hashFormat = ByteBuffer::DEFAULT_HASH_FORMAT);
 	void createDirectoryStructureForFilePath(const std::string & filePath, std::error_code & errorCode);
 	bool areSymlinksSupported();
+	std::string fileSizeToString(size_t fileSize);
 
 }
 

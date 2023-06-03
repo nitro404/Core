@@ -442,3 +442,27 @@ bool Utilities::areSymlinksSupported() {
 
 	return s_symlinksSupported.value();
 }
+
+std::string Utilities::fileSizeToString(size_t fileSize) {
+	if(fileSize < 1000u) {
+		return fmt::format("{} B", fileSize);
+	}
+	else if(fileSize < 1000000u) {
+		return fmt::format("{:.2f} KB", fileSize / 1000.0);
+	}
+	else if(fileSize < 1000000000u) {
+		return fmt::format("{:.2f} MB", fileSize / 1000000.0);
+	}
+	else if(fileSize < 1000000000000u) {
+		return fmt::format("{:.2f} GB", fileSize / 1000000000.0);
+	}
+	else if(fileSize < 1000000000000000u) {
+		return fmt::format("{:.2f} TB", fileSize / 1000000000000.0);
+	}
+	else if(fileSize < 1000000000000000000u) {
+		return fmt::format("{:.2f} PB", fileSize / 1000000000000000.0);
+	}
+	else {
+		return fmt::format("{:.2f} EB", fileSize / 1000000000000000000.0);
+	}
+}
