@@ -26,7 +26,7 @@ configure_file("${_CORE_FILE_PATH}.in" "${_CORE_FILE_PATH}" @ONLY)
 
 include(SourceFiles)
 
-add_library(${PROJECT_NAME} STATIC ${CORE_ALL_FILES})
+add_library(${PROJECT_NAME} STATIC ${CORE_SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
