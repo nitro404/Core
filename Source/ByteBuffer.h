@@ -86,6 +86,10 @@ public:
 	void setReadOffset(size_t offset) const;
 	bool canReadBytes(size_t numberOfBytes) const;
 	bool skipReadBytes(size_t numberOfBytes) const;
+	bool hasMoreLines() const;
+	bool skipToNextLine(size_t * endOfLineIndex = nullptr) const;
+	size_t indexOfNextLine(size_t * endOfLineIndex = nullptr) const;
+	size_t indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex = nullptr) const;
 	size_t numberOfBytesRemaining() const;
 	std::unique_ptr<ByteBuffer> getRemainingBytes() const;
 	bool isEndOfBuffer() const;
@@ -120,6 +124,8 @@ public:
 	std::optional<std::string> getString(size_t length, size_t offset) const;
 	std::string getNullTerminatedString(size_t offset, bool * error) const;
 	std::optional<std::string> getNullTerminatedString(size_t offset) const;
+	std::string getLine(size_t offset, size_t * nextLineIndex, bool * error) const;
+	std::optional<std::string> getLine(size_t offset, size_t * nextLineIndex = nullptr) const;
 	template <size_t N>
 	std::array<uint8_t, N> getBytes(size_t offset, bool * error) const;
 	template <size_t N>
@@ -151,6 +157,8 @@ public:
 	std::optional<std::string> readString(size_t length) const;
 	std::string readNullTerminatedString(bool * error) const;
 	std::optional<std::string> readNullTerminatedString() const;
+	std::string readLine(bool * error) const;
+	std::optional<std::string> readLine() const;
 	template <size_t N>
 	std::array<uint8_t, N> readBytes(bool * error) const;
 	template <size_t N>
@@ -170,6 +178,7 @@ public:
 	bool putDouble(double value, size_t offset);
 	bool putString(const std::string & value, size_t offset);
 	bool putNullTerminatedString(const std::string & value, size_t offset);
+	bool putLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool putBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
 	bool putBytes(const std::array<uint8_t, N> data, size_t offset);
@@ -188,6 +197,7 @@ public:
 	bool insertDouble(double value, size_t offset);
 	bool insertString(const std::string & value, size_t offset);
 	bool insertNullTerminatedString(const std::string & value, size_t offset);
+	bool insertLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
 	bool insertBytes(const std::array<uint8_t, N> data, size_t offset);
@@ -206,6 +216,7 @@ public:
 	bool writeDouble(double value);
 	bool writeString(const std::string & value);
 	bool writeNullTerminatedString(const std::string & value);
+	bool writeLine(const std::string & value, const std::string & newLine = "\n");
 	bool writeBytes(const uint8_t * data, size_t size);
 	template <size_t N>
 	bool writeBytes(const std::array<uint8_t, N> data);
