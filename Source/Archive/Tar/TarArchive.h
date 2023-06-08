@@ -42,7 +42,7 @@ public:
 		uint32_t getDeviceMajorNumber() const;
 		uint32_t getDeviceMinorNumber() const;
 		const std::string & getFileNamePrefix() const;
-		const std::array<uint8_t, 12> getPadding() const;
+		const std::array<uint8_t, 12> & getPadding() const;
 		bool isUStar() const;
 		std::string fileTypeToString() const;
 
@@ -74,8 +74,8 @@ public:
 		uint32_t m_deviceMajorNumber = 0;
 		uint32_t m_deviceMinorNumber = 0;
 		std::string m_fileNamePrefix;
-		std::array<uint8_t, 12> m_padding;
-		std::vector<uint8_t> m_data;
+		std::unique_ptr<std::array<uint8_t, 12>> m_padding;
+		std::unique_ptr<std::vector<uint8_t>> m_data;
 		TarArchive * m_parentArchive;
 
 		static const uint16_t DEFAULT_USTAR_VERSION;

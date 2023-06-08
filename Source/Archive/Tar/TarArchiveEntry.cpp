@@ -23,7 +23,9 @@ const uint8_t TarArchive::Entry::CONTIGUOUS_FILE_FLAG = 7;
 const uint8_t TarArchive::Entry::GLOBAL_EXTENDED_HEADER_WITH_METADATA_FLAG = 'g';
 const uint8_t TarArchive::Entry::EXTENDED_HEADER_WITH_METADATA_FOR_NEXT_FILE_FLAG = 'x';
 
-TarArchive::Entry::Entry() { }
+TarArchive::Entry::Entry()
+	: m_padding(std::make_unique<std::array<uint8_t, 12>>())
+	, m_data(std::make_unique<std::vector<uint8_t>>()) { }
 
 TarArchive::Entry::Entry(TarArchive::Entry && e) noexcept
 	: ArchiveEntry(e)
@@ -67,8 +69,8 @@ TarArchive::Entry::Entry(const TarArchive::Entry & e)
 	, m_deviceMajorNumber(e.m_deviceMajorNumber)
 	, m_deviceMinorNumber(e.m_deviceMinorNumber)
 	, m_fileNamePrefix(e.m_fileNamePrefix)
-	, m_padding(e.m_padding)
-	, m_data(e.m_data)
+	, m_padding(std::make_unique<std::array<uint8_t, 12>>(*e.m_padding))
+	, m_data(std::make_unique<std::vector<uint8_t>>(*e.m_data))
 	, m_parentArchive(nullptr) { }
 
 TarArchive::Entry & TarArchive::Entry::operator = (TarArchive::Entry && e) noexcept {
@@ -119,8 +121,8 @@ TarArchive::Entry & TarArchive::Entry::operator = (const TarArchive::Entry & e) 
 	m_deviceMajorNumber = e.m_deviceMajorNumber;
 	m_deviceMinorNumber = e.m_deviceMinorNumber;
 	m_fileNamePrefix = e.m_fileNamePrefix;
-	m_padding = e.m_padding;
-	m_data = e.m_data;
+	m_padding = std::make_unique<std::array<uint8_t, 12>>(*e.m_padding);
+	m_data = std::make_unique<std::vector<uint8_t>>(*e.m_data);
 
 	return *this;
 }
@@ -164,7 +166,7 @@ std::unique_ptr<ByteBuffer> TarArchive::Entry::getData() const {
 		return nullptr;
 	}
 
-	return std::make_unique<ByteBuffer>(m_data);
+	return std::make_unique<ByteBuffer>(*m_data);
 }
 
 uint32_t TarArchive::Entry::getCRC32() const {
@@ -240,8 +242,8 @@ const std::string & TarArchive::Entry::getFileNamePrefix() const {
 	return m_fileNamePrefix;
 }
 
-const std::array<uint8_t, 12> TarArchive::Entry::getPadding() const {
-	return m_padding;
+const std::array<uint8_t, 12> & TarArchive::Entry::getPadding() const {
+	return *m_padding;
 }
 
 bool TarArchive::Entry::isUStar() const {
@@ -326,16 +328,16 @@ std::unique_ptr<TarArchive::Entry> TarArchive::Entry::parseFrom(const ByteBuffer
 	tarEntry->m_deviceMajorNumber = static_cast<uint32_t>(TarUtilities::parseOctalNumber(data.readString(8, &error)));
 	tarEntry->m_deviceMinorNumber = static_cast<uint32_t>(TarUtilities::parseOctalNumber(data.readString(8, &error)));
 	tarEntry->m_fileNamePrefix = data.readString(155, &error);
-	tarEntry->m_padding = data.readBytes<12>(&error);
+	tarEntry->m_padding = data.readBytes<12>();
 
-	if(error) {
+	if(error || tarEntry->m_padding == nullptr) {
 		return nullptr;
 	}
 
 	if(tarEntry->isFile()) {
 		size_t dataPadding = (TAR_BLOCK_SIZE - (tarEntry->m_fileSize % TAR_BLOCK_SIZE));
 
-		tarEntry->m_data = data.readBytes(tarEntry->m_fileSize, &error);
+		tarEntry->m_data = data.readBytes(tarEntry->m_fileSize);
 
 		if(error) {
 			spdlog::error("Failed to read '{}' bytes for tar {} entry: '{}'.", tarEntry->m_fileSize, tarEntry->isDirectory() ? "directory" : "file", tarEntry->m_entryPath);

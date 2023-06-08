@@ -757,30 +757,14 @@ std::optional<std::string> ByteBuffer::getLine(size_t offset, size_t * nextLineI
 	return value;
 }
 
-std::vector<uint8_t> ByteBuffer::getBytes(size_t numberOfBytes, size_t offset, bool * error) const {
+std::unique_ptr<std::vector<uint8_t>> ByteBuffer::getBytes(size_t numberOfBytes, size_t offset) const {
 	if(offset + (numberOfBytes * sizeof(uint8_t)) > m_data->size()) {
-		if(error != nullptr) {
-			*error = true;
-		}
-
-		return std::vector<uint8_t>();
+		return nullptr;
 	}
 
 	const uint8_t * rawDataStart = m_data->data() + (offset * sizeof(uint8_t));
 
-	return std::vector<uint8_t>(rawDataStart, rawDataStart + (numberOfBytes * sizeof(uint8_t)));
-}
-
-std::optional<std::vector<uint8_t>> ByteBuffer::getBytes(size_t numberOfBytes, size_t offset) const {
-	bool error = false;
-
-	std::vector<uint8_t> value(getBytes(numberOfBytes, offset, &error));
-
-	if(error) {
-		return {};
-	}
-
-	return value;
+	return std::make_unique<std::vector<uint8_t>>(rawDataStart, rawDataStart + (numberOfBytes * sizeof(uint8_t)));
 }
 
 int8_t ByteBuffer::readByte(bool * error) const {
@@ -1148,29 +1132,11 @@ std::optional<std::string> ByteBuffer::readLine() const {
 	return value;
 }
 
-std::vector<uint8_t> ByteBuffer::readBytes(size_t numberOfBytes, bool * error) const {
-	bool e = false;
-	std::vector<uint8_t> value(getBytes(numberOfBytes, m_readOffset, &e));
+std::unique_ptr<std::vector<uint8_t>> ByteBuffer::readBytes(size_t numberOfBytes) const {
+	std::unique_ptr<std::vector<uint8_t>> value(getBytes(numberOfBytes, m_readOffset));
 
-	if(e) {
-		if(error != nullptr) {
-			*error = true;
-		}
-	}
-	else {
+	if(value != nullptr) {
 		m_readOffset += numberOfBytes * sizeof(uint8_t);
-	}
-
-	return value;
-}
-
-std::optional<std::vector<uint8_t>> ByteBuffer::readBytes(size_t numberOfBytes) const {
-	bool error = false;
-
-	std::vector<uint8_t> value(readBytes(numberOfBytes, &error));
-
-	if(error) {
-		return {};
 	}
 
 	return value;

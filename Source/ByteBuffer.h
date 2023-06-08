@@ -127,11 +127,8 @@ public:
 	std::string getLine(size_t offset, size_t * nextLineIndex, bool * error) const;
 	std::optional<std::string> getLine(size_t offset, size_t * nextLineIndex = nullptr) const;
 	template <size_t N>
-	std::array<uint8_t, N> getBytes(size_t offset, bool * error) const;
-	template <size_t N>
-	std::optional<std::array<uint8_t, N>> getBytes(size_t offset) const;
-	std::vector<uint8_t> getBytes(size_t numberOfBytes, size_t offset, bool * error) const;
-	std::optional<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
+	std::unique_ptr<std::array<uint8_t, N>> getBytes(size_t offset) const;
+	std::unique_ptr<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
 
 	int8_t readByte(bool * error) const;
 	std::optional<int8_t> readByte() const;
@@ -160,11 +157,8 @@ public:
 	std::string readLine(bool * error) const;
 	std::optional<std::string> readLine() const;
 	template <size_t N>
-	std::array<uint8_t, N> readBytes(bool * error) const;
-	template <size_t N>
-	std::optional<std::array<uint8_t, N>> readBytes() const;
-	std::vector<uint8_t> readBytes(size_t numberOfBytes, bool * error) const;
-	std::optional<std::vector<uint8_t>> readBytes(size_t numberOfBytes) const;
+	std::unique_ptr<std::array<uint8_t, N>> readBytes() const;
+	std::unique_ptr<std::vector<uint8_t>> readBytes(size_t numberOfBytes) const;
 
 	bool putByte(int8_t value, size_t offset);
 	bool putUnsignedByte(uint8_t value, size_t offset);
@@ -321,63 +315,27 @@ std::string ByteBuffer::getHash(HashFormat hashFormat) const {
 }
 
 template <size_t N>
-std::array<uint8_t, N> ByteBuffer::getBytes(size_t offset, bool * error) const {
+std::unique_ptr<std::array<uint8_t, N>> ByteBuffer::getBytes(size_t offset) const {
 	if(offset + (N * sizeof(uint8_t)) > m_data->size()) {
-		if(error != nullptr) {
-			*error = true;
-		}
-
-		return {};
+		return nullptr;
 	}
 
-	std::array<uint8_t, N> bytes;
+	std::unique_ptr<std::array<uint8_t, N>> bytes(std::make_unique<std::array<uint8_t, N>>());
 	std::vector<uint8_t>::const_iterator dataStart(m_data->begin() + (offset * sizeof(uint8_t)));
-	std::copy(dataStart, dataStart + (N * sizeof(uint8_t)), bytes.begin());
+	std::copy(dataStart, dataStart + (N * sizeof(uint8_t)), bytes->begin());
 
 	return bytes;
 }
 
 template <size_t N>
-std::optional<std::array<uint8_t, N>> ByteBuffer::getBytes(size_t offset) const {
-	bool error = false;
+std::unique_ptr<std::array<uint8_t, N>> ByteBuffer::readBytes() const {
+	std::unique_ptr<std::array<uint8_t, N>> bytes(getBytes<N>(m_readOffset));
 
-	std::array<uint8_t, N> value(getBytes<N>(offset, &error));
-
-	if(error) {
-		return {};
-	}
-
-	return value;
-}
-
-template <size_t N>
-std::array<uint8_t, N> ByteBuffer::readBytes(bool * error) const {
-	bool e = false;
-	std::array<uint8_t, N> value(getBytes<N>(m_readOffset, &e));
-
-	if(e) {
-		if(error != nullptr) {
-			*error = true;
-		}
-	}
-	else {
+	if(bytes != nullptr) {
 		m_readOffset += N * sizeof(uint8_t);
 	}
 
-	return value;
-}
-
-template <size_t N>
-std::optional<std::array<uint8_t, N>> ByteBuffer::readBytes() const {
-	bool error = false;
-
-	std::vector<uint8_t, N> value(readBytes<N>(&error));
-
-	if(error) {
-		return {};
-	}
-
-	return value;
+	return bytes;
 }
 
 template <size_t N>
