@@ -494,14 +494,14 @@ uint16_t ByteBuffer::getUnsignedShort(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint16_t>(
-			(static_cast<uint16_t>((*m_data)[offset    ]       )) << 8 |
-			(static_cast<uint16_t>((*m_data)[offset + 1] & 0xff))
+			static_cast<uint16_t>((*m_data)[offset    ]       ) << 8 |
+			static_cast<uint16_t>((*m_data)[offset + 1] & 0xff)
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint16_t>(
-			(static_cast<uint16_t>((*m_data)[offset + 1]       )) << 8 |
-			(static_cast<uint16_t>((*m_data)[offset    ] & 0xff))
+			static_cast<uint16_t>((*m_data)[offset + 1]       ) << 8 |
+			static_cast<uint16_t>((*m_data)[offset    ] & 0xff)
 		));
 	}
 }
@@ -545,18 +545,18 @@ uint32_t ByteBuffer::getUnsignedInteger(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint32_t>(
-			(static_cast<uint32_t>((*m_data)[offset    ]       )) << 24 |
-			(static_cast<uint32_t>((*m_data)[offset + 1] & 0xff)) << 16 |
-			(static_cast<uint32_t>((*m_data)[offset + 2] & 0xff)) << 8  |
-			(static_cast<uint32_t>((*m_data)[offset + 3] & 0xff))
+			static_cast<uint32_t>((*m_data)[offset    ]       ) << 24 |
+			static_cast<uint32_t>((*m_data)[offset + 1] & 0xff) << 16 |
+			static_cast<uint32_t>((*m_data)[offset + 2] & 0xff) << 8  |
+			static_cast<uint32_t>((*m_data)[offset + 3] & 0xff)
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint32_t>(
-			(static_cast<uint32_t>((*m_data)[offset + 3]       )) << 24 |
-			(static_cast<uint32_t>((*m_data)[offset + 2] & 0xff)) << 16 |
-			(static_cast<uint32_t>((*m_data)[offset + 1] & 0xff)) << 8  |
-			(static_cast<uint32_t>((*m_data)[offset    ] & 0xff))
+			static_cast<uint32_t>((*m_data)[offset + 3]       ) << 24 |
+			static_cast<uint32_t>((*m_data)[offset + 2] & 0xff) << 16 |
+			static_cast<uint32_t>((*m_data)[offset + 1] & 0xff) << 8  |
+			static_cast<uint32_t>((*m_data)[offset    ] & 0xff)
 		));
 	}
 }
@@ -600,26 +600,26 @@ uint64_t ByteBuffer::getUnsignedLong(size_t offset, bool * error) const {
 
 	if(m_endianness == Endianness::BigEndian) {
 		return fromBigEndian(static_cast<uint64_t>(
-			(static_cast<uint64_t>((*m_data)[offset    ]       )) << 56 |
-			(static_cast<uint64_t>((*m_data)[offset + 1] & 0xff)) << 48 |
-			(static_cast<uint64_t>((*m_data)[offset + 2] & 0xff)) << 40 |
-			(static_cast<uint64_t>((*m_data)[offset + 3] & 0xff)) << 32 |
-			(static_cast<uint64_t>((*m_data)[offset + 4] & 0xff)) << 24 |
-			(static_cast<uint64_t>((*m_data)[offset + 5] & 0xff)) << 16 |
-			(static_cast<uint64_t>((*m_data)[offset + 6] & 0xff)) << 8  |
-			(static_cast<uint64_t>((*m_data)[offset + 7] & 0xff))
+			static_cast<uint64_t>((*m_data)[offset    ]       ) << 56 |
+			static_cast<uint64_t>((*m_data)[offset + 1] & 0xff) << 48 |
+			static_cast<uint64_t>((*m_data)[offset + 2] & 0xff) << 40 |
+			static_cast<uint64_t>((*m_data)[offset + 3] & 0xff) << 32 |
+			static_cast<uint64_t>((*m_data)[offset + 4] & 0xff) << 24 |
+			static_cast<uint64_t>((*m_data)[offset + 5] & 0xff) << 16 |
+			static_cast<uint64_t>((*m_data)[offset + 6] & 0xff) << 8  |
+			static_cast<uint64_t>((*m_data)[offset + 7] & 0xff)
 		));
 	}
 	else {
 		return fromBigEndian(static_cast<uint64_t>(
-			static_cast<uint64_t>(((*m_data)[offset + 7]       )) << 56 |
-			static_cast<uint64_t>(((*m_data)[offset + 6] & 0xff)) << 48 |
-			static_cast<uint64_t>(((*m_data)[offset + 5] & 0xff)) << 40 |
-			static_cast<uint64_t>(((*m_data)[offset + 4] & 0xff)) << 32 |
-			static_cast<uint64_t>(((*m_data)[offset + 3] & 0xff)) << 24 |
-			static_cast<uint64_t>(((*m_data)[offset + 2] & 0xff)) << 16 |
-			static_cast<uint64_t>(((*m_data)[offset + 1] & 0xff)) << 8  |
-			static_cast<uint64_t>(((*m_data)[offset    ] & 0xff))
+			static_cast<uint64_t>((*m_data)[offset + 7]       ) << 56 |
+			static_cast<uint64_t>((*m_data)[offset + 6] & 0xff) << 48 |
+			static_cast<uint64_t>((*m_data)[offset + 5] & 0xff) << 40 |
+			static_cast<uint64_t>((*m_data)[offset + 4] & 0xff) << 32 |
+			static_cast<uint64_t>((*m_data)[offset + 3] & 0xff) << 24 |
+			static_cast<uint64_t>((*m_data)[offset + 2] & 0xff) << 16 |
+			static_cast<uint64_t>((*m_data)[offset + 1] & 0xff) << 8  |
+			static_cast<uint64_t>((*m_data)[offset    ] & 0xff)
 		));
 	}
 }

@@ -1061,6 +1061,176 @@ std::optional<double> Utilities::parseDouble(const std::string & data) {
 	return value;
 }
 
+uint16_t Utilities::toShortString(std::string_view value, char paddingCharacter) {
+	return toShortString(value, paddingCharacter, getEndianness());
+}
+
+uint32_t Utilities::toIntegerString(std::string_view value, char paddingCharacter) {
+	return toIntegerString(value, paddingCharacter, getEndianness());
+}
+
+uint64_t Utilities::toLongString(std::string_view value, char paddingCharacter) {
+	return toLongString(value, paddingCharacter, getEndianness());
+}
+
+uint16_t Utilities::toShortString(std::string_view value, Endianness endianness) {
+	return toShortString(value, ' ', endianness);
+}
+
+uint32_t Utilities::toIntegerString(std::string_view value, Endianness endianness) {
+	return toIntegerString(value, ' ', endianness);
+}
+
+uint64_t Utilities::toLongString(std::string_view value, Endianness endianness) {
+	return toLongString(value, ' ', endianness);
+}
+
+uint16_t Utilities::toShortString(std::string_view value, char paddingCharacter, Endianness endianness) {
+	size_t valueLength = value.length();
+
+	if(endianness == Endianness::BigEndian) {
+		return fromBigEndian(static_cast<uint16_t>(
+			static_cast<uint16_t>(valueLength >= 1 ? (value[0]       ) : paddingCharacter) << 8 |
+			static_cast<uint16_t>(valueLength >= 2 ? (value[1] & 0xff) : paddingCharacter)
+		));
+	}
+	else {
+		return fromBigEndian(static_cast<uint16_t>(
+			static_cast<uint16_t>(valueLength >= 2 ? (value[1]       ) : paddingCharacter) << 8 |
+			static_cast<uint16_t>(valueLength >= 1 ? (value[0] & 0xff) : paddingCharacter)
+		));
+	}
+}
+
+uint32_t Utilities::toIntegerString(std::string_view value, char paddingCharacter, Endianness endianness) {
+	size_t valueLength = value.length();
+
+	if(endianness == Endianness::BigEndian) {
+		return fromBigEndian(static_cast<uint32_t>(
+			static_cast<uint32_t>(valueLength >= 1 ? (value[0]       ) : paddingCharacter) << 24 |
+			static_cast<uint32_t>(valueLength >= 2 ? (value[1] & 0xff) : paddingCharacter) << 16 |
+			static_cast<uint32_t>(valueLength >= 3 ? (value[2] & 0xff) : paddingCharacter) << 8  |
+			static_cast<uint32_t>(valueLength >= 4 ? (value[3] & 0xff) : paddingCharacter)
+		));
+	}
+	else {
+		return fromBigEndian(static_cast<uint32_t>(
+			static_cast<uint32_t>(valueLength >= 4 ? (value[3]       ) : paddingCharacter) << 24 |
+			static_cast<uint32_t>(valueLength >= 3 ? (value[2] & 0xff) : paddingCharacter) << 16 |
+			static_cast<uint32_t>(valueLength >= 2 ? (value[1] & 0xff) : paddingCharacter) << 8  |
+			static_cast<uint32_t>(valueLength >= 1 ? (value[0] & 0xff) : paddingCharacter)
+		));
+	}
+}
+
+uint64_t Utilities::toLongString(std::string_view value, char paddingCharacter, Endianness endianness) {
+	size_t valueLength = value.length();
+
+	if(endianness == Endianness::BigEndian) {
+		return fromBigEndian(static_cast<uint64_t>(
+			static_cast<uint64_t>(valueLength >= 1 ? (value[0]       ) : paddingCharacter) << 56 |
+			static_cast<uint64_t>(valueLength >= 2 ? (value[1] & 0xff) : paddingCharacter) << 48 |
+			static_cast<uint64_t>(valueLength >= 3 ? (value[2] & 0xff) : paddingCharacter) << 40 |
+			static_cast<uint64_t>(valueLength >= 4 ? (value[3] & 0xff) : paddingCharacter) << 32 |
+			static_cast<uint64_t>(valueLength >= 5 ? (value[4] & 0xff) : paddingCharacter) << 24 |
+			static_cast<uint64_t>(valueLength >= 6 ? (value[5] & 0xff) : paddingCharacter) << 16 |
+			static_cast<uint64_t>(valueLength >= 7 ? (value[6] & 0xff) : paddingCharacter) << 8  |
+			static_cast<uint64_t>(valueLength >= 8 ? (value[7] & 0xff) : paddingCharacter)
+		));
+	}
+	else {
+		return fromBigEndian(static_cast<uint64_t>(
+			static_cast<uint64_t>(valueLength >= 8 ? (value[7]       ) : paddingCharacter) << 56 |
+			static_cast<uint64_t>(valueLength >= 7 ? (value[6] & 0xff) : paddingCharacter) << 48 |
+			static_cast<uint64_t>(valueLength >= 6 ? (value[5] & 0xff) : paddingCharacter) << 40 |
+			static_cast<uint64_t>(valueLength >= 5 ? (value[4] & 0xff) : paddingCharacter) << 32 |
+			static_cast<uint64_t>(valueLength >= 4 ? (value[3] & 0xff) : paddingCharacter) << 24 |
+			static_cast<uint64_t>(valueLength >= 3 ? (value[2] & 0xff) : paddingCharacter) << 16 |
+			static_cast<uint64_t>(valueLength >= 2 ? (value[1] & 0xff) : paddingCharacter) << 8  |
+			static_cast<uint64_t>(valueLength >= 1 ? (value[0] & 0xff) : paddingCharacter)
+		));
+	}
+}
+
+std::string Utilities::fromShortString(uint16_t value) {
+	return fromShortString(value, getEndianness());
+}
+
+std::string Utilities::fromIntegerString(uint32_t value) {
+	return fromIntegerString(value, getEndianness());
+}
+
+std::string Utilities::fromLongString(uint64_t value) {
+	return fromLongString(value, getEndianness());
+}
+
+std::string Utilities::fromShortString(uint16_t value, Endianness endianness) {
+	uint16_t bigEndianValue = toBigEndian(value);
+
+	if(endianness == Endianness::BigEndian) {
+		return std::string({
+			static_cast<char>(bigEndianValue >> 8),
+			static_cast<char>(bigEndianValue)
+		});
+	}
+	else {
+		return std::string({
+			static_cast<char>(bigEndianValue),
+			static_cast<char>(bigEndianValue >> 8)
+		});
+	}
+}
+
+std::string Utilities::fromIntegerString(uint32_t value, Endianness endianness) {
+	uint32_t bigEndianValue = toBigEndian(value);
+
+	if(endianness == Endianness::BigEndian) {
+		return std::string({
+			static_cast<char>(bigEndianValue >> 24),
+			static_cast<char>(bigEndianValue >> 16),
+			static_cast<char>(bigEndianValue >> 8),
+			static_cast<char>(bigEndianValue)
+		});
+	}
+	else {
+		return std::string({
+			static_cast<char>(bigEndianValue),
+			static_cast<char>(bigEndianValue >> 8),
+			static_cast<char>(bigEndianValue >> 16),
+			static_cast<char>(bigEndianValue >> 24)
+		});
+	}
+}
+
+std::string Utilities::fromLongString(uint64_t value, Endianness endianness) {
+	uint64_t bigEndianValue = toBigEndian(value);
+
+	if(endianness == Endianness::BigEndian) {
+		return std::string({
+			static_cast<char>(bigEndianValue >> 56),
+			static_cast<char>(bigEndianValue >> 48),
+			static_cast<char>(bigEndianValue >> 40),
+			static_cast<char>(bigEndianValue >> 32),
+			static_cast<char>(bigEndianValue >> 24),
+			static_cast<char>(bigEndianValue >> 16),
+			static_cast<char>(bigEndianValue >> 8),
+			static_cast<char>(bigEndianValue)
+		});
+	}
+	else {
+		return std::string({
+			static_cast<char>(bigEndianValue),
+			static_cast<char>(bigEndianValue >> 8),
+			static_cast<char>(bigEndianValue >> 16),
+			static_cast<char>(bigEndianValue >> 24),
+			static_cast<char>(bigEndianValue >> 32),
+			static_cast<char>(bigEndianValue >> 40),
+			static_cast<char>(bigEndianValue >> 48),
+			static_cast<char>(bigEndianValue >> 56)
+		});
+	}
+}
+
 std::optional<std::vector<std::string>> Utilities::parseVersion(const std::string & value, bool trimTrailingZeroes) {
 	static const std::regex versionSplitRegex("[. \t]+");
 

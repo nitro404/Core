@@ -1,6 +1,8 @@
 #ifndef _STRING_UTILITIES_H_
 #define _STRING_UTILITIES_H_
 
+#include "Endianness.h"
+
 #include <cstdint>
 #include <optional>
 #include <regex>
@@ -76,6 +78,21 @@ namespace Utilities {
 	std::optional<float> parseFloat(const std::string & data);
 	double parseDouble(const std::string & data, bool * error);
 	std::optional<double> parseDouble(const std::string & data);
+	uint16_t toShortString(std::string_view value, char paddingCharacter = ' ');
+	uint32_t toIntegerString(std::string_view value, char paddingCharacter = ' ');
+	uint64_t toLongString(std::string_view value, char paddingCharacter = ' ');
+	uint16_t toShortString(std::string_view value, Endianness endianness);
+	uint32_t toIntegerString(std::string_view value, Endianness endianness);
+	uint64_t toLongString(std::string_view value, Endianness endianness);
+	uint16_t toShortString(std::string_view value, char paddingCharacter, Endianness endianness);
+	uint32_t toIntegerString(std::string_view value, char paddingCharacter, Endianness endianness);
+	uint64_t toLongString(std::string_view value, char paddingCharacter, Endianness endianness);
+	std::string fromShortString(uint16_t value);
+	std::string fromIntegerString(uint32_t value);
+	std::string fromLongString(uint64_t value);
+	std::string fromShortString(uint16_t value, Endianness endianness);
+	std::string fromIntegerString(uint32_t value, Endianness endianness);
+	std::string fromLongString(uint64_t value, Endianness endianness);
 	std::optional<std::vector<std::string>> parseVersion(const std::string & value, bool trimTrailingZeroes = false);
 	std::optional<int8_t> compareVersions(const std::string & v1, const std::string & v2, bool caseSensitive = false);
 	std::string_view readLine(std::string_view data, size_t & offset);
