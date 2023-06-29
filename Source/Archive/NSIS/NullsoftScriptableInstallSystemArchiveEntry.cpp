@@ -10,11 +10,27 @@
 
 #include <spdlog/spdlog.h>
 
-NullsoftScriptableInstallSystemArchive::Entry::~Entry() = default;
-
 NullsoftScriptableInstallSystemArchive::Entry::Entry(uint64_t index, NullsoftScriptableInstallSystemArchive * parentArchive)
 	: m_index(index)
 	, m_parentArchive(parentArchive) { }
+
+NullsoftScriptableInstallSystemArchive::Entry::Entry(Entry && entry) noexcept
+	: ArchiveEntry(std::move(entry))
+	, m_index(entry.m_index)
+	, m_parentArchive(entry.m_parentArchive) { }
+
+const NullsoftScriptableInstallSystemArchive::Entry & NullsoftScriptableInstallSystemArchive::Entry::operator = (Entry && entry) noexcept {
+	if(this != &entry) {
+		ArchiveEntry::operator = (std::move(entry));
+
+		m_index =entry.m_index;
+		m_parentArchive = entry.m_parentArchive;
+	}
+
+	return *this;
+}
+
+NullsoftScriptableInstallSystemArchive::Entry::~Entry() = default;
 
 bool NullsoftScriptableInstallSystemArchive::Entry::isFile() const {
 	if(!isParentArchiveValid()) {

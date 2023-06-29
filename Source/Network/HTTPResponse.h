@@ -12,14 +12,13 @@
 #include <optional>
 
 class HTTPRequest;
-class HTTPService;
 
 namespace tinyxml2 {
 	class XMLElement;
 }
 
 class HTTPResponse final : public HTTPTransfer {
-	friend class HTTPService;
+friend class HTTPService;
 
 public:
 	enum class State : uint16_t {

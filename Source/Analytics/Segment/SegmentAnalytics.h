@@ -84,6 +84,8 @@ protected:
 	class DataStorage final {
 	public:
 		DataStorage();
+		DataStorage(DataStorage && dataStorage) noexcept;
+		const DataStorage & operator = (DataStorage && dataStorage) noexcept;
 		~DataStorage();
 
 		bool isInitialized() const;
@@ -142,9 +144,7 @@ protected:
 		mutable std::recursive_mutex m_mutex;
 
 		DataStorage(const DataStorage &) = delete;
-		DataStorage(DataStorage &&) noexcept = delete;
 		const DataStorage & operator = (const DataStorage &) = delete;
-		const DataStorage & operator = (DataStorage &&) noexcept = delete;
 	};
 
 	SegmentAnalytics();
@@ -194,9 +194,7 @@ private:
 	std::unique_ptr<DataStorage> m_dataStorage;
 
 	SegmentAnalytics(const SegmentAnalytics &) = delete;
-	SegmentAnalytics(SegmentAnalytics &&) noexcept = delete;
 	const SegmentAnalytics & operator = (const SegmentAnalytics &) = delete;
-	const SegmentAnalytics & operator = (SegmentAnalytics &&) noexcept = delete;
 };
 
 #endif // _SEGMENT_ANALYTICS_H_

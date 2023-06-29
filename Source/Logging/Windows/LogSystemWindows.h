@@ -10,9 +10,7 @@ public:
 
 protected:
 	LogSystemWindows(const LogSystemWindows &) = delete;
-	LogSystemWindows(LogSystemWindows &&) noexcept = delete;
 	const LogSystemWindows & operator = (const LogSystemWindows &) = delete;
-	const LogSystemWindows & operator = (LogSystemWindows &&) noexcept = delete;
 };
 
 #endif // _LOG_SYSTEM_WINDOWS_H_

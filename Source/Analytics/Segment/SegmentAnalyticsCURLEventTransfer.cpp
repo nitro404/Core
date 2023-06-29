@@ -6,6 +6,19 @@ SegmentAnalyticsCURL::AbstractEventTransfer::AbstractEventTransfer(std::shared_p
 	: m_httpRequest(httpRequest)
 	, m_futureResponse(std::move(futureResponse)) { }
 
+SegmentAnalyticsCURL::AbstractEventTransfer::AbstractEventTransfer(AbstractEventTransfer && eventTransfer) noexcept
+	: m_httpRequest(std::move(eventTransfer.m_httpRequest))
+	, m_futureResponse(std::move(eventTransfer.m_futureResponse)) { }
+
+const SegmentAnalyticsCURL::AbstractEventTransfer & SegmentAnalyticsCURL::AbstractEventTransfer::operator = (AbstractEventTransfer && eventTransfer) noexcept {
+	if(this != &eventTransfer) {
+		m_httpRequest = std::move(eventTransfer.m_httpRequest);
+		m_futureResponse = std::move(eventTransfer.m_futureResponse);
+	}
+
+	return *this;
+}
+
 SegmentAnalyticsCURL::AbstractEventTransfer::~AbstractEventTransfer() { }
 
 const std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::AbstractEventTransfer::getRequest() const {
@@ -28,6 +41,20 @@ SegmentAnalyticsCURL::SingleEventTransfer::SingleEventTransfer(std::shared_ptr<H
 	: AbstractEventTransfer(httpRequest, std::move(futureResponse))
 	, m_analyticEvent(analyticEvent) { }
 
+SegmentAnalyticsCURL::SingleEventTransfer::SingleEventTransfer(SingleEventTransfer && eventTransfer) noexcept
+	: AbstractEventTransfer(std::move(eventTransfer))
+	, m_analyticEvent(std::move(eventTransfer.m_analyticEvent)) { }
+
+const SegmentAnalyticsCURL::SingleEventTransfer & SegmentAnalyticsCURL::SingleEventTransfer::operator = (SingleEventTransfer && eventTransfer) noexcept {
+	if(this != &eventTransfer) {
+		AbstractEventTransfer::operator = (std::move(eventTransfer));
+
+		m_analyticEvent = std::move(eventTransfer.m_analyticEvent);
+	}
+
+	return *this;
+}
+
 SegmentAnalyticsCURL::SingleEventTransfer::~SingleEventTransfer() { }
 
 const std::shared_ptr<SegmentAnalyticEvent> SegmentAnalyticsCURL::SingleEventTransfer::getAnalyticEvent() const {
@@ -43,6 +70,20 @@ SegmentAnalyticsCURL::BatchEventTransfer::BatchEventTransfer(std::shared_ptr<HTT
 	, m_analyticEvents(analyticEvents) { }
 
 SegmentAnalyticsCURL::BatchEventTransfer::~BatchEventTransfer() { }
+
+SegmentAnalyticsCURL::BatchEventTransfer::BatchEventTransfer(BatchEventTransfer && eventTransfer) noexcept
+	: AbstractEventTransfer(std::move(eventTransfer))
+	, m_analyticEvents(std::move(eventTransfer.m_analyticEvents)) { }
+
+const SegmentAnalyticsCURL::BatchEventTransfer & SegmentAnalyticsCURL::BatchEventTransfer::operator = (BatchEventTransfer && eventTransfer) noexcept {
+	if(this != &eventTransfer) {
+		AbstractEventTransfer::operator = (std::move(eventTransfer));
+
+		m_analyticEvents = std::move(eventTransfer.m_analyticEvents);
+	}
+
+	return *this;
+}
 
 const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & SegmentAnalyticsCURL::BatchEventTransfer::getAnalyticEvents() const {
 	return m_analyticEvents;

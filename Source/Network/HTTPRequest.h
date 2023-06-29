@@ -15,10 +15,11 @@
 
 class HTTPService;
 
-class HTTPRequest final : public HTTPTransfer,
-                          public HTTPRequestSettings {
-	friend class HTTPResponse;
-	friend class HTTPService;
+class HTTPRequest final
+	: public HTTPTransfer
+	, public HTTPRequestSettings {
+friend class HTTPResponse;
+friend class HTTPService;
 
 public:
 	enum class Method {

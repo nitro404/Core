@@ -19,9 +19,6 @@ public:
 
 protected:
 	IPAddressService();
-
-private:
-	bool m_initialized;
 };
 
 #endif // _IP_ADDRESS_SERVICE_H_

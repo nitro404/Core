@@ -15,6 +15,8 @@ public:
 		friend class RarArchive;
 
 	public:
+		Entry(Entry && entry) noexcept;
+		const Entry & operator = (Entry && entry) noexcept;
 		virtual ~Entry();
 
 		virtual bool isFile() const override;
@@ -44,11 +46,11 @@ public:
 		RarArchive * m_parentArchive;
 
 		Entry(const Entry &) = delete;
-		Entry(Entry &&) noexcept = delete;
 		const Entry & operator = (const Entry &) = delete;
-		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
+	RarArchive(RarArchive && archive) noexcept;
+	const RarArchive & operator = (RarArchive && archive) noexcept;
 	virtual ~RarArchive();
 
 	virtual std::string getDefaultFileExtension() const override;
@@ -72,6 +74,7 @@ private:
 	RarArchive(ArchiveHandle archiveHandle, const std::string & filePath, std::unique_ptr<ByteBuffer> data);
 
 	dmc_unrar_archive * getRawArchiveHandle() const;
+	void updateParentArchive();
 
 	static bool isSuccess(dmc_unrar_return result, const std::string & errorMessage = {});
 	static ArchiveHandle createArchiveHandle();
@@ -85,9 +88,7 @@ private:
 	size_t m_numberOfDirectories;
 
 	RarArchive(const RarArchive &) = delete;
-	RarArchive(RarArchive &&) noexcept = delete;
 	const RarArchive & operator = (const RarArchive &) = delete;
-	const RarArchive & operator = (RarArchive &&) noexcept = delete;
 };
 
 #endif // _RAR_ARCHIVE_H_

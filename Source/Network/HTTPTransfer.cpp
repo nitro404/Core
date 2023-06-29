@@ -19,7 +19,7 @@ HTTPTransfer::HTTPTransfer(HTTPService * service)
 	, m_service(service) { }
 
 HTTPTransfer::HTTPTransfer(HTTPTransfer && transfer) noexcept
-	: HTTPHeaders(transfer)
+	: HTTPHeaders(std::move(transfer))
 	, m_id(transfer.m_id)
 	, m_body(std::move(transfer.m_body))
 	, m_service(transfer.m_service) { }
@@ -35,7 +35,7 @@ HTTPTransfer & HTTPTransfer::operator = (HTTPTransfer && transfer) noexcept {
 		std::lock_guard<std::recursive_mutex> lock(m_mutex);
 		std::lock_guard<std::recursive_mutex> otherLock(transfer.m_mutex);
 
-		HTTPHeaders::operator = (transfer);
+		HTTPHeaders::operator = (std::move(transfer));
 
 		m_id = transfer.m_id;
 		m_body = std::move(transfer.m_body);

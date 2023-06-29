@@ -65,6 +65,8 @@ public:
 		friend class ZipArchive;
 
 	public:
+		Entry(Entry && entry) noexcept;
+		const Entry & operator = (Entry && entry) noexcept;
 		virtual ~Entry();
 
 		bool setName(const std::string & name);
@@ -115,11 +117,11 @@ public:
 		uint32_t m_crc32;
 
 		Entry(const Entry &) = delete;
-		Entry(Entry &&) noexcept = delete;
 		const Entry & operator = (const Entry &) = delete;
-		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
+	ZipArchive(ZipArchive && archive) noexcept;
+	const ZipArchive & operator = (ZipArchive && archive) noexcept;
 	virtual ~ZipArchive();
 
 	virtual std::string getDefaultFileExtension() const override;
@@ -175,6 +177,8 @@ private:
 		friend class ZipArchive;
 
 	public:
+		SourceBuffer(SourceBuffer && sourceBuffer) noexcept;
+		const SourceBuffer & operator = (SourceBuffer && sourceBuffer) noexcept;
 		~SourceBuffer();
 
 		const ByteBuffer * getData() const;
@@ -200,9 +204,7 @@ private:
 		std::unique_ptr<ByteBuffer> m_data;
 
 		SourceBuffer(const SourceBuffer &) = delete;
-		SourceBuffer(SourceBuffer &&) noexcept = delete;
 		const SourceBuffer & operator = (const SourceBuffer &) = delete;
-		const SourceBuffer & operator = (SourceBuffer &&) noexcept = delete;
 	};
 
 	ZipArchive(ZipArchiveHandle zipArchiveHandle, std::unique_ptr<SourceBuffer> zipSourceBuffer = nullptr, const std::string & filePath = {}, const std::string & password = {});
@@ -225,6 +227,7 @@ private:
 	std::unique_ptr<SourceBuffer> createZipFileSourceBuffer(std::unique_ptr<ByteBuffer> data);
 	static std::unique_ptr<SourceBuffer> createEmptyZipArchiveSourceBuffer();
 	static std::unique_ptr<SourceBuffer> createZipArchiveSourceBuffer(std::unique_ptr<ByteBuffer> data);
+	void updateParentArchive();
 
 	ZipArchiveHandle m_archiveHandle;
 	std::unique_ptr<SourceBuffer> m_sourceBuffer;
@@ -240,9 +243,7 @@ private:
 	bool m_modified;
 
 	ZipArchive(const ZipArchive &) = delete;
-	ZipArchive(ZipArchive &&) noexcept = delete;
 	const ZipArchive & operator = (const ZipArchive &) = delete;
-	const ZipArchive & operator = (ZipArchive &&) noexcept = delete;
 };
 
 template <>

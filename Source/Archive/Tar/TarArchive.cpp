@@ -17,7 +17,7 @@ TarArchive::TarArchive(const std::string & filePath)
 	, m_numberOfDirectories(0) { }
 
 TarArchive::TarArchive(TarArchive && t) noexcept
-	: Archive(t)
+	: Archive(std::move(t))
 	, m_filePath(std::move(t.m_filePath))
 	, m_numberOfFiles(t.m_numberOfFiles)
 	, m_numberOfDirectories(t.m_numberOfDirectories)
@@ -41,7 +41,7 @@ TarArchive::TarArchive(const TarArchive & t)
 
 TarArchive & TarArchive::operator = (TarArchive && t) noexcept {
 	if(this != &t) {
-		Archive::operator = (t);
+		Archive::operator = (std::move(t));
 
 		m_filePath = std::move(t.m_filePath);
 		m_numberOfFiles = t.m_numberOfFiles;

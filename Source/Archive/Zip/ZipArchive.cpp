@@ -40,9 +40,53 @@ ZipArchive::ZipArchive(ZipArchiveHandle zipArchiveHandle, const std::string & fi
 	, m_numberOfDirectories(0)
 	, m_modified(false) { }
 
+ZipArchive::ZipArchive(ZipArchive && archive) noexcept
+	: Archive(std::move(archive))
+	, m_archiveHandle(std::move(archive.m_archiveHandle))
+	, m_sourceBuffer(std::move(archive.m_sourceBuffer))
+	, m_filePath(std::move(archive.m_filePath))
+	, m_password(std::move(archive.m_password))
+	, m_date(archive.m_date)
+	, m_compressionMethod(archive.m_compressionMethod)
+	, m_encryptionMethod(archive.m_encryptionMethod)
+	, m_compressedSize(archive.m_compressedSize)
+	, m_entries(std::move(archive.m_entries))
+	, m_numberOfFiles(archive.m_numberOfFiles)
+	, m_numberOfDirectories(archive.m_numberOfDirectories)
+	, m_modified(archive.m_modified) {
+	updateParentArchive();
+}
+
+const ZipArchive & ZipArchive::operator = (ZipArchive && archive) noexcept {
+	if(this != &archive) {
+		Archive::operator = (std::move(archive));
+
+		m_archiveHandle = std::move(archive.m_archiveHandle);
+		m_sourceBuffer = std::move(archive.m_sourceBuffer);
+		m_filePath = std::move(archive.m_filePath);
+		m_password = std::move(archive.m_password);
+		m_date = archive.m_date;
+		m_compressionMethod = archive.m_compressionMethod;
+		m_encryptionMethod = archive.m_encryptionMethod;
+		m_compressedSize = archive.m_compressedSize;
+		m_entries = std::move(archive.m_entries);
+		m_numberOfFiles = archive.m_numberOfFiles;
+		m_numberOfDirectories = archive.m_numberOfDirectories;
+		m_modified = archive.m_modified;
+
+		updateParentArchive();
+	}
+
+	return *this;
+}
+
 ZipArchive::~ZipArchive() {
-	for(std::vector<std::shared_ptr<ZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		(*i)->clearParentArchive();
+	for(std::shared_ptr<ZipArchive::Entry> & entry : m_entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		entry->clearParentArchive();
 	}
 }
 
@@ -1031,4 +1075,14 @@ std::unique_ptr<ZipArchive::SourceBuffer> ZipArchive::createZipArchiveSourceBuff
 	}
 
 	return std::unique_ptr<SourceBuffer>(new SourceBuffer(std::move(zipSourceHandle), std::move(data)));
+}
+
+void ZipArchive::updateParentArchive() {
+	for(std::shared_ptr<ZipArchive::Entry> & entry : m_entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		entry->setParentArchive(this);
+	}
 }

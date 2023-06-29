@@ -6,7 +6,18 @@
 
 std::unique_ptr<SingletonManager> s_singletonManagerInstance;
 
-SingletonManager::SingletonManager() { }
+SingletonManager::SingletonManager() = default;
+
+SingletonManager::SingletonManager(SingletonManager && singletonManager) noexcept
+	: m_singletons(std::move(singletonManager.m_singletons)) { }
+
+const SingletonManager & SingletonManager::operator = (SingletonManager && singletonManager) noexcept {
+	if(this != &singletonManager) {
+		m_singletons = std::move(singletonManager.m_singletons);
+	}
+
+	return *this;
+}
 
 SingletonManager::~SingletonManager() = default;
 

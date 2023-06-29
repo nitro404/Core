@@ -11,6 +11,21 @@ ComponentRegistry::ComponentRegistry()
 	addGlobalComponent(std::make_unique<GlobalComponent>(std::bind(&ComponentRegistry::deleteAllComponents, this)));
 }
 
+ComponentRegistry::ComponentRegistry(ComponentRegistry && componentRegistry) noexcept
+	: m_components(std::move(componentRegistry.m_components))
+	, m_globalComponents(std::move(componentRegistry.m_globalComponents))
+	, m_globalComponentsRegistered(componentRegistry.m_globalComponentsRegistered) { }
+
+const ComponentRegistry & ComponentRegistry::operator = (ComponentRegistry && componentRegistry) noexcept {
+	if(this != &componentRegistry) {
+		m_components = std::move(componentRegistry.m_components);
+		m_globalComponents = std::move(componentRegistry.m_globalComponents);
+		m_globalComponentsRegistered = componentRegistry.m_globalComponentsRegistered;
+	}
+
+	return *this;
+}
+
 ComponentRegistry::~ComponentRegistry() {
 	deleteAllGlobalComponents();
 }
@@ -115,6 +130,17 @@ bool ComponentRegistry::registerStandardGlobalComponents() {
 ComponentRegistry::Component::Component()
 	: m_id(s_componentIDCounter++) { }
 
+ComponentRegistry::Component::Component(Component && component) noexcept
+	: m_id(component.m_id) { }
+
+const ComponentRegistry::Component & ComponentRegistry::Component::operator = (Component && component) noexcept {
+	if(this != &component) {
+		m_id = component.m_id;
+	}
+
+	return *this;
+}
+
 ComponentRegistry::Component::~Component() { }
 
 uint64_t ComponentRegistry::Component::getID() const {
@@ -123,6 +149,20 @@ uint64_t ComponentRegistry::Component::getID() const {
 
 ComponentRegistry::GlobalComponent::GlobalComponent(std::function<void()> destroyFunction)
 	: m_destroyFunction(destroyFunction) { }
+
+ComponentRegistry::GlobalComponent::GlobalComponent(GlobalComponent && component) noexcept
+	: Component(std::move(component))
+	, m_destroyFunction(std::move(component.m_destroyFunction)) { }
+
+const ComponentRegistry::GlobalComponent & ComponentRegistry::GlobalComponent::operator = (GlobalComponent && component) noexcept {
+	if(this != &component) {
+		Component::operator = (std::move(component));
+
+		m_destroyFunction = std::move(component.m_destroyFunction);
+	}
+
+	return *this;
+}
 
 ComponentRegistry::GlobalComponent::~GlobalComponent() {
 	if(m_destroyFunction) {

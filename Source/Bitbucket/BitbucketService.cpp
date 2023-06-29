@@ -12,8 +12,7 @@
 static const std::string BITBUCKET_API_BASE_URL("https://api.bitbucket.org/2.0");
 static const std::string BITBUCKET_DOWNLOADS_API_URL_TEMPLATE(Utilities::joinPaths(BITBUCKET_API_BASE_URL, "repositories/{}/{}/downloads"));
 
-BitbucketService::BitbucketService()
-	: m_initialized(false) { }
+BitbucketService::BitbucketService() { }
 
 BitbucketService::~BitbucketService() { }
 

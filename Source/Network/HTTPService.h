@@ -22,7 +22,9 @@
 #include <thread>
 #include <vector>
 
-class HTTPService final : public HTTPRequestSettings, public Singleton<HTTPService> {
+class HTTPService final
+	: public Singleton<HTTPService>
+	, public HTTPRequestSettings {
 public:
 	HTTPService();
 	virtual ~HTTPService();
@@ -90,9 +92,7 @@ private:
 	mutable std::condition_variable_any m_waitCondition;
 
 	HTTPService(const HTTPService &) = delete;
-	HTTPService(HTTPService &&) noexcept = delete;
 	const HTTPService & operator = (const HTTPService &) = delete;
-	const HTTPService & operator = (HTTPService &&) noexcept = delete;
 };
 
 #endif // _HTTP_SERVICE_H_

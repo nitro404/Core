@@ -8,6 +8,17 @@ SegmentAnalyticsCURL::AbstractFailedEvent::AbstractFailedEvent(std::chrono::time
 SegmentAnalyticsCURL::AbstractFailedEvent::AbstractFailedEvent(std::chrono::milliseconds retryTransferDelay)
 	: m_retryTransferAfterTimePoint(std::chrono::system_clock::now() + retryTransferDelay) { }
 
+SegmentAnalyticsCURL::AbstractFailedEvent::AbstractFailedEvent(AbstractFailedEvent && failedEvent) noexcept
+	: m_retryTransferAfterTimePoint(failedEvent.m_retryTransferAfterTimePoint) { }
+
+const SegmentAnalyticsCURL::AbstractFailedEvent & SegmentAnalyticsCURL::AbstractFailedEvent::operator = (AbstractFailedEvent && failedEvent) noexcept {
+	if(this != &failedEvent) {
+		m_retryTransferAfterTimePoint = failedEvent.m_retryTransferAfterTimePoint;
+	}
+
+	return *this;
+}
+
 SegmentAnalyticsCURL::AbstractFailedEvent::~AbstractFailedEvent() { }
 
 bool SegmentAnalyticsCURL::AbstractFailedEvent::shouldRetryTransfer() const {
@@ -34,6 +45,20 @@ SegmentAnalyticsCURL::SingleFailedEvent::SingleFailedEvent(std::chrono::millisec
 	: AbstractFailedEvent(retryTransferDelay)
 	, m_analyticEvent(analyticEvent) { }
 
+SegmentAnalyticsCURL::SingleFailedEvent::SingleFailedEvent(SingleFailedEvent && failedEvent) noexcept
+	: AbstractFailedEvent(std::move(failedEvent))
+	, m_analyticEvent(std::move(failedEvent.m_analyticEvent)) { }
+
+const SegmentAnalyticsCURL::SingleFailedEvent & SegmentAnalyticsCURL::SingleFailedEvent::operator = (SingleFailedEvent && failedEvent) noexcept {
+	if(this != &failedEvent) {
+		AbstractFailedEvent::operator = (std::move(failedEvent));
+
+		m_analyticEvent = std::move(failedEvent.m_analyticEvent);
+	}
+
+	return *this;
+}
+
 SegmentAnalyticsCURL::SingleFailedEvent::~SingleFailedEvent() { }
 
 const std::shared_ptr<SegmentAnalyticEvent> SegmentAnalyticsCURL::SingleFailedEvent::getAnalyticEvent() const {
@@ -51,6 +76,20 @@ SegmentAnalyticsCURL::BatchFailedEvents::BatchFailedEvents(std::chrono::time_poi
 SegmentAnalyticsCURL::BatchFailedEvents::BatchFailedEvents(std::chrono::milliseconds retryTransferDelay, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents)
 	: AbstractFailedEvent(retryTransferDelay)
 	, m_analyticEvents(analyticEvents) { }
+
+SegmentAnalyticsCURL::BatchFailedEvents::BatchFailedEvents(BatchFailedEvents && failedEvent) noexcept
+	: AbstractFailedEvent(std::move(failedEvent))
+	, m_analyticEvents(std::move(failedEvent.m_analyticEvents)) { }
+
+const SegmentAnalyticsCURL::BatchFailedEvents & SegmentAnalyticsCURL::BatchFailedEvents::operator = (BatchFailedEvents && failedEvent) noexcept {
+	if(this != &failedEvent) {
+		AbstractFailedEvent::operator = (std::move(failedEvent));
+
+		m_analyticEvents = std::move(failedEvent.m_analyticEvents);
+	}
+
+	return *this;
+}
 
 SegmentAnalyticsCURL::BatchFailedEvents::~BatchFailedEvents() { }
 

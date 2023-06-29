@@ -26,8 +26,8 @@ HTTPRequest::HTTPRequest(HTTPRequest::Method method, const std::string & url, HT
 	, m_acceptedEncodingTypes(DEFAULT_ACCEPTED_ENCODING_TYPES) { }
 
 HTTPRequest::HTTPRequest(HTTPRequest && request) noexcept
-	: HTTPTransfer(request)
-	, HTTPRequestSettings(request)
+	: HTTPTransfer(std::move(request))
+	, HTTPRequestSettings(std::move(request))
 	, m_method(request.m_method)
 	, m_url(std::move(request.m_url))
 	, m_acceptedEncodingTypes(request.m_acceptedEncodingTypes)
@@ -57,8 +57,8 @@ HTTPRequest & HTTPRequest::operator = (HTTPRequest && request) noexcept {
 		std::lock_guard<std::recursive_mutex> lock(m_mutex);
 		std::lock_guard<std::recursive_mutex> otherLock(request.m_mutex);
 
-		HTTPTransfer::operator = (request);
-		HTTPRequestSettings::operator = (request);
+		HTTPTransfer::operator = (std::move(request));
+		HTTPRequestSettings::operator = (std::move(request));
 
 		m_method = request.m_method;
 		m_url = std::move(request.m_url);
@@ -632,7 +632,7 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 	// set request URL
 	std::string formattedURL;
 
-	if(!configuration.baseURL.empty() && 
+	if(!configuration.baseURL.empty() &&
 	   !(m_url.find("http://") == 0 || m_url.find("https://") == 0)) {
 		formattedURL = Utilities::joinPaths(configuration.baseURL, m_url);
 	}

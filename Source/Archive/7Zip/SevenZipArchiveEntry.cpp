@@ -11,6 +11,22 @@ SevenZipArchive::Entry::Entry(uint64_t index, SevenZipArchive * parentArchive)
 	: m_index(index)
 	, m_parentArchive(parentArchive) { }
 
+SevenZipArchive::Entry::Entry(Entry && entry) noexcept
+	: ArchiveEntry(std::move(entry))
+	, m_index(entry.m_index)
+	, m_parentArchive(entry.m_parentArchive) { }
+
+const SevenZipArchive::Entry & SevenZipArchive::Entry::operator = (Entry && entry) noexcept {
+	if(this != &entry) {
+		ArchiveEntry::operator = (std::move(entry));
+
+		m_index = entry.m_index;
+		m_parentArchive = entry.m_parentArchive;
+	}
+
+	return *this;
+}
+
 SevenZipArchive::Entry::~Entry() { }
 
 bool SevenZipArchive::Entry::isFile() const {

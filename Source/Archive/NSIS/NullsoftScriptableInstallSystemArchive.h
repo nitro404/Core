@@ -14,6 +14,8 @@ public:
 		friend class NullsoftScriptableInstallSystemArchive;
 
 	public:
+		Entry(Entry && entry) noexcept;
+		const Entry & operator = (Entry && entry) noexcept;
 		virtual ~Entry();
 
 		// ArchiveEntry Virtuasls
@@ -44,11 +46,11 @@ public:
 		NullsoftScriptableInstallSystemArchive * m_parentArchive;
 
 		Entry(const Entry &) = delete;
-		Entry(Entry &&) noexcept = delete;
 		const Entry & operator = (const Entry &) = delete;
-		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
+	NullsoftScriptableInstallSystemArchive(NullsoftScriptableInstallSystemArchive && archive) noexcept;
+	const NullsoftScriptableInstallSystemArchive & operator = (NullsoftScriptableInstallSystemArchive && archive) noexcept;
 	virtual ~NullsoftScriptableInstallSystemArchive();
 
 	// Archive Virtuals
@@ -75,6 +77,7 @@ public:
 private:
 	NullsoftScriptableInstallSystemArchive(CMyComPtr<IInArchive> archiveHandle);
 
+	void updateParentArchive();
 	static std::unique_ptr<NullsoftScriptableInstallSystemArchive> createFrom(CMyComPtr<IInStream> inputStream);
 
 	std::string m_filePath;
@@ -84,9 +87,7 @@ private:
 	CMyComPtr<IInArchive> m_archiveHandle;
 
 	NullsoftScriptableInstallSystemArchive(const NullsoftScriptableInstallSystemArchive &) = delete;
-	NullsoftScriptableInstallSystemArchive(NullsoftScriptableInstallSystemArchive &&) noexcept = delete;
 	const NullsoftScriptableInstallSystemArchive & operator = (const NullsoftScriptableInstallSystemArchive &) = delete;
-	const NullsoftScriptableInstallSystemArchive & operator = (NullsoftScriptableInstallSystemArchive &&) noexcept = delete;
 };
 
 #endif // _NULLSOFT_SCRIPTABLE_INSTALL_SYSTEM_ARCHIVE_H_

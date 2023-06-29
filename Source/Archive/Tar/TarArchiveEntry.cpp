@@ -28,7 +28,7 @@ TarArchive::Entry::Entry()
 	, m_data(std::make_unique<std::vector<uint8_t>>()) { }
 
 TarArchive::Entry::Entry(TarArchive::Entry && e) noexcept
-	: ArchiveEntry(e)
+	: ArchiveEntry(std::move(e))
 	, m_index(e.m_index)
 	, m_entryPath(std::move(e.m_entryPath))
 	, m_fileMode(e.m_fileMode)
@@ -75,7 +75,7 @@ TarArchive::Entry::Entry(const TarArchive::Entry & e)
 
 TarArchive::Entry & TarArchive::Entry::operator = (TarArchive::Entry && e) noexcept {
 	if(this != &e) {
-		ArchiveEntry::operator = (e);
+		ArchiveEntry::operator = (std::move(e));
 
 		m_index = e.m_index;
 		m_entryPath = std::move(e.m_entryPath);

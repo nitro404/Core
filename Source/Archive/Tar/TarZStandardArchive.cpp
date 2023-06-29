@@ -32,14 +32,14 @@ TarZStandardArchive::TarZStandardArchive(std::unique_ptr<TarArchive> tarArchive)
 }
 
 TarZStandardArchive::TarZStandardArchive(TarZStandardArchive && t) noexcept
-	: CompressedTarArchive(t) { }
+	: CompressedTarArchive(std::move(t)) { }
 
 TarZStandardArchive::TarZStandardArchive(const TarZStandardArchive & t)
 	: CompressedTarArchive(t) { }
 
 TarZStandardArchive & TarZStandardArchive::operator = (TarZStandardArchive && t) noexcept {
 	if(this != &t) {
-		CompressedTarArchive::operator = (t);
+		CompressedTarArchive::operator = (std::move(t));
 	}
 
 	return *this;

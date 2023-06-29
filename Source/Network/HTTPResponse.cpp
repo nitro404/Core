@@ -19,7 +19,7 @@ HTTPResponse::HTTPResponse(HTTPService * service, std::shared_ptr<HTTPRequest> r
 	, m_request(request) { }
 
 HTTPResponse::HTTPResponse(HTTPResponse && response) noexcept
-	: HTTPTransfer(response)
+	: HTTPTransfer(std::move(response))
 	, m_statusCode(response.m_statusCode)
 	, m_state(response.m_state)
 	, m_connectionInitiatedSystemTimePoint(response.m_connectionInitiatedSystemTimePoint)
@@ -59,7 +59,7 @@ HTTPResponse & HTTPResponse::operator = (HTTPResponse && response) noexcept {
 		std::lock_guard<std::recursive_mutex> lock(m_mutex);
 		std::lock_guard<std::recursive_mutex> otherLock(response.m_mutex);
 
-		HTTPTransfer::operator = (response);
+		HTTPTransfer::operator = (std::move(response));
 
 		m_statusCode = response.m_statusCode;
 		m_state = response.m_state;
@@ -524,7 +524,7 @@ bool HTTPResponse::setState(State state) {
 		}
 
 		case State::ConnectionTimedOut: {
-			if(m_state == State::None || 
+			if(m_state == State::None ||
 			   Any(m_state & State::Done)) {
 				return false;
 			}

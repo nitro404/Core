@@ -47,6 +47,8 @@ private:
 	class AbstractEventTransfer {
 	public:
 		AbstractEventTransfer(std::shared_ptr<HTTPRequest> httpRequest, std::future<std::shared_ptr<HTTPResponse>> futureResponse);
+		AbstractEventTransfer(AbstractEventTransfer && eventTransfer) noexcept;
+		const AbstractEventTransfer & operator = (AbstractEventTransfer && eventTransfer) noexcept;
 		virtual ~AbstractEventTransfer();
 
 		const std::shared_ptr<HTTPRequest> getRequest() const;
@@ -59,14 +61,14 @@ private:
 		std::future<std::shared_ptr<HTTPResponse>> m_futureResponse;
 
 		AbstractEventTransfer(const AbstractEventTransfer &) = delete;
-		AbstractEventTransfer(AbstractEventTransfer &&) noexcept = delete;
 		const AbstractEventTransfer & operator = (const AbstractEventTransfer &) = delete;
-		const AbstractEventTransfer & operator = (AbstractEventTransfer &&) noexcept = delete;
 	};
 
 	class SingleEventTransfer final : public AbstractEventTransfer {
 	public:
 		SingleEventTransfer(std::shared_ptr<HTTPRequest> httpRequest, std::future<std::shared_ptr<HTTPResponse>> futureResponse, std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
+		SingleEventTransfer(SingleEventTransfer && eventTransfer) noexcept;
+		const SingleEventTransfer & operator = (SingleEventTransfer && eventTransfer) noexcept;
 		virtual ~SingleEventTransfer();
 
 		const std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent() const;
@@ -76,14 +78,14 @@ private:
 		std::shared_ptr<SegmentAnalyticEvent> m_analyticEvent;
 
 		SingleEventTransfer(const SingleEventTransfer &) = delete;
-		SingleEventTransfer(SingleEventTransfer &&) noexcept = delete;
 		const SingleEventTransfer & operator = (const SingleEventTransfer &) = delete;
-		const SingleEventTransfer & operator = (SingleEventTransfer &&) noexcept = delete;
 	};
 
 	class BatchEventTransfer final : public AbstractEventTransfer {
 	public:
 		BatchEventTransfer(std::shared_ptr<HTTPRequest> httpRequest, std::future<std::shared_ptr<HTTPResponse>> futureResponse, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);
+		BatchEventTransfer(BatchEventTransfer && eventTransfer) noexcept;
+		const BatchEventTransfer & operator = (BatchEventTransfer && eventTransfer) noexcept;
 		virtual ~BatchEventTransfer();
 
 		const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents() const;
@@ -93,15 +95,15 @@ private:
 		std::vector<std::shared_ptr<SegmentAnalyticEvent>> m_analyticEvents;
 
 		BatchEventTransfer(const BatchEventTransfer &) = delete;
-		BatchEventTransfer(BatchEventTransfer &&) noexcept = delete;
 		const BatchEventTransfer & operator = (const BatchEventTransfer &) = delete;
-		const BatchEventTransfer & operator = (BatchEventTransfer &&) noexcept = delete;
 	};
 
 	class AbstractFailedEvent {
 	public:
 		AbstractFailedEvent(std::chrono::time_point<std::chrono::system_clock> retryTransferAfterTimePoint);
 		AbstractFailedEvent(std::chrono::milliseconds retryTransferDelay);
+		AbstractFailedEvent(AbstractFailedEvent && failedEvent) noexcept;
+		const AbstractFailedEvent & operator = (AbstractFailedEvent && failedEvent) noexcept;
 		virtual ~AbstractFailedEvent();
 
 		bool shouldRetryTransfer() const;
@@ -112,15 +114,15 @@ private:
 		std::chrono::time_point<std::chrono::system_clock> m_retryTransferAfterTimePoint;
 
 		AbstractFailedEvent(const AbstractFailedEvent &) = delete;
-		AbstractFailedEvent(AbstractFailedEvent &&) noexcept = delete;
 		const AbstractFailedEvent & operator = (const AbstractFailedEvent &) = delete;
-		const AbstractFailedEvent & operator = (AbstractFailedEvent &&) noexcept = delete;
 	};
 
 	class SingleFailedEvent final : public AbstractFailedEvent {
 	public:
 		SingleFailedEvent(std::chrono::time_point<std::chrono::system_clock> retryTransferAfterTimePoint, std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
 		SingleFailedEvent(std::chrono::milliseconds retryTransferDelay, std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
+		SingleFailedEvent(SingleFailedEvent && failedEvent) noexcept;
+		const SingleFailedEvent & operator = (SingleFailedEvent && failedEvent) noexcept;
 		virtual ~SingleFailedEvent();
 
 		const std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent() const;
@@ -130,15 +132,15 @@ private:
 		std::shared_ptr<SegmentAnalyticEvent> m_analyticEvent;
 
 		SingleFailedEvent(const SingleFailedEvent &) = delete;
-		SingleFailedEvent(SingleFailedEvent &&) noexcept = delete;
 		const SingleFailedEvent & operator = (const SingleFailedEvent &) = delete;
-		const SingleFailedEvent & operator = (SingleFailedEvent &&) noexcept = delete;
 	};
 
 	class BatchFailedEvents final : public AbstractFailedEvent {
 	public:
 		BatchFailedEvents(std::chrono::time_point<std::chrono::system_clock> retryTransferAfterTimePoint, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);
 		BatchFailedEvents(std::chrono::milliseconds retryTransferDelay, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);
+		BatchFailedEvents(BatchFailedEvents && failedEvent) noexcept;
+		const BatchFailedEvents & operator = (BatchFailedEvents && failedEvent) noexcept;
 		virtual ~BatchFailedEvents();
 
 		const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents() const;
@@ -148,9 +150,7 @@ private:
 		std::vector<std::shared_ptr<SegmentAnalyticEvent>> m_analyticEvents;
 
 		BatchFailedEvents(const BatchFailedEvents &) = delete;
-		BatchFailedEvents(BatchFailedEvents &&) noexcept = delete;
 		const BatchFailedEvents & operator = (const BatchFailedEvents &) = delete;
-		const BatchFailedEvents & operator = (BatchFailedEvents &&) noexcept = delete;
 	};
 
 	std::shared_ptr<HTTPRequest> createSingleAnalyticEventRequest(const SegmentAnalyticEvent & analyticEvent);
@@ -173,9 +173,7 @@ private:
 	mutable std::condition_variable_any m_flushWaitCondition;
 
 	SegmentAnalyticsCURL(const SegmentAnalyticsCURL &) = delete;
-	SegmentAnalyticsCURL(SegmentAnalyticsCURL &&) noexcept = delete;
 	const SegmentAnalyticsCURL & operator = (const SegmentAnalyticsCURL &) = delete;
-	const SegmentAnalyticsCURL & operator = (SegmentAnalyticsCURL &&) noexcept = delete;
 };
 
 #endif // _SEGMENT_ANALYTICS_CURL_H_

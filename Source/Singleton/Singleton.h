@@ -10,15 +10,19 @@
 template <class T>
 class Singleton {
 public:
+	virtual ~Singleton();
+
 	static T * getInstance();
 	static bool destroyInstance();
 
 protected:
 	Singleton();
-	virtual ~Singleton();
 
 private:
 	uint64_t m_componentID;
+
+	Singleton(const Singleton<T> &) = delete;
+	const Singleton<T> & operator = (const Singleton<T> &) = delete;
 };
 
 template <class T>

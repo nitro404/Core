@@ -16,10 +16,6 @@ class ArchiveEntry {
 
 public:
 	ArchiveEntry();
-	ArchiveEntry(ArchiveEntry && e) noexcept;
-	ArchiveEntry(const ArchiveEntry & e);
-	ArchiveEntry & operator = (ArchiveEntry && e) noexcept;
-	ArchiveEntry & operator = (const ArchiveEntry & e);
 	virtual ~ArchiveEntry();
 
 	virtual bool isFile() const;

@@ -46,9 +46,7 @@ private:
 	mutable std::recursive_mutex m_mutex;
 
 	ArchiveFactoryRegistry(const ArchiveFactoryRegistry &) = delete;
-	ArchiveFactoryRegistry(ArchiveFactoryRegistry &&) noexcept = delete;
 	const ArchiveFactoryRegistry & operator = (const ArchiveFactoryRegistry &) = delete;
-	const ArchiveFactoryRegistry & operator = (ArchiveFactoryRegistry &&) noexcept = delete;
 };
 
 #endif // _ARCHIVE_FACTORY_REGISTRY_H_

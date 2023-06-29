@@ -15,7 +15,7 @@ ArgumentParser::ArgumentParser(int argc, char * argv[])
 }
 
 ArgumentParser::ArgumentParser(ArgumentParser && parser) noexcept
-	: ArgumentCollection(parser)
+	: ArgumentCollection(std::move(parser))
 	, m_passthroughArguments(std::move(parser.m_passthroughArguments)) { }
 
 ArgumentParser::ArgumentParser(const ArgumentParser & parser)
@@ -24,7 +24,7 @@ ArgumentParser::ArgumentParser(const ArgumentParser & parser)
 
 ArgumentParser & ArgumentParser::operator = (ArgumentParser && parser) noexcept {
 	if(this != &parser) {
-		ArgumentCollection::operator = (parser);
+		ArgumentCollection::operator = (std::move(parser));
 
 		m_passthroughArguments = parser.m_passthroughArguments;
 	}

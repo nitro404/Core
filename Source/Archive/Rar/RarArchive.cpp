@@ -29,9 +29,37 @@ RarArchive::RarArchive(ArchiveHandle archiveHandle, const std::string & filePath
 	}
 }
 
+RarArchive::RarArchive(RarArchive && archive) noexcept
+	: Archive(std::move(archive))
+	, m_archiveHandle(std::move(archive.m_archiveHandle))
+	, m_data(std::move(archive.m_data))
+	, m_filePath(std::move(archive.m_filePath))
+	, m_entries(std::move(archive.m_entries))
+	, m_numberOfFiles(archive.m_numberOfFiles)
+	, m_numberOfDirectories(archive.m_numberOfDirectories) {
+	updateParentArchive();
+}
+
+const RarArchive & RarArchive::operator = (RarArchive && archive) noexcept {
+	if(this != &archive) {
+		Archive::operator = (std::move(archive));
+
+		m_archiveHandle = std::move(archive.m_archiveHandle);
+		m_data = std::move(archive.m_data);
+		m_filePath = std::move(archive.m_filePath);
+		m_entries = std::move(archive.m_entries);
+		m_numberOfFiles = archive.m_numberOfFiles;
+		m_numberOfDirectories = archive.m_numberOfDirectories;
+
+		updateParentArchive();
+	}
+
+	return *this;
+}
+
 RarArchive::~RarArchive() {
-	for(std::vector<std::shared_ptr<RarArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		(*i)->clearParentArchive();
+	for(std::shared_ptr<RarArchive::Entry> & entry : m_entries) {
+		entry->clearParentArchive();
 	}
 }
 
@@ -135,6 +163,12 @@ std::vector<std::shared_ptr<ArchiveEntry>> RarArchive::getEntries() const {
 
 dmc_unrar_archive * RarArchive::getRawArchiveHandle() const {
 	return m_archiveHandle.get();
+}
+
+void RarArchive::updateParentArchive() {
+	for(std::shared_ptr<RarArchive::Entry> & entry : m_entries) {
+		entry->setParentArchive(this);
+	}
 }
 
 bool RarArchive::isSuccess(dmc_unrar_return result, const std::string & errorMessage) {

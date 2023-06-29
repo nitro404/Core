@@ -26,12 +26,8 @@ private:
 
 	static std::optional<RepositoryInformation> parseRepositoryURL(const std::string & repositoryURL);
 
-	bool m_initialized;
-
 	BitbucketService(const BitbucketService &) = delete;
-	BitbucketService(BitbucketService &&) noexcept = delete;
 	const BitbucketService & operator = (const BitbucketService &) = delete;
-	const BitbucketService & operator = (BitbucketService &&) noexcept = delete;
 };
 
 #endif // _BITBUCKET_SERVICE_H_

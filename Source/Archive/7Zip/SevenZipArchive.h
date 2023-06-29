@@ -16,6 +16,8 @@ public:
 		friend class SevenZipArchive;
 
 	public:
+		Entry(Entry && entry) noexcept;
+		const Entry & operator = (Entry && entry) noexcept;
 		virtual ~Entry();
 
 		virtual bool isFile() const override;
@@ -42,11 +44,11 @@ public:
 		SevenZipArchive * m_parentArchive;
 
 		Entry(const Entry &) = delete;
-		Entry(Entry &&) noexcept = delete;
 		const Entry & operator = (const Entry &) = delete;
-		const Entry & operator = (Entry &&) noexcept = delete;
 	};
 
+	SevenZipArchive(SevenZipArchive && archive) noexcept;
+	const SevenZipArchive & operator = (SevenZipArchive && archive) noexcept;
 	virtual ~SevenZipArchive();
 
 	virtual std::string getDefaultFileExtension() const override;
@@ -88,6 +90,7 @@ private:
 	const ISzAlloc * getRawAllocatorHandle() const;
 	ISzAlloc * getRawAllocatorHandle();
 	ExtractionData & getCachedExtractionData();
+	void updateParentArchive();
 
 	static std::unique_ptr<SevenZipArchive> createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize);
 	static std::chrono::time_point<std::chrono::system_clock> getTimePointFromNTFSFileTime(const CNtfsFileTime & ntfsFileTime);
@@ -111,9 +114,7 @@ private:
 	static const ISzAlloc DEFAULT_ALLOCATOR;
 
 	SevenZipArchive(const SevenZipArchive &) = delete;
-	SevenZipArchive(SevenZipArchive &&) noexcept = delete;
 	const SevenZipArchive & operator = (const SevenZipArchive &) = delete;
-	const SevenZipArchive & operator = (SevenZipArchive &&) noexcept = delete;
 };
 
 #endif // _SEVEN_ZIP_ARCHIVE_H_

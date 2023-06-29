@@ -26,12 +26,8 @@ private:
 
 	static std::optional<RepositoryInformation> parseRepositoryURL(const std::string & repositoryURL);
 
-	bool m_initialized;
-
 	GitHubService(const GitHubService &) = delete;
-	GitHubService(GitHubService &&) noexcept = delete;
 	const GitHubService & operator = (const GitHubService &) = delete;
-	const GitHubService & operator = (GitHubService &&) noexcept = delete;
 };
 
 #endif // _GITHUB_SERVICE_H_

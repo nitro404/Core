@@ -12,9 +12,7 @@ public:
 
 private:
 	ProcessCreatorWindows(const ProcessCreatorWindows &) = delete;
-	ProcessCreatorWindows(ProcessCreatorWindows &&) noexcept = delete;
 	const ProcessCreatorWindows & operator = (const ProcessCreatorWindows &) = delete;
-	const ProcessCreatorWindows & operator = (ProcessCreatorWindows &&) noexcept = delete;
 };
 
 #endif // _PROCESS_CREATOR_WINDOWS_H_

@@ -23,7 +23,7 @@ ScriptArguments::ScriptArguments(const ScriptArguments & arguments)
 
 ScriptArguments & ScriptArguments::operator = (ScriptArguments && arguments) noexcept {
 	if(&arguments != this) {
-		ArgumentCollection::operator = (arguments);
+		ArgumentCollection::operator = (std::move(arguments));
 	}
 
 	return *this;

@@ -32,14 +32,14 @@ TarBZip2Archive::TarBZip2Archive(std::unique_ptr<TarArchive> tarArchive)
 }
 
 TarBZip2Archive::TarBZip2Archive(TarBZip2Archive && t) noexcept
-	: CompressedTarArchive(t) { }
+	: CompressedTarArchive(std::move(t)) { }
 
 TarBZip2Archive::TarBZip2Archive(const TarBZip2Archive & t)
 	: CompressedTarArchive(t) { }
 
 TarBZip2Archive & TarBZip2Archive::operator = (TarBZip2Archive && t) noexcept {
 	if(this != &t) {
-		CompressedTarArchive::operator = (t);
+		CompressedTarArchive::operator = (std::move(t));
 	}
 
 	return *this;

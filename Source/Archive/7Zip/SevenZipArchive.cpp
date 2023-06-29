@@ -95,9 +95,47 @@ SevenZipArchive::SevenZipArchive(ArchiveStreamHandle archiveStream, LookStreamHa
 	}
 }
 
+SevenZipArchive::SevenZipArchive(SevenZipArchive && archive) noexcept
+	: Archive(std::move(archive))
+	, m_archiveStream(std::move(archive.m_archiveStream))
+	, m_lookStream(std::move(archive.m_lookStream))
+	, m_archive(std::move(archive.m_archive))
+	, m_allocator(std::move(archive.m_allocator))
+	, m_data(std::move(archive.m_data))
+	, m_cachedExtractionData(std::move(archive.m_cachedExtractionData))
+	, m_filePath(std::move(archive.m_filePath))
+	, m_entries(std::move(archive.m_entries))
+	, m_numberOfFiles(archive.m_numberOfFiles)
+	, m_numberOfDirectories(archive.m_numberOfDirectories)
+	, m_compressedSize(archive.m_compressedSize) {
+	updateParentArchive();
+}
+
+const SevenZipArchive & SevenZipArchive::operator = (SevenZipArchive && archive) noexcept {
+	if(this != &archive) {
+		Archive::operator = (std::move(archive));
+
+		m_archiveStream = std::move(archive.m_archiveStream);
+		m_lookStream = std::move(archive.m_lookStream);
+		m_archive = std::move(archive.m_archive);
+		m_allocator = std::move(archive.m_allocator);
+		m_data = std::move(archive.m_data);
+		m_cachedExtractionData = std::move(archive.m_cachedExtractionData);
+		m_filePath = std::move(archive.m_filePath);
+		m_entries = std::move(archive.m_entries);
+		m_numberOfFiles = archive.m_numberOfFiles;
+		m_numberOfDirectories = archive.m_numberOfDirectories;
+		m_compressedSize = archive.m_compressedSize;
+
+		updateParentArchive();
+	}
+
+	return *this;
+}
+
 SevenZipArchive::~SevenZipArchive() {
-	for(std::vector<std::shared_ptr<SevenZipArchive::Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		(*i)->clearParentArchive();
+	for(std::shared_ptr<SevenZipArchive::Entry> & entry : m_entries) {
+		entry->clearParentArchive();
 	}
 
 	m_archive.reset();
@@ -313,4 +351,10 @@ SevenZipArchive::ArchiveHandle SevenZipArchive::createArchiveHandle(ISzAlloc & a
 
 SevenZipArchive::AllocatorHandle SevenZipArchive::createAllocatorHandle(const ISzAlloc & allocator) {
 	return SevenZipArchive::AllocatorHandle(new ISzAlloc(allocator));
+}
+
+void SevenZipArchive::updateParentArchive() {
+	for(std::shared_ptr<SevenZipArchive::Entry> & entry : m_entries) {
+		entry->clearParentArchive();
+	}
 }

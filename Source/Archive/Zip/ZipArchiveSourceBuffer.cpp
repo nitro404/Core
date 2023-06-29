@@ -8,6 +8,19 @@ ZipArchive::SourceBuffer::SourceBuffer(ZipSourceHandle zipSourceHandle, std::uni
 	: m_sourceHandle(std::move(zipSourceHandle))
 	, m_data(std::move(data)) { }
 
+ZipArchive::SourceBuffer::SourceBuffer(SourceBuffer && sourceBuffer) noexcept
+	: m_sourceHandle(std::move(sourceBuffer.m_sourceHandle))
+	, m_data(std::move(sourceBuffer.m_data)) { }
+
+const ZipArchive::SourceBuffer & ZipArchive::SourceBuffer::operator = (SourceBuffer && sourceBuffer) noexcept {
+	if(this != &sourceBuffer) {
+		m_sourceHandle = std::move(sourceBuffer.m_sourceHandle);
+		m_data = std::move(sourceBuffer.m_data);
+	}
+
+	return *this;
+}
+
 ZipArchive::SourceBuffer::~SourceBuffer() = default;
 
 zip_source * ZipArchive::SourceBuffer::getRawSourceHandle() const {

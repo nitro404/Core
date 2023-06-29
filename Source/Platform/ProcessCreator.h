@@ -19,9 +19,7 @@ protected:
 
 private:
 	ProcessCreator(const ProcessCreator &) = delete;
-	ProcessCreator(ProcessCreator &&) noexcept = delete;
 	const ProcessCreator & operator = (const ProcessCreator &) = delete;
-	const ProcessCreator & operator = (ProcessCreator &&) noexcept = delete;
 };
 
 #endif // _PROCESS_CREATOR_H_

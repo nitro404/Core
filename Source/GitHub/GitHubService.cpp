@@ -13,8 +13,7 @@ static const std::string GITHUB_API_BASE_URL("https://api.github.com");
 static const std::string GITHUB_RELEASES_API_URL_TEMPLATE(Utilities::joinPaths(GITHUB_API_BASE_URL, "repos/{}/{}/releases"));
 static const std::string GITHUB_LATEST_RELEASE_API_URL_TEMPLATE(Utilities::joinPaths(GITHUB_RELEASES_API_URL_TEMPLATE, "latest"));
 
-GitHubService::GitHubService()
-	: m_initialized(false) { }
+GitHubService::GitHubService() { }
 
 GitHubService::~GitHubService() { }
 

@@ -28,9 +28,7 @@ private:
 	bool m_initialized;
 
 	TimeZoneDataManager(const TimeZoneDataManager &) = delete;
-	TimeZoneDataManager(TimeZoneDataManager &&) noexcept = delete;
 	const TimeZoneDataManager & operator = (const TimeZoneDataManager &) = delete;
-	const TimeZoneDataManager & operator = (TimeZoneDataManager &&) noexcept = delete;
 };
 
 #endif // _TIME_ZONE_DATA_MANAGER_H_

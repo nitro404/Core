@@ -12,9 +12,7 @@ public:
 
 private:
 	TimeZoneDataManagerWindows(const TimeZoneDataManagerWindows &) = delete;
-	TimeZoneDataManagerWindows(TimeZoneDataManagerWindows &&) noexcept = delete;
 	const TimeZoneDataManagerWindows & operator = (const TimeZoneDataManagerWindows &) = delete;
-	const TimeZoneDataManagerWindows & operator = (TimeZoneDataManagerWindows &&) noexcept = delete;
 };
 
 #endif // _TIME_ZONE_DATA_MANAGER_WINDOWS_H_

@@ -6,7 +6,7 @@ CompressedTarArchive::CompressedTarArchive(const std::string & filePath, ByteBuf
 	, m_compressionMethod(compressionMethod) { }
 
 CompressedTarArchive::CompressedTarArchive(CompressedTarArchive && t) noexcept
-	: TarArchive(t)
+	: TarArchive(std::move(t))
 	, m_compressedSize(t.m_compressedSize)
 	, m_compressionMethod(t.m_compressionMethod) { }
 
@@ -17,7 +17,7 @@ CompressedTarArchive::CompressedTarArchive(const CompressedTarArchive & t)
 
 CompressedTarArchive & CompressedTarArchive::operator = (CompressedTarArchive && t) noexcept {
 	if(this != &t) {
-		TarArchive::operator = (t);
+		TarArchive::operator = (std::move(t));
 
 		m_compressedSize = t.m_compressedSize;
 		m_compressionMethod = t.m_compressionMethod;

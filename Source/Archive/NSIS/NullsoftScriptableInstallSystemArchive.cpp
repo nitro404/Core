@@ -36,9 +36,35 @@ NullsoftScriptableInstallSystemArchive::NullsoftScriptableInstallSystemArchive(C
 	}
 }
 
+NullsoftScriptableInstallSystemArchive::NullsoftScriptableInstallSystemArchive(NullsoftScriptableInstallSystemArchive && archive) noexcept
+	: Archive(std::move(archive))
+	, m_filePath(std::move(archive.m_filePath))
+	, m_entries(std::move(archive.m_entries))
+	, m_numberOfFiles(archive.m_numberOfFiles)
+	, m_numberOfDirectories(archive.m_numberOfDirectories)
+	, m_archiveHandle(std::move(archive.m_archiveHandle)) {
+	updateParentArchive();
+}
+
+const NullsoftScriptableInstallSystemArchive & NullsoftScriptableInstallSystemArchive::operator = (NullsoftScriptableInstallSystemArchive && archive) noexcept {
+	if(this != &archive) {
+		Archive::operator = (std::move(archive));
+
+		m_filePath = std::move(archive.m_filePath);
+		m_entries = std::move(archive.m_entries);
+		m_numberOfFiles = archive.m_numberOfFiles;
+		m_numberOfDirectories = archive.m_numberOfDirectories;
+		m_archiveHandle = std::move(archive.m_archiveHandle);
+
+		updateParentArchive();
+	}
+
+	return *this;
+}
+
 NullsoftScriptableInstallSystemArchive::~NullsoftScriptableInstallSystemArchive() {
-	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
-		(*i)->clearParentArchive();
+	for(std::shared_ptr<Entry> & entry : m_entries) {
+		entry->clearParentArchive();
 	}
 }
 
@@ -185,4 +211,10 @@ std::string NullsoftScriptableInstallSystemArchive::getExtractionOperationErrorM
 	}
 
 	return "Unknown Error";
+}
+
+void NullsoftScriptableInstallSystemArchive::updateParentArchive() {
+	for(std::shared_ptr<Entry> & entry : m_entries) {
+		entry->setParentArchive(this);
+	}
 }

@@ -9,6 +9,8 @@
 
 class SingletonManager final {
 public:
+	SingletonManager(SingletonManager && singletonManager) noexcept;
+	const SingletonManager & operator = (SingletonManager && singletonManager) noexcept;
 	~SingletonManager();
 
 	static SingletonManager & getInstance();
@@ -34,9 +36,7 @@ private:
 	mutable std::recursive_mutex m_mutex;
 
 	SingletonManager(const SingletonManager &) = delete;
-	SingletonManager(SingletonManager &&) noexcept = delete;
 	const SingletonManager & operator = (const SingletonManager &) = delete;
-	const SingletonManager & operator = (SingletonManager &&) noexcept = delete;
 };
 
 template <class T>

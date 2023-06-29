@@ -16,9 +16,7 @@ public:
 	std::unique_ptr<T> callFunction() const;
 
 private:
-	Factory(Factory && f) noexcept = delete;
 	Factory(const Factory & f) = delete;
-	Factory & operator = (Factory && f) noexcept = delete;
 	Factory & operator = (const Factory & f) = delete;
 };
 
@@ -26,6 +24,8 @@ template <class T>
 class FactoryFunction final : public Factory {
 public:
 	FactoryFunction(const std::function<std::unique_ptr<T>()> & func);
+	FactoryFunction(FactoryFunction<T> && factoryFunction) noexcept;
+	FactoryFunction<T> & operator = (FactoryFunction<T> && factoryFunction) noexcept;
 	virtual ~FactoryFunction();
 
 	std::unique_ptr<T> callFunctionDirect() const;
@@ -34,9 +34,7 @@ public:
 private:
 	std::function<std::unique_ptr<T>()> m_function;
 
-	FactoryFunction(FactoryFunction<T> && f) noexcept = delete;
 	FactoryFunction(const FactoryFunction<T> & f = delete);
-	FactoryFunction<T> & operator = (FactoryFunction<T> && f) noexcept = delete;
 	FactoryFunction<T> & operator = (const FactoryFunction<T> & f) = delete;
 };
 
@@ -44,6 +42,22 @@ template <class T>
 FactoryFunction<T>::FactoryFunction(const std::function<std::unique_ptr<T>()> & func)
 	: Factory()
 	, m_function(func) { }
+
+template <class T>
+FactoryFunction<T>::FactoryFunction(FactoryFunction<T> && factoryFunction) noexcept
+	: Factory(std::move(factoryFunction))
+	, m_function(std::move(factoryFunction.m_function)) { }
+
+template <class T>
+FactoryFunction<T> & FactoryFunction<T>::operator = (FactoryFunction<T> && factoryFunction) noexcept {
+	if(this != &factoryFunction) {
+		Factory::operator = (std::move(factoryFunction));
+
+		m_function = std::move(factoryFunction.m_function);
+	}
+
+	return *this;
+}
 
 template <class T>
 FactoryFunction<T>::~FactoryFunction() { }

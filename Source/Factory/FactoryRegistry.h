@@ -10,6 +10,8 @@
 
 class FactoryRegistry final {
 public:
+	FactoryRegistry(FactoryRegistry && factoryRegistry) noexcept;
+	const FactoryRegistry & operator = (FactoryRegistry && factoryRegistry) noexcept;
 	~FactoryRegistry();
 
 	static FactoryRegistry & getInstance();
@@ -39,9 +41,7 @@ private:
 	mutable std::recursive_mutex m_mutex;
 
 	FactoryRegistry(const FactoryRegistry &) = delete;
-	FactoryRegistry(FactoryRegistry &&) noexcept = delete;
 	const FactoryRegistry & operator = (const FactoryRegistry &) = delete;
-	const FactoryRegistry & operator = (FactoryRegistry &&) noexcept = delete;
 };
 
 template <class T>

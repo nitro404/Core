@@ -22,6 +22,38 @@ ZipArchive::Entry::Entry(const std::string & path, uint64_t index, std::unique_p
 	, m_uncompressedSize(uncompressedSize)
 	, m_crc32(crc32) { }
 
+ZipArchive::Entry::Entry(Entry && entry) noexcept
+	: ArchiveEntry(std::move(entry))
+	, m_parentArchive(entry.m_parentArchive)
+	, m_path(std::move(entry.m_path))
+	, m_index(entry.m_index)
+	, m_unsavedData(std::move(entry.m_unsavedData))
+	, m_date(entry.m_date)
+	, m_compressionMethod(entry.m_compressionMethod)
+	, m_encryptionMethod(entry.m_encryptionMethod)
+	, m_compressedSize(entry.m_compressedSize)
+	, m_uncompressedSize(entry.m_uncompressedSize)
+	, m_crc32(entry.m_crc32) { }
+
+const ZipArchive::Entry & ZipArchive::Entry::operator = (Entry && entry) noexcept {
+	if(this != &entry) {
+		ArchiveEntry::operator = (std::move(entry));
+
+		m_parentArchive = entry.m_parentArchive;
+		m_path = std::move(entry.m_path);
+		m_index = entry.m_index;
+		m_unsavedData = std::move(entry.m_unsavedData);
+		m_date = entry.m_date;
+		m_compressionMethod = entry.m_compressionMethod;
+		m_encryptionMethod = entry.m_encryptionMethod;
+		m_compressedSize = entry.m_compressedSize;
+		m_uncompressedSize = entry.m_uncompressedSize;
+		m_crc32 = entry.m_crc32;
+	}
+
+	return *this;
+}
+
 ZipArchive::Entry::~Entry() { }
 
 bool ZipArchive::Entry::setName(const std::string & name) {

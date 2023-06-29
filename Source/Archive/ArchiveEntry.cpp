@@ -6,18 +6,6 @@
 
 ArchiveEntry::ArchiveEntry() { }
 
-ArchiveEntry::ArchiveEntry(ArchiveEntry && e) noexcept { }
-
-ArchiveEntry::ArchiveEntry(const ArchiveEntry & e) { }
-
-ArchiveEntry & ArchiveEntry::operator = (ArchiveEntry && e) noexcept {
-	return *this;
-}
-
-ArchiveEntry & ArchiveEntry::operator = (const ArchiveEntry & e) {
-	return *this;
-}
-
 ArchiveEntry::~ArchiveEntry() { }
 
 bool ArchiveEntry::isFile() const {

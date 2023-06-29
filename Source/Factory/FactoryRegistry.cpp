@@ -17,6 +17,19 @@ static std::unique_ptr<FactoryRegistry> s_factoryRegistryInstance;
 FactoryRegistry::FactoryRegistry()
 	: m_defaultFactoriesAssigned(false) { }
 
+FactoryRegistry::FactoryRegistry(FactoryRegistry && factoryRegistry) noexcept
+	: m_factories(std::move(factoryRegistry.m_factories))
+	, m_defaultFactoriesAssigned(factoryRegistry.m_defaultFactoriesAssigned) { }
+
+const FactoryRegistry & FactoryRegistry::operator = (FactoryRegistry && factoryRegistry) noexcept {
+	if(this != &factoryRegistry) {
+		m_factories = std::move(factoryRegistry.m_factories);
+		m_defaultFactoriesAssigned = factoryRegistry.m_defaultFactoriesAssigned;
+	}
+
+	return *this;
+}
+
 FactoryRegistry::~FactoryRegistry() = default;
 
 FactoryRegistry & FactoryRegistry::getInstance() {

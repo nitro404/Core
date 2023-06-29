@@ -11,6 +11,8 @@ class ComponentRegistry final {
 public:
 	class GlobalComponent;
 
+	ComponentRegistry(ComponentRegistry && componentRegistry) noexcept;
+	const ComponentRegistry & operator = (ComponentRegistry && componentRegistry) noexcept;
 	~ComponentRegistry();
 
 	static ComponentRegistry & getInstance();
@@ -39,6 +41,8 @@ private:
 	class Component {
 	public:
 		Component();
+		Component(Component && component) noexcept;
+		const Component & operator = (Component && component) noexcept;
 		virtual ~Component();
 
 		uint64_t getID() const;
@@ -47,38 +51,36 @@ private:
 		uint64_t m_id;
 
 		Component(const Component &) = delete;
-		Component(Component &&) noexcept = delete;
 		const Component & operator = (const Component &) = delete;
-		const Component & operator = (Component &&) noexcept = delete;
 	};
 
 	template <class T>
 	class RawComponent final : public Component {
 	public:
 		RawComponent(T ** component);
+		RawComponent(RawComponent<T> && component) noexcept;
+		const RawComponent<T> & operator = (RawComponent<T> && component) noexcept;
 		virtual ~RawComponent();
 
 	private:
 		T ** m_component;
 
 		RawComponent(const RawComponent<T> &) = delete;
-		RawComponent(RawComponent<T> &&) noexcept  = delete;
 		const RawComponent<T> & operator = (const RawComponent<T> &) = delete;
-		const RawComponent<T> & operator = (RawComponent<T> &&) noexcept = delete;
 	};
 
 	template <class T>
 	class OwnedUniqueComponent final : public Component {
 	public:
 		OwnedUniqueComponent(std::unique_ptr<T> component);
+		OwnedUniqueComponent(OwnedUniqueComponent<T> && component) noexcept;
+		const OwnedUniqueComponent<T> & operator = (OwnedUniqueComponent<T> && component) noexcept;
 		virtual ~OwnedUniqueComponent();
 
 	private:
 		std::unique_ptr<T> m_component;
 
 		OwnedUniqueComponent(const OwnedUniqueComponent<T> &) = delete;
-		OwnedUniqueComponent(OwnedUniqueComponent<T> &&) noexcept = delete;
-		const OwnedUniqueComponent<T> & operator = (OwnedUniqueComponent<T> &&) noexcept = delete;
 		const OwnedUniqueComponent<T> & operator = (const OwnedUniqueComponent<T> &) = delete;
 	};
 
@@ -86,28 +88,28 @@ private:
 	class ExternalUniqueComponent final : public Component {
 	public:
 		ExternalUniqueComponent(std::unique_ptr<T> * component);
+		ExternalUniqueComponent(ExternalUniqueComponent<T> && component) noexcept;
+		const ExternalUniqueComponent<T> & operator = (ExternalUniqueComponent<T> && component) noexcept;
 		virtual ~ExternalUniqueComponent();
 
 	private:
 		std::unique_ptr<T> * m_component;
 
 		ExternalUniqueComponent(const ExternalUniqueComponent<T> &) = delete;
-		ExternalUniqueComponent(ExternalUniqueComponent<T> &&) noexcept = delete;
-		const ExternalUniqueComponent<T> & operator = (ExternalUniqueComponent<T> &&) noexcept = delete;
 		const ExternalUniqueComponent<T> & operator = (const ExternalUniqueComponent<T> &) = delete;
 	};
 
 	class GlobalComponent final : public Component {
 	public:
 		GlobalComponent(std::function<void()> destroyFunction);
+		GlobalComponent(GlobalComponent && component) noexcept;
+		const GlobalComponent & operator = (GlobalComponent && component) noexcept;
 		virtual ~GlobalComponent();
 
 	private:
 		std::function<void()> m_destroyFunction;
 
 		GlobalComponent(const GlobalComponent &) = delete;
-		GlobalComponent(GlobalComponent &&) noexcept = delete;
-		const GlobalComponent & operator = (GlobalComponent &&) noexcept = delete;
 		const GlobalComponent & operator = (const GlobalComponent &) = delete;
 	};
 
@@ -122,9 +124,7 @@ private:
 	mutable std::recursive_mutex m_globalComponentMutex;
 
 	ComponentRegistry(const ComponentRegistry &) = delete;
-	ComponentRegistry(ComponentRegistry &&) noexcept = delete;
 	const ComponentRegistry & operator = (const ComponentRegistry &) = delete;
-	const ComponentRegistry & operator = (ComponentRegistry &&) noexcept = delete;
 };
 
 template <class T>
@@ -181,6 +181,22 @@ ComponentRegistry::RawComponent<T>::RawComponent(T ** component)
 	, m_component(component) { }
 
 template <class T>
+ComponentRegistry::RawComponent<T>::RawComponent(RawComponent && component) noexcept
+	: Component(std::move(component))
+	, m_component(component.m_component) { }
+
+template <class T>
+const ComponentRegistry::RawComponent<T> & ComponentRegistry::RawComponent<T>::operator = (RawComponent<T> && component) noexcept {
+	if(this != &component) {
+		Component::operator = std::move(component);
+
+		m_component = component.m_component;
+	}
+
+	return *this;
+}
+
+template <class T>
 ComponentRegistry::RawComponent<T>::~RawComponent() {
 	if(m_component != nullptr && *m_component != nullptr) {
 		delete *m_component;
@@ -194,6 +210,22 @@ ComponentRegistry::OwnedUniqueComponent<T>::OwnedUniqueComponent(std::unique_ptr
 	, m_component(std::move(component)) { }
 
 template <class T>
+ComponentRegistry::OwnedUniqueComponent<T>::OwnedUniqueComponent(OwnedUniqueComponent && component) noexcept
+	: Component(std::move(component))
+	, m_component(std::move(component.m_component)) { }
+
+template <class T>
+const ComponentRegistry::OwnedUniqueComponent<T> & ComponentRegistry::OwnedUniqueComponent<T>::operator = (OwnedUniqueComponent<T> && component) noexcept {
+	if(this != &component) {
+		Component::operator = std::move(component);
+
+		m_component = std::move(component.m_component);
+	}
+
+	return *this;
+}
+
+template <class T>
 ComponentRegistry::OwnedUniqueComponent<T>::~OwnedUniqueComponent() {
 	m_component.reset();
 }
@@ -202,6 +234,22 @@ template <class T>
 ComponentRegistry::ExternalUniqueComponent<T>::ExternalUniqueComponent(std::unique_ptr<T> * component)
 	: Component()
 	, m_component(component) { }
+
+template <class T>
+ComponentRegistry::ExternalUniqueComponent<T>::ExternalUniqueComponent(ExternalUniqueComponent && component) noexcept
+	: Component(std::move(component))
+	, m_component(component.m_component) { }
+
+template <class T>
+const ComponentRegistry::ExternalUniqueComponent<T> & ComponentRegistry::ExternalUniqueComponent<T>::operator = (ExternalUniqueComponent<T> && component) noexcept {
+	if(this != &component) {
+		Component::operator = std::move(component);
+
+		m_component = component.m_component;
+	}
+
+	return *this;
+}
 
 template <class T>
 ComponentRegistry::ExternalUniqueComponent<T>::~ExternalUniqueComponent() {

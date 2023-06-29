@@ -49,9 +49,7 @@ private:
 
 	LogSystem() = delete;
 	LogSystem(const LogSystem &) = delete;
-	LogSystem(LogSystem &&) noexcept = delete;
 	const LogSystem & operator = (const LogSystem &) = delete;
-	const LogSystem & operator = (LogSystem &&) noexcept = delete;
 };
 
 #endif // _LOG_SYSTEM_H_

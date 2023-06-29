@@ -41,6 +41,39 @@ SegmentAnalytics::DataStorage::DataStorage()
 	, m_firstApplicationLaunch(true)
 	, m_sessionNumber(1) { }
 
+SegmentAnalytics::DataStorage::DataStorage(DataStorage && dataStorage) noexcept
+	: m_initialized(dataStorage.m_initialized)
+	, m_filePath(std::move(dataStorage.m_filePath))
+	, m_firstApplicationLaunch(dataStorage.m_firstApplicationLaunch)
+	, m_sessionNumber(dataStorage.m_sessionNumber)
+	, m_previousApplicationVersion(std::move(dataStorage.m_previousApplicationVersion))
+	, m_previousApplicationBuild(std::move(dataStorage.m_previousApplicationBuild))
+	, m_anonymousID(std::move(dataStorage.m_anonymousID))
+	, m_userID(std::move(dataStorage.m_userID))
+	, m_applicationVersion(std::move(dataStorage.m_applicationVersion))
+	, m_applicationBuild(std::move(dataStorage.m_applicationBuild))
+	, m_userTraits(std::move(dataStorage.m_userTraits))
+	, m_pendingAnalyticEvents(std::move(dataStorage.m_pendingAnalyticEvents)) { }
+
+const SegmentAnalytics::DataStorage & SegmentAnalytics::DataStorage::operator = (DataStorage && dataStorage) noexcept {
+	if(this != &dataStorage) {
+		m_initialized = dataStorage.m_initialized;
+		m_filePath = std::move(dataStorage.m_filePath);
+		m_firstApplicationLaunch = dataStorage.m_firstApplicationLaunch;
+		m_sessionNumber = dataStorage.m_sessionNumber;
+		m_previousApplicationVersion = std::move(dataStorage.m_previousApplicationVersion);
+		m_previousApplicationBuild = std::move(dataStorage.m_previousApplicationBuild);
+		m_anonymousID = std::move(dataStorage.m_anonymousID);
+		m_userID = std::move(dataStorage.m_userID);
+		m_applicationVersion = std::move(dataStorage.m_applicationVersion);
+		m_applicationBuild = std::move(dataStorage.m_applicationBuild);
+		m_userTraits = std::move(dataStorage.m_userTraits);
+		m_pendingAnalyticEvents = std::move(dataStorage.m_pendingAnalyticEvents);
+	}
+
+	return *this;
+}
+
 SegmentAnalytics::DataStorage::~DataStorage() { }
 
 bool SegmentAnalytics::DataStorage::isInitialized() const {
