@@ -767,6 +767,336 @@ std::unique_ptr<std::vector<uint8_t>> ByteBuffer::getBytes(size_t numberOfBytes,
 	return std::make_unique<std::vector<uint8_t>>(rawDataStart, rawDataStart + (numberOfBytes * sizeof(uint8_t)));
 }
 
+int8_t ByteBuffer::peekByte(bool * error) const {
+	bool e = false;
+	int8_t value = getByte(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<int8_t> ByteBuffer::peekByte() const {
+	bool error = false;
+
+	int8_t value = peekByte(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+uint8_t ByteBuffer::peekUnsignedByte(bool * error) const {
+	bool e = false;
+	uint8_t value = getUnsignedByte(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<uint8_t> ByteBuffer::peekUnsignedByte() const {
+	bool error = false;
+
+	uint8_t value = peekUnsignedByte(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+int16_t ByteBuffer::peekShort(bool * error) const {
+	bool e = false;
+	int16_t value = getShort(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<int16_t> ByteBuffer::peekShort() const {
+	bool error = false;
+
+	int16_t value = peekShort(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+uint16_t ByteBuffer::peekUnsignedShort(bool * error) const {
+	bool e = false;
+	uint16_t value = getUnsignedShort(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<uint16_t> ByteBuffer::peekUnsignedShort() const {
+	bool error = false;
+
+	uint16_t value = peekUnsignedShort(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+int32_t ByteBuffer::peekInteger(bool * error) const {
+	bool e = false;
+	int32_t value = getInteger(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<int32_t> ByteBuffer::peekInteger() const {
+	bool error = false;
+
+	int32_t value = peekInteger(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+uint32_t ByteBuffer::peekUnsignedInteger(bool * error) const {
+	bool e = false;
+	uint32_t value = getUnsignedInteger(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<uint32_t> ByteBuffer::peekUnsignedInteger() const {
+	bool error = false;
+
+	uint32_t value = peekUnsignedInteger(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+int64_t ByteBuffer::peekLong(bool * error) const {
+	bool e = false;
+	int64_t value = getLong(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<int64_t> ByteBuffer::peekLong() const {
+	bool error = false;
+
+	int64_t value = peekLong(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+uint64_t ByteBuffer::peekUnsignedLong(bool * error) const {
+	bool e = false;
+	uint64_t value = getUnsignedLong(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<uint64_t> ByteBuffer::peekUnsignedLong() const {
+	bool error = false;
+
+	uint64_t value = peekUnsignedLong(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+float ByteBuffer::peekFloat(bool * error) const {
+	bool e = false;
+	float value = getFloat(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<float> ByteBuffer::peekFloat() const {
+	bool error = false;
+
+	float value = peekFloat(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+double ByteBuffer::peekDouble(bool * error) const {
+	bool e = false;
+	double value = getDouble(m_readOffset, &e);
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<double> ByteBuffer::peekDouble() const {
+	bool error = false;
+
+	double value = peekDouble(&error);
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+std::string ByteBuffer::peekString(size_t length, bool * error) const {
+	bool e = false;
+	std::string value(getString(length, m_readOffset, &e));
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<std::string> ByteBuffer::peekString(size_t length) const {
+	bool error = false;
+
+	std::string value(peekString(length, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+std::string ByteBuffer::peekNullTerminatedString(bool * error) const {
+	bool e = false;
+	std::string value(getNullTerminatedString(m_readOffset, &e));
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return value;
+}
+
+std::optional<std::string> ByteBuffer::peekNullTerminatedString() const {
+	bool error = false;
+
+	std::string value(peekNullTerminatedString(&error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+std::string ByteBuffer::peekLine(bool * error) const {
+	bool e = false;
+	size_t nextLineIndex = std::numeric_limits<size_t>::max();
+	std::string line(getLine(m_readOffset, &nextLineIndex, &e));
+
+	if(e) {
+		if(error != nullptr) {
+			*error = true;
+		}
+	}
+
+	return line;
+}
+
+std::optional<std::string> ByteBuffer::peekLine() const {
+	bool error = false;
+
+	std::string value(peekLine(&error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+std::unique_ptr<std::vector<uint8_t>> ByteBuffer::peekBytes(size_t numberOfBytes) const {
+	return getBytes(numberOfBytes, m_readOffset);
+}
+
 int8_t ByteBuffer::readByte(bool * error) const {
 	bool e = false;
 	int8_t value = getByte(m_readOffset, &e);

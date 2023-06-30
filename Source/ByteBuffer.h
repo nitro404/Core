@@ -130,6 +130,36 @@ public:
 	std::unique_ptr<std::array<uint8_t, N>> getBytes(size_t offset) const;
 	std::unique_ptr<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
 
+	int8_t peekByte(bool * error) const;
+	std::optional<int8_t> peekByte() const;
+	uint8_t peekUnsignedByte(bool * error) const;
+	std::optional<uint8_t> peekUnsignedByte() const;
+	int16_t peekShort(bool * error) const;
+	std::optional<int16_t> peekShort() const;
+	uint16_t peekUnsignedShort(bool * error) const;
+	std::optional<uint16_t> peekUnsignedShort() const;
+	int32_t peekInteger(bool * error) const;
+	std::optional<int32_t> peekInteger() const;
+	uint32_t peekUnsignedInteger(bool * error) const;
+	std::optional<uint32_t> peekUnsignedInteger() const;
+	int64_t peekLong(bool * error) const;
+	std::optional<int64_t> peekLong() const;
+	uint64_t peekUnsignedLong(bool * error) const;
+	std::optional<uint64_t> peekUnsignedLong() const;
+	float peekFloat(bool * error) const;
+	std::optional<float> peekFloat() const;
+	double peekDouble(bool * error) const;
+	std::optional<double> peekDouble() const;
+	std::string peekString(size_t length, bool * error) const;
+	std::optional<std::string> peekString(size_t length) const;
+	std::string peekNullTerminatedString(bool * error) const;
+	std::optional<std::string> peekNullTerminatedString() const;
+	std::string peekLine(bool * error) const;
+	std::optional<std::string> peekLine() const;
+	template <size_t N>
+	std::unique_ptr<std::array<uint8_t, N>> peekBytes() const;
+	std::unique_ptr<std::vector<uint8_t>> peekBytes(size_t numberOfBytes) const;
+
 	int8_t readByte(bool * error) const;
 	std::optional<int8_t> readByte() const;
 	uint8_t readUnsignedByte(bool * error) const;
