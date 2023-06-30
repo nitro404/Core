@@ -518,6 +518,7 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 	deviceValue.AddMember(rapidjson::StringRef("motherboard"), motherboardValue, allocator);
 
 	rapidjson::Value gpuValue(rapidjson::kArrayType);
+	gpuValue.Reserve(graphicsCardNames.size(), allocator);
 
 	for(std::vector<std::string>::const_iterator i = graphicsCardNames.cbegin(); i != graphicsCardNames.cend(); ++i) {
 		rapidjson::Value graphicsCardNameValue(i->c_str(), allocator);
@@ -527,6 +528,7 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 	deviceValue.AddMember(rapidjson::StringRef("gpu"), gpuValue, allocator);
 
 	rapidjson::Value ramValue(rapidjson::kArrayType);
+	ramValue.Reserve(memoryDetails.size(), allocator);
 
 	for(std::vector<std::string>::const_iterator i = memoryDetails.cbegin(); i != memoryDetails.cend(); ++i) {
 		rapidjson::Value memoryStickValue(i->c_str(), allocator);

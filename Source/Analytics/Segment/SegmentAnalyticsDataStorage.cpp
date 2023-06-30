@@ -403,6 +403,7 @@ rapidjson::Document SegmentAnalytics::DataStorage::toJSON() const {
 	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_ANALYTIC_EVENT_ID_COUNTER_PROPERTY_NAME), rapidjson::Value(SegmentAnalyticEvent::getIDCounter()), allocator);
 
 	rapidjson::Value analyticEventsValue(rapidjson::kArrayType);
+	analyticEventsValue.Reserve(m_pendingAnalyticEvents.size(), allocator);
 
 	for(std::map<uint64_t, std::shared_ptr<SegmentAnalyticEvent>>::const_iterator i = m_pendingAnalyticEvents.cbegin(); i != m_pendingAnalyticEvents.cend(); ++i) {
 		analyticEventsValue.PushBack(i->second->toJSON(allocator), allocator);

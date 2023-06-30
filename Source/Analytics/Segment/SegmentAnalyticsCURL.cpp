@@ -236,6 +236,7 @@ std::shared_ptr<HTTPRequest> SegmentAnalyticsCURL::createBatchAnalyticEventReque
 	rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator = bodyDocument->GetAllocator();
 
 	rapidjson::Value batchEventArrayValue(rapidjson::kArrayType);
+	batchEventArrayValue.Reserve(analyticEvents.size(), allocator);
 
 	for(std::vector<std::shared_ptr<SegmentAnalyticEvent>>::const_iterator i = analyticEvents.cbegin(); i != analyticEvents.cend(); ++i) {
 		rapidjson::Value eventArrayEntryValue(rapidjson::kObjectType);
