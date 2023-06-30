@@ -236,7 +236,7 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse x position
 	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		spdlog::error("Point is missing '{}' property.", JSON_X_POSITION_PROPERTY_NAME);
 
 		if(error != nullptr) {
 			*error = true;
@@ -259,7 +259,7 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse y position
 	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		spdlog::error("Point is missing '{}' property.", JSON_Y_POSITION_PROPERTY_NAME);
 
 		if(error != nullptr) {
 			*error = true;
@@ -282,7 +282,7 @@ Point3D Point3D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse z position
 	if(!pointValue.HasMember(JSON_Z_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point is missing '{}' property'.", JSON_Z_POSITION_PROPERTY_NAME);
+		spdlog::error("Point is missing '{}' property.", JSON_Z_POSITION_PROPERTY_NAME);
 
 		if(error != nullptr) {
 			*error = true;

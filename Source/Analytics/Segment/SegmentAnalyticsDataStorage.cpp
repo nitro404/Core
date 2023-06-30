@@ -482,7 +482,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 
 	// parse previous session number property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME)) {
-		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -502,7 +502,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 
 	// parse previous application version property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME)) {
-		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property.", JSON_SEGMENT_PREVIOUS_APPLICATION_VERSION_PROPERTY_NAME);
 		return false;
 	}
 
@@ -522,7 +522,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 
 	// parse previous application build property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME)) {
-		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property.", JSON_SEGMENT_PREVIOUS_APPLICATION_BUILD_PROPERTY_NAME);
 		return false;
 	}
 
@@ -542,7 +542,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 
 	// parse anonymous id property
 	if(!value.HasMember(JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME)) {
-		spdlog::error("Segment analytics data is missing '{}' property'.", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
+		spdlog::error("Segment analytics data is missing '{}' property.", JSON_SEGMENT_ANONYMOUS_ID_PROPERTY_NAME);
 		return false;
 	}
 

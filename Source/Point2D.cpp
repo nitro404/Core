@@ -249,7 +249,7 @@ Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse x position
 	if(!pointValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point2D is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		spdlog::error("Point2D is missing '{}' property.", JSON_X_POSITION_PROPERTY_NAME);
 
 		if(error != nullptr) {
 			*error = true;
@@ -272,7 +272,7 @@ Point2D Point2D::parseFrom(const rapidjson::Value & pointValue, bool * error) {
 
 	// parse y position
 	if(!pointValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Point2D is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		spdlog::error("Point2D is missing '{}' property.", JSON_Y_POSITION_PROPERTY_NAME);
 
 		if(error != nullptr) {
 			*error = true;

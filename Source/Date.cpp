@@ -293,7 +293,7 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 
 	// parse month
 	if(!dateValue.HasMember(JSON_DATE_MONTH_PROPERTY_NAME)) {
-		spdlog::error("Date is missing '{}' property'.", JSON_DATE_MONTH_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property.", JSON_DATE_MONTH_PROPERTY_NAME);
 		return false;
 	}
 
@@ -318,7 +318,7 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 
 	// parse day
 	if(!dateValue.HasMember(JSON_DATE_DAY_PROPERTY_NAME)) {
-		spdlog::error("Date is missing '{}' property'.", JSON_DATE_DAY_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property.", JSON_DATE_DAY_PROPERTY_NAME);
 		return false;
 	}
 
@@ -338,7 +338,7 @@ bool Date::setValue(const rapidjson::Value & dateValue) {
 
 	// parse year
 	if(!dateValue.HasMember(JSON_DATE_YEAR_PROPERTY_NAME)) {
-		spdlog::error("Date is missing '{}' property'.", JSON_DATE_YEAR_PROPERTY_NAME);
+		spdlog::error("Date is missing '{}' property.", JSON_DATE_YEAR_PROPERTY_NAME);
 		return false;
 	}
 

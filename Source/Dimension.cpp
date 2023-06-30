@@ -96,7 +96,7 @@ Dimension Dimension::parseFrom(const rapidjson::Value & dimensionValue, bool * e
 
 	// parse width
 	if(!dimensionValue.HasMember(JSON_WIDTH_PROPERTY_NAME)) {
-		spdlog::error("Dimension is missing '{}' property'.", JSON_WIDTH_PROPERTY_NAME);
+		spdlog::error("Dimension is missing '{}' property.", JSON_WIDTH_PROPERTY_NAME);
 		return {};
 	}
 
@@ -109,7 +109,7 @@ Dimension Dimension::parseFrom(const rapidjson::Value & dimensionValue, bool * e
 
 	// parse height
 	if(!dimensionValue.HasMember(JSON_HEIGHT_PROPERTY_NAME)) {
-		spdlog::error("Dimension is missing '{}' property'.", JSON_HEIGHT_PROPERTY_NAME);
+		spdlog::error("Dimension is missing '{}' property.", JSON_HEIGHT_PROPERTY_NAME);
 		return {};
 	}
 

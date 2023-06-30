@@ -406,7 +406,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 
 	// parse analytic event ID
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME)) {
-		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property.", JSON_SEGMENT_ANALYTIC_EVENT_ID_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -426,7 +426,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 
 	// parse analytic event type
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME)) {
-		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property.", JSON_SEGMENT_ANALYTIC_EVENT_TYPE_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -446,7 +446,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 
 	// parse analytic event name
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME)) {
-		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property.", JSON_SEGMENT_ANALYTIC_EVENT_NAME_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -480,7 +480,7 @@ std::unique_ptr<SegmentAnalyticEvent> SegmentAnalyticEvent::parseFrom(const rapi
 
 	// parse analytic event timestamp
 	if(!analyticEventValue.HasMember(JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME)) {
-		spdlog::error("Segment analytic event is missing '{}' property'.", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME);
+		spdlog::error("Segment analytic event is missing '{}' property.", JSON_SEGMENT_ANALYTIC_EVENT_TIMESTAMP_PROPERTY_NAME);
 		return nullptr;
 	}
 

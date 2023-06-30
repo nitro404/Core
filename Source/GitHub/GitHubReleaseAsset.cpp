@@ -138,7 +138,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse id
 	if(!assetValue.HasMember(JSON_ID_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_ID_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_ID_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -153,7 +153,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse file name
 	if(!assetValue.HasMember(JSON_FILE_NAME_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_FILE_NAME_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_FILE_NAME_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -173,7 +173,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse file size
 	if(!assetValue.HasMember(JSON_FILE_SIZE_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_FILE_SIZE_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_FILE_SIZE_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -188,7 +188,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse label
 	if(!assetValue.HasMember(JSON_LABEL_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_LABEL_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_LABEL_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -207,7 +207,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse asset url
 	if(!assetValue.HasMember(JSON_ASSET_URL_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_ASSET_URL_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_ASSET_URL_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -227,7 +227,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse download url
 	if(!assetValue.HasMember(JSON_DOWNLOAD_URL_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_DOWNLOAD_URL_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_DOWNLOAD_URL_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -247,7 +247,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse content type
 	if(!assetValue.HasMember(JSON_CONTENT_TYPE_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_CONTENT_TYPE_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_CONTENT_TYPE_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -267,7 +267,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse created timestamp
 	if(!assetValue.HasMember(JSON_CREATED_TIMESTAMP_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_CREATED_TIMESTAMP_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_CREATED_TIMESTAMP_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -287,7 +287,7 @@ std::unique_ptr<GitHubReleaseAsset> GitHubReleaseAsset::parseFrom(const rapidjso
 
 	// parse updated timestamp
 	if(!assetValue.HasMember(JSON_UPDATED_TIMESTAMP_PROPERTY_NAME)) {
-		spdlog::error("GitHub release asset is missing '{}' property'.", JSON_UPDATED_TIMESTAMP_PROPERTY_NAME);
+		spdlog::error("GitHub release asset is missing '{}' property.", JSON_UPDATED_TIMESTAMP_PROPERTY_NAME);
 		return nullptr;
 	}
 

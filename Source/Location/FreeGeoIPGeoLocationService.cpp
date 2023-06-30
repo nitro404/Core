@@ -74,7 +74,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse ip address
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_IP_ADDRESS_PROPERTY_NAME);
 		return {};
 	}
 
@@ -94,7 +94,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse country name
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_COUNTRY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
@@ -114,7 +114,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse country code
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_COUNTRY_CODE_PROPERTY_NAME);
 		return {};
 	}
 
@@ -134,7 +134,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse region name
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_REGION_NAME_PROPERTY_NAME);
 		return {};
 	}
 
@@ -154,7 +154,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse region code
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_REGION_CODE_PROPERTY_NAME);
 		return {};
 	}
 
@@ -174,7 +174,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse city
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_CITY_NAME_PROPERTY_NAME);
 		return {};
 	}
 
@@ -194,7 +194,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse time zone
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_TIME_ZONE_PROPERTY_NAME);
 		return {};
 	}
 
@@ -214,7 +214,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse latitude
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_LATITUDE_PROPERTY_NAME);
 		return {};
 	}
 
@@ -229,7 +229,7 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 
 	// parse longitude
 	if(!geoLocationDocument->HasMember(JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME)) {
-		spdlog::error("Geo location data is missing '{}' property'.", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME);
+		spdlog::error("Geo location data is missing '{}' property.", JSON_GEO_LOCATION_LONGITUDE_PROPERTY_NAME);
 		return {};
 	}
 

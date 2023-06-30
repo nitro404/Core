@@ -236,7 +236,7 @@ Rect Rect::parseFrom(const rapidjson::Value & rectangleValue, bool * error) {
 
 	// parse x position
 	if(!rectangleValue.HasMember(JSON_X_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Rectangle is missing '{}' property'.", JSON_X_POSITION_PROPERTY_NAME);
+		spdlog::error("Rectangle is missing '{}' property.", JSON_X_POSITION_PROPERTY_NAME);
 		return {};
 	}
 
@@ -249,7 +249,7 @@ Rect Rect::parseFrom(const rapidjson::Value & rectangleValue, bool * error) {
 
 	// parse y position
 	if(!rectangleValue.HasMember(JSON_Y_POSITION_PROPERTY_NAME)) {
-		spdlog::error("Rectangle is missing '{}' property'.", JSON_Y_POSITION_PROPERTY_NAME);
+		spdlog::error("Rectangle is missing '{}' property.", JSON_Y_POSITION_PROPERTY_NAME);
 		return {};
 	}
 
@@ -262,7 +262,7 @@ Rect Rect::parseFrom(const rapidjson::Value & rectangleValue, bool * error) {
 
 	// parse width
 	if(!rectangleValue.HasMember(JSON_WIDTH_PROPERTY_NAME)) {
-		spdlog::error("Rectangle is missing '{}' property'.", JSON_WIDTH_PROPERTY_NAME);
+		spdlog::error("Rectangle is missing '{}' property.", JSON_WIDTH_PROPERTY_NAME);
 		return {};
 	}
 
@@ -275,7 +275,7 @@ Rect Rect::parseFrom(const rapidjson::Value & rectangleValue, bool * error) {
 
 	// parse height
 	if(!rectangleValue.HasMember(JSON_HEIGHT_PROPERTY_NAME)) {
-		spdlog::error("Rectangle is missing '{}' property'.", JSON_HEIGHT_PROPERTY_NAME);
+		spdlog::error("Rectangle is missing '{}' property.", JSON_HEIGHT_PROPERTY_NAME);
 		return {};
 	}
 

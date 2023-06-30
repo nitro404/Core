@@ -77,7 +77,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// parse file name
 	if(!downloadValue.HasMember(JSON_FILE_NAME_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' property'.", JSON_FILE_NAME_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' property.", JSON_FILE_NAME_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -97,7 +97,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// parse file size
 	if(!downloadValue.HasMember(JSON_FILE_SIZE_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' property'.", JSON_FILE_SIZE_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' property.", JSON_FILE_SIZE_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -112,7 +112,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// parse created timestamp
 	if(!downloadValue.HasMember(JSON_CREATED_TIMESTAMP_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' property'.", JSON_CREATED_TIMESTAMP_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' property.", JSON_CREATED_TIMESTAMP_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -132,7 +132,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// get links object
 	if(!downloadValue.HasMember(JSON_DOWNLOAD_LINKS_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' property'.", JSON_DOWNLOAD_LINKS_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' property.", JSON_DOWNLOAD_LINKS_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -145,7 +145,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// get links self object
 	if(!linksValue.HasMember(JSON_DOWNLOAD_LINKS_SELF_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' property'.", JSON_DOWNLOAD_LINKS_SELF_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' property.", JSON_DOWNLOAD_LINKS_SELF_PROPERTY_NAME);
 		return nullptr;
 	}
 
@@ -158,7 +158,7 @@ std::unique_ptr<BitbucketDownload> BitbucketDownload::parseFrom(const rapidjson:
 
 	// parse links self href value (download url)
 	if(!linksSelfValue.HasMember(JSON_DOWNLOAD_LINKS_SELF_HREF_PROPERTY_NAME)) {
-		spdlog::error("Bitbucket download is missing '{}' '{}' '{}' property'.", JSON_DOWNLOAD_LINKS_PROPERTY_NAME, JSON_DOWNLOAD_LINKS_SELF_PROPERTY_NAME, JSON_DOWNLOAD_LINKS_SELF_HREF_PROPERTY_NAME);
+		spdlog::error("Bitbucket download is missing '{}' '{}' '{}' property.", JSON_DOWNLOAD_LINKS_PROPERTY_NAME, JSON_DOWNLOAD_LINKS_SELF_PROPERTY_NAME, JSON_DOWNLOAD_LINKS_SELF_HREF_PROPERTY_NAME);
 		return nullptr;
 	}
 
