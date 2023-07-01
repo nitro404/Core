@@ -298,14 +298,6 @@ SevenZipArchive::ExtractionData & SevenZipArchive::getCachedExtractionData() {
 	return m_cachedExtractionData;
 }
 
-std::chrono::time_point<std::chrono::system_clock> SevenZipArchive::getTimePointFromNTFSFileTime(const CNtfsFileTime & ntfsFileTime) {
-	FILETIME fileTime;
-	fileTime.dwLowDateTime = static_cast<DWORD>(ntfsFileTime.Low);
-	fileTime.dwHighDateTime = static_cast<DWORD>(ntfsFileTime.High);
-
-	return std::chrono::system_clock::from_time_t(time_t{0}) + std::chrono::milliseconds(((fileTime.dwLowDateTime | (static_cast<UInt64>(fileTime.dwHighDateTime) << 32)) / 10000ULL) - 11644473600000ULL);
-}
-
 SevenZipArchive::ArchiveStreamHandle SevenZipArchive::createArchiveStreamHandle() {
 	return ArchiveStreamHandle(new CFileInStream(), [](CFileInStream * archiveStreamHandle) {
 		if(archiveStreamHandle != nullptr) {

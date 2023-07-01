@@ -93,7 +93,6 @@ private:
 	void updateParentArchive();
 
 	static std::unique_ptr<SevenZipArchive> createFrom(ArchiveStreamHandle archiveStream, const std::string & filePath, std::unique_ptr<ByteBuffer> data, uint64_t compressedSize);
-	static std::chrono::time_point<std::chrono::system_clock> getTimePointFromNTFSFileTime(const CNtfsFileTime & ntfsFileTime);
 	static ArchiveStreamHandle createArchiveStreamHandle();
 	static LookStreamHandle createLookStreamHandle(ISzAlloc & allocator);
 	static ArchiveHandle createArchiveHandle(ISzAlloc & allocator);

@@ -207,6 +207,7 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Platform/Windows/WindowsUtilities.h
 	Platform/Windows/WindowsUtilities.cpp
 	Utilities/Windows/ThreadUtilitiesWindows.cpp
+	Utilities/Windows/TimeUtilitiesWindows.h
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 

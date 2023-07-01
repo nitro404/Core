@@ -3,6 +3,10 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
+#if _WIN32
+#include "Utilities/Windows/TimeUtilitiesWindows.h"
+#endif // _WIN32
+
 #include <SevenZip/C/7z.h>
 
 #include <spdlog/spdlog.h>
@@ -80,7 +84,17 @@ std::chrono::time_point<std::chrono::system_clock> SevenZipArchive::Entry::getDa
 		return std::chrono::system_clock::from_time_t(time_t{0});
 	}
 
-	return SevenZipArchive::getTimePointFromNTFSFileTime(archiveHandle->MTime.Vals[m_index]);
+#if _WIN32
+	const CNtfsFileTime & ntfsFileTime = archiveHandle->MTime.Vals[m_index];
+
+	FILETIME fileTime;
+	fileTime.dwLowDateTime = static_cast<DWORD>(ntfsFileTime.Low);
+	fileTime.dwHighDateTime = static_cast<DWORD>(ntfsFileTime.High);
+
+	return Utilities::fileTimeToSystemClockTime(fileTime);
+#else
+	return std::chrono::system_clock::from_time_t(time_t{0});
+#endif // _WIN32
 }
 
 uint64_t SevenZipArchive::Entry::getCompressedSize() const {
