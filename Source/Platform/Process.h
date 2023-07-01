@@ -28,6 +28,9 @@ public:
 	bool wasForceTerminated() const;
 	bool didExitNormally() const;
 	virtual std::optional<Priority> getPriority() const = 0;
+virtual void getMemoryUsageInfo() const = 0;
+virtual void getIOInfo() const = 0;
+virtual void getProcessUptime() const = 0;
 
 	boost::signals2::signal<void (uint64_t /* nativeExitCode */, bool /* forceTerminated */)> terminated;
 

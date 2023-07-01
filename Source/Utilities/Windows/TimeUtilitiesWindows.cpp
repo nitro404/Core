@@ -37,6 +37,23 @@ std::tm Utilities::getUTCTime(bool * error) {
 	return invalidTime;
 }
 
+std::chrono::milliseconds Utilities::fileTimeToDuration(const FILETIME & fileTime) {
+// TODO: ??
+	SYSTEMTIME systemTime = FileTimeToSystemTime(fileTime);
+
+	std::tm time;
+	time.tm_sec = st.wSecond;
+	time.tm_min = st.wMinute;
+	time.tm_hour = st.wHour;
+	time.tm_mday = st.wDay;
+	time.tm_mon = st.wMonth - 1;
+	time.tm_year = st.wYear - 1900;
+	time.tm_isdst = -1;
+	std::time_t t = std::mktime(&time);
+
+	return std::chrono::milliseconds(((fileTime.dwLowDateTime | (static_cast<uint64_t>(fileTime.dwHighDateTime) << 32)) / 10000ULL) - 11644473600000ULL);
+}
+
 std::chrono::time_point<std::chrono::system_clock> Utilities::fileTimeToSystemClockTime(const FILETIME & fileTime) {
-	return std::chrono::system_clock::from_time_t(time_t{0}) + std::chrono::milliseconds(((fileTime.dwLowDateTime | (static_cast<uint64_t>(fileTime.dwHighDateTime) << 32)) / 10000ULL) - 11644473600000ULL);
+	return std::chrono::system_clock::from_time_t(time_t{0}) + fileTimeToDuration(fileTime);
 }

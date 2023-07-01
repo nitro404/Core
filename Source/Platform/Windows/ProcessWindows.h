@@ -25,6 +25,9 @@ public:
 	virtual void doTerminate() override;
 	virtual uint64_t getNativeExitCode() const override;
 	virtual std::optional<Priority> getPriority() const override;
+virtual void getMemoryUsageInfo() const override;
+virtual void getIOInfo() const override;
+virtual void getProcessUptime() const override;
 
 	static DWORD getWindowsProcessPriority(Process::Priority priority);
 	static Process::Priority getProcessPriority(DWORD priority);

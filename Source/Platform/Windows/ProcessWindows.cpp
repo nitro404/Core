@@ -1,5 +1,13 @@
 #include "ProcessWindows.h"
 
+#include "Utilities/FileUtilities.h"
+#include "Utilities/Windows/TimeUtilitiesWindows.h"
+
+#include <spdlog/spdlog.h>
+
+#include <Psapi.h>
+#include <WinBase.h>
+
 void CALLBACK onProcessExited(LPVOID context, BOOLEAN timedOut) {
 	reinterpret_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
 }
@@ -100,6 +108,76 @@ std::optional<Process::Priority> ProcessWindows::getPriority() const {
 
 	return getProcessPriority(priority);
 }
+
+void ProcessWindows::getMemoryUsageInfo() const {
+	PROCESS_MEMORY_COUNTERS processMemoryCounters;
+
+	if(!GetProcessMemoryInfo(m_processInfo.hProcess, &processMemoryCounters, sizeof(processMemoryCounters))) {
+		return;
+	}
+
+spdlog::info("PageFaultCount: {}", processMemoryCounters.PageFaultCount);
+spdlog::info("WorkingSetSize: {}", Utilities::fileSizeToString(processMemoryCounters.WorkingSetSize));
+spdlog::info("QuotaPagedPoolUsage: {}", Utilities::fileSizeToString(processMemoryCounters.QuotaPagedPoolUsage));
+spdlog::info("QuotaNonPagedPoolUsage: {}", Utilities::fileSizeToString(processMemoryCounters.QuotaNonPagedPoolUsage));
+spdlog::info("PagefileUsage: {}", Utilities::fileSizeToString(processMemoryCounters.PagefileUsage));
+}
+
+void ProcessWindows::getIOInfo() const {
+	IO_COUNTERS processIOCounters;
+
+	if(!GetProcessIoCounters(m_processInfo.hProcess, &processIOCounters)) {
+		return;
+	}
+
+spdlog::info("ReadOperationCount: {}", processIOCounters.ReadOperationCount);
+spdlog::info("WriteOperationCount: {}", processIOCounters.WriteOperationCount);
+spdlog::info("OtherOperationCount: {}", processIOCounters.OtherOperationCount);
+spdlog::info("ReadTransferCount: {}", Utilities::fileSizeToString(processIOCounters.ReadTransferCount));
+spdlog::info("WriteTransferCount: {}", Utilities::fileSizeToString(processIOCounters.WriteTransferCount));
+spdlog::info("OtherTransferCount: {}", Utilities::fileSizeToString(processIOCounters.OtherTransferCount));
+}
+
+void ProcessWindows::getProcessUptime() const {
+	FILETIME processCreationFileTime;
+	FILETIME processExitFileTime;
+	FILETIME kernelFileTime;
+	FILETIME userFileTime;
+
+	if(!GetProcessTimes(m_processInfo.hProcess, &processCreationFileTime, &processExitFileTime, &kernelFileTime, &userFileTime)) {
+		return;
+	}
+
+	std::chrono::time_point<std::chrono::system_clock> processCreationTime = Utilities::fileTimeToSystemClockTime(processCreationFileTime);
+	std::chrono::milliseconds kernelTime = Utilities::fileTimeToDuration(kernelFileTime);
+	std::chrono::milliseconds userTime = Utilities::fileTimeToDuration(userFileTime);
+
+spdlog::info("ProcessCreationTime: {}", Utilities::timePointToString(processCreationTime, Utilities::TimeFormat::ISO8601));
+spdlog::info("KernelTime: {} ms", kernelTime.count());
+spdlog::info("UserTime: {} ms", userTime.count());
+}
+
+/*
+// TODO: hmm.. none of this seems valid? not sure.:
+PageFaultCount: 23816
+WorkingSetSize: 82120704
+QuotaPagedPoolUsage: 343448
+QuotaNonPagedPoolUsage: 29016
+PagefileUsage: 122527744
+ReadOperationCount: 42477
+WriteOperationCount: 5
+OtherOperationCount: 1643
+ReadTransferCount: 5108387
+WriteTransferCount: 683
+OtherTransferCount: 355368
+ProcessCreationTime: 2023-07-01T05:56:26.3710000Z
+ProcessExitTime: 1601-01-01T00:00:00.0000000Z
+// TODO: this looks like some sort of cumulate time represented in a file time object? Maybe just count it?:
+KernelTime: 1601-01-01T00:00:00.3740000Z
+UserTime: 1601-01-01T00:00:03.3690000Z
+// TODO: what about CPU usage? maybe not relevant.
+// TODO: what about process priority?
+*/
 
 DWORD ProcessWindows::getWindowsProcessPriority(Process::Priority priority) {
 	switch(priority) {

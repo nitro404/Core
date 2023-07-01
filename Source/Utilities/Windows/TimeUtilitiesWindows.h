@@ -9,6 +9,7 @@
 
 namespace Utilities {
 
+	std::chrono::milliseconds fileTimeToDuration(const FILETIME & fileTime);
 	std::chrono::time_point<std::chrono::system_clock> fileTimeToSystemClockTime(const FILETIME & fileTime);
 
 }
