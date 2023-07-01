@@ -91,6 +91,16 @@ uint64_t ProcessWindows::getNativeExitCode() const {
 	return m_exitCode;
 }
 
+std::optional<Process::Priority> ProcessWindows::getPriority() const {
+	DWORD priority = GetPriorityClass(m_processInfo.hProcess);
+
+	if(priority == 0) {
+		return {};
+	}
+
+	return getProcessPriority(priority);
+}
+
 DWORD ProcessWindows::getWindowsProcessPriority(Process::Priority priority) {
 	switch(priority) {
 		case Priority::Idle: {
@@ -114,4 +124,29 @@ DWORD ProcessWindows::getWindowsProcessPriority(Process::Priority priority) {
 	}
 
 	return NORMAL_PRIORITY_CLASS;
+}
+
+Process::Priority ProcessWindows::getProcessPriority(DWORD priority) {
+	switch(priority) {
+		case IDLE_PRIORITY_CLASS: {
+			return Priority::Idle;
+		}
+		case BELOW_NORMAL_PRIORITY_CLASS: {
+			return Priority::BelowNormal;
+		}
+		case NORMAL_PRIORITY_CLASS: {
+			return Priority::Normal;
+		}
+		case ABOVE_NORMAL_PRIORITY_CLASS: {
+			return Priority::AboveNormal;
+		}
+		case HIGH_PRIORITY_CLASS: {
+			return Priority::High;
+		}
+		case REALTIME_PRIORITY_CLASS: {
+			return Priority::Realtime;
+		}
+	}
+
+	return Priority::Normal;
 }

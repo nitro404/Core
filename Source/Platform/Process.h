@@ -4,6 +4,7 @@
 #include <boost/signals2.hpp>
 
 #include <chrono>
+#include <optional>
 #include <string>
 
 class Process {
@@ -26,6 +27,7 @@ public:
 	virtual uint64_t getNativeExitCode() const = 0;
 	bool wasForceTerminated() const;
 	bool didExitNormally() const;
+	virtual std::optional<Priority> getPriority() const = 0;
 
 	boost::signals2::signal<void (uint64_t /* nativeExitCode */, bool /* forceTerminated */)> terminated;
 
