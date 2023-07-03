@@ -38,6 +38,10 @@ void LogSystem::disable() {
 void LogSystem::setEnabled(bool enabled) {
 	std::lock_guard lock(m_mutex);
 
+	if(isEnabled() == enabled) {
+		return;
+	}
+
 	if(enabled) {
 		if(m_previousLevel.has_value()) {
 			m_logger->set_level(m_previousLevel.value());
@@ -50,6 +54,8 @@ void LogSystem::setEnabled(bool enabled) {
 			m_logger->set_level(spdlog::level::level_enum::off);
 		}
 	}
+
+	statusChanged(enabled);
 }
 
 spdlog::level::level_enum LogSystem::getLevel() const {
@@ -57,7 +63,7 @@ spdlog::level::level_enum LogSystem::getLevel() const {
 }
 
 void LogSystem::setLevel(spdlog::level::level_enum level) {
-	std::lock_guard lock(m_mutex);
+	std::unique_lock lock(m_mutex);
 
 	if(level == spdlog::level::level_enum::n_levels) {
 		return;
@@ -69,6 +75,10 @@ void LogSystem::setLevel(spdlog::level::level_enum level) {
 	else {
 		m_logger->set_level(level);
 	}
+
+	lock.unlock();
+
+	logLevelChanged(level);
 }
 
 spdlog::level::level_enum LogSystem::getFlushLevel() const {

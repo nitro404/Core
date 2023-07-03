@@ -3,6 +3,7 @@
 
 #include "Singleton/Singleton.h"
 
+#include <boost/signals2.hpp>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -30,6 +31,9 @@ public:
 	bool addLogSink(std::shared_ptr<spdlog::sinks::sink> logSink);
 	void removeLogSink(const std::shared_ptr<spdlog::sinks::sink> & logSink);
 	void clearLogSinks();
+
+	boost::signals2::signal<void (spdlog::level::level_enum /* logLevel */)> logLevelChanged;
+	boost::signals2::signal<void (bool /* enabled */)> statusChanged;
 
 	static const spdlog::level::level_enum DEFAULT_LEVEL;
 	static const char * DEFAULT_PATTERN;
