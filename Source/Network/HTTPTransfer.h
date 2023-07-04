@@ -4,6 +4,7 @@
 #include "ByteBuffer.h"
 #include "HTTPHeaders.h"
 
+#include <boost/signals2.hpp>
 #include <rapidjson/document.h>
 
 #include <cstdint>

@@ -4,8 +4,6 @@
 #include "BitmaskOperators.h"
 #include "HTTPTransfer.h"
 
-#include <boost/signals2.hpp>
-
 #include <chrono>
 #include <future>
 #include <memory>
