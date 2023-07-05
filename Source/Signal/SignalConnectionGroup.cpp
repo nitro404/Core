@@ -36,4 +36,6 @@ void SignalConnectionGroup::disconnect() {
 	for(boost::signals2::connection & connection : m_connections) {
 		connection.disconnect();
 	}
+
+	clear();
 }
