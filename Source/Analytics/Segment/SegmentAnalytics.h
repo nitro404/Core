@@ -62,12 +62,12 @@ public:
 	uint16_t getMaxEventQueueSize() const;
 	virtual bool shouldTrackApplicationEvents() const = 0;
 	std::string getAnonymousID() const;
-	bool setIdentity(const std::string & userID, const std::map<std::string, std::any> & traits);
+	bool setIdentity(const std::string & userID, const std::map<std::string, std::any> & traits = {});
 	bool setAlias(const std::string & previousUserID);
-	bool setGroup(const std::string & group, const std::map<std::string, std::any> & traits);
-	bool track(const std::string & name, const std::map<std::string, std::any> & metrics);
-	bool screen(const std::string & name, const std::map<std::string, std::any> & metrics);
-	bool screen(const std::string & name, const std::string & category, const std::map<std::string, std::any> & metrics);
+	bool setGroup(const std::string & group, const std::map<std::string, std::any> & traits = {});
+	bool track(const std::string & name, const std::map<std::string, std::any> & metrics = {});
+	bool screen(const std::string & name, const std::map<std::string, std::any> & metrics = {});
+	bool screen(const std::string & name, const std::string & category, const std::map<std::string, std::any> & metrics = {});
 	virtual bool flush(std::chrono::milliseconds waitForDuration = std::chrono::milliseconds(0)) = 0;
 	virtual void reset();
 	bool onApplicationClosed();
