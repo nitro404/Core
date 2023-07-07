@@ -228,7 +228,7 @@ void ByteBuffer::fill(uint8_t value, size_t start, size_t end) {
 		return;
 	}
 
-	memset(m_data->data() + (start * sizeof(uint8_t)), 0, ((end < m_data->size() ? end : m_data->size() - 1) - start + 1) * sizeof(uint8_t));
+	memset(m_data->data() + (start * sizeof(uint8_t)), value, ((end < m_data->size() ? end : m_data->size() - 1) - start + 1) * sizeof(uint8_t));
 }
 
 void ByteBuffer::reverse(size_t start, size_t end) {
