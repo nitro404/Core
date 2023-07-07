@@ -182,6 +182,8 @@ public:
 	std::optional<double> readDouble() const;
 	std::string readString(size_t length, bool * error) const;
 	std::optional<std::string> readString(size_t length) const;
+	std::string readFixedLengthString(size_t length, size_t fixedLength, bool * error) const;
+	std::optional<std::string> readFixedLengthString(size_t length, size_t fixedLength) const;
 	std::string readNullTerminatedString(bool * error) const;
 	std::optional<std::string> readNullTerminatedString() const;
 	std::string readLine(bool * error) const;
@@ -238,7 +240,9 @@ public:
 	bool writeUnsignedLong(uint64_t value);
 	bool writeFloat(float value);
 	bool writeDouble(double value);
+	bool writeFillByte(size_t numberOfBytes, uint8_t value = 0);
 	bool writeString(const std::string & value);
+	bool writeFixedLengthString(const std::string & value, size_t fixedLength);
 	bool writeNullTerminatedString(const std::string & value);
 	bool writeLine(const std::string & value, const std::string & newLine = "\n");
 	bool writeBytes(const uint8_t * data, size_t size);

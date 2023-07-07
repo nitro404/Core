@@ -1424,6 +1424,49 @@ std::optional<std::string> ByteBuffer::readString(size_t length) const {
 	return value;
 }
 
+std::string ByteBuffer::readFixedLengthString(size_t length, size_t fixedLength, bool * error) const {
+	if(length > fixedLength) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	bool internalError = false;
+	std::string value(readString(length, &internalError));
+
+	if(internalError) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	if(!skipReadBytes(fixedLength - length)) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	return value;
+}
+
+std::optional<std::string> ByteBuffer::readFixedLengthString(size_t length, size_t fixedLength) const {
+	bool error = false;
+
+	std::string value(readFixedLengthString(length, fixedLength, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
 std::string ByteBuffer::readNullTerminatedString(bool * error) const {
 	bool e = false;
 	std::string value(getNullTerminatedString(m_readOffset, &e));
@@ -1886,6 +1929,16 @@ bool ByteBuffer::writeDouble(double value) {
 	return false;
 }
 
+bool ByteBuffer::writeFillByte(size_t numberOfBytes, uint8_t value) {
+	for(size_t i = 0; i < numberOfBytes; i++) {
+		if(!writeUnsignedByte(value)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool ByteBuffer::writeString(const std::string & value) {
 	if(putString(value, m_writeOffset)) {
 		m_writeOffset += value.length() * sizeof(uint8_t);
@@ -1894,6 +1947,22 @@ bool ByteBuffer::writeString(const std::string & value) {
 	}
 
 	return false;
+}
+
+bool ByteBuffer::writeFixedLengthString(const std::string & value, size_t fixedLength) {
+	if(value.length() > fixedLength) {
+		return false;
+	}
+
+	if(!writeString(value)) {
+		return false;
+	}
+
+	if(!writeFillByte(fixedLength - value.length())) {
+		return false;
+	}
+
+	return true;
 }
 
 bool ByteBuffer::writeNullTerminatedString(const std::string & value) {
