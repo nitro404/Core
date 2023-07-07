@@ -71,7 +71,7 @@ public:
 	void shrinkToFit();
 	Endianness getEndianness() const;
 	void setEndianness(Endianness endianness) const;
-	void fill(uint8_t value, size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
+	bool fill(uint8_t value, size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void reverse(size_t start = 0, size_t end = std::numeric_limits<size_t>::max());
 	void clear();
 	std::string getMD5(HashFormat hashFormat = DEFAULT_HASH_FORMAT) const;

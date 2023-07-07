@@ -223,12 +223,31 @@ void ByteBuffer::setEndianness(Endianness endianness) const {
 	m_endianness = endianness;
 }
 
-void ByteBuffer::fill(uint8_t value, size_t start, size_t end) {
-	if(start >= end) {
-		return;
+bool ByteBuffer::fill(uint8_t value, size_t start, size_t end) {
+	if(end == std::numeric_limits<size_t>::max()) {
+		end = m_data->size() - 1;
 	}
 
-	memset(m_data->data() + (start * sizeof(uint8_t)), value, ((end < m_data->size() ? end : m_data->size() - 1) - start + 1) * sizeof(uint8_t));
+	if(start == end) {
+		return true;
+	}
+	else if(start > end) {
+		return false;
+	}
+
+	std::memset(m_data->data() + (start * sizeof(uint8_t)), value, ((end < m_data->size() ? end : m_data->size() - 1) - start + 1) * sizeof(uint8_t));
+
+	if(end >= m_data->size()) {
+		size_t additionalBytes = end - m_data->size() + 1;
+
+		if(checkOverflow(m_data->size(), additionalBytes)) {
+			return false;
+		}
+
+		resize(m_data->size() + additionalBytes, value);
+	}
+
+	return true;
 }
 
 void ByteBuffer::reverse(size_t start, size_t end) {
