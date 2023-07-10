@@ -339,6 +339,32 @@ bool ByteBuffer::hasMoreLines() const {
 	return m_readOffset < m_data->size();
 }
 
+size_t ByteBuffer::totalNumberOfLines() const {
+	return numberOfLinesAfterOffset(0);
+}
+
+size_t ByteBuffer::numberOfLinesRemaining() const {
+	return numberOfLinesAfterOffset(m_readOffset);
+}
+
+size_t ByteBuffer::numberOfLinesAfterOffset(size_t offset) const {
+	size_t currentOffset = offset;
+	size_t lineCount = 0;
+
+	while(currentOffset < m_data->size()) {
+		size_t nextLineOffset = indexOfNextLineFrom(currentOffset);
+
+		if(nextLineOffset == std::numeric_limits<size_t>::max()) {
+			break;
+		}
+
+		lineCount++;
+		currentOffset = nextLineOffset;
+	}
+
+	return lineCount;
+}
+
 bool ByteBuffer::skipToNextLine(size_t * endOfLineIndex) const {
 	size_t nextLineIndex = indexOfNextLine(endOfLineIndex);
 

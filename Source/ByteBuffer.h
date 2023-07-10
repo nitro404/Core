@@ -87,6 +87,9 @@ public:
 	bool canReadBytes(size_t numberOfBytes) const;
 	bool skipReadBytes(size_t numberOfBytes) const;
 	bool hasMoreLines() const;
+	size_t totalNumberOfLines() const;
+	size_t numberOfLinesRemaining() const;
+	size_t numberOfLinesAfterOffset(size_t offset) const;
 	bool skipToNextLine(size_t * endOfLineIndex = nullptr) const;
 	size_t indexOfNextLine(size_t * endOfLineIndex = nullptr) const;
 	size_t indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex = nullptr) const;
