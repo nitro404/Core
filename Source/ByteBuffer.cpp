@@ -336,7 +336,7 @@ bool ByteBuffer::hasMoreLines() const {
 		}
 	}
 
-	return false;
+	return m_readOffset < m_data->size();
 }
 
 bool ByteBuffer::skipToNextLine(size_t * endOfLineIndex) const {
@@ -358,18 +358,23 @@ size_t ByteBuffer::indexOfNextLine(size_t * endOfLineIndex) const {
 size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) const {
 	bool foundCarriageReturn = false;
 	bool foundNewline = false;
+	size_t currentOffset = offset;
 	uint8_t currentByte = 0;
 
-	while(offset < m_data->size()) {
-		currentByte = (*m_data)[offset];
+	if(currentOffset >= m_data->size()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	while(currentOffset < m_data->size()) {
+		currentByte = (*m_data)[currentOffset];
 
 		if(currentByte == '\n') {
 			if(foundNewline) {
-				return offset;
+				return currentOffset;
 			}
 			else if(!foundCarriageReturn) {
 				if(endOfLineIndex != nullptr) {
-					*endOfLineIndex = offset == 0 ? 0 : offset - 1;
+					*endOfLineIndex = currentOffset == 0 ? 0 : currentOffset - 1;
 				}
 			}
 
@@ -379,14 +384,27 @@ size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) c
 			foundCarriageReturn = true;
 
 			if(endOfLineIndex != nullptr) {
-				*endOfLineIndex = offset == 0 ? 0 : offset - 1;
+				*endOfLineIndex = currentOffset == 0 ? 0 : currentOffset - 1;
 			}
 		}
 		else if(foundCarriageReturn || foundNewline) {
-			return offset;
+			return currentOffset;
 		}
 
-		offset++;
+		currentOffset++;
+	}
+
+	if(offset < m_data->size()) {
+		if(foundCarriageReturn || foundNewline) {
+			return currentOffset;
+		}
+		else {
+			if(endOfLineIndex != nullptr) {
+				*endOfLineIndex = m_data->size() - 1;
+			}
+
+			return m_data->size();
+		}
 	}
 
 	return std::numeric_limits<size_t>::max();
@@ -755,13 +773,36 @@ std::string ByteBuffer::getLine(size_t offset, size_t * nextLineIndex, bool * er
 
 	size_t endOfLineIndex = std::numeric_limits<size_t>::max();
 	size_t nextLineIndexInternal = indexOfNextLineFrom(offset, &endOfLineIndex);
-	size_t lineLength = nextLineIndexInternal != std::numeric_limits<size_t>::max() ? endOfLineIndex - offset + 1 : m_data->size() - offset;
+	size_t lineLength = 0;
+
+	if(nextLineIndexInternal != std::numeric_limits<size_t>::max()) {
+		if(endOfLineIndex == 0) {
+			lineLength = 0;
+		}
+		else {
+			lineLength = endOfLineIndex - offset + 1;
+		}
+	}
+	else {
+		lineLength = m_data->size() - offset;
+		uint8_t currentByte = 0;
+
+		while(lineLength != 0) {
+			currentByte = (*m_data)[m_readOffset + lineLength - 1];
+
+			if(currentByte != '\r' && currentByte != '\n') {
+				break;
+			}
+
+			lineLength--;
+		}
+	}
 
 	if(nextLineIndex != nullptr) {
 		*nextLineIndex = nextLineIndexInternal;
 	}
 
-	return std::string(reinterpret_cast<const char *>(m_data->data() + (m_readOffset * sizeof(uint8_t))), lineLength);
+	return std::string(reinterpret_cast<const char *>(m_data->data() + (m_readOffset * sizeof(uint8_t))), lineLength);;
 }
 
 std::optional<std::string> ByteBuffer::getLine(size_t offset, size_t * nextLineIndex) const {
