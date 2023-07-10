@@ -134,37 +134,38 @@ size_t Utilities::stringLength(const char * s) {
 }
 
 std::string Utilities::trimString(std::string_view data, bool trimWhiteSpace, bool trimNewLines) {
+	static const std::string WHITESPACE("\t ");
+	static const std::string NEWLINES("\r\n");
+	static const std::string WHITESPACE_AND_NEWLINES(WHITESPACE + NEWLINES);
+
 	if(data.empty()) {
 		return std::string();
 	}
 
-	if(trimWhiteSpace == false && trimNewLines == false) {
+	const std::string * trimCharacters = nullptr;
+
+	if(trimWhiteSpace && trimNewLines) {
+		trimCharacters = &WHITESPACE_AND_NEWLINES;
+	}
+	else if(trimWhiteSpace) {
+		trimCharacters = &WHITESPACE;
+	}
+	else if(trimNewLines) {
+		trimCharacters = &NEWLINES;
+	}
+	else {
 		return std::string(data);
 	}
 
-	std::string whiteSpace;
-
-	if(trimWhiteSpace) {
-		whiteSpace = " \t";
-	}
-
-	if(trimNewLines) {
-		whiteSpace.append("\n\r");
-	}
-
-	size_t start = data.find_first_not_of(whiteSpace);
+	size_t start = data.find_first_not_of(*trimCharacters);
 
 	if(start == std::string::npos) {
-		start = 0;
+		return std::string();
 	}
 
-	size_t end = data.find_last_not_of(whiteSpace);
+	size_t end = data.find_last_not_of(*trimCharacters);
 
-	if(end == std::string::npos) {
-		end = data.length() - 1;
-	}
-
-	if(start > end) {
+	if(end == std::string::npos || start > end) {
 		return std::string();
 	}
 
