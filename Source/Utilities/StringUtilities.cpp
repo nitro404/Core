@@ -133,81 +133,6 @@ size_t Utilities::stringLength(const char * s) {
 	return s == nullptr ? 0 : strlen(s);
 }
 
-bool Utilities::copyString(char * destination, size_t size, const char * source) {
-	if(source == nullptr || destination == nullptr || size == 0) {
-		return false;
-	}
-
-#if _WIN32
-	return strcpy_s(destination, size, source) == 0;
-#else
-	return strcpy(destination, source) == 0;
-#endif // _WIN32
-}
-
-char * Utilities::copyString(const char * data) {
-	if(data == nullptr) {
-		return nullptr;
-	}
-
-	size_t bufferSize = Utilities::stringLength(data) + 1;
-	char * newData = new char[bufferSize];
-
-	if(Utilities::copyString(newData, bufferSize, data)) {
-		return newData;
-	}
-
-	return nullptr;
-}
-
-// trims whitespace off of the front and end of string passed into it, and returns a copy of the trimmed string
-char * Utilities::trimCopyString(const char * data) {
-	// verify the string
-	if(data == nullptr) {
-		return nullptr;
-	}
-
-	char * newData = nullptr;
-	size_t length = Utilities::stringLength(data);
-
-	if(length == 0) {
-		newData = new char[1];
-		*newData = '\0';
-		return newData;
-	}
-
-	// find the new start and end of the string and verify that they do not overlap (0 length string)
-	const char * head = data;
-	const char * tail = data + (sizeof(char) * length) - 1;
-	size_t startPos = 0;
-	size_t endPos = length - 1;
-
-	while((*head == ' ' || *head == '\t') && startPos <= endPos) {
-		head += sizeof(char);
-		startPos++;
-	}
-
-	while((*tail == ' ' || *tail == '\t') && startPos <= endPos) {
-		tail -= sizeof(char);
-		endPos--;
-	}
-
-	if(startPos > endPos) {
-		newData = new char[1];
-		*newData = '\0';
-
-		return newData;
-	}
-
-	// copy the contents of the string from the start to the end into a new string (trim) and return the copy
-	size_t newLength = endPos - startPos + 2;
-	newData = new char[newLength];
-	memcpy(newData, data + (startPos * sizeof(char)), newLength - 1);
-	newData[newLength - 1] = '\0';
-
-	return newData;
-}
-
 std::string Utilities::trimString(std::string_view data, bool trimWhiteSpace, bool trimNewLines) {
 	if(data.empty()) {
 		return std::string();
@@ -244,31 +169,6 @@ std::string Utilities::trimString(std::string_view data, bool trimWhiteSpace, bo
 	}
 
 	return std::string(data.data() + start, end - start + 1);
-}
-
-char * Utilities::substring(const char * data, size_t start, size_t length) {
-	if(data == nullptr) {
-		return nullptr;
-	}
-
-	size_t dataLength = Utilities::stringLength(data);
-
-	if(start + length > dataLength) {
-		return nullptr;
-	}
-
-	if(dataLength == 0) {
-		char * newString = new char[1];
-		newString[0] = '\0';
-
-		return newString;
-	}
-
-	char * newString = new char[length];
-	memcpy(newString, data + (start * sizeof(char)), length - 1);
-	newString[length - 1] = '\0';
-
-	return newString;
 }
 
 std::string Utilities::reverseString(std::string_view data) {
@@ -682,38 +582,6 @@ bool Utilities::isMACAddress(const std::string & data) {
 	}
 
 	return std::regex_match(data, MAC_ADDRESS_REGEX);
-}
-
-std::string Utilities::getVariableID(std::string_view data) {
-	if(data.empty()) {
-		return std::string();
-	}
-
-	std::string formattedData(Utilities::trimString(data));
-
-	if(formattedData.empty()) {
-		return std::string();
-	}
-
-	size_t separatorIndex = formattedData.find_first_of(":=");
-
-	return separatorIndex == std::string::npos ? std::string() : Utilities::trimString(formattedData.substr(0, separatorIndex));
-}
-
-std::string Utilities::getVariableValue(std::string_view data) {
-	if(data.empty()) {
-		return std::string();
-	}
-
-	std::string formattedData(Utilities::trimString(data));
-
-	if(formattedData.empty()) {
-		return std::string();
-	}
-
-	size_t separatorIndex = formattedData.find_first_of(":=");
-
-	return separatorIndex == std::string::npos ? std::string() : Utilities::trimString(formattedData.substr(separatorIndex + 1, formattedData.length() - (separatorIndex + 1)));
 }
 
 bool Utilities::isValidIntegerNumber(const std::string & data) {

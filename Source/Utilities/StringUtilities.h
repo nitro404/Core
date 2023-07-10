@@ -15,11 +15,7 @@ namespace Utilities {
 	bool isAlphaNumericUpperCase(char c);
 	bool isAlphaNumericLowerCase(char c);
 	size_t stringLength(const char * s);
-	bool copyString(char * destination, size_t size, const char * source);
-	char * copyString(const char * data);
-	char * trimCopyString(const char * data);
 	std::string trimString(std::string_view data, bool trimWhiteSpace = true, bool trimNewLines = true);
-	char * substring(const char * data, size_t start, size_t length);
 	std::string reverseString(std::string_view data);
 	std::string replaceAll(std::string_view value, std::string_view match, std::string_view replacement);
 	std::vector<std::string> regularExpressionStringSplit(const std::string & data, const std::string & regularExpression, std::regex_constants::match_flag_type matchFlags = std::regex_constants::match_default);
@@ -51,8 +47,6 @@ namespace Utilities {
 	bool isIPV4Address(const std::string & data);
 	bool isIPV6Address(const std::string & data);
 	bool isMACAddress(const std::string & data);
-	std::string getVariableID(std::string_view data);
-	std::string getVariableValue(std::string_view data);
 	bool isValidIntegerNumber(const std::string & data);
 	bool isValidWholeNumber(const std::string & data);
 	bool isValidRealNumber(const std::string & data);
