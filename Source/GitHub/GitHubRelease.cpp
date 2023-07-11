@@ -452,7 +452,7 @@ std::unique_ptr<GitHubRelease> GitHubRelease::parseFrom(const rapidjson::Value &
 	std::shared_ptr<GitHubReleaseAsset> newAsset;
 
 	for(rapidjson::Value::ConstValueIterator i = assetsValue.Begin(); i != assetsValue.End(); ++i) {
-		newAsset = std::shared_ptr<GitHubReleaseAsset>(GitHubReleaseAsset::parseFrom(*i).release());
+		newAsset = GitHubReleaseAsset::parseFrom(*i);
 
 		if(!GitHubReleaseAsset::isValid(newAsset.get())) {
 			spdlog::error("Failed to parse GitHub release asset #{}.", newRelease->m_assets.size() + 1);

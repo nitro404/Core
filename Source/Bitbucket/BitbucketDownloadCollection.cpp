@@ -130,7 +130,7 @@ std::unique_ptr<BitbucketDownloadCollection> BitbucketDownloadCollection::parseF
 	std::shared_ptr<BitbucketDownload> newDownload;
 
 	for(rapidjson::Value::ConstValueIterator i = downloadCollectionValuesValue.Begin(); i != downloadCollectionValuesValue.End(); ++i) {
-		newDownload = std::shared_ptr<BitbucketDownload>(BitbucketDownload::parseFrom(*i).release());
+		newDownload = BitbucketDownload::parseFrom(*i);
 
 		if(!BitbucketDownload::isValid(newDownload.get())) {
 			spdlog::error("Failed to parse Bitbucket download #{}.", newDownloadCollection->m_downloads.size() + 1);

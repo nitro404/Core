@@ -601,7 +601,7 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 			}
 
 			currentAnalyticEventID = analyticEvent->getID();
-			pendingAnalyticEvents[currentAnalyticEventID] = std::shared_ptr<SegmentAnalyticEvent>(analyticEvent.release());
+			pendingAnalyticEvents[currentAnalyticEventID] = std::move(analyticEvent);
 		}
 	}
 

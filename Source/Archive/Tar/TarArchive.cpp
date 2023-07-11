@@ -174,7 +174,7 @@ std::unique_ptr<TarArchive> TarArchive::createFrom(std::unique_ptr<ByteBuffer> d
 				tarArchive->m_numberOfFiles++;
 			}
 
-			tarArchive->m_entries.emplace_back(std::shared_ptr<Entry>(tarEntry.release()));
+			tarArchive->m_entries.emplace_back(std::move(tarEntry));
 		}
 	} while(data->canReadBytes(1));
 

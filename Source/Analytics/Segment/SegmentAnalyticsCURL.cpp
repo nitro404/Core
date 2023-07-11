@@ -95,7 +95,7 @@ bool SegmentAnalyticsCURL::queueEvent(std::unique_ptr<SegmentAnalyticEvent> anal
 		return false;
 	}
 
-	std::shared_ptr<SegmentAnalyticEvent> sharedAnalyticEvent(std::shared_ptr<SegmentAnalyticEvent>(analyticEvent.release()));
+	std::shared_ptr<SegmentAnalyticEvent> sharedAnalyticEvent(std::move(analyticEvent));
 
 	DataStorage * dataStorage = getDataStorage();
 

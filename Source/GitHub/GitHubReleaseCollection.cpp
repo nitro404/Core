@@ -200,7 +200,7 @@ std::unique_ptr<GitHubReleaseCollection> GitHubReleaseCollection::parseFrom(cons
 	std::shared_ptr<GitHubRelease> newRelease;
 
 	for(rapidjson::Value::ConstValueIterator i = releaseCollectionValue.Begin(); i != releaseCollectionValue.End(); ++i) {
-		newRelease = std::shared_ptr<GitHubRelease>(GitHubRelease::parseFrom(*i).release());
+		newRelease = GitHubRelease::parseFrom(*i);
 
 		if(!GitHubRelease::isValid(newRelease.get())) {
 			spdlog::error("Failed to parse GitHub release #{}.", newReleaseCollection->m_releases.size() + 1);

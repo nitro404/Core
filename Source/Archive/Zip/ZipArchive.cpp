@@ -897,7 +897,7 @@ bool ZipArchive::populateEntries() {
 	std::vector<std::shared_ptr<Entry>> entries;
 
 	for(size_t i = 0; i < entryCount; i++) {
-		entries.emplace_back(std::shared_ptr<Entry>(createEntryFromIndex(i).release()));
+		entries.emplace_back(createEntryFromIndex(i));
 
 		if(entries[i] != nullptr) {
 			if(entries[i]->isFile()) {
@@ -979,7 +979,7 @@ bool ZipArchive::addEntry(std::unique_ptr<Entry> entry) {
 
 	uint64_t entryIndex = entry->getIndex();
 
-	m_entries.emplace(m_entries.begin() + entryIndex, std::shared_ptr<Entry>(entry.release()));
+	m_entries.emplace(m_entries.begin() + entryIndex, std::move(entry));
 
 	if(m_entries.size() > entryIndex + 1) {
 		for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin() + entryIndex + 1; i != m_entries.end(); ++i) {
