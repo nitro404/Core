@@ -161,7 +161,6 @@ std::string ScriptArguments::applyArguments(const std::string & command) const {
 	}
 
 	static const std::regex       argumentRegExp(fmt::format("{0}[^{0}]+{0}", ARG_CHAR));
-	static const std::regex   argumentTrimRegExp(fmt::format("^{0}|{0}$", ARG_CHAR));
 
 	std::string commandWithConditionalsApplied(applyConditionals(command));
 

@@ -94,6 +94,10 @@ std::string_view Utilities::getBasePath(std::string_view filePath) {
 	return std::string_view(filePath.data(), index);
 }
 
+bool Utilities::isFilePathAbsolute(std::string_view filePath) {
+	return !filePath.empty() && (filePath[0] == '/' || filePath.find_first_of(':') != std::string::npos);
+}
+
 std::string Utilities::getAbsoluteFilePath(std::string_view filePath, std::string_view defaultPath) {
 	std::error_code errorCode;
 	std::filesystem::path absoluteFilePath(std::filesystem::absolute(std::filesystem::path(filePath.empty() ? std::filesystem::current_path() : filePath), errorCode));
