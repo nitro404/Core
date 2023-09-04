@@ -390,7 +390,7 @@ size_t Archive::extractAllEntriesInSubdirectory(const std::string & destionation
 			if(entry->writeToFile(currentEntryDestinationPath.string(), overwrite)) {
 				numberOfExtractedFileEntries++;
 
-				spdlog::debug("Extracted file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, numberOfFiles(), currentEntryDestinationPath.string());
+				spdlog::debug("Extracted file entry #{}/{} to: '{}'.", numberOfExtractedFileEntries, entriesInDirectory.size(), currentEntryDestinationPath.string());
 			}
 		}
 	}
