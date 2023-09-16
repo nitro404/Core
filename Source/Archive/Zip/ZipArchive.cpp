@@ -737,7 +737,7 @@ bool ZipArchive::reopen(bool verifyConsistency) {
 	return true;
 }
 
-bool ZipArchive::close() {
+bool ZipArchive::close(bool * saved) {
 	if(!isOpen()) {
 		return false;
 	}
@@ -763,11 +763,24 @@ bool ZipArchive::close() {
 			}
 			else {
 				spdlog::debug("Successfully wrote updated zip archive data buffer to file: '{}'.", m_filePath);
+
+				if(saved != nullptr) {
+					*saved = true;
+				}
+			}
+		}
+		else {
+			if(saved != nullptr) {
+				*saved = true;
 			}
 		}
 	}
 	else if(!m_filePath.empty()) {
 		spdlog::debug("Successfully wrote updated zip archive to file: '{}'.", m_filePath);
+
+		if(saved != nullptr) {
+			*saved = true;
+		}
 	}
 
 	for(std::vector<std::shared_ptr<Entry>>::iterator i = m_entries.begin(); i != m_entries.end(); ++i) {
@@ -782,7 +795,10 @@ bool ZipArchive::close() {
 }
 
 bool ZipArchive::save() {
-	return close() && reopen();
+	bool saved = false;
+	bool closed = close(&saved);
+	bool reopened = reopen();
+	return saved && closed && reopened;
 }
 
 std::string ZipArchive::toDebugString(bool includeDate) const {

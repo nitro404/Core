@@ -163,7 +163,7 @@ public:
 	static std::unique_ptr<ZipArchive> createNew(const std::string & filePath = {}, bool overwrite = false);
 	static std::unique_ptr<ZipArchive> createFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & password = {}, bool verifyConsistency = false, const std::string & filePath = {});
 	static std::unique_ptr<ZipArchive> readFrom(const std::string & filePath, const std::string & password = {}, bool verifyConsistency = false);
-	bool close();
+	bool close(bool * saved = nullptr);
 	bool reopen(bool verifyConsistency = false);
 	bool save();
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
