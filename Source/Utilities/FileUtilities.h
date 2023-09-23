@@ -27,8 +27,8 @@ namespace Utilities {
 	std::string addTrailingPathSeparator(std::string_view filePath, char pathSeparator = '/');
 	std::string_view getFileExtension(std::string_view filePath, bool useLastPeriod = true);
 	std::string_view getFileNameNoExtension(std::string_view filePath, bool useLastPeriod = true);
-	bool hasFileExtension(std::string_view filePath, std::string_view extension, bool caseSensitive = false);
-	std::string replaceFileExtension(std::string_view filePath, std::string_view extension);
+	bool hasFileExtension(std::string_view filePath, std::string_view fileExtension, bool caseSensitive = false);
+	std::string replaceFileExtension(std::string_view filePath, std::string_view fileExtension);
 	std::string reverseFileExtension(std::string_view filePath);
 	std::string truncateFileName(std::string_view filePath, size_t maxLength);
 	template <typename ...Arguments, typename = typename std::enable_if<sizeof...(Arguments) >= 2>::type>

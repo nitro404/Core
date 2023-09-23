@@ -50,6 +50,14 @@ std::string ArchiveEntry::getBasePath() const {
 	return std::string(Utilities::getBasePath(getPath()));
 }
 
+bool ArchiveEntry::hasFileExtension(std::string_view fileExtension) const {
+	if(!isFile()) {
+		return false;
+	}
+
+	return Utilities::hasFileExtension(getName(), fileExtension);
+}
+
 std::string ArchiveEntry::getFileExtension(bool useLastPeriod) const {
 	if(!isFile()) {
 		return {};

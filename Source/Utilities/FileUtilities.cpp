@@ -184,20 +184,27 @@ std::string_view Utilities::getFileNameNoExtension(std::string_view filePath, bo
 	return std::string_view(filePath.data(), index);
 }
 
-bool Utilities::hasFileExtension(std::string_view filePath, std::string_view extension, bool caseSensitive) {
-	if(filePath.empty() || extension.empty()) {
+bool Utilities::hasFileExtension(std::string_view filePath, std::string_view fileExtension, bool caseSensitive) {
+	if(filePath.empty() || fileExtension.empty()) {
 		return false;
 	}
 
-	return Utilities::areStringsEqual(Utilities::getFileExtension(filePath), extension, caseSensitive);
+	std::string_view fileName(getFileName(filePath));
+
+	if(fileName.length() < fileExtension.length() + 1) {
+		return false;
+	}
+
+	return fileName[fileName.length() - fileExtension.length() - 1] == '.' &&
+		   Utilities::areStringsEqual(std::string_view(fileName.data() + fileName.length() - fileExtension.length(), fileExtension.length()), fileExtension, caseSensitive);
 }
 
-std::string Utilities::replaceFileExtension(std::string_view filePath, std::string_view extension) {
+std::string Utilities::replaceFileExtension(std::string_view filePath, std::string_view fileExtension) {
 	if(Utilities::getFileExtension(filePath).empty()) {
 		return std::string(filePath);
 	}
 
-	return std::string(Utilities::getFileNameNoExtension(filePath)) + "." + std::string(extension);
+	return std::string(Utilities::getFileNameNoExtension(filePath)) + "." + std::string(fileExtension);
 }
 
 std::string Utilities::reverseFileExtension(std::string_view filePath) {

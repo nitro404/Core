@@ -25,6 +25,7 @@ public:
 	std::string getName() const;
 	virtual std::string getPath() const = 0;
 	std::string getBasePath() const;
+	bool hasFileExtension(std::string_view fileExtension) const;
 	std::string getFileExtension(bool useLastPeriod = true) const;
 	std::vector<std::shared_ptr<ArchiveEntry>> getChildren(bool includeSubdirectories = true, bool caseSensitive = false) const;
 	virtual uint64_t getIndex() const = 0;
