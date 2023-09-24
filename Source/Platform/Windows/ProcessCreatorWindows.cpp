@@ -2,6 +2,7 @@
 
 #include "ProcessWindows.h"
 #include "Utilities/FileUtilities.h"
+#include "WindowsUtilities.h"
 
 #include <spdlog/spdlog.h>
 
@@ -33,42 +34,21 @@ std::unique_ptr<Process> ProcessCreatorWindows::createProcess(const std::string 
 		&startupInfo, // process startup information
 		&processInfo // process information
 	)) {
-		return std::unique_ptr<Process>(new ProcessWindows(startupInfo, processInfo));
+		return std::unique_ptr<Process>(new ProcessWindows(std::move(startupInfo), std::move(processInfo)));
 	}
 
 	DWORD errorCode = GetLastError();
-	std::string errorMessage;
+	std::string errorMessage(WindowsUtilities::getLastErrorMessage());
 
 	if(nativeErrorCode != nullptr) {
-		*nativeErrorCode = static_cast<uint64_t>(errorCode);
-	}
-
-	if (errorCode) {
-		LPVOID errorMessageBuffer = nullptr;
-
-		DWORD errorMessageLength = FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // formatting options
-			nullptr, // message definition location
-			errorCode, // message identifier
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // language identifier
-			reinterpret_cast<LPTSTR>(&errorMessageBuffer), // buffer
-			0, // output buffer size
-			nullptr // message arguments
-		);
-
-		if(errorMessageLength != 0) {
-			LPCSTR errorMessageString = reinterpret_cast<LPCSTR>(errorMessageBuffer);
-			errorMessage = std::string(errorMessageString, errorMessageString + errorMessageLength);
-
-			LocalFree(errorMessageBuffer);
-		}
+		*nativeErrorCode = static_cast<uint64_t>(GetLastError());
 	}
 
 	if(nativeErrorMessage != nullptr) {
 		*nativeErrorMessage = errorMessage;
 	}
 
-	spdlog::error("Failed to create process: {}", errorMessage);
+	spdlog::error("Failed to create process with error: {}", errorMessage);
 
 	return nullptr;
 }

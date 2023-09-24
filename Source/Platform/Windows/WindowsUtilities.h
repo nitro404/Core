@@ -15,6 +15,7 @@
 namespace WindowsUtilities {
 
 	std::string getErrorMessage(HRESULT result);
+	std::string getLastErrorMessage();
 	std::string getRegistryEntry(const std::string & key, const std::string & entryName, bool * error);
 	std::optional<std::string> getRegistryEntry(const std::string & key, const std::string & entryName);
 	std::string getVariantTypeName(const VARIANT & variant);

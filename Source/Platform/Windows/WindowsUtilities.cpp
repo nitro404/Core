@@ -10,6 +10,37 @@ std::string WindowsUtilities::getErrorMessage(HRESULT result) {
 	return _com_error(result).ErrorMessage();
 }
 
+std::string WindowsUtilities::getLastErrorMessage() {
+	DWORD errorCode = GetLastError();
+
+	if(!errorCode) {
+		return {};
+	}
+
+	LPVOID errorMessageBuffer = nullptr;
+
+	DWORD errorMessageLength = FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // formatting options
+		nullptr, // message definition location
+		errorCode, // message identifier
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // language identifier
+		reinterpret_cast<LPTSTR>(&errorMessageBuffer), // buffer
+		0, // output buffer size
+		nullptr // message arguments
+	);
+
+	std::string errorMessage;
+
+	if(errorMessageLength != 0) {
+		LPCSTR errorMessageString = reinterpret_cast<LPCSTR>(errorMessageBuffer);
+		errorMessage = std::string(errorMessageString, errorMessageString + errorMessageLength);
+
+		LocalFree(errorMessageBuffer);
+	}
+
+	return errorMessage;
+}
+
 std::string WindowsUtilities::getRegistryEntry(const std::string & key, const std::string & entryName, bool * error) {
 	HKEY hkey = 0;
 

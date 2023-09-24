@@ -1,5 +1,9 @@
 #include "ProcessWindows.h"
 
+#include "WindowsUtilities.h"
+
+#include <spdlog/spdlog.h>
+
 void CALLBACK onProcessExited(LPVOID context, BOOLEAN timedOut) {
 	reinterpret_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
 }
@@ -14,7 +18,9 @@ ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_IN
 }
 
 ProcessWindows::~ProcessWindows() {
-	UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE);
+	if(!UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE)) {
+		spdlog::warn("Failed to cancel registered process wait operation with error: {}", WindowsUtilities::getLastErrorMessage());
+	}
 
 	if(m_running) {
 		TerminateProcess(m_processInfo.hProcess, 0);
