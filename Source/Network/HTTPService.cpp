@@ -345,6 +345,28 @@ std::shared_ptr<HTTPResponse> HTTPService::sendRequestAndWait(std::shared_ptr<HT
 	return futureResponse.get();
 }
 
+bool HTTPService::abortRequest(HTTPRequest & request) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	std::map<CURL *, std::shared_ptr<HTTPRequest>>::const_iterator activeRequestIterator(std::find_if(m_activeRequests.cbegin(), m_activeRequests.cend(), [&request](const std::pair<CURL *, std::shared_ptr<HTTPRequest>> & activeRequest) {
+		return activeRequest.second.get() == &request;
+	}));
+
+	if(activeRequestIterator != m_activeRequests.cend()) {
+		return abortRequest(*activeRequestIterator->second);
+	}
+
+	std::deque<std::shared_ptr<HTTPRequest>>::const_iterator pendingRequestIterator(std::find_if(m_pendingRequests.cbegin(), m_pendingRequests.cend(), [&request](const std::shared_ptr<HTTPRequest> & pendingRequest) {
+		return pendingRequest.get() == &request;
+	}));
+
+	if(pendingRequestIterator != m_pendingRequests.cend()) {
+		return abortRequest(*pendingRequestIterator);
+	}
+
+	return false;
+}
+
 bool HTTPService::abortRequest(std::shared_ptr<HTTPRequest> request) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
