@@ -42,8 +42,8 @@ std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string
 
 	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
-	if(response->isFailure()) {
-		spdlog::error("Failed to retrieve latest '{}' release information with error: {}", repositoryName, response->getErrorMessage());
+	if(response == nullptr || response->isFailure()) {
+		spdlog::error("Failed to retrieve latest '{}' release information with error: {}", repositoryName, response != nullptr ? response->getErrorMessage() : "Invalid request.");
 		return nullptr;
 	}
 
@@ -95,8 +95,8 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 
 	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
-	if(response->isFailure()) {
-		spdlog::error("Failed to retrieve '{}' releases information with error: {}", repositoryName, response->getErrorMessage());
+	if(response == nullptr || response->isFailure()) {
+		spdlog::error("Failed to retrieve '{}' releases information with error: {}", repositoryName, response != nullptr ? response->getErrorMessage() : "Invalid request.");
 		return nullptr;
 	}
 

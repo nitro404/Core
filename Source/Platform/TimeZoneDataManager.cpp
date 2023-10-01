@@ -122,8 +122,8 @@ std::string TimeZoneDataManager::getLatestTimeZoneDatabaseVersion() {
 
 	std::shared_ptr<HTTPResponse> timeZoneDatabasePageResponse(httpService->sendRequestAndWait(timeZoneDatabasePageRequest));
 
-	if(timeZoneDatabasePageResponse->isFailure()) {
-		spdlog::error("Failed to retrieve Internet Assigned Numbers Authority time zone database page with error: {}", timeZoneDatabasePageResponse->getErrorMessage());
+	if(timeZoneDatabasePageResponse == nullptr || timeZoneDatabasePageResponse->isFailure()) {
+		spdlog::error("Failed to retrieve Internet Assigned Numbers Authority time zone database page with error: {}", timeZoneDatabasePageResponse != nullptr ? timeZoneDatabasePageResponse->getErrorMessage() : "Invalid request.");
 		return {};
 	}
 	else if(timeZoneDatabasePageResponse->isFailureStatusCode()) {
@@ -216,8 +216,8 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 
 	std::shared_ptr<HTTPResponse> latestTimeZoneDatabaseResponse(httpService->sendRequestAndWait(latestTimeZoneDatabaseRequest));
 
-	if(latestTimeZoneDatabaseResponse->isFailure()) {
-		spdlog::error("Failed to download latest Internet Assigned Numbers Authority time zone database archive file with error: {}", latestTimeZoneDatabaseResponse->getErrorMessage());
+	if(latestTimeZoneDatabaseResponse == nullptr || latestTimeZoneDatabaseResponse->isFailure()) {
+		spdlog::error("Failed to download latest Internet Assigned Numbers Authority time zone database archive file with error: {}", latestTimeZoneDatabaseResponse != nullptr ? latestTimeZoneDatabaseResponse->getErrorMessage() : "Invalid request.");
 		return allTimeZoneDatabaseFilesExist;
 	}
 	else if(latestTimeZoneDatabaseResponse->getStatusCode() == magic_enum::enum_integer(HTTPStatusCode::NotModified)) {

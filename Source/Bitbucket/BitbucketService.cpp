@@ -62,8 +62,8 @@ std::unique_ptr<BitbucketDownloadCollection> BitbucketService::getDownloads(cons
 
 	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
-	if(response->isFailure()) {
-		spdlog::error("Failed to retrieve '{}' downloads information with error: {}", repositoryName, response->getErrorMessage());
+	if(response == nullptr || response->isFailure()) {
+		spdlog::error("Failed to retrieve '{}' downloads information with error: {}", repositoryName, response != nullptr ? response->getErrorMessage() : "Invalid request.");
 		return nullptr;
 	}
 

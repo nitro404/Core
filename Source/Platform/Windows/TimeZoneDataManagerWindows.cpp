@@ -51,8 +51,8 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 
 	std::shared_ptr<HTTPResponse> response(httpService->sendRequestAndWait(request));
 
-	if(response->isFailure()) {
-		spdlog::error("Failed to download Windows time zone data file with error: {}", response->getErrorMessage());
+	if(response == nullptr || response->isFailure()) {
+		spdlog::error("Failed to download Windows time zone data file with error: {}", response != nullptr ? response->getErrorMessage() : "Invalid request.");
 		return windowsTimeZoneDataFileExists;
 	}
 	else if(response->getStatusCode() == magic_enum::enum_integer(HTTPStatusCode::NotModified)) {
