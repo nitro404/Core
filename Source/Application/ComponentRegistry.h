@@ -188,7 +188,7 @@ ComponentRegistry::RawComponent<T>::RawComponent(RawComponent && component) noex
 template <class T>
 const ComponentRegistry::RawComponent<T> & ComponentRegistry::RawComponent<T>::operator = (RawComponent<T> && component) noexcept {
 	if(this != &component) {
-		Component::operator = std::move(component);
+		Component::operator = (std::move(component));
 
 		m_component = component.m_component;
 	}
@@ -217,7 +217,7 @@ ComponentRegistry::OwnedUniqueComponent<T>::OwnedUniqueComponent(OwnedUniqueComp
 template <class T>
 const ComponentRegistry::OwnedUniqueComponent<T> & ComponentRegistry::OwnedUniqueComponent<T>::operator = (OwnedUniqueComponent<T> && component) noexcept {
 	if(this != &component) {
-		Component::operator = std::move(component);
+		Component::operator = (std::move(component));
 
 		m_component = std::move(component.m_component);
 	}
@@ -243,7 +243,7 @@ ComponentRegistry::ExternalUniqueComponent<T>::ExternalUniqueComponent(ExternalU
 template <class T>
 const ComponentRegistry::ExternalUniqueComponent<T> & ComponentRegistry::ExternalUniqueComponent<T>::operator = (ExternalUniqueComponent<T> && component) noexcept {
 	if(this != &component) {
-		Component::operator = std::move(component);
+		Component::operator = (std::move(component));
 
 		m_component = component.m_component;
 	}

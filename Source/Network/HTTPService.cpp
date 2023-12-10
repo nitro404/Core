@@ -485,7 +485,7 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 	std::string calculcatedCACertFileSHA256(caCertFileResponse->getBodySHA256());
 
 	if(!Utilities::areStringsEqual(calculcatedCACertFileSHA256, expectedCACertSHA256)) {
-		spdlog::error("Certificate authority certificate store file SHA256 verification failed. Calculated '{}', but expected: '{}'.", calculcatedCACertFileSHA256);
+		spdlog::error("Certificate authority certificate store file SHA256 verification failed. Calculated '{}', but expected: '{}'.", calculcatedCACertFileSHA256, expectedCACertSHA256);
 		promise->set_value(false);
 		return;
 	}

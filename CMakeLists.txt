@@ -26,6 +26,10 @@ configure_file("${_CORE_FILE_PATH}.in" "${_CORE_FILE_PATH}" @ONLY)
 
 include(SourceFiles)
 
+if(MSVC)
+	add_compile_options(/Zc:__cplusplus)
+endif()
+
 add_library(${PROJECT_NAME} STATIC ${CORE_SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME}

@@ -189,7 +189,7 @@ RarArchive::ArchiveHandle RarArchive::createArchiveHandle() {
 	if(!isSuccess(dmc_unrar_archive_init(archiveHandle), "Failed to initialize Rar archive.")) {
 		delete archiveHandle;
 
-		return false;
+		return nullptr;
 	}
 
 	return ArchiveHandle(archiveHandle, [](dmc_unrar_archive * archiveHandle) {

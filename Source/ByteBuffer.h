@@ -306,14 +306,14 @@ private:
 
 template <size_t N>
 ByteBuffer::ByteBuffer(const std::array<uint8_t, N> & data, Endianness endianness)
-	: m_data(std::make_unique<std::vector<uint8_t>(data))
+	: m_data(std::make_unique<std::vector<uint8_t>>(data))
 	, m_endianness(endianness)
 	, m_readOffset(0)
 	, m_writeOffset(data.size()) { }
 
 template <size_t N>
 ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
-	m_data = std::make_unique<std::vector<uint8_t>(data);
+	m_data = std::make_unique<std::vector<uint8_t>>(data);
 	m_readOffset = 0;
 	m_writeOffset = 0;
 
@@ -322,7 +322,7 @@ ByteBuffer & ByteBuffer::operator = (const std::array<uint8_t, N> & data) {
 
 template <size_t N>
 void ByteBuffer::setData(const std::array<uint8_t, N> & data) {
-	m_data = std::make_unique<std::vector<uint8_t>(data);
+	m_data = std::make_unique<std::vector<uint8_t>>(data);
 	m_readOffset = 0;
 	m_writeOffset = 0;
 }

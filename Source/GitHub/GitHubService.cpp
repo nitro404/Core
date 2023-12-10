@@ -4,6 +4,7 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
+#include <fmt/args.h>
 #include <fmt/core.h>
 #include <spdlog/spdlog.h>
 
@@ -36,7 +37,11 @@ std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string
 		return nullptr;
 	}
 
-	std::string latestReleaseURL(fmt::format(GITHUB_LATEST_RELEASE_API_URL_TEMPLATE, organizationName, repositoryName));
+	fmt::dynamic_format_arg_store<fmt::format_context> githubLatestReleaseApiUrlArguments;
+	githubLatestReleaseApiUrlArguments.push_back(organizationName);
+	githubLatestReleaseApiUrlArguments.push_back(repositoryName);
+
+	std::string latestReleaseURL(fmt::vformat(GITHUB_LATEST_RELEASE_API_URL_TEMPLATE, githubLatestReleaseApiUrlArguments));
 
 	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, latestReleaseURL));
 
@@ -89,7 +94,11 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 		return nullptr;
 	}
 
-	std::string releasesURL(fmt::format(GITHUB_RELEASES_API_URL_TEMPLATE, organizationName, repositoryName));
+	fmt::dynamic_format_arg_store<fmt::format_context> githubReleasesApiUrlArguments;
+	githubReleasesApiUrlArguments.push_back(organizationName);
+	githubReleasesApiUrlArguments.push_back(repositoryName);
+
+	std::string releasesURL(fmt::vformat(GITHUB_RELEASES_API_URL_TEMPLATE, githubReleasesApiUrlArguments));
 
 	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, releasesURL));
 

@@ -484,21 +484,21 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 	// parse previous session number property
 	if(!value.HasMember(JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME)) {
 		spdlog::error("Segment analytics data is missing '{}' property.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME);
-		return nullptr;
+		return false;
 	}
 
 	const rapidjson::Value & previousSessionNumberValue = value[JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME];
 
 	if(!previousSessionNumberValue.IsUint64()) {
 		spdlog::error("Segment analytics data has an invalid '{}' property type: '{}', expected unsigned integer 'number'.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
-		return nullptr;
+		return false;
 	}
 
 	uint64_t previousSessionNumber = previousSessionNumberValue.GetUint64();
 
 	if(previousSessionNumber == 0) {
 		spdlog::error("Segment analytics data has an invalid '{}' property value: '{}', expected positive integer greater than zero.", JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME, Utilities::typeToString(previousSessionNumberValue.GetType()));
-		return nullptr;
+		return false;
 	}
 
 	// parse previous application version property

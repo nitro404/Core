@@ -1,8 +1,6 @@
 #ifndef _SINGLETON_MANAGER_H_
 #define _SINGLETON_MANAGER_H_
 
-#include "Singleton.h"
-
 #include <map>
 #include <mutex>
 #include <string>

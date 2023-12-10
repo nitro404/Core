@@ -2,6 +2,7 @@
 #define _UTILITIES_H_
 
 #include <any>
+#include <chrono>
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -40,6 +41,20 @@ namespace Utilities {
 		else if(std::is_same<D, std::chrono::hours>::value) {
 			return "Hours";
 		}
+#if __cplusplus >= 202002L
+		else if(std::is_same<D, std::chrono::days>::value) {
+			return "Days";
+		}
+		else if(std::is_same<D, std::chrono::weeks>::value) {
+			return "Weeks";
+		}
+		else if(std::is_same<D, std::chrono::months>::value) {
+			return "Months";
+		}
+		else if(std::is_same<D, std::chrono::years>::value) {
+			return "Years";
+		}
+#else
 		else if(std::is_same<D, std::chrono::duration<int, std::ratio<86400>>>::value) {
 			return "Days";
 		}
@@ -52,6 +67,7 @@ namespace Utilities {
 		else if(std::is_same<D, std::chrono::duration<int, std::ratio<31556952>>>::value) {
 			return "Years";
 		}
+#endif
 
 		return {};
 	}

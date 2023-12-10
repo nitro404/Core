@@ -109,7 +109,7 @@ bool ZipArchive::Entry::setName(const std::string & name) {
 	}
 
 	std::string_view currentEntryBasePath;
-	std::vector<std::shared_ptr<ArchiveEntry>> & entries = m_parentArchive->getEntries();
+	std::vector<std::shared_ptr<ArchiveEntry>> entries = m_parentArchive->getEntries();
 
 	for(std::vector<std::shared_ptr<ArchiveEntry>>::iterator i = entries.begin(); i != entries.end(); ++i) {
 		if(*i == nullptr) {

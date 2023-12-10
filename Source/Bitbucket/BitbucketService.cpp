@@ -4,6 +4,7 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
+#include <fmt/args.h>
 #include <fmt/core.h>
 #include <spdlog/spdlog.h>
 
@@ -56,7 +57,11 @@ std::unique_ptr<BitbucketDownloadCollection> BitbucketService::getDownloads(cons
 		return nullptr;
 	}
 
-	std::string downloadsURL(fmt::format(BITBUCKET_DOWNLOADS_API_URL_TEMPLATE, organizationName, repositoryName));
+	fmt::dynamic_format_arg_store<fmt::format_context> bitbucketDownloadsApiUrlArguments;
+	bitbucketDownloadsApiUrlArguments.push_back(organizationName);
+	bitbucketDownloadsApiUrlArguments.push_back(repositoryName);
+
+	std::string downloadsURL(fmt::vformat(BITBUCKET_DOWNLOADS_API_URL_TEMPLATE, bitbucketDownloadsApiUrlArguments));
 
 	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, downloadsURL));
 

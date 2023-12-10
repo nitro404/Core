@@ -367,7 +367,7 @@ std::shared_ptr<HTTPRequest> HTTPResponse::getRequest() const {
 	std::shared_ptr<HTTPRequest> request(m_request.lock());
 
 	if(request == nullptr) {
-		return false;
+		return nullptr;
 	}
 
 	return request;

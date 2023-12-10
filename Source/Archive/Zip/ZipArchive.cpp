@@ -113,7 +113,7 @@ bool ZipArchive::setPassword(const std::string & password) {
 	}
 
 	if(!ZipUtilities::isSuccess(zip_set_default_password(m_archiveHandle.get(), m_password.c_str()), "Failed to set zip archive password.")) {
-		return nullptr;
+		return false;
 	}
 
 	m_modified = true;
@@ -706,19 +706,19 @@ bool ZipArchive::reopen(bool verifyConsistency) {
 	else if(!m_filePath.empty()) {
 		if(!std::filesystem::is_regular_file(std::filesystem::path(m_filePath))) {
 			spdlog::error("Failed to re-open zip archive from non-existent file: '{}'!", m_filePath);
-			return nullptr;
+			return false;
 		}
 
 		int zipErrorCode = 0;
 		m_archiveHandle = createZipArchiveHandle(zip_open(m_filePath.c_str(), zipFlags, &zipErrorCode));
 
 		if(!ZipUtilities::isSuccess(zipErrorCode, fmt::format("Failed to re-open zip archive file: '{}'.", m_filePath))) {
-			return nullptr;
+			return false;
 		}
 
 		if(m_archiveHandle == nullptr) {
 			spdlog::error("Failed to re-open zip archive from file: '{}'.", m_filePath);
-			return nullptr;
+			return false;
 		}
 	}
 	else {

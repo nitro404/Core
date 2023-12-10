@@ -310,7 +310,7 @@ const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithAttributeValue(co
 
 const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithClassName(const tinyxml2::XMLElement * element, const std::string & className) {
 	if(element == nullptr || className.empty()) {
-		return false;
+		return nullptr;
 	}
 
 	return findFirstMatchingXMLElementHelper(element, std::bind(&xmlElementClassNameMatcher, std::placeholders::_1, className));
@@ -318,7 +318,7 @@ const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithClassName(const t
 
 const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithClassNames(const tinyxml2::XMLElement * element, const std::vector<std::string> & classNames) {
 	if(element == nullptr || classNames.empty()) {
-		return false;
+		return nullptr;
 	}
 
 	return findFirstMatchingXMLElementHelper(element, std::bind(&xmlElementClassNamesMatcher, std::placeholders::_1, classNames));
@@ -326,7 +326,7 @@ const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithClassNames(const 
 
 const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithFullText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive) {
 	if(element == nullptr || text.empty()) {
-		return false;
+		return nullptr;
 	}
 
 	return findFirstMatchingXMLElementHelper(element, std::bind(&xmlElementFullTextMatcher, std::placeholders::_1, text, caseSensitive));
@@ -335,7 +335,7 @@ const tinyxml2::XMLElement * Utilities::findFirstXMLElementWithFullText(const ti
 
 const tinyxml2::XMLElement * Utilities::findFirstXMLElementContainingText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive) {
 	if(element == nullptr || text.empty()) {
-		return false;
+		return nullptr;
 	}
 
 	return findFirstMatchingXMLElementHelper(element, std::bind(&xmlElementContainsTextMatcher, std::placeholders::_1, text, caseSensitive));
