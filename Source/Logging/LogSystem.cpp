@@ -127,7 +127,7 @@ void LogSystem::removeLogSink(const std::shared_ptr<spdlog::sinks::sink> & logSi
 	}
 
 	std::vector<spdlog::sink_ptr> & logSinks(m_logger->sinks());
-	logSinks.erase(std::remove(std::begin(logSinks), std::end(logSinks), logSink));
+	logSinks.erase(std::remove(logSinks.begin(), logSinks.end(), logSink), logSinks.end());
 }
 
 void LogSystem::clearLogSinks() {
