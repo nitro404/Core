@@ -34,7 +34,7 @@ static const std::array<std::string_view, 8> JSON_SEGMENT_PROPERTY_NAMES = {
 };
 
 const std::string SegmentAnalytics::DataStorage::FILE_TYPE("Segment Analytics Cache");
-const std::string SegmentAnalytics::DataStorage::FILE_FORMAT_VERSION("1.0.0");
+const uint32_t SegmentAnalytics::DataStorage::FILE_FORMAT_VERSION = 1;
 
 SegmentAnalytics::DataStorage::DataStorage()
 	: m_initialized(false)
@@ -386,8 +386,7 @@ rapidjson::Document SegmentAnalytics::DataStorage::toJSON() const {
 	rapidjson::Value fileTypeVersionValue(FILE_TYPE.c_str(), allocator);
 	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_TYPE_PROPERTY_NAME), fileTypeVersionValue, allocator);
 
-	rapidjson::Value fileFormatVersionValue(FILE_FORMAT_VERSION.c_str(), allocator);
-	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME), fileFormatVersionValue, allocator);
+	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME), rapidjson::Value(FILE_FORMAT_VERSION), allocator);
 
 	dataDocument.AddMember(rapidjson::StringRef(JSON_SEGMENT_PREVIOUS_SESSION_NUMBER_PROPERTY_NAME), rapidjson::Value(m_sessionNumber), allocator);
 
@@ -460,20 +459,13 @@ bool SegmentAnalytics::DataStorage::parseFrom(const rapidjson::Value & value) {
 	if(value.HasMember(JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME)) {
 		const rapidjson::Value & fileFormatVersionValue = value[JSON_SEGMENT_FILE_FORMAT_VERSION_PROPERTY_NAME];
 
-		if(!fileFormatVersionValue.IsString()) {
-			spdlog::error("Invalid Segment analytics data file format version type: '{}', expected: 'string'.", Utilities::typeToString(fileFormatVersionValue.GetType()));
+		if(!fileFormatVersionValue.IsUint()) {
+			spdlog::error("Invalid Segment analytics data file format version type: '{}', expected unsigned integer 'number'.", Utilities::typeToString(fileFormatVersionValue.GetType()));
 			return false;
 		}
 
-		std::optional<std::uint8_t> optionalVersionComparison(Utilities::compareVersions(fileFormatVersionValue.GetString(), FILE_FORMAT_VERSION));
-
-		if(!optionalVersionComparison.has_value()) {
-			spdlog::error("Invalid Segment analytics data file format version: '{}'.", fileFormatVersionValue.GetString());
-			return false;
-		}
-
-		if(*optionalVersionComparison != 0) {
-			spdlog::error("Unsupported Segment analytics data file format version: '{}', only version '{}' is supported.", fileFormatVersionValue.GetString(), FILE_FORMAT_VERSION);
+		if(fileFormatVersionValue.GetUint() != FILE_FORMAT_VERSION) {
+			spdlog::error("Unsupported Segment analytics data file format version: {}, only version {} is supported.", fileFormatVersionValue.GetUint(), FILE_FORMAT_VERSION);
 			return false;
 		}
 	}

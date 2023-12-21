@@ -120,7 +120,7 @@ protected:
 		void reset();
 
 		static const std::string FILE_TYPE;
-		static const std::string FILE_FORMAT_VERSION;
+		static const uint32_t FILE_FORMAT_VERSION;
 
 	private:
 		rapidjson::Document toJSON() const;
