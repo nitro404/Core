@@ -353,7 +353,7 @@ bool HTTPService::abortRequest(HTTPRequest & request) {
 	}));
 
 	if(activeRequestIterator != m_activeRequests.cend()) {
-		return abortRequest(*activeRequestIterator->second);
+		return abortRequest(activeRequestIterator->second);
 	}
 
 	std::deque<std::shared_ptr<HTTPRequest>>::const_iterator pendingRequestIterator(std::find_if(m_pendingRequests.cbegin(), m_pendingRequests.cend(), [&request](const std::shared_ptr<HTTPRequest> & pendingRequest) {
@@ -374,7 +374,7 @@ bool HTTPService::abortRequest(std::shared_ptr<HTTPRequest> request) {
 		return false;
 	}
 
-	m_pendingRequests.erase(std::remove(m_pendingRequests.begin(), m_pendingRequests.end(), request));
+	m_pendingRequests.erase(std::remove(m_pendingRequests.begin(), m_pendingRequests.end(), request), m_pendingRequests.end());
 	m_activeRequests.erase(request->getCURLEasyHandle().get());
 	m_abortedRequests.push_back(request);
 	m_waitCondition.notify_one();
@@ -602,6 +602,11 @@ void HTTPService::run() {
 				}
 
 				std::map<CURL *, std::shared_ptr<HTTPRequest>>::iterator completedRequestIterator(m_activeRequests.find(curlMessage->easy_handle));
+
+				if(completedRequestIterator == m_activeRequests.end()) {
+					continue;
+				}
+
 				std::shared_ptr<HTTPRequest> completedRequest(completedRequestIterator->second);
 
 				if(completedRequest == nullptr) {
