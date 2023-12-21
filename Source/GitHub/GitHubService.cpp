@@ -90,7 +90,7 @@ std::unique_ptr<GitHubReleaseCollection> GitHubService::getReleases(const std::s
 	HTTPService * httpService = HTTPService::getInstance();
 
 	if(!httpService->isInitialized()) {
-		spdlog::error("Failed to retrieve '{}' releases information, HTTP service is not initialized!");
+		spdlog::error("Failed to retrieve '{}' releases information, HTTP service is not initialized!", repositoryName);
 		return nullptr;
 	}
 
