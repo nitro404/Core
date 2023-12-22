@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 
 void CALLBACK onProcessExited(LPVOID context, BOOLEAN timedOut) {
-	reinterpret_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
+	static_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
 }
 
 ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_INFORMATION & processInfo)
@@ -18,6 +18,8 @@ ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_IN
 }
 
 ProcessWindows::~ProcessWindows() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(!UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE)) {
 		spdlog::warn("Failed to cancel registered process wait operation with error: {}", WindowsUtilities::getLastErrorMessage());
 	}
@@ -34,21 +36,35 @@ void ProcessWindows::onProcessTerminated(bool timedOut) {
 }
 
 bool ProcessWindows::isRunning() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_running;
 }
 
 void ProcessWindows::wait() {
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
 	if(!m_running) {
 		return;
 	}
 
-	WaitForSingleObject(m_processInfo.hProcess, INFINITE);
+	HANDLE processHandle = m_processInfo.hProcess;
+
+	lock.unlock();
+
+	WaitForSingleObject(processHandle, INFINITE);
 
 	cleanup();
 }
 
 bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
-	DWORD waitResult = WaitForSingleObject(m_processInfo.hProcess, duration.count());
+	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	
+	HANDLE processHandle = m_processInfo.hProcess;
+
+	lock.unlock();
+
+	DWORD waitResult = WaitForSingleObject(processHandle, duration.count());
 
 	switch(waitResult) {
 		case WAIT_OBJECT_0: {
@@ -68,6 +84,8 @@ bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
 }
 
 void ProcessWindows::doTerminate() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(m_running) {
 		TerminateProcess(m_processInfo.hProcess, 0);
 	}
@@ -76,6 +94,8 @@ void ProcessWindows::doTerminate() {
 }
 
 void ProcessWindows::cleanup() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(!m_running) {
 		return;
 	}
@@ -94,10 +114,14 @@ void ProcessWindows::cleanup() {
 }
 
 uint64_t ProcessWindows::getNativeExitCode() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_exitCode;
 }
 
 std::optional<Process::Priority> ProcessWindows::getPriority() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	DWORD priority = GetPriorityClass(m_processInfo.hProcess);
 
 	if(priority == 0) {

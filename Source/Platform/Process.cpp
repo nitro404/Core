@@ -1,5 +1,7 @@
 #include "Process.h"
 
+#include <spdlog/spdlog.h>
+
 Process::Process()
 	: m_forceTerminated(false)
 	, m_terminatedConnection(notifyTerminated.connect([this]() {
@@ -7,10 +9,14 @@ Process::Process()
 	})) { }
 
 Process::~Process() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	m_terminatedConnection.disconnect();
 }
 
 void Process::terminate() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(!isRunning()) {
 		return;
 	}
@@ -21,10 +27,14 @@ void Process::terminate() {
 }
 
 bool Process::wasForceTerminated() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	return m_forceTerminated;
 }
 
 bool Process::didExitNormally() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(isRunning()) {
 		return false;
 	}

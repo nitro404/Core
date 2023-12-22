@@ -4,6 +4,7 @@
 #include <boost/signals2.hpp>
 
 #include <chrono>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -39,6 +40,8 @@ protected:
 	virtual void doTerminate() = 0;
 
 	boost::signals2::signal<void (void)> notifyTerminated;
+
+	mutable std::recursive_mutex m_mutex;
 
 private:
 	std::atomic<bool> m_forceTerminated;
