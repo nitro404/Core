@@ -103,9 +103,9 @@ hunter_config(SevenZip
 )
 
 hunter_config(spdlog
-	URL "https://github.com/Telefrag-Software/spdlog/archive/refs/heads/hunter-1.11.0.0.zip"
-	VERSION "1.11.0.0"
-	SHA1 "5fdb178952d99d6bcc9d9e77ca443817ba4b0ea6"
+	URL "https://github.com/Telefrag-Software/spdlog/archive/refs/heads/hunter-1.12.0.0.zip"
+	VERSION "1.12.0.0"
+	SHA1 "b1b289fe0e7da8d972151cab28b76cb39ba7a9a4"
 )
 
 hunter_config(tidy
