@@ -64,9 +64,9 @@ hunter_config(GTest
 )
 
 hunter_config(liblzma
-	URL "https://github.com/Telefrag-Software/xz/archive/refs/heads/hunter-5.4.0.zip"
-	VERSION "5.4.0"
-	SHA1 "2347b787e6626f6ffa6baac0a36ceb5dc5439309"
+	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.4.5"
+	VERSION "5.4.5"
+	SHA1 "99d49eecca208460832e422148c0cb1f3c8ff7cd"
 	CMAKE_ARGS
 		BUILD_TESTING=OFF
 )
