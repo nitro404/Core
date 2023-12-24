@@ -138,7 +138,7 @@ hunter_config(zstd
 
 # cURL Dependencies
 hunter_config(c-ares
-	VERSION "1.14.0-p0"
+	VERSION "1.24.0"
 )
 
 hunter_config(Libssh2
