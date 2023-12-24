@@ -5,7 +5,7 @@ if(WIN32)
 endif()
 
 hunter_config(Boost
-	VERSION "1.80.0"
+	VERSION "1.83.0"
 )
 
 hunter_config(BZip2
