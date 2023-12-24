@@ -146,7 +146,7 @@ hunter_config(Libssh2
 )
 
 hunter_config(OpenSSL
-	VERSION "1.1.1o"
+	VERSION "1.1.1t"
 )
 
 include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)
