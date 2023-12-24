@@ -58,9 +58,9 @@ hunter_config(fmt
 )
 
 hunter_config(GTest
-	URL "https://github.com/Telefrag-Software/googletest/archive/refs/heads/hunter-1.11.0.1.zip"
-	VERSION "1.11.0.1"
-	SHA1 "399764392feff6f6482aff04d40c7ed33ffa0dc5"
+	URL "https://codeload.github.com/google/googletest/zip/tags/v1.14.0"
+	VERSION "1.14.0.0"
+	SHA1 "713bdcaf2ed0050e582d7c2a05cb9a35523ddf4e"
 )
 
 hunter_config(liblzma
