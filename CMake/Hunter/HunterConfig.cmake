@@ -83,9 +83,9 @@ hunter_config(libzip
 )
 
 hunter_config(magic_enum
-	URL "https://codeload.github.com/Neargye/magic_enum/zip/tags/v0.8.2"
-	VERSION "0.8.2"
-	SHA1 "aea0008df68137b5555b7e9aa0eb7652d6f85793"
+	URL "https://codeload.github.com/Neargye/magic_enum/zip/tags/v0.9.5"
+	VERSION "0.9.5"
+	SHA1 "e6164e735dd2fe169142954d9529c340701b8669"
 )
 
 hunter_config(RapidJSON
