@@ -21,11 +21,12 @@ hunter_config(CryptoPP
 )
 
 hunter_config(CURL
-	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-7.87.0.0.zip"
-	VERSION "7.87.0.0"
-	SHA1 "1665f94819bef1e21e2622771e13acf527e3fc25"
+	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-8.5.0.zip"
+	VERSION "8.5.0.0"
+	SHA1 "9d82ea2685a3402c5385f700bbd9832f85112148"
 	CMAKE_ARGS
 		CURL_USE_OPENSSL=ON
+		CURL_ZSTD=ON
 		BUILD_SHARED_LIBS=OFF
 )
 
