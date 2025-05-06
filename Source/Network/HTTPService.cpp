@@ -50,7 +50,7 @@ bool HTTPService::initialize(const HTTPConfiguration & configuration, bool autoS
 		return true;
 	}
 
-	if(!HTTPUtilities::isSuccess(curl_global_init(CURL_GLOBAL_DEFAULT))) {
+	if(!HTTPUtilities::isSuccess(curl_global_init(CURL_GLOBAL_DEFAULT), "Failed to initialize cURL")) {
 		return false;
 	}
 
@@ -614,7 +614,7 @@ void HTTPService::run() {
 					continue;
 				}
 
-				completedRequest->getResponse()->onTransferCompleted(HTTPUtilities::isSuccess(curlMessage->data.result));
+				completedRequest->getResponse()->onTransferCompleted(HTTPUtilities::isSuccess(curlMessage->data.result), HTTPUtilities::getCURLErrorCodeName(curlMessage->data.result));
 
 				if(!HTTPUtilities::isSuccess(curl_multi_remove_handle(curlMultiHandle.get(), curlMessage->easy_handle))) {
 					spdlog::error("Failed to remove CURL easy handle from multi handle.");

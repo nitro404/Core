@@ -763,11 +763,11 @@ void HTTPResponse::notifyFailed() {
 	request->failed(*request);
 }
 
-bool HTTPResponse::onTransferCompleted(bool success) {
+bool HTTPResponse::onTransferCompleted(bool success, std::string_view errorMessage) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(!success) {
-		onTransferError("Request failed.");
+		onTransferError(fmt::format("Request failed: {}.", errorMessage));
 		return false;
 	}
 

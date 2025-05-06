@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace HTTPUtilities {
 
@@ -16,6 +17,9 @@ namespace HTTPUtilities {
 	using CURLStringList = std::unique_ptr<curl_slist, std::function<void (curl_slist *)>>;
 
 	std::string getStatusCodeName(uint16_t statusCode);
+	std::string_view getCURLErrorCodeName(CURLcode code);
+	std::string_view getCURLErrorCodeName(CURLMcode code);
+	std::string_view getCURLErrorCodeName(CURLSHcode code);
 	bool isSuccess(CURLcode code, const std::string & errorMessage = {});
 	bool isSuccess(CURLMcode code, const std::string & errorMessage = {});
 	bool isSuccess(CURLSHcode code, const std::string & errorMessage = {});

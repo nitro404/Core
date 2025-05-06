@@ -104,7 +104,7 @@ private:
 	void notifyProgress();
 	void notifyCompleted();
 	void notifyFailed();
-	bool onTransferCompleted(bool success);
+	bool onTransferCompleted(bool success, std::string_view errorMessage);
 	bool onConnectionTimedOut();
 	bool onNetworkTimedOut();
 	bool onTransferTimedOut();
