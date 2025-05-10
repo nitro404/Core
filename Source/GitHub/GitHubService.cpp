@@ -33,7 +33,7 @@ std::unique_ptr<GitHubRelease> GitHubService::getLatestRelease(const std::string
 	HTTPService * httpService = HTTPService::getInstance();
 
 	if(!httpService->isInitialized()) {
-		spdlog::error("Failed to retrieve latest '{}' release information, HTTP service is not initialized!");
+		spdlog::error("Failed to retrieve latest '{}' release information, HTTP service is not initialized!", repositoryName);
 		return nullptr;
 	}
 

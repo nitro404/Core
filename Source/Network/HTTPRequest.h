@@ -3,6 +3,7 @@
 
 #include "BitmaskOperators.h"
 #include "HTTPConfiguration.h"
+#include "HTTPQueryParameters.h"
 #include "HTTPResponse.h"
 #include "HTTPRequestSettings.h"
 #include "HTTPTransfer.h"
@@ -73,7 +74,23 @@ public:
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> getTransferStartedSteadyTimePoint() const;
 	std::shared_ptr<HTTPResponse> getResponse() const;
 
-	// HTTPResponse aliases
+	// HTTPQueryParameters Aliases
+	bool hasQueryParameters() const;
+	size_t numberOfQueryParameters() const;
+	bool hasQueryParameter(std::string_view key) const;
+	std::vector<std::string> getQueryParameterKeys() const;
+	std::string getFirstQueryParameterValue(std::string_view key) const;
+	std::string getLastQueryParameterValue(std::string_view key) const;
+	std::vector<std::string> getQueryParameterValues(std::string_view key) const;
+	const HTTPQueryParameters & getQueryParameters() const;
+	void addQueryParameter(std::string_view key, std::string_view value);
+	void addQueryParameter(std::string_view key, const std::vector<std::string> values);
+	void setQueryParameter(const std::string & key, std::string_view value);
+	void setQueryParameter(const std::string & key, const std::vector<std::string> values);
+	void removeQueryParameter(const std::string & key);
+	void clearQueryParameters();
+
+	// HTTPResponse Aliases
 	HTTPResponse::State getState() const;
 	bool isConnecting() const;
 	bool isReceiving() const;
@@ -118,6 +135,7 @@ private:
 
 	Method m_method;
 	std::string m_url;
+	HTTPQueryParameters m_queryParameters;
 	EncodingTypes m_acceptedEncodingTypes;
 	std::optional<std::chrono::time_point<std::chrono::system_clock>> m_requestInitiatedSystemTimePoint;
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_requestInitiatedSteadyTimePoint;

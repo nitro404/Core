@@ -122,6 +122,8 @@ set(CORE_SOURCE_FILES
 	Network/HTTPConfiguration.h
 	Network/HTTPHeaders.h
 	Network/HTTPHeaders.cpp
+	Network/HTTPQueryParameters.h
+	Network/HTTPQueryParameters.cpp
 	Network/HTTPRequest.h
 	Network/HTTPRequest.cpp
 	Network/HTTPRequestSettings.h

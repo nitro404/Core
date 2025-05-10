@@ -316,6 +316,114 @@ bool HTTPRequest::setResponse(std::shared_ptr<HTTPResponse> response) {
 	return true;
 }
 
+bool HTTPRequest::hasQueryParameters() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.isNotEmpty();
+}
+
+size_t HTTPRequest::numberOfQueryParameters() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.numberOfQueryParameters();
+}
+
+bool HTTPRequest::hasQueryParameter(std::string_view key) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.hasKey(key);
+}
+
+std::vector<std::string> HTTPRequest::getQueryParameterKeys() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.getKeys();
+}
+
+std::string HTTPRequest::getFirstQueryParameterValue(std::string_view key) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.getFirstValue(key);
+}
+
+std::string HTTPRequest::getLastQueryParameterValue(std::string_view key) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.getLastValue(key);
+}
+
+std::vector<std::string> HTTPRequest::getQueryParameterValues(std::string_view key) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters.getValues(key);
+}
+
+const HTTPQueryParameters & HTTPRequest::getQueryParameters() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return m_queryParameters;
+}
+
+void HTTPRequest::addQueryParameter(std::string_view key, std::string_view value) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.addValue(key, value);
+}
+
+void HTTPRequest::addQueryParameter(std::string_view key, const std::vector<std::string> values) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.addValues(key, values);
+}
+
+void HTTPRequest::setQueryParameter(const std::string & key, std::string_view value) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.setValue(key, value);
+}
+
+void HTTPRequest::setQueryParameter(const std::string & key, const std::vector<std::string> values) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.setValues(key, values);
+}
+
+void HTTPRequest::removeQueryParameter(const std::string & key) {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.removeKey(key);
+}
+
+void HTTPRequest::clearQueryParameters() {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(m_readOnly) {
+		return;
+	}
+
+	m_queryParameters.clear();
+}
+
 HTTPResponse::State HTTPRequest::getState() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
@@ -640,6 +748,7 @@ bool HTTPRequest::startTransfer(const HTTPConfiguration & configuration, HTTPUti
 		formattedURL = m_url;
 	}
 
+	formattedURL += m_queryParameters.toString();
 	formattedURL = Utilities::replaceAll(formattedURL, " ", "%20");
 
 	if(!HTTPUtilities::isSuccess(curl_easy_setopt(m_curlEasyHandle.get(), CURLOPT_URL, formattedURL.c_str()), fmt::format("Failed to set cURL request #{} URL to '{}'.", m_id, m_url))) {

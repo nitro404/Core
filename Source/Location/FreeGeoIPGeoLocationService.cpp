@@ -38,7 +38,8 @@ std::optional<GeoLocation> FreeGeoIPGeoLocationService::getGeoLocation() {
 		return {};
 	}
 
-	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, FREE_GEO_IP_API_ADDRESS + "?" + API_KEY_QUERY_PARAMETER + "=" + getAPIKey()));
+	std::shared_ptr<HTTPRequest> request(httpService->createRequest(HTTPRequest::Method::Get, FREE_GEO_IP_API_ADDRESS));
+	request->addQueryParameter(API_KEY_QUERY_PARAMETER, getAPIKey());
 	request->setConnectionTimeout(3s);
 	request->setNetworkTimeout(2s);
 
