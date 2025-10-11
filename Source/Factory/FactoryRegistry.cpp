@@ -33,6 +33,10 @@ const FactoryRegistry & FactoryRegistry::operator = (FactoryRegistry && factoryR
 FactoryRegistry::~FactoryRegistry() = default;
 
 FactoryRegistry & FactoryRegistry::getInstance() {
+	static std::mutex s_instanceMutex;
+
+	std::lock_guard<std::mutex> instanceLock(s_instanceMutex);
+
 	if(s_factoryRegistryInstance == nullptr) {
 		s_factoryRegistryInstance = std::unique_ptr<FactoryRegistry>(new FactoryRegistry());
 
