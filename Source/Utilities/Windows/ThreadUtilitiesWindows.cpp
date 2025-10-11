@@ -103,24 +103,24 @@ namespace Utilities {
 		return getThreadNameFallback(thread);
 	}
 
-	void setThreadName(std::thread & thread, const std::string & threadName) {
-		static std::optional<SET_THREAD_DESCRIPTION_FUNCTION_TYPE> optionalSetThreadDescriptionFunction = nullptr;
+	bool setThreadName(std::thread & thread, const std::string & threadName) {
+		static std::optional<SET_THREAD_DESCRIPTION_FUNCTION_TYPE> s_optionalSetThreadDescriptionFunction = nullptr;
 
-		if(!optionalSetThreadDescriptionFunction.has_value()) {
+		if(!s_optionalSetThreadDescriptionFunction.has_value()) {
 			HMODULE kernelHandle = GetModuleHandle(KERNEL32_DLL_NAME);
 
 			if(kernelHandle != 0) {
-				optionalSetThreadDescriptionFunction = reinterpret_cast<SET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, SET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
+				s_optionalSetThreadDescriptionFunction = reinterpret_cast<SET_THREAD_DESCRIPTION_FUNCTION_TYPE>(GetProcAddress(kernelHandle, SET_THREAD_DESCRIPTIPTION_FUNCTION_NAME));
 			}
 		}
 
-		if(optionalSetThreadDescriptionFunction.has_value() && optionalSetThreadDescriptionFunction.value() != nullptr) {
-			if(FAILED((*optionalSetThreadDescriptionFunction)(thread.native_handle(), Utilities::stringToWideString(threadName).data()))) {
+		if(s_optionalSetThreadDescriptionFunction.has_value() && s_optionalSetThreadDescriptionFunction.value() != nullptr) {
+			if(FAILED((*s_optionalSetThreadDescriptionFunction)(thread.native_handle(), Utilities::stringToWideString(threadName).data()))) {
 				spdlog::error("Failed to set thread name to '{}'.", threadName);
-				return;
+				return false;
 			}
 
-			return;
+			return true;
 		}
 
 		if(s_threadNames == nullptr) {
@@ -131,6 +131,8 @@ namespace Utilities {
 		(*s_threadNames)[thread.native_handle()] = threadName;
 
 		setThreadNameFallback(thread, threadName);
+
+		return true;
 	}
 
 }

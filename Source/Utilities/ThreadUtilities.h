@@ -7,7 +7,7 @@
 namespace Utilities {
 
 	std::string getThreadName(std::thread & thread);
-	void setThreadName(std::thread & thread, const std::string & threadName);
+	bool setThreadName(std::thread & thread, const std::string & threadName);
 
 }
 
