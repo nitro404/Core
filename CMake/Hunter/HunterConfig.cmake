@@ -2,6 +2,8 @@ include_guard()
 
 if(WIN32)
 	set(BUILD_7Z_CPP_LIB ON)
+else()
+	set(BUILD_7Z_CPP_LIB OFF)
 endif()
 
 hunter_config(Boost
@@ -102,9 +104,9 @@ hunter_config(RapidJSON
 )
 
 hunter_config(SevenZip
-	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.2.zip"
-	VERSION "21.7.0.2"
-	SHA1 "0286aef04c00a928c264008188eda25efb23c389"
+	URL "https://github.com/Telefrag-Software/7-Zip/archive/refs/heads/hunter-21.7.0.3.zip"
+	VERSION "21.7.0.3"
+	SHA1 "7c1c5c7fbea2da100ca99ae3cdbdfc263a1457b0"
 	CMAKE_ARGS
 		BUILD_CPP_LIB=${BUILD_7Z_CPP_LIB}
 )

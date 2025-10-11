@@ -14,13 +14,19 @@
 
 const ISzAlloc SevenZipArchive::DEFAULT_ALLOCATOR = { SzAlloc, SzFree };
 
+static std::vector<const ByteBuffer *> s_byteBufferVirtualFileHandles;
+
 static void createVirtualByteBufferFileHandle(CSzFile & file, const ByteBuffer & data) {
 #ifdef USE_WINDOWS_FILE
 	file.handle = reinterpret_cast<HANDLE>(const_cast<ByteBuffer *>(&data));
-#elif defined(USE_FOPEN)
-	file.file = reinterpret_cast<FILE *>(const_cast<ByteBuffer *>(&data));
 #else
-	file.fd = reinterpret_cast<int>(const_cast<ByteBuffer *>(&data));
+	s_byteBufferVirtualFileHandles.push_back(&data);
+
+	#if defined(USE_FOPEN)
+		file.file = reinterpret_cast<FILE *>(s_byteBufferVirtualFileHandles.size() - 1);
+	#else
+		file.fd = static_cast<int>(s_byteBufferVirtualFileHandles.size() - 1);
+	#endif
 #endif
 }
 
@@ -29,10 +35,16 @@ static const ByteBuffer * getByteBufferFromSeekInStreamInterface(const ISeekInSt
 
 #ifdef USE_WINDOWS_FILE
 	return reinterpret_cast<const ByteBuffer *>(fileInStream->file.handle);
-#elif defined(USE_FOPEN)
-	return reinterpret_cast<const ByteBuffer *>(fileInStream->file.file);
 #else
-	return reinterpret_cast<const ByteBuffer *>(fileInStream->file.fd);
+	size_t byteBufferVirtualFileHandleIndex = 0;
+
+	#if defined(USE_FOPEN)
+		byteBufferVirtualFileHandleIndex = reinterpret_cast<size_t>(fileInStream->file.file);
+	#else
+		byteBufferVirtualFileHandleIndex = fileInStream->file.fd;
+	#endif
+
+	return s_byteBufferVirtualFileHandles[byteBufferVirtualFileHandleIndex];
 #endif
 }
 
