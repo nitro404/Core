@@ -129,6 +129,14 @@ bool Utilities::isAlphaNumericLowerCase(char c) {
 	return std::isdigit(c) || std::islower(c);
 }
 
+bool Utilities::isEmptyString(const char * s) {
+	return s == nullptr || s[0] == '\0';
+}
+
+bool Utilities::isNonEmptyString(const char * s) {
+	return s != nullptr && s[0] != '\0';
+}
+
 size_t Utilities::stringLength(const char * s) {
 	return s == nullptr ? 0 : strlen(s);
 }

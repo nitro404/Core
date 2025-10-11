@@ -14,6 +14,8 @@ namespace Utilities {
 	const std::string emptyString;
 	bool isAlphaNumericUpperCase(char c);
 	bool isAlphaNumericLowerCase(char c);
+	bool isEmptyString(const char * s);
+	bool isNonEmptyString(const char * s);
 	size_t stringLength(const char * s);
 	std::string trimString(std::string_view data, bool trimWhiteSpace = true, bool trimNewLines = true);
 	std::string reverseString(std::string_view data);
