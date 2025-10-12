@@ -146,14 +146,14 @@ std::string DeviceInformationBridgeWindows::getOperatingSystemVersion() {
 	return s_operatingSystemVersion;
 }
 
-std::string DeviceInformationBridgeWindows::getOperatingSystemArchitectureName() {
-	static std::string s_operatingSystemArchitecture;
+std::string DeviceInformationBridgeWindows::getArchitectureName() {
+	static std::string s_architecture;
 
-	if(s_operatingSystemArchitecture.empty()) {
-		s_operatingSystemArchitecture = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "OSArchitecture"));
+	if(s_architecture.empty()) {
+		s_architecture = std::any_cast<std::string>(WindowsUtilities::getWindowsManagementInstrumentationEntry(OPERATING_SYSTEM_PROVIDER_CLASS_NAME, "OSArchitecture"));
 	}
 
-	return s_operatingSystemArchitecture;
+	return s_architecture;
 }
 
 std::string DeviceInformationBridgeWindows::getProcessorName() {

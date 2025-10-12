@@ -2,6 +2,9 @@
 
 #include "Utilities/StringUtilities.h"
 
+#include <magic_enum.hpp>
+#include <spdlog/spdlog.h>
+
 DeviceInformationBridge::DeviceInformationBridge() { }
 
 DeviceInformationBridge::~DeviceInformationBridge() { }
@@ -16,26 +19,54 @@ std::optional<DeviceInformationBridge::OperatingSystemType> DeviceInformationBri
 		if(operatingSystemNameLowerCase.find("windows") != std::string::npos) {
 			s_optionalOperatingSystemType = OperatingSystemType::Windows;
 		}
+		else if(operatingSystemNameLowerCase.find("linux") != std::string::npos) {
+			s_optionalOperatingSystemType = OperatingSystemType::Linux;
+		}
+		else {
+			spdlog::error("Unknown operating system type: '{}'.", operatingSystemName);
+		}
 	}
 
 	return s_optionalOperatingSystemType;
 }
 
-std::optional<DeviceInformationBridge::OperatingSystemArchitectureType> DeviceInformationBridge::getOperatingSystemArchitectureType() {
-	static std::optional<DeviceInformationBridge::OperatingSystemArchitectureType> s_optionalOperatingSystemArchitectureType;
+std::optional<DeviceInformationBridge::ArchitectureType> DeviceInformationBridge::getArchitectureType() {
+	static std::optional<DeviceInformationBridge::ArchitectureType> s_optionalArchitectureType;
 
-	if(!s_optionalOperatingSystemArchitectureType.has_value()) {
-		std::string operatingSystemArchitectureName(getOperatingSystemArchitectureName());
+	if(!s_optionalArchitectureType.has_value()) {
+		std::string architectureName(getArchitectureName());
 
-		if(operatingSystemArchitectureName.find("64") != std::string::npos) {
-			s_optionalOperatingSystemArchitectureType = OperatingSystemArchitectureType::x64;
+		if(Utilities::areStringsEqualIgnoreCase(architectureName, "mips")) {
+			s_optionalArchitectureType = ArchitectureType::MIPS32;
 		}
-		else if(operatingSystemArchitectureName.find("32") != std::string::npos) {
-			s_optionalOperatingSystemArchitectureType = OperatingSystemArchitectureType::x86;
+		else if(Utilities::areStringsEqualIgnoreCase(architectureName, "ppc")) {
+			s_optionalArchitectureType = ArchitectureType::PPC32;
+		}
+		else if(Utilities::areStringsEqualIgnoreCase(architectureName, "sparc")) {
+			s_optionalArchitectureType = ArchitectureType::SPARC32;
+		}
+		else {
+			constexpr auto architectureEntries = magic_enum::enum_entries<ArchitectureType>();
+
+			for(const auto & currentArchitectureEntry : architectureEntries) {
+				if(Utilities::areStringsEqualIgnoreCase(currentArchitectureEntry.second, architectureName)) {
+					s_optionalArchitectureType = currentArchitectureEntry.first;
+					break;
+				}
+			}
+		}
+
+		if(!s_optionalArchitectureType.has_value()) {
+			if(architectureName.find("64") != std::string::npos) {
+				s_optionalArchitectureType = ArchitectureType::x64;
+			}
+			else if(architectureName.find("32") != std::string::npos) {
+				s_optionalArchitectureType = ArchitectureType::x86;
+			}
 		}
 	}
 
-	return s_optionalOperatingSystemArchitectureType;
+	return s_optionalArchitectureType;
 }
 
 bool DeviceInformationBridge::isConnectedToInternet() {

@@ -65,14 +65,32 @@ public:
 		MacOS
 	};
 
-	enum class OperatingSystemArchitectureType {
+	enum class ArchitectureType {
 		x86,
-		x64
+		x64,
+		Alpha,
+		ARMV7L,
+		AARCH64,
+		HPPA,
+		i386,
+		i486,
+		i586,
+		i686,
+		i860,
+		MIPS32,
+		MIPS64,
+		PPC32,
+		PPC64,
+		RISCV,
+		s390x,
+		SH4,
+		SPARC32,
+		SPARC64
 	};
 
 	struct MemoryStatus {
-		uint64_t used;
-		uint64_t total;
+		uint64_t used = 0;
+		uint64_t total = 0;
 	};
 
 	struct NetworkAdapterInformation {
@@ -96,8 +114,8 @@ public:
 	virtual std::string getOperatingSystemName() = 0;
 	std::optional<OperatingSystemType> getOperatingSystemType();
 	virtual std::string getOperatingSystemVersion() = 0;
-	virtual std::string getOperatingSystemArchitectureName() = 0;
-	std::optional<OperatingSystemArchitectureType> getOperatingSystemArchitectureType();
+	virtual std::string getArchitectureName() = 0;
+	std::optional<ArchitectureType> getArchitectureType();
 	virtual std::string getProcessorName() = 0;
 	virtual std::string getMotherboardName() = 0;
 	virtual std::vector<std::string> getGraphicsCardNames() = 0;

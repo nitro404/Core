@@ -213,6 +213,20 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Utilities/Windows/TimeUtilitiesWindows.cpp
 )
 
+set(CORE_SOURCE_FILES_LINUX
+	Archive/Linux/ArchiveFactoryRegistryLinux.cpp
+	Factory/Linux/FactoryRegistryLinux.cpp
+	Logging/Linux/LogSystemLinux.h
+	Logging/Linux/LogSystemLinux.cpp
+	Platform/Linux/DeviceInformationBridgeLinux.h
+	Platform/Linux/DeviceInformationBridgeLinux.cpp
+	Platform/Linux/LinuxUtilities.h
+	Platform/Linux/LinuxUtilities.cpp
+	Platform/Linux/ProcessCreatorLinux.h
+	Platform/Linux/ProcessCreatorLinux.cpp
+	Utilities/Linux/ThreadUtilitiesLinux.cpp
+)
+
 list(APPEND CORE_SOURCE_FILES ${CORE_SOURCE_FILES_${PLATFORM_UPPER}})
 
 list(TRANSFORM CORE_SOURCE_FILES PREPEND "${_SOURCE_DIRECTORY}/")

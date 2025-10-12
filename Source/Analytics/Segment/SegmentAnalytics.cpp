@@ -545,8 +545,8 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 	operatingSystemValue.AddMember(rapidjson::StringRef("name"), operatingSystemNameValue, allocator);
 	rapidjson::Value operatingSystemVersionValue(deviceInfoBridge->getOperatingSystemVersion().c_str(), allocator);
 	operatingSystemValue.AddMember(rapidjson::StringRef("version"), operatingSystemVersionValue, allocator);
-	rapidjson::Value operatingSystemArchitectureValue(deviceInfoBridge->getOperatingSystemArchitectureName().c_str(), allocator);
-	operatingSystemValue.AddMember(rapidjson::StringRef("architecture"), operatingSystemArchitectureValue, allocator);
+	rapidjson::Value architectureValue(deviceInfoBridge->getArchitectureName().c_str(), allocator);
+	operatingSystemValue.AddMember(rapidjson::StringRef("architecture"), architectureValue, allocator);
 
 	contextValue.AddMember(rapidjson::StringRef("os"), operatingSystemValue, allocator);
 
