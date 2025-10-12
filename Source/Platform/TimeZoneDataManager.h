@@ -11,6 +11,7 @@ public:
 	TimeZoneDataManager();
 	virtual ~TimeZoneDataManager();
 
+	virtual bool isSupported() const;
 	bool isInitialized() const;
 	bool initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 

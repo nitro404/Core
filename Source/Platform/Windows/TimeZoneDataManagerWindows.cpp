@@ -15,6 +15,10 @@ TimeZoneDataManagerWindows::TimeZoneDataManagerWindows() { }
 
 TimeZoneDataManagerWindows::~TimeZoneDataManagerWindows() { }
 
+bool TimeZoneDataManagerWindows::isSupported() const {
+	return true;
+}
+
 bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
 	std::string windowsTimeZoneFilePath(Utilities::joinPaths(dataDirectoryPath, WINDOWS_TIMEZONE_DATA_FILE_NAME));
 	bool windowsTimeZoneDataFileExists = std::filesystem::is_regular_file(std::filesystem::path(windowsTimeZoneFilePath));

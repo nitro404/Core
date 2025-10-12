@@ -44,11 +44,20 @@ TimeZoneDataManager::TimeZoneDataManager()
 
 TimeZoneDataManager::~TimeZoneDataManager() { }
 
+bool TimeZoneDataManager::isSupported() const {
+	return false;
+}
+
 bool TimeZoneDataManager::isInitialized() const {
 	return m_initialized;
 }
 
 bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate, bool forceUpdate, bool * updated) {
+	if(!isSupported()) {
+		spdlog::warn("Time zone data manager is not supported on this platform.");
+		return false;
+	}
+
 	if(m_initialized) {
 		return true;
 	}
