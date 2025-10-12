@@ -64,13 +64,10 @@ public:
 
 	union {
 		struct {
-			Point2D position;
-			Dimension size;
-		};
-
-		struct {
-			int32_t x, y;
-			uint32_t w, h;
+			int32_t x;
+			int32_t y;
+			uint32_t w;
+			uint32_t h;
 		};
 
 		struct {

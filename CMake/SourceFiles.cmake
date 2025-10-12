@@ -39,8 +39,8 @@ set(CORE_SOURCE_FILES
 	Archive/Tar/TarLZMAArchive.cpp
 	Archive/Tar/TarUtilities.h
 	Archive/Tar/TarUtilities.cpp
-	Archive/Tar/TarXZArchive.h
-	Archive/Tar/TarXZArchive.cpp
+	Archive/Tar/TarXzArchive.h
+	Archive/Tar/TarXzArchive.cpp
 	Archive/Tar/TarZStandardArchive.h
 	Archive/Tar/TarZStandardArchive.cpp
 	Archive/Zip/ZipArchive.h

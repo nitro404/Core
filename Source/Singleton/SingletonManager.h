@@ -4,6 +4,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <typeindex>
 
 class SingletonManager final {
 public:
@@ -26,7 +27,7 @@ public:
 	bool unregisterSingleton();
 
 private:
-	typedef std::map<std::string, void *> SingletonMap;
+	typedef std::map<std::type_index, void *> SingletonMap;
 
 	SingletonManager();
 
@@ -41,7 +42,7 @@ template <class T>
 bool SingletonManager::hasSingleton() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
+	SingletonMap::const_iterator i = m_singletons.find(std::type_index(typeid(T)));
 
 	return i != m_singletons.end();
 }
@@ -50,7 +51,7 @@ template <class T>
 const T * SingletonManager::getSingleton() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
+	SingletonMap::const_iterator i = m_singletons.find(std::type_index(typeid(T)));
 
 	if(i == m_singletons.end()) {
 		return nullptr;
@@ -63,7 +64,7 @@ template <class T>
 T * SingletonManager::getSingleton() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	SingletonMap::const_iterator i = m_singletons.find(typeid(T).name());
+	SingletonMap::const_iterator i = m_singletons.find(std::type_index(typeid(T)));
 
 	if(i == m_singletons.end()) {
 		return nullptr;
@@ -80,7 +81,7 @@ bool SingletonManager::registerSingleton(T * singleton) {
 		return false;
 	}
 
-	m_singletons[typeid(T).name()] = singleton;
+	m_singletons[std::type_index(typeid(T))] = singleton;
 
 	return true;
 }
@@ -89,7 +90,7 @@ template <class T>
 bool SingletonManager::unregisterSingleton() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	SingletonMap::iterator i = m_singletons.find(typeid(T).name());
+	SingletonMap::iterator i = m_singletons.find(std::type_index(typeid(T)));
 
 	if(i == m_singletons.end()) {
 		return false;

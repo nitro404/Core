@@ -8,35 +8,6 @@
 #include <mutex>
 
 class ComponentRegistry final {
-public:
-	class GlobalComponent;
-
-	ComponentRegistry(ComponentRegistry && componentRegistry) noexcept;
-	const ComponentRegistry & operator = (ComponentRegistry && componentRegistry) noexcept;
-	~ComponentRegistry();
-
-	static ComponentRegistry & getInstance();
-
-	size_t numberOfComponents() const;
-	bool hasComponent(uint64_t id) const;
-	template <class T>
-	uint64_t addComponent(T ** component);
-	template <class T>
-	uint64_t addComponent(std::unique_ptr<T> component);
-	template <class T>
-	uint64_t addComponent(std::unique_ptr<T> * component);
-	bool deleteComponent(uint64_t id);
-	void deleteAllComponents();
-
-	size_t numberOfGlobalComponents() const;
-	bool hasGlobalComponent(uint64_t id) const;
-	uint64_t addGlobalComponent(std::unique_ptr<GlobalComponent> globalComponent);
-	bool deleteGlobalComponent(uint64_t id);
-	void deleteAllGlobalComponents();
-
-	bool areGlobalComponentsRegistered() const;
-	bool registerGlobalComponents();
-
 private:
 	class Component {
 	public:
@@ -112,6 +83,33 @@ private:
 		GlobalComponent(const GlobalComponent &) = delete;
 		const GlobalComponent & operator = (const GlobalComponent &) = delete;
 	};
+
+public:
+	ComponentRegistry(ComponentRegistry && componentRegistry) noexcept;
+	const ComponentRegistry & operator = (ComponentRegistry && componentRegistry) noexcept;
+	~ComponentRegistry();
+
+	static ComponentRegistry & getInstance();
+
+	size_t numberOfComponents() const;
+	bool hasComponent(uint64_t id) const;
+	template <class T>
+	uint64_t addComponent(T ** component);
+	template <class T>
+	uint64_t addComponent(std::unique_ptr<T> component);
+	template <class T>
+	uint64_t addComponent(std::unique_ptr<T> * component);
+	bool deleteComponent(uint64_t id);
+	void deleteAllComponents();
+
+	size_t numberOfGlobalComponents() const;
+	bool hasGlobalComponent(uint64_t id) const;
+	uint64_t addGlobalComponent(std::unique_ptr<GlobalComponent> globalComponent);
+	bool deleteGlobalComponent(uint64_t id);
+	void deleteAllGlobalComponents();
+
+	bool areGlobalComponentsRegistered() const;
+	bool registerGlobalComponents();
 
 	ComponentRegistry();
 

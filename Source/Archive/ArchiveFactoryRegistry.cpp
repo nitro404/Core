@@ -6,7 +6,7 @@
 #include "Archive/Tar/TarBZip2Archive.h"
 #include "Archive/Tar/TarGZipArchive.h"
 #include "Archive/Tar/TarLZMAArchive.h"
-#include "Archive/Tar/TarXZArchive.h"
+#include "Archive/Tar/TarXzArchive.h"
 #include "Archive/Tar/TarZStandardArchive.h"
 #include "Archive/Zip/ZipArchive.h"
 #include "Utilities/FileUtilities.h"

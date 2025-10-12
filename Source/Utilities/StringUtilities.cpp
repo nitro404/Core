@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <codecvt>
+#include <cstring>
 #include <functional>
 #include <locale>
 #include <regex>

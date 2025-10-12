@@ -4,17 +4,17 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#if _DEBUG
+#if defined(__DEBUG)
 const spdlog::level::level_enum LogSystem::DEFAULT_LEVEL = spdlog::level::level_enum::trace;
 #else
 const spdlog::level::level_enum LogSystem::DEFAULT_LEVEL = spdlog::level::level_enum::info;
-#endif // _DEBUG
+#endif // __DEBUG
 
-#if _DEBUG
+#if defined(__DEBUG)
 const char * LogSystem::DEFAULT_PATTERN = "%^%T.%e [%t] %L: %v%$";
 #else
 const char * LogSystem::DEFAULT_PATTERN = "%^%T.%e %L: %v%$";
-#endif // _DEBUG
+#endif // __DEBUG
 
 LogSystem::LogSystem(std::shared_ptr<spdlog::logger> logger)
 	: m_logger(logger) {

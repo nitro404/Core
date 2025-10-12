@@ -3,6 +3,7 @@
 #include <date/date.h>
 
 #include <array>
+#include <cstring>
 #include <ctime>
 #include <iomanip>
 #include <map>
@@ -35,7 +36,7 @@ namespace Utilities {
 		}
 
 		std::tm invalidTime;
-		memset(&invalidTime, 0, sizeof(invalidTime));
+		std::memset(&invalidTime, 0, sizeof(invalidTime));
 		return invalidTime;
 	}
 
@@ -52,7 +53,7 @@ namespace Utilities {
 		}
 
 		std::tm invalidTime;
-		memset(&invalidTime, 0, sizeof(invalidTime));
+		std::memset(&invalidTime, 0, sizeof(invalidTime));
 		return invalidTime;
 	}
 

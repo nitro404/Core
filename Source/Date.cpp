@@ -63,7 +63,7 @@ Date::Date(uint8_t day, Date::Month month, uint16_t year)
 
 
 Date::Date(std::chrono::time_point<std::chrono::system_clock> timestamp) {
-	date::year_month_day yearMonthDay(floor<date::days>(timestamp));
+	date::year_month_day yearMonthDay(date::floor<date::days>(timestamp));
 	m_day = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.day()));
 	m_month = static_cast<uint8_t>(static_cast<unsigned>(yearMonthDay.month()));
 	m_year = static_cast<uint16_t>(static_cast<int>(yearMonthDay.year()));
@@ -185,7 +185,7 @@ bool Date::setValue(uint8_t day, uint8_t month, uint16_t year) {
 }
 
 bool Date::setValue(std::chrono::time_point<std::chrono::system_clock> timestamp) {
-	date::year_month_day yearMonthDay(floor<date::days>(timestamp));
+	date::year_month_day yearMonthDay(date::floor<date::days>(timestamp));
 
 	if(!yearMonthDay.ok()) {
 		return false;

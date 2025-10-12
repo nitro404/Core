@@ -4,6 +4,7 @@
 class ByteBuffer;
 
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <string>
 

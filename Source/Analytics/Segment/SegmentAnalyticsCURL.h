@@ -33,7 +33,7 @@ public:
 	virtual const std::string & getLibraryVersion() const override;
 
 protected:
-	virtual const LibraryInfoProvider * getLibraryInfoProvider() const override;
+	virtual const SegmentAnalytics::LibraryInfoProvider * getLibraryInfoProvider() const override;
 
 	// SegmentAnalytics Virtuals
 	virtual bool queueEvent(std::unique_ptr<SegmentAnalyticEvent> analyticEvent) override;

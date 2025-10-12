@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <typeindex>
 
 class FactoryRegistry final {
 public:
@@ -29,7 +30,7 @@ public:
 	void assignDefaultFactories();
 
 private:
-	typedef std::map<std::string, std::unique_ptr<Factory>> FactoryMap;
+	typedef std::map<std::type_index, std::unique_ptr<Factory>> FactoryMap;
 
 	FactoryRegistry();
 
@@ -48,14 +49,14 @@ template <class T>
 bool FactoryRegistry::hasFactory() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	return m_factories.find(typeid(T).name()) != m_factories.end();
+	return m_factories.find(std::type_index(typeid(T))) != m_factories.end();
 }
 
 template <class T>
 std::function<std::unique_ptr<T>()> FactoryRegistry::getFactory() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	FactoryMap::const_iterator factory(m_factories.find(typeid(T).name()));
+	FactoryMap::const_iterator factory(m_factories.find(std::type_index(typeid(T))));
 
 	if(factory == m_factories.end()) {
 		return nullptr;
@@ -68,7 +69,7 @@ template <class T>
 std::unique_ptr<T> FactoryRegistry::callFactory() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	FactoryMap::const_iterator factory(m_factories.find(typeid(T).name()));
+	FactoryMap::const_iterator factory(m_factories.find(std::type_index(typeid(T))));
 
 	if(factory == m_factories.end()) {
 		return nullptr;
@@ -82,10 +83,10 @@ void FactoryRegistry::setFactory(std::function<std::unique_ptr<T>()> factory) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(factory == nullptr) {
-		m_factories.erase(typeid(T).name());
+		m_factories.erase(std::type_index(typeid(T)));
 	}
 	else {
-		m_factories[typeid(T).name()] = std::make_unique<FactoryFunction<T>>(factory);
+		m_factories[std::type_index(typeid(T))] = std::make_unique<FactoryFunction<T>>(factory);
 	}
 }
 

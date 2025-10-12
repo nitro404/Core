@@ -34,7 +34,7 @@ public:
 private:
 	std::function<std::unique_ptr<T>()> m_function;
 
-	FactoryFunction(const FactoryFunction<T> & f = delete);
+	FactoryFunction(const FactoryFunction<T> & f) = delete;
 	FactoryFunction<T> & operator = (const FactoryFunction<T> & f) = delete;
 };
 

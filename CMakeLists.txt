@@ -6,6 +6,8 @@ set(CORE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "" FORCE)
 set(_SOURCE_DIRECTORY "Source")
 set(_CORE_FILE_PATH "${CORE_DIRECTORY}/${_SOURCE_DIRECTORY}/Core.h")
 
+include(Modules/ConfigurePlatform)
+include(Modules/ConfigureCPlusPlus)
 include(Modules/Debug)
 include(Modules/GetGitCommitHash)
 include(Hunter/HunterInit)

@@ -3,6 +3,7 @@
 
 #include <boost/signals2.hpp>
 
+#include <atomic>
 #include <chrono>
 #include <mutex>
 #include <optional>

@@ -1,4 +1,4 @@
-#include "TarXZArchive.h"
+#include "TarXzArchive.h"
 
 #include <spdlog/spdlog.h>
 
