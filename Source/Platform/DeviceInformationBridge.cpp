@@ -69,8 +69,8 @@ std::optional<DeviceInformationBridge::ArchitectureType> DeviceInformationBridge
 	return s_optionalArchitectureType;
 }
 
-bool DeviceInformationBridge::isConnectedToInternet() {
-	return getNetworkConnectionStatus() == NetworkConnectionStatus::Internet;
+bool DeviceInformationBridge::isConnectedToNetwork() {
+	return getNetworkConnectionStatus() == NetworkConnectionStatus::Connected;
 }
 
 std::string DeviceInformationBridge::getMemoryTypeName(MemoryType memoryType) {

@@ -27,7 +27,7 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 		return true;
 	}
 
-	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+	if(!HTTPService::getInstance()->checkForInternetConnectivity()) {
 		return windowsTimeZoneDataFileExists;
 	}
 

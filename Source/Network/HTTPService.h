@@ -53,8 +53,11 @@ public:
 	void setAuthorization(const std::string & bearerToken);
 	void setAuthorization(const std::string & userName, const std::string & password);
 	void clearAuthorization();
-	std::future<bool> updateCertificateAuthorityCertificate(bool force = false);
-	bool updateCertificateAuthorityCertificateAndWait(bool force = false);
+	bool checkForInternetConnectivity(bool force = false);
+	std::string getCertificateAuthorityCertificateStoreFilePath() const;
+	bool hasCertificateAuthorityCertificateStoreFile() const;
+	std::future<bool> updateCertificateAuthorityCertificateStoreFile(bool force = false);
+	bool updateCertificateAuthorityCertificateStoreFileAndWait(bool force = false);
 	std::shared_ptr<HTTPRequest> createRequest(HTTPRequest::Method method, const std::string & url);
 	std::future<std::shared_ptr<HTTPResponse>> sendRequest(std::shared_ptr<HTTPRequest> request);
 	std::shared_ptr<HTTPResponse> sendRequestAndWait(std::shared_ptr<HTTPRequest> request);
@@ -65,12 +68,15 @@ public:
 	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL;
 	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME;
 	static const std::string CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX;
+	static const std::string INTERNET_CONNECTIVITY_CHECK_URL;
+	static const std::chrono::seconds DEFAULT_INTERNET_CONNECTIVITY_CHECK_INTERVAL;
+	static const std::chrono::seconds DEFAULT_INTERNET_CONNECTIVITY_CHECK_TIMEOUT;
 
 private:
 	using HTTPThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
 	using CACertUpdateThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
 
-	void runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertDirectoryPath, bool force);
+	void runCertificateAuthorityCertificateStoreFileUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertFilePath, bool force);
 	void run();
 	std::shared_ptr<HTTPResponse> createResponse(std::shared_ptr<HTTPRequest> request);
 
@@ -83,7 +89,12 @@ private:
 	std::string m_userAgent;
 	std::string m_authorizationToken;
 	HTTPThread m_httpThread;
-	bool m_updatingCACert;
+	std::chrono::seconds m_internetConnectivityCheckInterval;
+	std::chrono::seconds m_internetConnectivityCheckTimeout;
+	std::optional<bool> m_connectedToInternet;
+	mutable std::mutex m_internetConnectivityMutex;
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_lastInternetConnectivityCheckTimePoint;
+	bool m_updatingCertificateAuthorityCertificateStoreFile;
 	CACertUpdateThread m_caCertUpdateThread;
 	std::vector<std::weak_ptr<HTTPRequest>> m_requests;
 	std::deque<std::shared_ptr<HTTPRequest>> m_pendingRequests;

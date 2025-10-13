@@ -5,6 +5,10 @@
 
 #include <spdlog/spdlog.h>
 
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <net/if.h>
 #include <unistd.h>
 
 #include <fstream>
@@ -571,8 +575,70 @@ std::vector<DeviceInformationBridge::NetworkAdapterInformation> DeviceInformatio
 }
 
 DeviceInformationBridge::NetworkConnectionStatus DeviceInformationBridgeLinux::getNetworkConnectionStatus() {
-	// Note: This function is not yet implemented.
-	return DeviceInformationBridge::NetworkConnectionStatus::Unknown;
+	static const uint8_t LOOPBACK_IPV6_ADDRESS[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+
+	struct ifaddrs * networkInterfaces;
+
+	if(getifaddrs(&networkInterfaces) == -1) {
+		return NetworkConnectionStatus::Error;
+	}
+
+	bool connectedToNetwork = false;
+
+	for(ifaddrs * currentNetworkInterface = networkInterfaces; currentNetworkInterface != nullptr; currentNetworkInterface = currentNetworkInterface->ifa_next) {
+		if(currentNetworkInterface->ifa_addr == nullptr) {
+			continue;
+		}
+
+		if((currentNetworkInterface->ifa_flags & IFF_LOOPBACK) || !(currentNetworkInterface->ifa_flags & IFF_UP)) {
+			continue;
+		}
+
+		switch(currentNetworkInterface->ifa_addr->sa_family) {
+			case AF_INET: {
+				void * adapterAddress = &((struct sockaddr_in *) currentNetworkInterface->ifa_addr)->sin_addr;
+				char ipAddress[INET_ADDRSTRLEN];
+				ipAddress[0] = '\0';
+
+				if(inet_ntop(AF_INET, adapterAddress, ipAddress, sizeof(ipAddress))) {
+					connectedToNetwork = true;
+				}
+
+				break;
+			}
+
+			case AF_INET6: {
+				struct sockaddr_in6 * adapterAddress = (struct sockaddr_in6 *) currentNetworkInterface->ifa_addr;
+				const uint8_t * rawAdapterAddress = adapterAddress->sin6_addr.s6_addr;
+				char ipAddress[INET6_ADDRSTRLEN];
+				ipAddress[0] = '\0';
+
+				// Skip loopback addresses
+				if(std::memcmp(rawAdapterAddress, LOOPBACK_IPV6_ADDRESS, 16) == 0) {
+					continue;
+				}
+
+				// Skip link-local addresses
+				if(rawAdapterAddress[0] == 0xFE && (rawAdapterAddress[1] & 0xC0) == 0x80) {
+					continue;
+				}
+
+				if(inet_ntop(AF_INET6, &adapterAddress->sin6_addr, ipAddress, sizeof(ipAddress))) {
+					connectedToNetwork = true;
+				}
+
+				break;
+			}
+		}
+
+		if(connectedToNetwork) {
+			break;
+		}
+	}
+
+	freeifaddrs(networkInterfaces);
+
+	return connectedToNetwork ? NetworkConnectionStatus::Connected : NetworkConnectionStatus::Disconnected;
 }
 
 bool DeviceInformationBridgeLinux::populateSystemInformation() {

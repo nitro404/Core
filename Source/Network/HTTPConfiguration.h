@@ -12,6 +12,8 @@ struct HTTPConfiguration {
 	std::optional<std::chrono::seconds> networkTimeout;
 	std::optional<std::chrono::seconds> transferTimeout;
 	std::optional<int64_t> maximumRedirects;
+	std::optional<std::chrono::seconds> internetConnectivityCheckInterval;
+	std::optional<std::chrono::seconds> internetConnectivityCheckTimeout;
 };
 
 #endif // _HTTP_CONFIGURATION_H_

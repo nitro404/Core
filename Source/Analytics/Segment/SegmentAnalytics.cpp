@@ -564,7 +564,6 @@ std::unique_ptr<rapidjson::Document> SegmentAnalytics::createBaseEventPayloadDoc
 	networkValue.AddMember(rapidjson::StringRef("cellular"), rapidjson::Value(false), allocator);
 	networkValue.AddMember(rapidjson::StringRef("bluetooth"), rapidjson::Value(false), allocator);
 	networkValue.AddMember(rapidjson::StringRef("local"), rapidjson::Value(wiredAdapterConnected || wirelessAdapterConnected), allocator);
-	networkValue.AddMember(rapidjson::StringRef("internet"), rapidjson::Value(deviceInfoBridge->isConnectedToInternet()), allocator);
 
 	contextValue.AddMember(rapidjson::StringRef("network"), networkValue, allocator);
 

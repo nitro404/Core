@@ -52,8 +52,7 @@ public:
 	};
 
 	enum class NetworkConnectionStatus {
-		Internet,
-		Local,
+		Connected,
 		Disconnected,
 		Error,
 		Unknown
@@ -126,7 +125,7 @@ public:
 	virtual std::string getLocale() = 0;
 	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) = 0;
 	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() = 0;
-	bool isConnectedToInternet();
+	bool isConnectedToNetwork();
 	virtual NetworkConnectionStatus getNetworkConnectionStatus() = 0;
 
 	static std::string getMemoryTypeName(MemoryType memoryType);

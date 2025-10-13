@@ -464,10 +464,7 @@ DeviceInformationBridge::NetworkConnectionStatus DeviceInformationBridgeWindows:
 
 				if(SUCCEEDED(networkListManager->get_IsConnectedToInternet(&internetConnected))) {
 					if(internetConnected == VARIANT_TRUE) {
-						networkConnectionStatus = NetworkConnectionStatus::Internet;
-					}
-					else {
-						networkConnectionStatus = NetworkConnectionStatus::Disconnected;
+						networkConnectionStatus = NetworkConnectionStatus::Connected;
 					}
 				}
 
@@ -479,7 +476,7 @@ DeviceInformationBridge::NetworkConnectionStatus DeviceInformationBridgeWindows:
 							continue;
 						}
 
-						networkConnectionStatus = NetworkConnectionStatus::Local;
+						networkConnectionStatus = NetworkConnectionStatus::Connected;
 
 						break;
 					}

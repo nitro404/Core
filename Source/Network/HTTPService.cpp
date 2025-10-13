@@ -7,12 +7,17 @@
 
 #include <spdlog/spdlog.h>
 
+#include <filesystem>
+
 using namespace std::chrono_literals;
 
 const size_t HTTPService::DEFAULT_MAXIMUM_ACTIVE_REQUESTS = 8u;
 const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL("https://curl.se/ca");
 const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME("cacert.pem");
 const std::string HTTPService::CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX(".sha256");
+const std::string HTTPService::INTERNET_CONNECTIVITY_CHECK_URL("http://connectivitycheck.gstatic.com/generate_204");
+const std::chrono::seconds HTTPService::DEFAULT_INTERNET_CONNECTIVITY_CHECK_INTERVAL(15s);
+const std::chrono::seconds HTTPService::DEFAULT_INTERNET_CONNECTIVITY_CHECK_TIMEOUT(1s);
 
 HTTPService::HTTPService()
 	: HTTPRequestSettings()
@@ -20,7 +25,9 @@ HTTPService::HTTPService()
 	, m_running(false)
 	, m_stopRequested(false)
 	, m_maximumActiveRequests(DEFAULT_MAXIMUM_ACTIVE_REQUESTS)
-	, m_updatingCACert(false) { }
+	, m_internetConnectivityCheckInterval(DEFAULT_INTERNET_CONNECTIVITY_CHECK_INTERVAL)
+	, m_internetConnectivityCheckTimeout(DEFAULT_INTERNET_CONNECTIVITY_CHECK_TIMEOUT)
+	, m_updatingCertificateAuthorityCertificateStoreFile(false) { }
 
 HTTPService::~HTTPService() {
 	stop();
@@ -76,20 +83,32 @@ void HTTPService::setConfiguration(const HTTPConfiguration & configuration) {
 
 	m_configuration = configuration;
 
-	if(configuration.connectionTimeout.has_value()) {
+	if(configuration.connectionTimeout.has_value() && configuration.connectionTimeout.value() > std::chrono::seconds::zero()) {
 		m_connectionTimeout = configuration.connectionTimeout.value();
 	}
 
-	if(configuration.networkTimeout.has_value()) {
+	if(configuration.networkTimeout.has_value() && configuration.networkTimeout.value() > std::chrono::seconds::zero()) {
 		m_networkTimeout = configuration.networkTimeout.value();
 	}
 
-	if(configuration.transferTimeout.has_value()) {
+	if(configuration.transferTimeout.has_value() && configuration.transferTimeout.value() > std::chrono::seconds::zero()) {
 		m_transferTimeout = configuration.transferTimeout.value();
 	}
 
 	if(configuration.maximumRedirects.has_value()) {
 		m_maximumRedirects = configuration.maximumRedirects.value();
+	}
+
+	{
+		std::lock_guard<std::mutex> internetConnectivityLock(m_internetConnectivityMutex);
+
+		if(configuration.internetConnectivityCheckInterval.has_value()) {
+			m_internetConnectivityCheckInterval = configuration.internetConnectivityCheckInterval.value();
+		}
+
+		if(configuration.internetConnectivityCheckTimeout.has_value()) {
+			m_internetConnectivityCheckTimeout = configuration.internetConnectivityCheckTimeout.value();
+		}
 	}
 }
 
@@ -126,11 +145,11 @@ bool HTTPService::start() {
 }
 
 void HTTPService::stop() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
+	{
+		std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	m_stopRequested = true;
-
-	lock.unlock();
+		m_stopRequested = true;
+	}
 
 	m_waitCondition.notify_one();
 
@@ -138,7 +157,10 @@ void HTTPService::stop() {
 
 	m_httpThread.reset();
 
-	lock.lock();
+	std::lock_guard<std::mutex> internetConnectivityLock(m_internetConnectivityMutex);
+
+	m_connectedToInternet.reset();
+	m_lastInternetConnectivityCheckTimePoint.reset();
 }
 
 bool HTTPService::hasMaximumActiveRequests() const {
@@ -249,22 +271,58 @@ void HTTPService::clearAuthorization() {
 	m_authorizationToken.clear();
 }
 
-std::future<bool> HTTPService::updateCertificateAuthorityCertificate(bool force) {
+bool HTTPService::checkForInternetConnectivity(bool force) {
+	std::lock_guard<std::mutex> internetConnectivityLock(m_internetConnectivityMutex);
+
+	if(!DeviceInformationBridge::getInstance()->isConnectedToNetwork()) {
+		m_connectedToInternet = false;
+		return false;
+	}
+
+	if(!force && m_connectedToInternet.has_value() && m_lastInternetConnectivityCheckTimePoint.has_value() && std::chrono::steady_clock::now() - m_lastInternetConnectivityCheckTimePoint.value() < m_internetConnectivityCheckInterval) {
+		return m_connectedToInternet.value();
+	}
+
+	std::shared_ptr<HTTPRequest> internetConnectivityCheckRequest(createRequest(HTTPRequest::Method::Get, INTERNET_CONNECTIVITY_CHECK_URL));
+	internetConnectivityCheckRequest->setConnectionTimeout(m_internetConnectivityCheckTimeout);
+
+	std::shared_ptr<HTTPResponse> internetConnectivityCheckResponse(sendRequestAndWait(internetConnectivityCheckRequest));
+
+	bool connectedToInternet = static_cast<HTTPStatusCode>(internetConnectivityCheckResponse->getStatusCode()) == HTTPStatusCode::NoContent;
+
+	m_connectedToInternet = connectedToInternet;
+
+	return connectedToInternet;
+}
+
+std::string HTTPService::getCertificateAuthorityCertificateStoreFilePath() const {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+	return Utilities::joinPaths(m_configuration.certificateAuthorityCertificateStoreDirectoryPath, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME);
+}
+
+bool HTTPService::hasCertificateAuthorityCertificateStoreFile() const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	return std::filesystem::is_regular_file(std::filesystem::path(getCertificateAuthorityCertificateStoreFilePath()));
+}
+
+std::future<bool> HTTPService::updateCertificateAuthorityCertificateStoreFile(bool force) {
+	if(!checkForInternetConnectivity() && hasCertificateAuthorityCertificateStoreFile()) {
 		return {};
 	}
 
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
 	if(m_caCertUpdateThread != nullptr && m_caCertUpdateThread->joinable()) {
-		m_updatingCACert = false;
+		m_updatingCertificateAuthorityCertificateStoreFile = false;
 		m_caCertUpdateThread->join();
 	}
 
 	std::shared_ptr<std::promise<bool>> caCertUpdatedPromise(std::make_shared<std::promise<bool>>());
 
-	m_caCertUpdateThread = CACertUpdateThread(new std::thread(&HTTPService::runCACertUpdate, this, caCertUpdatedPromise, m_configuration.certificateAuthorityCertificateStoreDirectoryPath, force), [this](std::thread * caCertUpdateThread) {
-		m_updatingCACert = false;
+	m_caCertUpdateThread = CACertUpdateThread(new std::thread(&HTTPService::runCertificateAuthorityCertificateStoreFileUpdate, this, caCertUpdatedPromise, getCertificateAuthorityCertificateStoreFilePath(), force), [this](std::thread * caCertUpdateThread) {
+		m_updatingCertificateAuthorityCertificateStoreFile = false;
 
 		if(caCertUpdateThread != nullptr) {
 			if(caCertUpdateThread->joinable()) {
@@ -280,8 +338,8 @@ std::future<bool> HTTPService::updateCertificateAuthorityCertificate(bool force)
 	return caCertUpdatedPromise->get_future();
 }
 
-bool HTTPService::updateCertificateAuthorityCertificateAndWait(bool force) {
-	std::future<bool> caCertUpdateFuture(updateCertificateAuthorityCertificate());
+bool HTTPService::updateCertificateAuthorityCertificateStoreFileAndWait(bool force) {
+	std::future<bool> caCertUpdateFuture(updateCertificateAuthorityCertificateStoreFile());
 
 	if(!caCertUpdateFuture.valid()) {
 		return false;
@@ -392,13 +450,13 @@ std::shared_ptr<HTTPResponse> HTTPService::createResponse(std::shared_ptr<HTTPRe
 	return response;
 }
 
-void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertDirectoryPath, bool force) {
+void HTTPService::runCertificateAuthorityCertificateStoreFileUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertFilePath, bool force) {
 	if(!m_initialized || !m_running) {
 		promise->set_value(false);
 		return;
 	}
 
-	m_updatingCACert = true;
+	m_updatingCertificateAuthorityCertificateStoreFile = true;
 
 	std::shared_ptr<HTTPRequest> caCertSHA256FileRequest(createRequest(HTTPRequest::Method::Get, Utilities::joinPaths(CERTIFICATE_AUTHORITY_CERTIFICATE_PAGE_BASE_URL, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME + CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_SHA256_FILE_NAME_SUFFIX)));
 
@@ -416,7 +474,7 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 		return;
 	}
 
-	if(!m_updatingCACert) {
+	if(!m_updatingCertificateAuthorityCertificateStoreFile) {
 		promise->set_value(false);
 		return;
 	}
@@ -441,12 +499,10 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 
 	caCertSHA256FileResponse.reset();
 
-	if(!m_updatingCACert) {
+	if(!m_updatingCertificateAuthorityCertificateStoreFile) {
 		promise->set_value(false);
 		return;
 	}
-
-	std::string caCertFilePath(Utilities::joinPaths(caCertDirectoryPath, CERTIFICATE_AUTHORITY_CERTIFICATE_STORE_FILE_NAME));
 
 	std::string currentCACertSHA256(Utilities::getFileSHA256Hash(caCertFilePath));
 
@@ -456,7 +512,7 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 		return;
 	}
 
-	if(!m_updatingCACert) {
+	if(!m_updatingCertificateAuthorityCertificateStoreFile) {
 		promise->set_value(false);
 		return;
 	}
@@ -477,7 +533,7 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 		return;
 	}
 
-	if(!m_updatingCACert) {
+	if(!m_updatingCertificateAuthorityCertificateStoreFile) {
 		promise->set_value(false);
 		return;
 	}
@@ -492,7 +548,7 @@ void HTTPService::runCACertUpdate(std::shared_ptr<std::promise<bool>> promise, c
 
 	spdlog::debug("Certificate authority certificate store file data download and validated.");
 
-	if(!m_updatingCACert) {
+	if(!m_updatingCertificateAuthorityCertificateStoreFile) {
 		promise->set_value(false);
 		return;
 	}

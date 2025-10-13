@@ -186,7 +186,7 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 		return true;
 	}
 
-	if(!DeviceInformationBridge::getInstance()->isConnectedToInternet()) {
+	if(!HTTPService::getInstance()->checkForInternetConnectivity()) {
 		return allTimeZoneDatabaseFilesExist;
 	}
 
