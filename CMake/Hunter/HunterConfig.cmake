@@ -6,10 +6,13 @@ else()
 	set(BUILD_7Z_CPP_LIB OFF)
 endif()
 
+set(HUNTER_BOOST_ADDRESS_MODEL 64)
+set(HUNTER_BOOST_ARCHITECTURE x86)
+
 hunter_config(Boost
-	URL "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2"
-	VERSION "1.87"
-	SHA1 "acf19e9d53f0b6db8e85452978eb9c731ef8b865"
+	URL "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.bz2"
+	VERSION "1.90"
+	SHA1 "a1d6405b423de1f0e88920337ab3334dcef9e1ec"
 )
 
 # Brotli is used by cURL.
