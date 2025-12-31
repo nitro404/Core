@@ -51,9 +51,9 @@ hunter_config(dmc_unrar
 )
 
 hunter_config(double-conversion
-	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.2.1.1.zip"
-	VERSION "3.2.1.1"
-	SHA1 "cc123cefcc3361d979734d9c2bbc51631bd7b81b"
+	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.4.0.zip"
+	VERSION "3.4.0"
+	SHA1 "4c93a5593409e986e0b8173a1249db00af62f2e5"
 )
 
 hunter_config(fmt
