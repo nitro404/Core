@@ -6,7 +6,7 @@ set(BOOST_COMPONENTS
 
 hunter_add_package(Boost COMPONENTS ${BOOST_COMPONENTS})
 hunter_add_package(BZip2)
-hunter_add_package(CryptoPP)
+hunter_add_package(cryptopp)
 hunter_add_package(CURL)
 hunter_add_package(date)
 hunter_add_package(dmc_unrar)
@@ -27,7 +27,7 @@ hunter_add_package(zstd)
 
 find_package(Boost CONFIG REQUIRED ${BOOST_COMPONENTS})
 find_package(BZip2 CONFIG REQUIRED)
-find_package(CryptoPP CONFIG REQUIRED)
+find_package(cryptopp CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(date CONFIG REQUIRED)
 find_package(dmc_unrar CONFIG REQUIRED)
