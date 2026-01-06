@@ -62,9 +62,9 @@ hunter_config(double-conversion
 )
 
 hunter_config(fmt
-	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/10.1.1"
-	VERSION "10.1.1.0"
-	SHA1 "ace30ce9270669c63317f43e10917a85a9acfdcc"
+	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/12.1.0"
+	VERSION "12.1.0"
+	SHA1 "2d2580111a263b772bfbc266dbdfa902cb1a8bf9"
 )
 
 hunter_config(GTest
