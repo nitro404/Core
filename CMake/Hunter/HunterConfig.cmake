@@ -139,9 +139,9 @@ hunter_config(tinyxml2
 )
 
 hunter_config(ZLIB
-	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"
+	URL "https://codeload.github.com/madler/zlib/zip/tags/v1.3.1.2"
 	VERSION "1.3.1.2"
-	SHA1 "8d74511044b41d5ba5ab5a5996c503c49f1df3db"
+	SHA1 "7a93d599baf1c6983357e241f2571bf6860512b0"
 	CMAKE_ARGS
 		ZLIB_BUILD_TESTING=OFF
 		ZLIB_BUILD_SHARED=OFF
