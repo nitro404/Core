@@ -74,9 +74,9 @@ hunter_config(GTest
 )
 
 hunter_config(liblzma
-	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.4.5"
-	VERSION "5.4.5"
-	SHA1 "99d49eecca208460832e422148c0cb1f3c8ff7cd"
+	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.2"
+	VERSION "5.8.2"
+	SHA1 "078a77cfee78937449a9f159c6d35fe81806f268"
 	CMAKE_ARGS
 		BUILD_TESTING=OFF
 )
