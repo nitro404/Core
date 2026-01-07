@@ -30,9 +30,9 @@ hunter_config(cryptopp
 )
 
 hunter_config(CURL
-	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-8.5.0.zip"
-	VERSION "8.5.0.0"
-	SHA1 "9d82ea2685a3402c5385f700bbd9832f85112148"
+	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-8.17.0.zip"
+	VERSION "8.17.0.0"
+	SHA1 "3ccb092b86e8cdf90e16589542154dcd40aab200"
 	CMAKE_ARGS
 		CURL_USE_OPENSSL=ON
 		CURL_ZSTD=ON
