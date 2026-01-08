@@ -271,6 +271,16 @@ hunter_config(zstd
 )
 
 # cURL Dependencies
+hunter_config(Brotli
+	URL "https://codeload.github.com/google/brotli/zip/tags/v1.2.0"
+	VERSION "1.2.0"
+	SHA1 "b4ae936beae13ee9201f23c6b9b44fcda37d3b9c"
+	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
+		BROTLI_BUILD_TOOLS=OFF
+		BROTLI_DISABLE_TESTS=OFF
+)
+
 hunter_config(c-ares
 	URL "https://codeload.github.com/c-ares/c-ares/zip/tags/v1.34.6"
 	VERSION "1.34.6"
