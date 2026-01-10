@@ -3,15 +3,20 @@
 #include "Core.h"
 #include "Utilities/StringUtilities.h"
 
+#include <ares_version.h>
+#include <brotli/decode.h>
 #include <bzlib.h>
 #include <cryptopp/cryptlib.h>
 #include <curl/curl.h>
 #include <dmc_unrar/dmc_unrar.h>
 #include <fmt/core.h>
 #include <libssh2.h>
+#include <libxml/xmlversion.h>
 #include <zip.h>
 #include <lzma.h>
 #include <magic_enum.hpp>
+#include <openssl/opensslv.h>
+#include <openssl/crypto.h>
 #include <rapidjson/rapidjson.h>
 #include <SevenZip/C/7zVersion.h>
 #include <spdlog/spdlog.h>
@@ -25,7 +30,9 @@
 LibraryInformation::LibraryInformation()
 	: m_libraryInformation({
 		{ "Core", CORE_VERSION, CORE_COMMIT_HASH },
+		{ "c-ares", ares_version() },
 		{ "7-Zip", MY_VERSION },
+		{ "Brotli", fmt::format("{}.{}.{}", BROTLI_VERSION_MAJOR, BROTLI_VERSION_MINOR, BROTLI_VERSION_PATCH) },
 		{ "BZip", BZ2_bzlibVersion() },
 		{ "Crypto++", fmt::format("{}.{}.{}", CryptoPP::LibraryVersion() / 100, (CryptoPP::LibraryVersion() % 100) / 10, CryptoPP::LibraryVersion() % 10) },
 		{ "cURL", LIBCURL_VERSION },
@@ -33,8 +40,10 @@ LibraryInformation::LibraryInformation()
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
 		{ "LibLZMA", lzma_version_string() },
 		{ "LibSSH2", LIBSSH2_VERSION },
+		{ "LibXML2", xmlParserVersion },
 		{ "LibZIP", zip_libzip_version() },
 		{ "Magic Enum C++", fmt::format("{}.{}.{}", MAGIC_ENUM_VERSION_MAJOR, MAGIC_ENUM_VERSION_MINOR, MAGIC_ENUM_VERSION_PATCH) },
+		{ "OpenSSL", OpenSSL_version(OPENSSL_VERSION) }
 		{ "RapidJSON", RAPIDJSON_VERSION_STRING },
 		{ "spdlog", fmt::format("{}.{}.{}", SPDLOG_VERSION / 10000, (SPDLOG_VERSION % 10000) / 100, SPDLOG_VERSION % 100) },
 		{ "TidyHTML5", tidyLibraryVersion(), tidyReleaseDate() },

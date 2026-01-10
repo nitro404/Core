@@ -62,7 +62,11 @@ endforeach()
 
 set(CORE_LIBRARIES
 	${BOOST_LIBRARIES}
-	BZip2::bz2
+	brotli::brotlicommon
+	brotli::brotlienc
+	brotli::brotlidec
+	BZip2::bz2_static
+	c-ares::c-ares
 	cryptopp-static
 	CURL::libcurl
 	date::date
@@ -72,8 +76,12 @@ set(CORE_LIBRARIES
 	fmt::fmt
 	LibLZMA::LibLZMA
 	Libssh2::libssh2
+	LibXml2::libxml2
 	libzip::zip
 	magic_enum::magic_enum
+	nghttp2::nghttp2
+	OpenSSL::SSL
+	OpenSSL::Crypto
 	RapidJSON::rapidjson
 	SevenZip::SevenZip
 	spdlog::spdlog

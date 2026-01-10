@@ -12,10 +12,11 @@ hunter_config(Boost
 	SHA1 "acf19e9d53f0b6db8e85452978eb9c731ef8b865"
 )
 
+# BZip2 is used by LibZIP.
 hunter_config(BZip2
 	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.1.0.1.zip"
 	VERSION "1.1.0.1"
-	SHA1 "ea652959e7cbeb0b71b59f3573e2aa96f32782ce"
+	SHA1 "e5c848657e22f7e59165feee281b31aa15d2268d"
 	CMAKE_ARGS
 		ENABLE_APP=OFF
 		ENABLE_TESTS=OFF
@@ -38,19 +39,45 @@ hunter_config(cryptopp
 )
 
 hunter_config(CURL
-	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-8.17.0.zip"
-	VERSION "8.17.0.0"
-	SHA1 "3ccb092b86e8cdf90e16589542154dcd40aab200"
+	URL "https://github.com/Telefrag-Software/curl/archive/refs/heads/hunter-8.18.0.zip"
+	VERSION "8.18.0.0"
+	SHA1 "240bbc943ddb4c2ad31584b6266e7b86fbc4092f"
 	CMAKE_ARGS
+		ENABLE_IPV6=ON
+		CURL_WERROR=OFF
+		PICKY_COMPILER=ON
+		CURL_ENABLE_SSL=ON
 		CURL_USE_OPENSSL=ON
 		CURL_ZSTD=ON
+		USE_NGHTTP2=OFF
+		USE_NGTCP2=OFF
 		BUILD_SHARED_LIBS=OFF
+		BUILD_STATIC_LIBS=ON
+		CURL_STATIC_CRT=ON
+		BUILD_TESTING=OFF
+		BUILD_EXAMPLES=OFF
+		BUILD_LIBCURL_DOCS=OFF
+		BUILD_MISC_DOCS=OFF
+		ENABLE_CURL_MANUAL=OFF
+		BUILD_CURL_EXE=OFF
+		CURL_CODE_COVERAGE=OFF
+		CURL_DISABLE_INSTALL=OFF
+		ENABLE_ARES=ON
+		CURL_USE_LIBPSL=OFF
+		CURL_USE_LIBSSH=OFF
+		CURL_USE_LIBSSH2=ON
+		CURL_USE_GSASL=OFF
+		CURL_USE_GSSAPI=OFF
+		CURL_USE_LIBBACKTRACE=OFF
+		CURL_USE_LIBUV=OFF
+		USE_LIBRTMP=OFF
+		ENABLE_UNIX_SOCKETS=ON
 )
 
 hunter_config(date
 	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.4.1.zip"
 	VERSION "3.0.4.1"
-	SHA1 "06107c325f2befbed6e06f504b56e95d358737ca"
+	SHA1 "5372d0daefa652aa57ba1a1ea1d7bfaeb0eb7ebf"
 	CMAKE_ARGS
 		BUILD_TZ_LIB=ON
 		USE_SYSTEM_TZ_DB=OFF
@@ -71,12 +98,13 @@ hunter_config(dmc_unrar
 hunter_config(double-conversion
 	URL "https://github.com/Telefrag-Software/double-conversion/archive/refs/heads/hunter-3.4.0.zip"
 	VERSION "3.4.0"
-	SHA1 "4c93a5593409e986e0b8173a1249db00af62f2e5"
+	SHA1 "581925b4ddf707094f24a66ebaf50458240d5fdf"
 	CMAKE_ARGS
 		BUILD_SHARED_LIBS=OFF
 		BUILD_TESTING=OFF
 )
 
+# {fmt} is used by spdlog.
 hunter_config(fmt
 	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/12.1.0"
 	VERSION "12.1.0"
@@ -101,6 +129,7 @@ hunter_config(GTest
 	SHA1 "c9cd451f89c5d5869ba7fa88efa3c9d91db628ad"
 )
 
+# XZ-Utils (LibLZMA) is used by LibZIP, LibTIFF, and wxWidgets.
 hunter_config(liblzma
 	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.2"
 	VERSION "5.8.2"
@@ -127,31 +156,74 @@ hunter_config(liblzma
 		XZ_DOC=OFF
 )
 
-hunter_config(libzip
-	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.10.1.0.zip"
-	VERSION "1.10.1.0"
-	SHA1 "4c652502b252484f888f1dba3175481494647c70"
+hunter_config(libxml2
+	URL "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.15.1/libxml2-v2.15.1.zip"
+	VERSION "2.15.1"
+	SHA1 "3dbe39a4ab2b0e52cf1a02144d68c6b6e2021a63"
 	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
+		LIBXML2_WITH_CATALOG=ON
+		LIBXML2_WITH_DEBUG=OFF
+		LIBXML2_WITH_DOCS=OFF
+		LIBXML2_WITH_HTML=ON
+		LIBXML2_WITH_HTTP=OFF
+		LIBXML2_WITH_ICONV=OFF
+		LIBXML2_WITH_ICU=OFF
+		LIBXML2_WITH_ISO8859X=ON
+		LIBXML2_WITH_LEGACY=OFF
+		LIBXML2_WITH_MODULES=ON
+		LIBXML2_WITH_OUTPUT=ON
+		LIBXML2_WITH_PATTERN=ON
+		LIBXML2_WITH_PROGRAMS=OFF
+		LIBXML2_WITH_PUSH=ON
+		LIBXML2_WITH_PYTHON=OFF
+		LIBXML2_WITH_READLINE=OFF
+		LIBXML2_WITH_REGEXPS=ON
+		LIBXML2_WITH_SAX1=ON
+		LIBXML2_WITH_TESTS=OFF
+		LIBXML2_WITH_THREADS=ON
+		LIBXML2_WITH_TLS=OFF
+		LIBXML2_WITH_VALID=ON
+		LIBXML2_WITH_XINCLUDE=ON
+		LIBXML2_WITH_XPATH=ON
+)
+
+hunter_config(libzip
+	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.11.4.1.zip"
+	VERSION "1.11.4.1"
+	SHA1 "1701e2997f19560b31346009d18de0a676982ce2"
+	CMAKE_ARGS
+		ENABLE_COMMONCRYPTO=ON
+		ENABLE_GNUTLS=ON
+		ENABLE_MBEDTLS=ON
+		ENABLE_OPENSSL=ON
+		ENABLE_WINDOWS_CRYPTO=ON
 		ENABLE_BZIP2=ON
 		ENABLE_LZMA=ON
 		ENABLE_ZSTD=ON
+		ENABLE_FDOPEN=ON
+		ENABLE_COVERAGE=OFF
 		BUILD_TOOLS=OFF
 		BUILD_REGRESS=OFF
+		BUILD_OSSFUZZ=OFF
 		BUILD_EXAMPLES=OFF
 		BUILD_DOC=OFF
-		BUILD_OSSFUZZ=OFF
+		BUILD_SHARED_LIBS=OFF
+		LIBZIP_DO_INSTALL=ON
+		SHARED_LIB_VERSIONNING=ON
 )
 
 hunter_config(magic_enum
-	URL "https://codeload.github.com/Neargye/magic_enum/zip/tags/v0.9.7"
-	VERSION "0.9.7"
-	SHA1 "4a8e4814f679f10654a9cb7a9d1316c820493c42"
+	URL "https://github.com/Telefrag-Software/magic_enum/archive/refs/heads/hunter-0.9.7.1.zip"
+	VERSION "0.9.7.1"
+	SHA1 "fdb0b26231cab124211fddff0bb7bb003f697f04"
 	CMAKE_ARGS
 		MAGIC_ENUM_OPT_BUILD_EXAMPLES=OFF
 		MAGIC_ENUM_OPT_BUILD_TESTS=OFF
 		MAGIC_ENUM_OPT_INSTALL=ON
 		MAGIC_ENUM_OPT_TEST_INSTALLED_VERSION=OFF
 		MAGIC_ENUM_OPT_TEST_INSTALLED_VERSION_PKGCONFIG=OFF
+		MAGIC_ENUM_OPT_INSTALL_PACKAGE_XML=OFF
 )
 
 hunter_config(RapidJSON
@@ -211,15 +283,14 @@ hunter_config(spdlog
 )
 
 hunter_config(tidy
-	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.2.zip"
-	VERSION "5.8.0.2"
-	SHA1 "51d9e9329db1eeaf1ffafd075f6d4370b5b9d81d"
+	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.3.zip"
+	VERSION "5.8.0.3"
+	SHA1 "15066d395dcfa29284a9dddb0c558d3bee620723"
 	CMAKE_ARGS
 		BUILD_SHARED_LIB=OFF
 		USE_STATIC_RUNTIME=ON
 		SUPPORT_CONSOLE_APP=OFF
 		DISABLE_DEBUG_LOG=ON
-		ENABLE_DEBUG_LOG=OFF
 		ENABLE_ALLOC_DEBUG=OFF
 		ENABLE_MEMORY_DEBUG=OFF
 		ENABLE_CRTDBG_MEMORY=OFF
@@ -242,10 +313,11 @@ hunter_config(tinyxml2
 		tinyxml2_INSTALL_PKGCONFIG=ON
 )
 
+# ZLib is used by cURL, LibZIP, LibPNG, LibTIFF, and wxWidgets.
 hunter_config(ZLIB
-	URL "https://codeload.github.com/madler/zlib/zip/tags/v1.3.1.2"
+	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"
 	VERSION "1.3.1.2"
-	SHA1 "7a93d599baf1c6983357e241f2571bf6860512b0"
+	SHA1 "0a8b433ea1eac928a1dfaff3f533dfba61b3aeb9"
 	CMAKE_ARGS
 		ZLIB_BUILD_TESTING=OFF
 		ZLIB_BUILD_SHARED=OFF
@@ -253,8 +325,11 @@ hunter_config(ZLIB
 		ZLIB_BUILD_MINIZIP=OFF
 		ZLIB_INSTALL=ON
 		ZLIB_PREFIX=OFF
+		ZLIB_INSTALL_DOCS=OFF
+		ZLIB_INSTALL_LICENSES=OFF
 )
 
+# Zstandard is used by cURL, LibZIP, LibTIFF, and wxWidgets.
 hunter_config(zstd
 	URL "https://codeload.github.com/facebook/zstd/zip/tags/v1.5.7"
 	VERSION "1.5.7.0"
@@ -270,17 +345,19 @@ hunter_config(zstd
 		ZSTD_ENABLE_CXX=ON
 )
 
-# cURL Dependencies
-hunter_config(Brotli
-	URL "https://codeload.github.com/google/brotli/zip/tags/v1.2.0"
-	VERSION "1.2.0"
-	SHA1 "b4ae936beae13ee9201f23c6b9b44fcda37d3b9c"
+# Brotli is used by cURL.
+hunter_config(brotli
+	URL "https://github.com/Telefrag-Software/brotli/archive/refs/heads/hunter-1.2.0.1.zip"
+	VERSION "1.2.0.1"
+	SHA1 "77118cfb19c5fa3267d13f680dc7d45c5ff51e82"
 	CMAKE_ARGS
 		BUILD_SHARED_LIBS=OFF
 		BROTLI_BUILD_TOOLS=OFF
-		BROTLI_DISABLE_TESTS=OFF
+		BROTLI_DISABLE_TESTS=ON
+		ENABLE_COVERAGE=OFF
 )
 
+# c-ares is used by cURL.
 hunter_config(c-ares
 	URL "https://codeload.github.com/c-ares/c-ares/zip/tags/v1.34.6"
 	VERSION "1.34.6"
@@ -298,6 +375,7 @@ hunter_config(c-ares
 		CARES_COVERAGE=OFF
 )
 
+# LibSSH2 is used by cURL.
 hunter_config(Libssh2
 	URL "https://codeload.github.com/libssh2/libssh2/zip/tags/libssh2-1.11.1"
 	VERSION "1.11.1"
@@ -317,8 +395,9 @@ hunter_config(Libssh2
 		LIBSSH2_BUILD_DOCS=OFF
 )
 
+# OpenSSL is used by cURL and LibZIP.
 hunter_config(OpenSSL
-	VERSION "1.1.1w"
+	VERSION "3.5.1"
 )
 
 include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)
