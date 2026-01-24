@@ -171,9 +171,19 @@ hunter_config(magic_enum
 )
 
 hunter_config(RapidJSON
-	URL "https://github.com/Telefrag-Software/rapidjson/archive/refs/heads/hunter-1.1.0.3.zip"
-	VERSION "1.1.0.3"
-	SHA1 "e587aa956425051d3936d14cd0db597f0cf6ea16"
+	URL "https://github.com/Telefrag-Software/rapidjson/archive/refs/heads/hunter-1.1.0.4.zip"
+	VERSION "1.1.0.4"
+	SHA1 "eeec831cf68c2e4aca66d32b0df04e73154fcfd4"
+	CMAKE_ARGS
+		RAPIDJSON_BUILD_DOC=OFF
+		RAPIDJSON_BUILD_EXAMPLES=OFF
+		RAPIDJSON_BUILD_TESTS=OFF
+		RAPIDJSON_BUILD_THIRDPARTY_GTEST=OFF
+		RAPIDJSON_BUILD_CXX11=OFF
+		RAPIDJSON_BUILD_CXX17=OFF
+		RAPIDJSON_BUILD_CXX20=ON
+		RAPIDJSON_BUILD_ASAN=OFF
+		RAPIDJSON_BUILD_UBSAN=OFF
 )
 
 hunter_config(SevenZip
