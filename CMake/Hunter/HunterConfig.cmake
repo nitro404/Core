@@ -110,9 +110,9 @@ hunter_config(fmt
 )
 
 hunter_config(GTest
-	URL "https://codeload.github.com/google/googletest/zip/tags/v1.14.0"
-	VERSION "1.14.0.0"
-	SHA1 "713bdcaf2ed0050e582d7c2a05cb9a35523ddf4e"
+	URL "https://codeload.github.com/google/googletest/zip/tags/v1.17.0"
+	VERSION "1.17.0.0"
+	SHA1 "c9cd451f89c5d5869ba7fa88efa3c9d91db628ad"
 )
 
 hunter_config(liblzma
