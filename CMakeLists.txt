@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5...4.2.1 FATAL_ERROR)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
@@ -29,7 +29,10 @@ configure_file("${_CORE_FILE_PATH}.in" "${_CORE_FILE_PATH}" @ONLY)
 include(SourceFiles)
 
 if(MSVC)
-	add_compile_options(/Zc:__cplusplus)
+	add_compile_options(
+		/Zc:__cplusplus
+		/Zc:preprocessor-
+	)
 endif()
 
 add_library(${PROJECT_NAME} STATIC ${CORE_SOURCE_FILES})
