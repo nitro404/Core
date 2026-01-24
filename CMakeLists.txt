@@ -46,6 +46,7 @@ target_compile_definitions(${PROJECT_NAME}
 	PUBLIC
 		${PLATFORM_UPPER}
 		CRYPTOPP_ENABLE_NAMESPACE_WEAK=1
+		BROTLI_VERSION="${brotli_VERSION}"
 )
 
 if(WIN32)
@@ -66,6 +67,9 @@ endforeach()
 set(CORE_LIBRARIES
 	${BOOST_LIBRARIES}
 	BZip2::bz2
+	brotli::brotlicommon
+	brotli::brotlienc
+	brotli::brotlidec
 	cryptopp-static
 	CURL::libcurl
 	date::date

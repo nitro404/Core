@@ -28,6 +28,7 @@ LibraryInformation::LibraryInformation()
 		{ "Core", CORE_VERSION, CORE_COMMIT_HASH },
 		{ "7-Zip", MY_VERSION },
 		{ "Boost", fmt::format("{}.{}.{}", BOOST_VERSION / 10000, (BOOST_VERSION % 10000) / 100, BOOST_VERSION % 100) },
+		{ "Brotli", BROTLI_VERSION },
 		{ "BZip", BZ2_bzlibVersion() },
 		{ "Crypto++", fmt::format("{}.{}.{}", CryptoPP::LibraryVersion() / 100, (CryptoPP::LibraryVersion() % 100) / 10, CryptoPP::LibraryVersion() % 10) },
 		{ "cURL", LIBCURL_VERSION },

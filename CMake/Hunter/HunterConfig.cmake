@@ -12,6 +12,18 @@ hunter_config(Boost
 	SHA1 "acf19e9d53f0b6db8e85452978eb9c731ef8b865"
 )
 
+# Brotli is used by cURL.
+hunter_config(brotli
+	URL "https://github.com/Telefrag-Software/brotli/archive/refs/heads/hunter-1.2.0.1.zip"
+	VERSION "1.2.0.1"
+	SHA1 "77118cfb19c5fa3267d13f680dc7d45c5ff51e82"
+	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
+		BROTLI_BUILD_TOOLS=OFF
+		BROTLI_DISABLE_TESTS=ON
+		ENABLE_COVERAGE=OFF
+)
+
 hunter_config(BZip2
 	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.8.zip"
 	VERSION "1.0.8"
