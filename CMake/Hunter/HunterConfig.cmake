@@ -39,10 +39,15 @@ hunter_config(BZip2
 		ENABLE_STATIC_LIB_IS_PIC=ON
 )
 
-hunter_config(CryptoPP
-	URL "https://github.com/Telefrag-Software/cryptopp/archive/refs/heads/hunter-8.7.0.1.zip"
-	VERSION "8.7.0.1"
-	SHA1 "38c2ae2d5d5f196277454f528993d76824001317"
+hunter_config(cryptopp
+	URL "https://github.com/Telefrag-Software/cryptopp/archive/refs/heads/hunter-8.9.0.2.zip"
+	VERSION "8.9.0.2"
+	SHA1 "6e7c41078d8d5dd62824fd3876c7d1d421a8e08e"
+	CMAKE_ARGS
+		BUILD_STATIC=ON
+		BUILD_SHARED=OFF
+		BUILD_TESTING=OFF
+		BUILD_DOCUMENTATION=OFF
 )
 
 hunter_config(CURL
