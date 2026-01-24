@@ -248,9 +248,13 @@ hunter_config(tidy
 )
 
 hunter_config(tinyxml2
-	URL "https://github.com/Telefrag-Software/tinyxml2/archive/refs/heads/hunter-9.0.0.1.zip"
-	VERSION "9.0.0.1"
-	SHA1 "594b6b1e75477ad7d769713f0b59edeb929614c7"
+	URL "https://codeload.github.com/leethomason/tinyxml2/zip/tags/11.0.0"
+	VERSION "11.0.0"
+	SHA1 "0f35e6e7196a8f244a08ee5808bd8a3d575b46b7"
+	CMAKE_ARGS
+		tinyxml2_SHARED_LIBS=OFF
+		tinyxml2_BUILD_TESTING=OFF
+		tinyxml2_INSTALL_PKGCONFIG=ON
 )
 
 hunter_config(ZLIB
