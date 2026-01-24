@@ -115,12 +115,31 @@ hunter_config(GTest
 	SHA1 "c9cd451f89c5d5869ba7fa88efa3c9d91db628ad"
 )
 
+# XZ-Utils (LibLZMA) is used by LibZIP, LibTIFF, and wxWidgets.
 hunter_config(liblzma
-	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.4.5"
-	VERSION "5.4.5"
-	SHA1 "99d49eecca208460832e422148c0cb1f3c8ff7cd"
+	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.2"
+	VERSION "5.8.2"
+	SHA1 "078a77cfee78937449a9f159c6d35fe81806f268"
 	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
 		BUILD_TESTING=OFF
+		XZ_SMALL=OFF
+		XZ_EXTERNAL_SHA256=OFF
+		XZ_MICROLZMA_ENCODER=ON
+		XZ_MICROLZMA_DECODER=ON
+		XZ_LZIP_DECODER=ON
+		XZ_CLMUL_CRC=ON
+		XZ_ARM64_CRC32=ON
+		XZ_LOONGARCH_CRC32=ON
+		XZ_TOOL_XZDEC=OFF
+		XZ_TOOL_LZMADEC=OFF
+		XZ_TOOL_LZMAINFO=OFF
+		XZ_TOOL_XZ=OFF
+		XZ_TOOL_SYMLINKS=OFF
+		XZ_TOOL_SYMLINKS_LZMA=OFF
+		XZ_TOOL_SCRIPTS=OFF
+		XZ_DOXYGEN=OFF
+		XZ_DOC=OFF
 )
 
 hunter_config(libzip
