@@ -90,10 +90,23 @@ hunter_config(double-conversion
 		BUILD_TESTING=OFF
 )
 
+# {fmt} is used by spdlog.
 hunter_config(fmt
-	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/10.1.1"
-	VERSION "10.1.1.0"
-	SHA1 "ace30ce9270669c63317f43e10917a85a9acfdcc"
+	URL "https://codeload.github.com/fmtlib/fmt/zip/tags/12.1.0"
+	VERSION "12.1.0"
+	SHA1 "2d2580111a263b772bfbc266dbdfa902cb1a8bf9"
+	CMAKE_ARGS
+		FMT_PEDANTIC=OFF
+		FMT_WERROR=OFF
+		FMT_DOC=OFF
+		FMT_INSTALL=ON
+		FMT_TEST=OFF
+		FMT_FUZZ=OFF
+		FMT_CUDA_TEST=OFF
+		FMT_OS=ON
+		FMT_MODULE=OFF
+		FMT_SYSTEM_HEADERS=OFF
+		FMT_UNICODE=ON
 )
 
 hunter_config(GTest
