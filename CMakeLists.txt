@@ -84,6 +84,8 @@ set(CORE_LIBRARIES
 	Libssh2::libssh2
 	libzip::zip
 	magic_enum::magic_enum
+	OpenSSL::SSL
+	OpenSSL::Crypto
 	RapidJSON::rapidjson
 	SevenZip::SevenZip
 	spdlog::spdlog

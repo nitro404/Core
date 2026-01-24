@@ -337,8 +337,9 @@ hunter_config(Libssh2
 		LIBSSH2_BUILD_DOCS=OFF
 )
 
+# OpenSSL is used by cURL and LibZIP.
 hunter_config(OpenSSL
-	VERSION "1.1.1t"
+	VERSION "3.5.1"
 )
 
 include("${CMAKE_SOURCE_DIR}/CMake/Hunter/HunterConfig.cmake" OPTIONAL)

@@ -16,6 +16,8 @@
 #include <zip.h>
 #include <lzma.h>
 #include <magic_enum/magic_enum.hpp>
+#include <openssl/opensslv.h>
+#include <openssl/crypto.h>
 #include <rapidjson/rapidjson.h>
 #include <SevenZip/C/7zVersion.h>
 #include <spdlog/spdlog.h>
@@ -44,6 +46,7 @@ LibraryInformation::LibraryInformation()
 		{ "LibSSH2", LIBSSH2_VERSION },
 		{ "LibZIP", zip_libzip_version() },
 		{ "Magic Enum C++", fmt::format("{}.{}.{}", MAGIC_ENUM_VERSION_MAJOR, MAGIC_ENUM_VERSION_MINOR, MAGIC_ENUM_VERSION_PATCH) },
+		{ "OpenSSL", OpenSSL_version(OPENSSL_VERSION) },
 		{ "RapidJSON", RAPIDJSON_VERSION_STRING },
 		{ "spdlog", fmt::format("{}.{}.{}", SPDLOG_VERSION / 10000, (SPDLOG_VERSION % 10000) / 100, SPDLOG_VERSION % 100) },
 		{ "TidyHTML5", tidyLibraryVersion(), tidyReleaseDate() },
