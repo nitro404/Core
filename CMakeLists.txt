@@ -66,10 +66,10 @@ endforeach()
 
 set(CORE_LIBRARIES
 	${BOOST_LIBRARIES}
-	BZip2::bz2
 	brotli::brotlicommon
 	brotli::brotlienc
 	brotli::brotlidec
+	BZip2::bz2_static
 	c-ares::cares
 	cryptopp-static
 	CURL::libcurl

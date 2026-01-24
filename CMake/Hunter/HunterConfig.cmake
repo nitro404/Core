@@ -24,10 +24,19 @@ hunter_config(brotli
 		ENABLE_COVERAGE=OFF
 )
 
+# BZip2 is used by LibZIP and PCRE2.
 hunter_config(BZip2
-	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.0.8.zip"
-	VERSION "1.0.8"
-	SHA1 "1aff69cc4d5ad8af639901fda1642d45217ec9d8"
+	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.1.0.1.zip"
+	VERSION "1.1.0.1"
+	SHA1 "e5c848657e22f7e59165feee281b31aa15d2268d"
+	CMAKE_ARGS
+		ENABLE_APP=OFF
+		ENABLE_TESTS=OFF
+		ENABLE_DOCS=OFF
+		ENABLE_EXAMPLES=OFF
+		ENABLE_STATIC_LIB=ON
+		ENABLE_SHARED_LIB=OFF
+		ENABLE_STATIC_LIB_IS_PIC=ON
 )
 
 hunter_config(CryptoPP
