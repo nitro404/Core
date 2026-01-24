@@ -6,7 +6,6 @@
 #include "ZipUtilities.h"
 
 #include <fmt/core.h>
-#include <magic_enum.hpp>
 #include <spdlog/spdlog.h>
 
 #include <filesystem>

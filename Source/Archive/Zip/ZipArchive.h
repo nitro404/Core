@@ -4,7 +4,7 @@
 #include "Archive/Archive.h"
 #include "BitmaskOperators.h"
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <zip.h>
 
 #include <functional>

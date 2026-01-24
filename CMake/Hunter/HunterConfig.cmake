@@ -104,9 +104,16 @@ hunter_config(libzip
 )
 
 hunter_config(magic_enum
-	URL "https://codeload.github.com/Neargye/magic_enum/zip/tags/v0.9.5"
-	VERSION "0.9.5"
-	SHA1 "e6164e735dd2fe169142954d9529c340701b8669"
+	URL "https://github.com/Telefrag-Software/magic_enum/archive/refs/heads/hunter-0.9.7.1.zip"
+	VERSION "0.9.7.1"
+	SHA1 "fdb0b26231cab124211fddff0bb7bb003f697f04"
+	CMAKE_ARGS
+		MAGIC_ENUM_OPT_BUILD_EXAMPLES=OFF
+		MAGIC_ENUM_OPT_BUILD_TESTS=OFF
+		MAGIC_ENUM_OPT_INSTALL=ON
+		MAGIC_ENUM_OPT_TEST_INSTALLED_VERSION=OFF
+		MAGIC_ENUM_OPT_TEST_INSTALLED_VERSION_PKGCONFIG=OFF
+		MAGIC_ENUM_OPT_INSTALL_PACKAGE_XML=OFF
 )
 
 hunter_config(RapidJSON

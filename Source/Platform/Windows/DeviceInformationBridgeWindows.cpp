@@ -4,7 +4,7 @@
 #include "Utilities/StringUtilities.h"
 
 #include <fmt/core.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <netlistmgr.h>
 #include <powerbase.h>

@@ -12,7 +12,7 @@
 #include <libssh2.h>
 #include <zip.h>
 #include <lzma.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <rapidjson/rapidjson.h>
 #include <SevenZip/C/7zVersion.h>
 #include <spdlog/spdlog.h>

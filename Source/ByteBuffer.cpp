@@ -11,7 +11,7 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 #include <double-conversion/ieee.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <spdlog/spdlog.h>
 #include <zstd.h>
 

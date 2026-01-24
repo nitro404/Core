@@ -1,7 +1,7 @@
 #ifndef _HTTP_STATUS_CODE_H_
 #define _HTTP_STATUS_CODE_H_
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 enum class HTTPStatusCode : uint16_t {
 	None = 0,
