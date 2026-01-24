@@ -3,6 +3,8 @@
 #include "Core.h"
 #include "Utilities/StringUtilities.h"
 
+#include <winsock2.h>
+
 #include <ares_version.h>
 #include <boost/version.hpp>
 #include <bzlib.h>
