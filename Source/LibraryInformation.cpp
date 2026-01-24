@@ -34,6 +34,7 @@ LibraryInformation::LibraryInformation()
 		{ "c-ares", ARES_VERSION_STR },
 		{ "Crypto++", fmt::format("{}.{}.{}", CryptoPP::LibraryVersion() / 100, (CryptoPP::LibraryVersion() % 100) / 10, CryptoPP::LibraryVersion() % 10) },
 		{ "cURL", LIBCURL_VERSION },
+		{ "Date", DATE_VERSION },
 		{ "dmc_unrar", DMC_UNRAR_VERSION },
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
 		{ "LibLZMA", lzma_version_string() },

@@ -61,13 +61,18 @@ hunter_config(CURL
 )
 
 hunter_config(date
-	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.1.3.zip"
-	VERSION "3.0.1.3"
-	SHA1 "f513791222d7430ffff0345312f2e285da0cc6f4"
+	URL "https://github.com/Telefrag-Software/date/archive/refs/heads/hunter-3.0.4.1.zip"
+	VERSION "3.0.4.1"
+	SHA1 "5372d0daefa652aa57ba1a1ea1d7bfaeb0eb7ebf"
 	CMAKE_ARGS
 		BUILD_TZ_LIB=ON
 		USE_SYSTEM_TZ_DB=OFF
 		MANUAL_TZ_DB=ON
+		BUILD_SHARED_LIBS=OFF
+		ENABLE_DATE_TESTING=OFF
+		DISABLE_STRING_VIEW=OFF
+		COMPILE_WITH_C_LOCALE=OFF
+		ENABLE_DATE_INSTALL=ON
 )
 
 hunter_config(dmc_unrar

@@ -47,6 +47,7 @@ target_compile_definitions(${PROJECT_NAME}
 		${PLATFORM_UPPER}
 		CRYPTOPP_ENABLE_NAMESPACE_WEAK=1
 		BROTLI_VERSION="${brotli_VERSION}"
+		DATE_VERSION="${date_VERSION}"
 )
 
 if(WIN32)
