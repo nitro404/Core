@@ -6,7 +6,7 @@
 class LogSystemWindows final : public LogSystem {
 public:
 	LogSystemWindows();
-	virtual ~LogSystemWindows();
+	~LogSystemWindows() override;
 
 protected:
 	LogSystemWindows(const LogSystemWindows &) = delete;

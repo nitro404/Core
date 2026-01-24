@@ -27,7 +27,7 @@ class HTTPService final
 	, public HTTPRequestSettings {
 public:
 	HTTPService();
-	virtual ~HTTPService();
+	~HTTPService() override;
 
 	bool isInitialized() const;
 	bool initialize(const HTTPConfiguration & configuration = {}, bool autoStart = true);

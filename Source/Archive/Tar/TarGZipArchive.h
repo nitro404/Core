@@ -9,7 +9,7 @@ public:
 	TarGZipArchive(const TarGZipArchive & t);
 	TarGZipArchive & operator = (TarGZipArchive && t) noexcept;
 	TarGZipArchive & operator = (const TarGZipArchive & t);
-	virtual ~TarGZipArchive();
+	~TarGZipArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 

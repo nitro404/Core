@@ -9,7 +9,7 @@
 class TimeZoneDataManager : public Singleton<TimeZoneDataManager> {
 public:
 	TimeZoneDataManager();
-	virtual ~TimeZoneDataManager();
+	~TimeZoneDataManager() override;
 
 	virtual bool isSupported() const;
 	bool isInitialized() const;

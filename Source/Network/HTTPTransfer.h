@@ -25,7 +25,7 @@ public:
 	HTTPTransfer(const HTTPTransfer & transfer);
 	HTTPTransfer & operator = (HTTPTransfer && transfer) noexcept;
 	HTTPTransfer & operator = (const HTTPTransfer & transfer);
-	virtual ~HTTPTransfer();
+	~HTTPTransfer() override;
 
 	uint64_t getID() const;
 	const ByteBuffer * getBody() const;

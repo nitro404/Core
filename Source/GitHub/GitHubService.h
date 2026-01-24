@@ -11,7 +11,7 @@
 class GitHubService final : public Singleton<GitHubService> {
 public:
 	GitHubService();
-	virtual ~GitHubService();
+	~GitHubService() override;
 
 	std::unique_ptr<GitHubRelease> getLatestRelease(const std::string & repositoryURL) const;
 	std::unique_ptr<GitHubRelease> getLatestRelease(const std::string & repositoryName, const std::string & organizationName) const;

@@ -13,7 +13,7 @@
 
 class LogSystem : public Singleton<LogSystem> {
 public:
-	virtual ~LogSystem();
+	~LogSystem() override;
 
 	bool isEnabled() const;
 	void enable();

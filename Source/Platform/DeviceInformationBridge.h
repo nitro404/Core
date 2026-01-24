@@ -102,7 +102,7 @@ public:
 		bool connected = false;
 	};
 
-	virtual ~DeviceInformationBridge();
+	~DeviceInformationBridge() override;
 
 	virtual std::string getHostName() = 0;
 	virtual std::string getDeviceModel() = 0;

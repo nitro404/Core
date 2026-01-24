@@ -17,7 +17,7 @@ public:
 		Entry(const Entry & t);
 		Entry & operator = (Entry && t) noexcept;
 		Entry & operator = (const Entry & t);
-		virtual ~Entry();
+		~Entry() override;
 
 		virtual std::string getPath() const override;
 		virtual uint64_t getIndex() const override;
@@ -96,7 +96,7 @@ public:
 	TarArchive(const TarArchive & t);
 	TarArchive & operator = (TarArchive && t) noexcept;
 	TarArchive & operator = (const TarArchive & t);
-	virtual ~TarArchive();
+	~TarArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 	virtual std::string getFilePath() const override;

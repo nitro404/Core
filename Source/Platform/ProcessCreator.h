@@ -10,7 +10,7 @@
 
 class ProcessCreator : public Singleton<ProcessCreator> {
 public:
-	virtual ~ProcessCreator();
+	~ProcessCreator() override;
 
 	virtual std::unique_ptr<Process> createProcess(const std::string & applicationCommand, const std::optional<std::string> & workingDirectory = {}, Process::Priority priority = Process::DEFAULT_PRIORITY, uint64_t * nativeErrorCode = nullptr, std::string * nativeErrorMessage = nullptr) = 0;
 

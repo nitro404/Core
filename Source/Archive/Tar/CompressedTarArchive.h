@@ -9,7 +9,7 @@ public:
 	CompressedTarArchive(const CompressedTarArchive & t);
 	CompressedTarArchive & operator = (CompressedTarArchive && t) noexcept;
 	CompressedTarArchive & operator = (const CompressedTarArchive & t);
-	virtual ~CompressedTarArchive();
+	~CompressedTarArchive() override;
 
 	virtual uint64_t getCompressedSize() const override;
 

@@ -10,7 +10,7 @@
 class DeviceInformationBridgeLinux final : public DeviceInformationBridge {
 public:
 	DeviceInformationBridgeLinux();
-	virtual ~DeviceInformationBridgeLinux();
+	~DeviceInformationBridgeLinux() override;
 
 	virtual std::string getHostName() override;
 	virtual std::string getDeviceModel() override;

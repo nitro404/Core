@@ -9,7 +9,7 @@ public:
 	TarLZMAArchive(const TarLZMAArchive & t);
 	TarLZMAArchive & operator = (TarLZMAArchive && t) noexcept;
 	TarLZMAArchive & operator = (const TarLZMAArchive & t);
-	virtual ~TarLZMAArchive();
+	~TarLZMAArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 

@@ -11,7 +11,7 @@
 class BitbucketService final : public Singleton<BitbucketService> {
 public:
 	BitbucketService();
-	virtual ~BitbucketService();
+	~BitbucketService() override;
 
 	std::shared_ptr<BitbucketDownload> getLatestDownload(const std::string & repositoryURL) const;
 	std::shared_ptr<BitbucketDownload> getLatestDownload(const std::string & repositoryName, const std::string & organizationName) const;

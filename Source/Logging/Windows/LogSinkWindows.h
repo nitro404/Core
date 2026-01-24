@@ -9,7 +9,7 @@
 class LogSinkWindows : public spdlog::sinks::base_sink<std::mutex> {
 public:
 	LogSinkWindows();
-	virtual ~LogSinkWindows();
+	~LogSinkWindows() override;
 
 protected:
 	virtual void sink_it_(const spdlog::details::log_msg & logMessage) override;

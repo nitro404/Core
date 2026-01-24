@@ -17,7 +17,7 @@ public:
 	public:
 		Entry(Entry && entry) noexcept;
 		const Entry & operator = (Entry && entry) noexcept;
-		virtual ~Entry();
+		~Entry() override;
 
 		virtual bool isFile() const override;
 		virtual bool isDirectory() const override;
@@ -51,7 +51,7 @@ public:
 
 	RarArchive(RarArchive && archive) noexcept;
 	const RarArchive & operator = (RarArchive && archive) noexcept;
-	virtual ~RarArchive();
+	~RarArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 	virtual std::string getFilePath() const override;

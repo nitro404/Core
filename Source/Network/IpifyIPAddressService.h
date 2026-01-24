@@ -10,7 +10,7 @@ class HTTPService;
 class IpifyIPAddressService final : public IPAddressService {
 public:
 	IpifyIPAddressService();
-	virtual ~IpifyIPAddressService();
+	~IpifyIPAddressService() override;
 
 	virtual std::string getIPAddress(IPAddressType type = IPAddressType::V4) override;
 };

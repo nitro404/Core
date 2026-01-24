@@ -13,7 +13,7 @@ public:
 		V6
 	};
 
-	virtual ~IPAddressService();
+	~IPAddressService() override;
 
 	virtual std::string getIPAddress(IPAddressType type = IPAddressType::V4) = 0;
 

@@ -15,7 +15,7 @@ public:
 	ArgumentParser(const ArgumentParser & parser);
 	ArgumentParser & operator = (ArgumentParser && parser) noexcept;
 	ArgumentParser & operator = (const ArgumentParser & parser);
-	virtual ~ArgumentParser();
+	~ArgumentParser() override;
 
 	bool hasPassthroughArguments() const;
 	std::optional<std::string> getPassthroughArguments() const;

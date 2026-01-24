@@ -40,7 +40,7 @@ public:
 		std::string userAgent;
 	};
 
-	virtual ~SegmentAnalytics();
+	~SegmentAnalytics() override;
 
 	bool isInitialized() const;
 	virtual bool initialize(const Configuration & configuration);

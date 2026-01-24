@@ -6,7 +6,7 @@
 class LogSystemLinux final : public LogSystem {
 public:
 	LogSystemLinux();
-	virtual ~LogSystemLinux();
+	~LogSystemLinux() override;
 
 protected:
 	LogSystemLinux(const LogSystemLinux &) = delete;

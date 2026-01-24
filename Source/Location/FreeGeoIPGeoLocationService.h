@@ -10,7 +10,7 @@ class HTTPService;
 class FreeGeoIPGeoLocationService final : public GeoLocationService {
 public:
 	FreeGeoIPGeoLocationService();
-	virtual ~FreeGeoIPGeoLocationService();
+	~FreeGeoIPGeoLocationService() override;
 
 	virtual std::optional<GeoLocation> getGeoLocation() override;
 };

@@ -67,7 +67,7 @@ public:
 	public:
 		Entry(Entry && entry) noexcept;
 		const Entry & operator = (Entry && entry) noexcept;
-		virtual ~Entry();
+		~Entry() override;
 
 		bool setName(const std::string & name);
 		virtual std::string getPath() const override;
@@ -122,7 +122,7 @@ public:
 
 	ZipArchive(ZipArchive && archive) noexcept;
 	const ZipArchive & operator = (ZipArchive && archive) noexcept;
-	virtual ~ZipArchive();
+	~ZipArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 	virtual bool isOpen() const override;

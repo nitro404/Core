@@ -10,7 +10,7 @@
 
 class GeoLocationService : public Singleton<GeoLocationService> {
 public:
-	virtual ~GeoLocationService();
+	~GeoLocationService() override;
 
 	bool isInitialized() const;
 	virtual bool initialize(const std::string & apiKey);

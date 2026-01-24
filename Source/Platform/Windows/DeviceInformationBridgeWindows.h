@@ -6,7 +6,7 @@
 class DeviceInformationBridgeWindows final : public DeviceInformationBridge {
 public:
 	DeviceInformationBridgeWindows();
-	virtual ~DeviceInformationBridgeWindows();
+	~DeviceInformationBridgeWindows() override;
 
 	virtual std::string getHostName() override;
 	virtual std::string getDeviceModel() override;

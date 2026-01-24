@@ -46,7 +46,7 @@ public:
 	HTTPRequest(const HTTPRequest & request);
 	HTTPRequest & operator = (HTTPRequest && request) noexcept;
 	HTTPRequest & operator = (const HTTPRequest & request);
-	virtual ~HTTPRequest();
+	~HTTPRequest() override;
 
 	Method getMethod() const;
 	void setMethod(Method method);

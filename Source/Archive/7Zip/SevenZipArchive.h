@@ -18,7 +18,7 @@ public:
 	public:
 		Entry(Entry && entry) noexcept;
 		const Entry & operator = (Entry && entry) noexcept;
-		virtual ~Entry();
+		~Entry() override;
 
 		virtual bool isFile() const override;
 		virtual bool isDirectory() const override;
@@ -49,7 +49,7 @@ public:
 
 	SevenZipArchive(SevenZipArchive && archive) noexcept;
 	const SevenZipArchive & operator = (SevenZipArchive && archive) noexcept;
-	virtual ~SevenZipArchive();
+	~SevenZipArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 	virtual std::string getFilePath() const override;

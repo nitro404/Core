@@ -8,7 +8,7 @@
 class CustomIndentationXMLPrinter final : public tinyxml2::XMLPrinter {
 public:
 	CustomIndentationXMLPrinter(FILE * file = nullptr, bool compact = false, int depth = 0, const std::string & indentation = "\t");
-	virtual ~CustomIndentationXMLPrinter();
+	~CustomIndentationXMLPrinter() override;
 
 protected:
 	virtual void PrintSpace(int depth) override;

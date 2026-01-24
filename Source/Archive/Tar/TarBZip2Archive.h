@@ -9,7 +9,7 @@ public:
 	TarBZip2Archive(const TarBZip2Archive & t);
 	TarBZip2Archive & operator = (TarBZip2Archive && t) noexcept;
 	TarBZip2Archive & operator = (const TarBZip2Archive & t);
-	virtual ~TarBZip2Archive();
+	~TarBZip2Archive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 

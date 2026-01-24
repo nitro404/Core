@@ -14,7 +14,7 @@ class ProcessWindows final : public Process {
 	friend class ProcessCreatorWindows;
 
 public:
-	virtual ~ProcessWindows();
+	~ProcessWindows() override;
 
 	void onProcessTerminated(bool timedOut);
 

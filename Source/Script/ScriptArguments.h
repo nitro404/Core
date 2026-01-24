@@ -14,7 +14,7 @@ public:
 	ScriptArguments(const ScriptArguments & arguments);
 	ScriptArguments & operator = (ScriptArguments && arguments) noexcept;
 	ScriptArguments & operator = (const ScriptArguments & arguments);
-	virtual ~ScriptArguments();
+	~ScriptArguments() override;
 
 	std::string applyConditionals(const std::string & command) const;
 	std::string applyArguments(const std::string & command) const;

@@ -17,7 +17,7 @@ class SegmentAnalyticsCURL final : public SegmentAnalytics,
                                    public SegmentAnalytics::LibraryInfoProvider {
 public:
 	SegmentAnalyticsCURL();
-	virtual ~SegmentAnalyticsCURL();
+	~SegmentAnalyticsCURL() override;
 
 	bool isRunning() const;
 

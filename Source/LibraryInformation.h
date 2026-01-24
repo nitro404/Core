@@ -9,7 +9,7 @@
 class LibraryInformation final : public Singleton<LibraryInformation> {
 public:
 	LibraryInformation();
-	virtual ~LibraryInformation();
+	~LibraryInformation() override;
 
 	struct VersionData {
 		std::string name;

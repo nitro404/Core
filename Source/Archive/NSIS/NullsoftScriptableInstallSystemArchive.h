@@ -16,7 +16,7 @@ public:
 	public:
 		Entry(Entry && entry) noexcept;
 		const Entry & operator = (Entry && entry) noexcept;
-		virtual ~Entry();
+		~Entry() override;
 
 		// ArchiveEntry Virtuasls
 		virtual bool isFile() const override;
@@ -51,7 +51,7 @@ public:
 
 	NullsoftScriptableInstallSystemArchive(NullsoftScriptableInstallSystemArchive && archive) noexcept;
 	const NullsoftScriptableInstallSystemArchive & operator = (NullsoftScriptableInstallSystemArchive && archive) noexcept;
-	virtual ~NullsoftScriptableInstallSystemArchive();
+	~NullsoftScriptableInstallSystemArchive() override;
 
 	// Archive Virtuals
 	virtual std::string getDefaultFileExtension() const override;

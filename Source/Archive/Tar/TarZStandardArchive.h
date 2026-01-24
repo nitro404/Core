@@ -9,7 +9,7 @@ public:
 	TarZStandardArchive(const TarZStandardArchive & t);
 	TarZStandardArchive & operator = (TarZStandardArchive && t) noexcept;
 	TarZStandardArchive & operator = (const TarZStandardArchive & t);
-	virtual ~TarZStandardArchive();
+	~TarZStandardArchive() override;
 
 	virtual std::string getDefaultFileExtension() const override;
 

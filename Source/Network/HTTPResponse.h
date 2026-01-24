@@ -40,7 +40,7 @@ public:
 	HTTPResponse(const HTTPResponse & response);
 	HTTPResponse & operator = (HTTPResponse && response) noexcept;
 	HTTPResponse & operator = (const HTTPResponse & response);
-	virtual ~HTTPResponse();
+	~HTTPResponse() override;
 
 	size_t getSize() const;
 	size_t getExpectedSize() const;

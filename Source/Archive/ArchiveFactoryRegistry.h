@@ -13,7 +13,7 @@
 class ArchiveFactoryRegistry final : public Singleton<ArchiveFactoryRegistry> {
 public:
 	ArchiveFactoryRegistry();
-	virtual ~ArchiveFactoryRegistry();
+	~ArchiveFactoryRegistry() override;
 
 	bool hasFactory(const std::string & fileExtension) const;
 	bool setFactory(const std::string & fileExtension, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
