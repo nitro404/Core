@@ -36,6 +36,7 @@ LibraryInformation::LibraryInformation()
 		{ "cURL", LIBCURL_VERSION },
 		{ "Date", DATE_VERSION },
 		{ "dmc_unrar", DMC_UNRAR_VERSION },
+		{ "Double Conversion", DOUBLE_CONVERSION_VERSION },
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
 		{ "LibLZMA", lzma_version_string() },
 		{ "LibSSH2", LIBSSH2_VERSION },
