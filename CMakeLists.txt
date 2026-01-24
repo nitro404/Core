@@ -87,6 +87,7 @@ set(CORE_LIBRARIES
 	libcdio::cdio++
 	LibLZMA::LibLZMA
 	Libssh2::libssh2
+	LibXml2::LibXml2
 	libzip::zip
 	magic_enum::magic_enum
 	open-vcdiff::vcdcom
