@@ -89,7 +89,7 @@ set(CORE_LIBRARIES
 	spdlog::spdlog
 	tidy::tidy-static
 	tinyxml2::tinyxml2
-	ZLIB::zlib
+	ZLIB::ZLIBSTATIC
 	zstd::libzstd_static
 	${CORE_LIBRARIES_${PLATFORM_UPPER}}
 )

@@ -257,10 +257,20 @@ hunter_config(tinyxml2
 		tinyxml2_INSTALL_PKGCONFIG=ON
 )
 
+# ZLib is used by cURL, LibZIP, LibPNG, LibTIFF, PCRE2, and wxWidgets.
 hunter_config(ZLIB
-	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.0.0.zip"
-	VERSION "1.3.0.0"
-	SHA1 "553c130c05f514e5db8b4ae623347e717674a4d1"
+	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"
+	VERSION "1.3.1.2"
+	SHA1 "0a8b433ea1eac928a1dfaff3f533dfba61b3aeb9"
+	CMAKE_ARGS
+		ZLIB_BUILD_TESTING=OFF
+		ZLIB_BUILD_SHARED=OFF
+		ZLIB_BUILD_STATIC=ON
+		ZLIB_BUILD_MINIZIP=OFF
+		ZLIB_INSTALL=ON
+		ZLIB_PREFIX=OFF
+		ZLIB_INSTALL_DOCS=OFF
+		ZLIB_INSTALL_LICENSES=OFF
 )
 
 hunter_config(zstd
