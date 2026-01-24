@@ -13,6 +13,7 @@
 #include <dmc_unrar/dmc_unrar.h>
 #include <fmt/core.h>
 #include <libssh2.h>
+#include <libxml2/libxml/xmlversion.h>
 #include <zip.h>
 #include <lzma.h>
 #include <magic_enum/magic_enum.hpp>
@@ -44,6 +45,7 @@ LibraryInformation::LibraryInformation()
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
 		{ "LibLZMA", lzma_version_string() },
 		{ "LibSSH2", LIBSSH2_VERSION },
+		{ "LibXML2", LIBXML_DOTTED_VERSION },
 		{ "LibZIP", zip_libzip_version() },
 		{ "Magic Enum C++", fmt::format("{}.{}.{}", MAGIC_ENUM_VERSION_MAJOR, MAGIC_ENUM_VERSION_MINOR, MAGIC_ENUM_VERSION_PATCH) },
 		{ "OpenSSL", OpenSSL_version(OPENSSL_VERSION) },

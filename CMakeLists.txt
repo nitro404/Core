@@ -82,6 +82,7 @@ set(CORE_LIBRARIES
 	fmt::fmt
 	LibLZMA::LibLZMA
 	Libssh2::libssh2
+	LibXml2::LibXml2
 	libzip::zip
 	magic_enum::magic_enum
 	OpenSSL::SSL
