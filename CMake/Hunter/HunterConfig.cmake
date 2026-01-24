@@ -227,13 +227,24 @@ hunter_config(spdlog
 )
 
 hunter_config(tidy
-	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.2.zip"
-	VERSION "5.8.0.2"
-	SHA1 "51d9e9329db1eeaf1ffafd075f6d4370b5b9d81d"
+	URL "https://github.com/Telefrag-Software/tidy-html5/archive/refs/heads/hunter-5.8.0.3.zip"
+	VERSION "5.8.0.3"
+	SHA1 "15066d395dcfa29284a9dddb0c558d3bee620723"
 	CMAKE_ARGS
 		BUILD_SHARED_LIB=OFF
+		USE_STATIC_RUNTIME=ON
 		SUPPORT_CONSOLE_APP=OFF
 		DISABLE_DEBUG_LOG=ON
+		ENABLE_ALLOC_DEBUG=OFF
+		ENABLE_MEMORY_DEBUG=OFF
+		ENABLE_CRTDBG_MEMORY=OFF
+		ADD_SYSTEM_RUNTIMES=OFF
+		TIDY_CONSOLE_SHARED=OFF
+		BUILD_TAB2SPACE=OFF
+		BUILD_SAMPLE_CODE=OFF
+		TIDY_COMPAT_HEADERS=OFF
+		SUPPORT_LOCALIZATIONS=OFF
+		SUPPORT_CONSOLE_APP=OFF
 )
 
 hunter_config(tinyxml2
