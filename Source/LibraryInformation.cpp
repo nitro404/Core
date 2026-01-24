@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Utilities/StringUtilities.h"
 
+#include <ares_version.h>
 #include <boost/version.hpp>
 #include <bzlib.h>
 #include <cryptopp/cryptlib.h>
@@ -30,6 +31,7 @@ LibraryInformation::LibraryInformation()
 		{ "Boost", fmt::format("{}.{}.{}", BOOST_VERSION / 10000, (BOOST_VERSION % 10000) / 100, BOOST_VERSION % 100) },
 		{ "Brotli", BROTLI_VERSION },
 		{ "BZip", BZ2_bzlibVersion() },
+		{ "c-ares", ARES_VERSION_STR },
 		{ "Crypto++", fmt::format("{}.{}.{}", CryptoPP::LibraryVersion() / 100, (CryptoPP::LibraryVersion() % 100) / 10, CryptoPP::LibraryVersion() % 10) },
 		{ "cURL", LIBCURL_VERSION },
 		{ "dmc_unrar", DMC_UNRAR_VERSION },

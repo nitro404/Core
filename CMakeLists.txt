@@ -70,6 +70,7 @@ set(CORE_LIBRARIES
 	brotli::brotlicommon
 	brotli::brotlienc
 	brotli::brotlidec
+	c-ares::cares
 	cryptopp-static
 	CURL::libcurl
 	date::date

@@ -164,9 +164,22 @@ hunter_config(zstd
 	SHA1 "f9ba91e59dfbd100e04fbf737f58c7c2fffb0918"
 )
 
-# cURL Dependencies
+# c-ares is used by cURL.
 hunter_config(c-ares
-	VERSION "1.24.0"
+	URL "https://codeload.github.com/c-ares/c-ares/zip/tags/v1.34.6"
+	VERSION "1.34.6"
+	SHA1 "2470860765112049c3aba8a79b76f438ae73b1ba"
+	CMAKE_ARGS
+		CARES_STATIC=ON
+		CARES_SHARED=OFF
+		CARES_INSTALL=ON
+		CARES_STATIC_PIC=OFF
+		CARES_BUILD_TESTS=OFF
+		CARES_BUILD_CONTAINER_TESTS=OFF
+		CARES_BUILD_TOOLS=OFF
+		CARES_SYMBOL_HIDING=ON
+		CARES_THREADS=ON
+		CARES_COVERAGE=OFF
 )
 
 hunter_config(Libssh2
