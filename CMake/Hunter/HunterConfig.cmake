@@ -273,10 +273,20 @@ hunter_config(ZLIB
 		ZLIB_INSTALL_LICENSES=OFF
 )
 
+# Zstandard is used by cURL, LibZIP, LibTIFF, and wxWidgets.
 hunter_config(zstd
-	URL "https://codeload.github.com/facebook/zstd/zip/tags/v1.5.5"
-	VERSION "1.5.5.0"
-	SHA1 "f9ba91e59dfbd100e04fbf737f58c7c2fffb0918"
+	URL "https://codeload.github.com/facebook/zstd/zip/tags/v1.5.7"
+	VERSION "1.5.7.0"
+	SHA1 "8bd73c3d2bf87f0c033299f5d05fb4bde2480ad1"
+	CMAKE_ARGS
+		ZSTD_LEGACY_SUPPORT=OFF
+		ZSTD_MULTITHREAD_SUPPORT=ON
+		ZSTD_BUILD_PROGRAMS=OFF
+		ZSTD_BUILD_CONTRIB=OFF
+		ZSTD_PROGRAMS_LINK_SHARED=OFF
+		ZSTD_BUILD_TESTS=OFF
+		ZSTD_USE_STATIC_RUNTIME=ON
+		ZSTD_ENABLE_CXX=ON
 )
 
 # c-ares is used by cURL.
