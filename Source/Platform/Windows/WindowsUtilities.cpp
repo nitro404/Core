@@ -44,7 +44,32 @@ std::string WindowsUtilities::getLastErrorMessage() {
 std::string WindowsUtilities::getRegistryEntry(const std::string & key, const std::string & entryName, bool * error) {
 	HKEY hkey = 0;
 
-	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &hkey) != ERROR_SUCCESS) {
+	LSTATUS registryKeyOpenResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &hkey);
+
+	if(registryKeyOpenResult != ERROR_SUCCESS) {
+		LPSTR buffer = nullptr;
+
+		DWORD errorMessageLength = FormatMessageA(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			nullptr,
+			registryKeyOpenResult,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			reinterpret_cast<LPSTR>(&buffer),
+			0,
+			nullptr
+		);
+
+		if(errorMessageLength != 0) {
+			std::string_view errorMessage(buffer, errorMessageLength);
+
+			spdlog::warn("Failed to open '{}' registry key: {}", key, errorMessage);
+
+			LocalFree(buffer);
+		}
+		else {
+			spdlog::warn("Failed to open '{}' registry key.", key);
+		}
+
 		if(error != nullptr) {
 			*error = true;
 		}
