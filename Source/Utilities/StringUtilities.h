@@ -15,8 +15,11 @@ namespace Utilities {
 	bool isAlphaNumericUpperCase(char c);
 	bool isAlphaNumericLowerCase(char c);
 	bool isEmptyString(const char * s);
+	bool isEmptyString(const std::string * s);
 	bool isNonEmptyString(const char * s);
+	bool isNonEmptyString(const std::string * s);
 	size_t stringLength(const char * s);
+	size_t stringLength(const std::string * s);
 	std::string trimString(std::string_view data, bool trimWhiteSpace = true, bool trimNewLines = true);
 	std::string reverseString(std::string_view data);
 	std::string replaceAll(std::string_view value, std::string_view match, std::string_view replacement);

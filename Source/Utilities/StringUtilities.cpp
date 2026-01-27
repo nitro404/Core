@@ -134,12 +134,24 @@ bool Utilities::isEmptyString(const char * s) {
 	return s == nullptr || s[0] == '\0';
 }
 
+bool Utilities::isEmptyString(const std::string * s) {
+	return s == nullptr || s->empty();
+}
+
 bool Utilities::isNonEmptyString(const char * s) {
 	return s != nullptr && s[0] != '\0';
 }
 
+bool Utilities::isNonEmptyString(const std::string * s) {
+	return s != nullptr && !s->empty();
+}
+
 size_t Utilities::stringLength(const char * s) {
 	return s == nullptr ? 0 : strlen(s);
+}
+
+size_t Utilities::stringLength(const std::string * s) {
+	return s == nullptr ? 0 : s->length();
 }
 
 std::string Utilities::trimString(std::string_view data, bool trimWhiteSpace, bool trimNewLines) {
