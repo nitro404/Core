@@ -3,6 +3,7 @@
 #include "Logging/Linux/LogSystemLinux.h"
 #include "Platform/Linux/DeviceInformationBridgeLinux.h"
 #include "Platform/Linux/ProcessCreatorLinux.h"
+#include "Platform/Linux/SystemInformationBridgeLinux.h"
 
 void FactoryRegistry::assignPlatformFactories() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -17,5 +18,9 @@ void FactoryRegistry::assignPlatformFactories() {
 
 	setFactory<ProcessCreator>([]() {
 		return std::make_unique<ProcessCreatorLinux>();
+	});
+
+	setFactory<SystemInformationBridge>([]() {
+		return std::make_unique<SystemInformationBridgeLinux>();
 	});
 }

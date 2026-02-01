@@ -146,6 +146,8 @@ set(CORE_SOURCE_FILES
 	Platform/Process.cpp
 	Platform/ProcessCreator.h
 	Platform/ProcessCreator.cpp
+	Platform/SystemInformationBridge.h
+	Platform/SystemInformationBridge.cpp
 	Platform/TimeZoneDataManager.h
 	Platform/TimeZoneDataManager.cpp
 	Script/Script.h
@@ -204,6 +206,8 @@ set(CORE_SOURCE_FILES_WINDOWS
 	Platform/Windows/ProcessCreatorWindows.cpp
 	Platform/Windows/ProcessWindows.h
 	Platform/Windows/ProcessWindows.cpp
+	Platform/Windows/SystemInformationBridgeWindows.h
+	Platform/Windows/SystemInformationBridgeWindows.cpp
 	Platform/Windows/TimeZoneDataManagerWindows.h
 	Platform/Windows/TimeZoneDataManagerWindows.cpp
 	Platform/Windows/WindowsUtilities.h
@@ -224,6 +228,8 @@ set(CORE_SOURCE_FILES_LINUX
 	Platform/Linux/LinuxUtilities.cpp
 	Platform/Linux/ProcessCreatorLinux.h
 	Platform/Linux/ProcessCreatorLinux.cpp
+	Platform/Linux/SystemInformationBridgeLinux.h
+	Platform/Linux/SystemInformationBridgeLinux.cpp
 	Utilities/Linux/ThreadUtilitiesLinux.cpp
 )
 

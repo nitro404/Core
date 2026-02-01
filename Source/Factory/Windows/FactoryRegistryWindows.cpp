@@ -3,6 +3,7 @@
 #include "Logging/Windows/LogSystemWindows.h"
 #include "Platform/Windows/DeviceInformationBridgeWindows.h"
 #include "Platform/Windows/ProcessCreatorWindows.h"
+#include "Platform/Windows/SystemInformationBridgeWindows.h"
 #include "Platform/Windows/TimeZoneDataManagerWindows.h"
 
 void FactoryRegistry::assignPlatformFactories() {
@@ -18,6 +19,10 @@ void FactoryRegistry::assignPlatformFactories() {
 
 	setFactory<ProcessCreator>([]() {
 		return std::make_unique<ProcessCreatorWindows>();
+	});
+
+	setFactory<SystemInformationBridge>([]() {
+		return std::make_unique<SystemInformationBridgeWindows>();
 	});
 
 	setFactory<TimeZoneDataManager>([]() {
