@@ -3,6 +3,7 @@
 #include "Application/ComponentRegistry.h"
 #include "Archive/ArchiveFactoryRegistry.h"
 #include "Bitbucket/BitbucketService.h"
+#include "FilePathVariableEvaluator.h"
 #include "GitHub/GitHubService.h"
 #include "LibraryInformation.h"
 #include "Logging/LogSystem.h"
@@ -79,6 +80,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<BitbucketService>([]() {
 		return std::make_unique<BitbucketService>();
+	});
+
+	setFactory<FilePathVariableEvaluator>([]() {
+		return std::unique_ptr<FilePathVariableEvaluator>(new FilePathVariableEvaluator());
 	});
 
 	setFactory<IPAddressService>([]() {

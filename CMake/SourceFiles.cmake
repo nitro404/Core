@@ -82,6 +82,8 @@ set(CORE_SOURCE_FILES
 	Factory/Factory.cpp
 	Factory/FactoryRegistry.h
 	Factory/FactoryRegistry.cpp
+	FilePathVariableEvaluator.h
+	FilePathVariableEvaluator.cpp
 	GitHub/GitHubRelease.h
 	GitHub/GitHubRelease.cpp
 	GitHub/GitHubReleaseAsset.h
