@@ -9,8 +9,9 @@
 #include <string>
 
 class GitHubService final : public Singleton<GitHubService> {
+	friend class FactoryRegistry;
+
 public:
-	GitHubService();
 	~GitHubService() override;
 
 	std::unique_ptr<GitHubRelease> getLatestRelease(const std::string & repositoryURL) const;
@@ -23,6 +24,8 @@ private:
 		std::string repositoryName;
 		std::string organizationName;
 	};
+
+	GitHubService();
 
 	static std::optional<RepositoryInformation> parseRepositoryURL(const std::string & repositoryURL);
 

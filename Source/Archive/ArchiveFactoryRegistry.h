@@ -11,8 +11,9 @@
 #include <vector>
 
 class ArchiveFactoryRegistry final : public Singleton<ArchiveFactoryRegistry> {
+	friend class FactoryRegistry;
+
 public:
-	ArchiveFactoryRegistry();
 	~ArchiveFactoryRegistry() override;
 
 	bool hasFactory(const std::string & fileExtension) const;
@@ -33,6 +34,8 @@ private:
 	};
 
 	typedef std::map<std::string, ArchiveFactoryData> ArchiveFactoryMap;
+
+	ArchiveFactoryRegistry();
 
 	void assignStandardFactories();
 	void assignPlatformFactories();

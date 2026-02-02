@@ -79,7 +79,7 @@ void FactoryRegistry::assignStandardFactories() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	setFactory<BitbucketService>([]() {
-		return std::make_unique<BitbucketService>();
+		return std::unique_ptr<BitbucketService>(new BitbucketService());
 	});
 
 	setFactory<FilePathVariableEvaluator>([]() {
@@ -87,34 +87,34 @@ void FactoryRegistry::assignStandardFactories() {
 	});
 
 	setFactory<IPAddressService>([]() {
-		return std::make_unique<IpifyIPAddressService>();
+		return std::unique_ptr<IpifyIPAddressService>(new IpifyIPAddressService());
 	});
 
 	setFactory<GeoLocationService>([]() {
-		return std::make_unique<FreeGeoIPGeoLocationService>();
+		return std::unique_ptr<FreeGeoIPGeoLocationService>(new FreeGeoIPGeoLocationService());
 	});
 
 	setFactory<GitHubService>([]() {
-		return std::make_unique<GitHubService>();
+		return std::unique_ptr<GitHubService>(new GitHubService());
 	});
 
 	setFactory<HTTPService>([]() {
-		return std::make_unique<HTTPService>();
+		return std::unique_ptr<HTTPService>(new HTTPService());
 	});
 
 	setFactory<LibraryInformation>([]() {
-		return std::make_unique<LibraryInformation>();
+		return std::unique_ptr<LibraryInformation>(new LibraryInformation());
 	});
 
 	setFactory<SegmentAnalytics>([]() {
-		return std::make_unique<SegmentAnalyticsCURL>();
+		return std::unique_ptr<SegmentAnalyticsCURL>(new SegmentAnalyticsCURL());
 	});
 
 	setFactory<TimeZoneDataManager>([]() {
-		return std::make_unique<TimeZoneDataManager>();
+		return std::unique_ptr<TimeZoneDataManager>(new TimeZoneDataManager());
 	});
 
 	setFactory<ArchiveFactoryRegistry>([]() {
-		return std::make_unique<ArchiveFactoryRegistry>();
+		return std::unique_ptr<ArchiveFactoryRegistry>(new ArchiveFactoryRegistry());
 	});
 }

@@ -3,16 +3,18 @@
 
 #include "IPAddressService.h"
 
-#include <memory>
-
 class HTTPService;
 
 class IpifyIPAddressService final : public IPAddressService {
+	friend class FactoryRegistry;
+
 public:
-	IpifyIPAddressService();
 	~IpifyIPAddressService() override;
 
 	virtual std::string getIPAddress(IPAddressType type = IPAddressType::V4) override;
+
+private:
+	IpifyIPAddressService();
 };
 
 #endif // _IPIFY_IP_ADDRESS_SERVICE_H_

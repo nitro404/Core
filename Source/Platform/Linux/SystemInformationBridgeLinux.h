@@ -4,14 +4,17 @@
 #include "Platform/SystemInformationBridge.h"
 
 class SystemInformationBridgeLinux final : public SystemInformationBridge {
+	friend class FactoryRegistry;
+
 public:
-	SystemInformationBridgeLinux();
 	~SystemInformationBridgeLinux() override;
 
 	std::optional<std::string> getHomeDirectoryPath() override;
 	std::optional<std::string> getApplicationDataDirectoryPath() override;
 
 private:
+	SystemInformationBridgeLinux();
+
 	SystemInformationBridgeLinux(const SystemInformationBridgeLinux &) = delete;
 	const SystemInformationBridgeLinux & operator = (const SystemInformationBridgeLinux &) = delete;
 };

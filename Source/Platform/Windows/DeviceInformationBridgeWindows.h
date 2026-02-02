@@ -4,8 +4,9 @@
 #include "Platform/DeviceInformationBridge.h"
 
 class DeviceInformationBridgeWindows final : public DeviceInformationBridge {
+	friend class FactoryRegistry;
+
 public:
-	DeviceInformationBridgeWindows();
 	~DeviceInformationBridgeWindows() override;
 
 	virtual std::string getHostName() override;
@@ -67,6 +68,8 @@ private:
 		DDR5 = 34,
 		LPDDR5 = 35
 	};
+
+	DeviceInformationBridgeWindows();
 
 	static MemoryType getMemoryTypeFromWindowsMemoryType(WindowsMemoryType memoryType);
 

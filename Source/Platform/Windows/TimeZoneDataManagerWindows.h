@@ -4,14 +4,17 @@
 #include "Platform/TimeZoneDataManager.h"
 
 class TimeZoneDataManagerWindows final : public TimeZoneDataManager {
+	friend class FactoryRegistry;
+
 public:
-	TimeZoneDataManagerWindows();
 	~TimeZoneDataManagerWindows() override;
 
 	virtual bool isSupported() const override;
 	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr) override;
 
 private:
+	TimeZoneDataManagerWindows();
+
 	TimeZoneDataManagerWindows(const TimeZoneDataManagerWindows &) = delete;
 	const TimeZoneDataManagerWindows & operator = (const TimeZoneDataManagerWindows &) = delete;
 };

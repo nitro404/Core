@@ -8,8 +8,9 @@
 #include <optional>
 
 class DeviceInformationBridgeLinux final : public DeviceInformationBridge {
+	friend class FactoryRegistry;
+
 public:
-	DeviceInformationBridgeLinux();
 	~DeviceInformationBridgeLinux() override;
 
 	virtual std::string getHostName() override;
@@ -34,6 +35,8 @@ public:
 	virtual NetworkConnectionStatus getNetworkConnectionStatus() override;
 
 private:
+	DeviceInformationBridgeLinux();
+
 	bool populateSystemInformation();
 
 	std::optional<utsname> m_systemInformation;

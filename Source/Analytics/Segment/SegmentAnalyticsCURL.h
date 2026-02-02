@@ -15,8 +15,9 @@ class HTTPResponse;
 
 class SegmentAnalyticsCURL final : public SegmentAnalytics,
                                    public SegmentAnalytics::LibraryInfoProvider {
+	friend class FactoryRegistry;
+
 public:
-	SegmentAnalyticsCURL();
 	~SegmentAnalyticsCURL() override;
 
 	bool isRunning() const;
@@ -152,6 +153,8 @@ private:
 		BatchFailedEvents(const BatchFailedEvents &) = delete;
 		const BatchFailedEvents & operator = (const BatchFailedEvents &) = delete;
 	};
+
+	SegmentAnalyticsCURL();
 
 	std::shared_ptr<HTTPRequest> createSingleAnalyticEventRequest(const SegmentAnalyticEvent & analyticEvent);
 	std::shared_ptr<HTTPRequest> createBatchAnalyticEventRequest(const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);

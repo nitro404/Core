@@ -4,13 +4,16 @@
 #include "Platform/ProcessCreator.h"
 
 class ProcessCreatorLinux : public ProcessCreator {
+	friend class FactoryRegistry;
+
 public:
-	ProcessCreatorLinux();
 	~ProcessCreatorLinux() override;
 
 	virtual std::unique_ptr<Process> createProcess(const std::string & applicationCommand, const std::optional<std::string> & workingDirectory = {}, Process::Priority = Process::DEFAULT_PRIORITY, uint64_t * nativeErrorCode = nullptr, std::string * nativeErrorMessage = nullptr) override;
 
 private:
+	ProcessCreatorLinux();
+
 	ProcessCreatorLinux(const ProcessCreatorLinux &) = delete;
 	const ProcessCreatorLinux & operator = (const ProcessCreatorLinux &) = delete;
 };

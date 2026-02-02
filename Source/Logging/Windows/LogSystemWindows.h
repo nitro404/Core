@@ -4,11 +4,14 @@
 #include "Logging/LogSystem.h"
 
 class LogSystemWindows final : public LogSystem {
+	friend class FactoryRegistry;
+
 public:
-	LogSystemWindows();
 	~LogSystemWindows() override;
 
-protected:
+private:
+	LogSystemWindows();
+
 	LogSystemWindows(const LogSystemWindows &) = delete;
 	const LogSystemWindows & operator = (const LogSystemWindows &) = delete;
 };

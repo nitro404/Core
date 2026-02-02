@@ -7,8 +7,9 @@
 #include <vector>
 
 class LibraryInformation final : public Singleton<LibraryInformation> {
+	friend class FactoryRegistry;
+
 public:
-	LibraryInformation();
 	~LibraryInformation() override;
 
 	struct VersionData {
@@ -29,6 +30,8 @@ public:
 	bool addLibrary(const std::string & name, const std::string & version, const std::string & extra = {});
 
 private:
+	LibraryInformation();
+
 	std::vector<VersionData> m_libraryInformation;
 };
 

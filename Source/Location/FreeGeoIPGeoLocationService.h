@@ -8,11 +8,15 @@
 class HTTPService;
 
 class FreeGeoIPGeoLocationService final : public GeoLocationService {
+	friend class FactoryRegistry;
+
 public:
-	FreeGeoIPGeoLocationService();
 	~FreeGeoIPGeoLocationService() override;
 
 	virtual std::optional<GeoLocation> getGeoLocation() override;
+
+private:
+	FreeGeoIPGeoLocationService();
 };
 
 #endif // _FREE_GEO_IP_GEO_LOCATION_SERVICE_H_

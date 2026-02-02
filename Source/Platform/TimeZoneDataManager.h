@@ -7,8 +7,9 @@
 #include <string>
 
 class TimeZoneDataManager : public Singleton<TimeZoneDataManager> {
+	friend class FactoryRegistry;
+
 public:
-	TimeZoneDataManager();
 	~TimeZoneDataManager() override;
 
 	virtual bool isSupported() const;
@@ -16,6 +17,8 @@ public:
 	bool initialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 
 protected:
+	TimeZoneDataManager();
+
 	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr);
 
 private:

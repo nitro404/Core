@@ -9,8 +9,9 @@
 #include <string>
 
 class BitbucketService final : public Singleton<BitbucketService> {
+	friend class FactoryRegistry;
+
 public:
-	BitbucketService();
 	~BitbucketService() override;
 
 	std::shared_ptr<BitbucketDownload> getLatestDownload(const std::string & repositoryURL) const;
@@ -23,6 +24,8 @@ private:
 		std::string repositoryName;
 		std::string organizationName;
 	};
+
+	BitbucketService();
 
 	static std::optional<RepositoryInformation> parseRepositoryURL(const std::string & repositoryURL);
 

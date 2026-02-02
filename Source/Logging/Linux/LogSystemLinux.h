@@ -4,11 +4,14 @@
 #include "Logging/LogSystem.h"
 
 class LogSystemLinux final : public LogSystem {
+	friend class FactoryRegistry;
+
 public:
-	LogSystemLinux();
 	~LogSystemLinux() override;
 
-protected:
+private:
+	LogSystemLinux();
+
 	LogSystemLinux(const LogSystemLinux &) = delete;
 	const LogSystemLinux & operator = (const LogSystemLinux &) = delete;
 };

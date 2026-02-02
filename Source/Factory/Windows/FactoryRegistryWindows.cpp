@@ -10,22 +10,22 @@ void FactoryRegistry::assignPlatformFactories() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	setFactory<LogSystem>([]() {
-		return std::make_unique<LogSystemWindows>();
+		return std::unique_ptr<LogSystemWindows>(new LogSystemWindows());
 	});
 
 	setFactory<DeviceInformationBridge>([]() {
-		return std::make_unique<DeviceInformationBridgeWindows>();
+		return std::unique_ptr<DeviceInformationBridgeWindows>(new DeviceInformationBridgeWindows());
 	});
 
 	setFactory<ProcessCreator>([]() {
-		return std::make_unique<ProcessCreatorWindows>();
+		return std::unique_ptr<ProcessCreatorWindows>(new ProcessCreatorWindows());
 	});
 
 	setFactory<SystemInformationBridge>([]() {
-		return std::make_unique<SystemInformationBridgeWindows>();
+		return std::unique_ptr<SystemInformationBridgeWindows>(new SystemInformationBridgeWindows());
 	});
 
 	setFactory<TimeZoneDataManager>([]() {
-		return std::make_unique<TimeZoneDataManagerWindows>();
+		return std::unique_ptr<TimeZoneDataManagerWindows>(new TimeZoneDataManagerWindows());
 	});
 }

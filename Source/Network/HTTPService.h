@@ -25,8 +25,9 @@
 class HTTPService final
 	: public Singleton<HTTPService>
 	, public HTTPRequestSettings {
+	friend class FactoryRegistry;
+
 public:
-	HTTPService();
 	~HTTPService() override;
 
 	bool isInitialized() const;
@@ -75,6 +76,8 @@ public:
 private:
 	using HTTPThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
 	using CACertUpdateThread = std::unique_ptr<std::thread, std::function<void (std::thread *)>>;
+
+	HTTPService();
 
 	void runCertificateAuthorityCertificateStoreFileUpdate(std::shared_ptr<std::promise<bool>> promise, const std::string & caCertFilePath, bool force);
 	void run();

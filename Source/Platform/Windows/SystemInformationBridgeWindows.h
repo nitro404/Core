@@ -4,14 +4,17 @@
 #include "Platform/SystemInformationBridge.h"
 
 class SystemInformationBridgeWindows final : public SystemInformationBridge {
+	friend class FactoryRegistry;
+
 public:
-	SystemInformationBridgeWindows();
 	~SystemInformationBridgeWindows() override;
 
 	std::optional<std::string> getHomeDirectoryPath() override;
 	std::optional<std::string> getApplicationDataDirectoryPath() override;
 
 private:
+	SystemInformationBridgeWindows();
+
 	SystemInformationBridgeWindows(const SystemInformationBridgeWindows &) = delete;
 	const SystemInformationBridgeWindows & operator = (const SystemInformationBridgeWindows &) = delete;
 };
