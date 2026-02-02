@@ -263,7 +263,7 @@ rapidjson::Document Utilities::anyVectorToJSONDocument(const std::vector<std::an
 		}
 	}
 
-	return std::move(vectorDocument);
+	return vectorDocument;
 }
 
 rapidjson::Value Utilities::anyVectorToJSONValue(const std::vector<std::any> & values, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
@@ -307,7 +307,7 @@ rapidjson::Document Utilities::anyMapToJSONDocument(const std::map<std::string, 
 		}
 	}
 
-	return std::move(mapDocument);
+	return mapDocument;
 }
 
 rapidjson::Value Utilities::anyMapToJSONValue(const std::map<std::string, std::any> & valueMap, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
