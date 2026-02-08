@@ -12,6 +12,9 @@
 #include <SevenZip/CPP/7zip/Common/ILibrary.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <sstream>
 
 const std::string NullsoftScriptableInstallSystemArchive::DEFAULT_FILE_EXTENSION("exe");
@@ -122,6 +125,114 @@ std::string NullsoftScriptableInstallSystemArchive::toDebugString(bool includeDa
 	}
 
 	return stringStream.str();
+}
+
+bool NullsoftScriptableInstallSystemArchive::isNSISArchive(const std::string & filePath) {
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary | std::ios::ate);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	const size_t size = fileStream.tellg();
+
+	ByteBuffer buffer(size, Endianness::LittleEndian);
+	buffer.resize(size);
+
+	fileStream.seekg(0, std::ios::beg);
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), size);
+	fileStream.close();
+
+	return isNSISArchive(buffer);
+}
+
+bool NullsoftScriptableInstallSystemArchive::isNSISArchive(const ByteBuffer & data) {
+	static const std::array<uint8_t, 2> PORTABLE_EXECUTABLE_MAGIC_NUMBER({ 0x4D, 0x5A }); // MZ
+	static const std::array<uint8_t, 4> PORTABLE_EXECUTABLE_SIGNATURE({ 0x50, 0x45, 0x00, 0x00 }); // PE
+	static const std::string NSIS_SIGNATURE("NullsoftInst");
+	static constexpr size_t PORTABLE_EXECUTABLE_HEADER_SIZE = 24;
+	static constexpr size_t DOS_HEADER_NEW_EXE_HEADER_OFFSET_VALUE_OFFSET = 0x3C; 
+	static constexpr size_t NT_HEADER_NUMBER_OF_SECTIONS_OFFSET = 0x06;
+	static constexpr size_t NT_HEADER_OPTIONAL_HEADER_SIZE_OFFSET = 0x14;
+	static constexpr size_t SECTION_HEADER_SIZE = 40;
+	static constexpr size_t SECTION_HEADER_RAW_DATA_SIZE_OFFSET = 0x10;
+	static constexpr size_t SECTION_HEADER_RAW_DATA_POINTER_OFFSET = 0x14;
+
+	if(data.getSize() < PORTABLE_EXECUTABLE_MAGIC_NUMBER.size()) {
+		return false;
+	}
+
+	data.setEndianness(Endianness::LittleEndian);
+
+	if(std::memcmp(data.getRawData(), PORTABLE_EXECUTABLE_MAGIC_NUMBER.data(), PORTABLE_EXECUTABLE_MAGIC_NUMBER.size()) != 0) {
+		return false;
+	}
+
+	const std::optional<int32_t> optionalNewExeHeaderOffset(data.getInteger(DOS_HEADER_NEW_EXE_HEADER_OFFSET_VALUE_OFFSET));
+
+	if(!optionalNewExeHeaderOffset.has_value()) {
+		return false;
+	}
+
+	std::unique_ptr<std::array<uint8_t, 4>> optionalPortableExecutableSignature(data.getBytes<4>(optionalNewExeHeaderOffset.value()));
+
+	if(optionalPortableExecutableSignature == nullptr || std::memcmp(optionalPortableExecutableSignature->data(), PORTABLE_EXECUTABLE_SIGNATURE.data(), PORTABLE_EXECUTABLE_SIGNATURE.size()) != 0) {
+		return false;
+	}
+
+	//const std::optional<uint16_t> optionalSizeOfOptionalHeader(data.getUnsignedShort(static_cast<size_t>(optionalNewExeHeaderOffset.value() + PORTABLE_EXECUTABLE_SIGNATURE.size() + SIZE_OF_OPTIONAL_HEADER_OFFSET));
+	const std::optional<uint16_t> optionalNumberOfSections(data.getUnsignedShort(static_cast<size_t>(optionalNewExeHeaderOffset.value() + NT_HEADER_NUMBER_OF_SECTIONS_OFFSET)));
+
+	if(!optionalNumberOfSections.has_value()) {
+		return false;
+	}
+
+	const std::optional<uint16_t> optionalHeaderSize(data.getUnsignedShort(static_cast<size_t>(optionalNewExeHeaderOffset.value() + NT_HEADER_OPTIONAL_HEADER_SIZE_OFFSET)));
+
+	if(!optionalHeaderSize.has_value()) {
+		return false;
+	}
+
+	const size_t sectionTableOffset = optionalNewExeHeaderOffset.value() + PORTABLE_EXECUTABLE_HEADER_SIZE + optionalHeaderSize.value();
+	std::optional<size_t> portableExecutableEndOffset;
+
+	for (uint16_t i = 0; i < optionalNumberOfSections.value(); ++i) {
+		const size_t sectionHeaderOffset = sectionTableOffset + (i * SECTION_HEADER_SIZE);
+
+		const std::optional<uint32_t> optionalRawSize(data.getInteger(sectionHeaderOffset + SECTION_HEADER_RAW_DATA_SIZE_OFFSET));
+
+		if(!optionalRawSize.has_value()) {
+			return false;
+		}
+
+		const std::optional<uint32_t> optionalPointerRaw(data.getInteger(sectionHeaderOffset + SECTION_HEADER_RAW_DATA_POINTER_OFFSET));
+
+		if(!optionalPointerRaw.has_value()) {
+			return false;
+		}
+
+		const size_t portableExecutableEndOffsetCandidate = static_cast<size_t>(optionalPointerRaw.value() + optionalRawSize.value());
+
+		if(portableExecutableEndOffset.has_value()) {
+			portableExecutableEndOffset = std::max(portableExecutableEndOffset.value(), portableExecutableEndOffsetCandidate);
+		}
+		else {
+			portableExecutableEndOffset = portableExecutableEndOffsetCandidate;
+		}
+	}
+
+	if(!portableExecutableEndOffset.has_value() || portableExecutableEndOffset.value() >= data.getSize()) {
+		return false;
+	}
+
+	const size_t overlaySize = data.getSize() - portableExecutableEndOffset.value();
+	const std::vector<uint8_t> & internalData = data.getData();
+
+	return std::search(internalData.begin() + portableExecutableEndOffset.value(), internalData.end(), std::begin(NSIS_SIGNATURE), std::end(NSIS_SIGNATURE)) != internalData.end();
 }
 
 std::unique_ptr<NullsoftScriptableInstallSystemArchive> NullsoftScriptableInstallSystemArchive::readFrom(const std::string & filePath) {

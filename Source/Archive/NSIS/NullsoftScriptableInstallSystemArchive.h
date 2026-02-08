@@ -67,6 +67,8 @@ public:
 	CMyComPtr<IInArchive> & getArchiveHandle();
 	const CMyComPtr<IInArchive> & getArchiveHandle() const;
 
+	static bool isNSISArchive(const std::string & filePath);
+	static bool isNSISArchive(const ByteBuffer & data);
 	static std::unique_ptr<NullsoftScriptableInstallSystemArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<NullsoftScriptableInstallSystemArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
