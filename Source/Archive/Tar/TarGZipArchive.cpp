@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string TarGZipArchive::DEFAULT_FILE_EXTENSION("tar.gz");
 const std::string TarGZipArchive::ALTERNATE_FILE_EXTENSION("tgz");
@@ -55,6 +56,54 @@ TarGZipArchive::~TarGZipArchive() { }
 
 std::string TarGZipArchive::getDefaultFileExtension() const {
 	return DEFAULT_FILE_EXTENSION;
+}
+
+bool TarGZipArchive::isTarGZipArchive(const std::string & filePath) {
+	static const size_t MAX_GZIP_MAGIC_NUMBER_LENGTH = 2;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_GZIP_MAGIC_NUMBER_LENGTH, Endianness::LittleEndian);
+	buffer.resize(MAX_GZIP_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_GZIP_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarGZipArchive(buffer);
+}
+
+bool TarGZipArchive::isTarGZipArchive(const ByteBuffer & data) {
+	static const std::array<std::array<uint8_t, 2>, 2> GZIP_MAGIC_NUMBERS({
+		{ 0x1F, 0x8B },
+		{ 0x1F, 0x9E }
+	});
+
+	for(const std::array<uint8_t, 2> & magicNumber : GZIP_MAGIC_NUMBERS) {
+		if(data.getSize() < magicNumber.size()) {
+			continue;
+		}
+
+		if(std::memcmp(data.getRawData(), magicNumber.data(), magicNumber.size()) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::unique_ptr<TarGZipArchive> TarGZipArchive::readFrom(const std::string & filePath) {

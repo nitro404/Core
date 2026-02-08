@@ -13,6 +13,8 @@ public:
 
 	virtual std::string getDefaultFileExtension() const override;
 
+	static bool isTarGZipArchive(const std::string & filePath);
+	static bool isTarGZipArchive(const ByteBuffer & data);
 	static std::unique_ptr<TarGZipArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<TarGZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
