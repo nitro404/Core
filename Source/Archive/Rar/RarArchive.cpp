@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string RarArchive::DEFAULT_FILE_EXTENSION("rar");
 
@@ -123,6 +124,55 @@ std::string RarArchive::toDebugString(bool includeDate) const {
 	}
 
 	return stringStream.str();
+}
+
+bool RarArchive::isRarArchive(const std::string & filePath) {
+	static constexpr size_t MAX_RAR_MAGIC_NUMBER_LENGTH = 8;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_RAR_MAGIC_NUMBER_LENGTH, Endianness::LittleEndian);
+	buffer.resize(MAX_RAR_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_RAR_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isRarArchive(buffer);
+}
+
+bool RarArchive::isRarArchive(const ByteBuffer & data) {
+	static const std::array<std::vector<uint8_t>, 3> RAR_MAGIC_NUMBERS({
+		{ 0x52, 0x45, 0x7e, 0x5e }, // pre-v1.50
+		{ 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x00 }, // v1.50 - v4.20
+		{ 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07, 0x01, 0x00 } // v5+
+	});
+
+	for(const std::vector<uint8_t> & magicNumber : RAR_MAGIC_NUMBERS) {
+		if(data.getSize() < magicNumber.size()) {
+			continue;
+		}
+
+		if(std::memcmp(data.getRawData(), magicNumber.data(), magicNumber.size()) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::unique_ptr<RarArchive> RarArchive::readFrom(const std::string & filePath) {
