@@ -17,7 +17,7 @@ TarXZArchive::TarXZArchive(const std::string & filePath)
 	: CompressedTarArchive(filePath, ByteBuffer::CompressionMethod::XZ) { }
 
 TarXZArchive::TarXZArchive(std::unique_ptr<TarArchive> tarArchive)
-	: CompressedTarArchive(tarArchive->getFilePath(), ByteBuffer::CompressionMethod::ZLib) {
+	: CompressedTarArchive(tarArchive->getFilePath(), ByteBuffer::CompressionMethod::XZ) {
 	m_numberOfFiles = tarArchive->numberOfFiles();
 	m_numberOfDirectories = tarArchive->numberOfDirectories();
 
@@ -119,7 +119,7 @@ std::unique_ptr<TarXZArchive> TarXZArchive::createFrom(std::unique_ptr<ByteBuffe
 		return nullptr;
 	}
 
-	std::unique_ptr<TarArchive> tarArchive(TarArchive::createFrom(data->decompressed(ByteBuffer::CompressionMethod::ZLib)));
+	std::unique_ptr<TarArchive> tarArchive(TarArchive::createFrom(data->decompressed(ByteBuffer::CompressionMethod::XZ)));
 
 	if(tarArchive == nullptr) {
 		return nullptr;

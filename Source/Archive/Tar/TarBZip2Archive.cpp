@@ -128,7 +128,7 @@ std::unique_ptr<TarBZip2Archive> TarBZip2Archive::createFrom(std::unique_ptr<Byt
 		return nullptr;
 	}
 
-	std::unique_ptr<TarArchive> tarArchive(TarArchive::createFrom(data->decompressed(ByteBuffer::CompressionMethod::ZLib)));
+	std::unique_ptr<TarArchive> tarArchive(TarArchive::createFrom(data->decompressed(ByteBuffer::CompressionMethod::BZip2)));
 
 	if(tarArchive == nullptr) {
 		return nullptr;
