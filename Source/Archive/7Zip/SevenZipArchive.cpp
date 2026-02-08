@@ -11,6 +11,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const ISzAlloc SevenZipArchive::DEFAULT_ALLOCATOR = { SzAlloc, SzFree };
 
@@ -207,6 +208,45 @@ std::string SevenZipArchive::toDebugString(bool includeDate) const {
 	}
 
 	return stringStream.str();
+}
+
+bool SevenZipArchive::is7ZipArchive(const std::string & filePath) {
+	static constexpr size_t MAX_7ZIP_MAGIC_NUMBER_LENGTH = 6;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_7ZIP_MAGIC_NUMBER_LENGTH, Endianness::LittleEndian);
+	buffer.resize(MAX_7ZIP_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_7ZIP_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return is7ZipArchive(buffer);
+}
+
+bool SevenZipArchive::is7ZipArchive(const ByteBuffer & data) {
+	static const std::array<uint8_t, 6> SEVEN_ZIP_MAGIC_NUMBER({ 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }); // 7z
+
+	if(data.getSize() < SEVEN_ZIP_MAGIC_NUMBER.size()) {
+		return false;
+	}
+
+	return std::memcmp(data.getRawData(), SEVEN_ZIP_MAGIC_NUMBER.data(), SEVEN_ZIP_MAGIC_NUMBER.size()) == 0;
 }
 
 std::unique_ptr<SevenZipArchive> SevenZipArchive::readFrom(const std::string & filePath) {

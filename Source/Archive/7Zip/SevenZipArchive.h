@@ -62,6 +62,8 @@ public:
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
+	static bool is7ZipArchive(const std::string & filePath);
+	static bool is7ZipArchive(const ByteBuffer & data);
 	static std::unique_ptr<SevenZipArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<SevenZipArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
