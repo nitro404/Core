@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string TarXZArchive::DEFAULT_FILE_EXTENSION("tar.xz");
 const std::string TarXZArchive::ALTERNATE_FILE_EXTENSION("txz");
@@ -55,6 +56,45 @@ TarXZArchive::~TarXZArchive() { }
 
 std::string TarXZArchive::getDefaultFileExtension() const {
 	return DEFAULT_FILE_EXTENSION;
+}
+
+bool TarXZArchive::isTarXZArchive(const std::string & filePath) {
+	static constexpr size_t MAX_XZ_MAGIC_NUMBER_LENGTH = 6;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_XZ_MAGIC_NUMBER_LENGTH, Endianness::BigEndian);
+	buffer.resize(MAX_XZ_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_XZ_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarXZArchive(buffer);
+}
+
+bool TarXZArchive::isTarXZArchive(const ByteBuffer & data) {
+	static const std::array<uint8_t, 6> XZ_MAGIC_NUMBER({ 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00 });
+
+	if(data.getSize() < XZ_MAGIC_NUMBER.size()) {
+		return false;
+	}
+
+	return std::memcmp(data.getRawData(), XZ_MAGIC_NUMBER.data(), XZ_MAGIC_NUMBER.size()) == 0;
 }
 
 std::unique_ptr<TarXZArchive> TarXZArchive::readFrom(const std::string & filePath) {
