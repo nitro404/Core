@@ -160,8 +160,10 @@ public:
 	size_t removeFirstEntryWithName(const std::string & entryName, bool includeSubdirectories = true, bool caseSensitive = false);
 	size_t removeAllEntries();
 	bool isModified() const;
+	static bool isZipArchive(const std::string & filePath);
+	static bool isZipArchive(const ByteBuffer & data);
 	static std::unique_ptr<ZipArchive> createNew(const std::string & filePath = {}, bool overwrite = false);
-	static std::unique_ptr<ZipArchive> createFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & password = {}, bool verifyConsistency = false, const std::string & filePath = {});
+	static std::unique_ptr<ZipArchive> createFrom(std::unique_ptr<ByteBuffer> data, const std::string & password = {}, bool verifyConsistency = false, const std::string & filePath = {});
 	static std::unique_ptr<ZipArchive> readFrom(const std::string & filePath, const std::string & password = {}, bool verifyConsistency = false);
 	bool close(bool * saved = nullptr);
 	bool reopen(bool verifyConsistency = false);

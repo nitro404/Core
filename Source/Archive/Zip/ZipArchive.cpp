@@ -9,6 +9,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 #include <sstream>
 
 const std::string ZipArchive::DEFAULT_FILE_EXTENSION("zip");
@@ -565,6 +566,45 @@ bool ZipArchive::isModified() const {
 
 void ZipArchive::setModified() {
 	m_modified = true;
+}
+
+bool ZipArchive::isZipArchive(const std::string & filePath) {
+	static constexpr size_t MAX_ZIP_MAGIC_NUMBER_LENGTH = 4;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_ZIP_MAGIC_NUMBER_LENGTH, Endianness::LittleEndian);
+	buffer.resize(MAX_ZIP_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_ZIP_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isZipArchive(buffer);
+}
+
+bool ZipArchive::isZipArchive(const ByteBuffer & data) {
+	static const std::array<uint8_t, 4> ZIP_MAGIC_NUMBER({ 0x50, 0x4B, 0x03, 0x04 });
+
+	if(data.getSize() < ZIP_MAGIC_NUMBER.size()) {
+		return false;
+	}
+
+	return std::memcmp(data.getRawData(), ZIP_MAGIC_NUMBER.data(), ZIP_MAGIC_NUMBER.size()) == 0;
 }
 
 std::unique_ptr<ZipArchive> ZipArchive::createNew(const std::string & filePath, bool overwrite) {
