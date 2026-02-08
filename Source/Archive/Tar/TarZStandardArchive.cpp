@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string TarZStandardArchive::DEFAULT_FILE_EXTENSION("tar.zst");
 const std::string TarZStandardArchive::ALTERNATE_FILE_EXTENSION("tzst");
@@ -55,6 +56,60 @@ TarZStandardArchive::~TarZStandardArchive() { }
 
 std::string TarZStandardArchive::getDefaultFileExtension() const {
 	return DEFAULT_FILE_EXTENSION;
+}
+
+bool TarZStandardArchive::isTarZStandardArchive(const std::string & filePath) {
+	static constexpr size_t MAX_ZSTANDARD_MAGIC_NUMBER_LENGTH = 4;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_ZSTANDARD_MAGIC_NUMBER_LENGTH, Endianness::BigEndian);
+	buffer.resize(MAX_ZSTANDARD_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_ZSTANDARD_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarZStandardArchive(buffer);
+}
+
+bool TarZStandardArchive::isTarZStandardArchive(const ByteBuffer & data) {
+	static const std::array<std::array<uint8_t, 4>, 8> ZSTANDARD_MAGIC_NUMBERS({
+		{ 0x28, 0xB5, 0x2F, 0xFD }, // v0.8+
+		{ 0x27, 0xB5, 0x2F, 0xFD }, // v0.7+
+		{ 0x26, 0xB5, 0x2F, 0xFD }, // v0.6+
+		{ 0x25, 0xB5, 0x2F, 0xFD }, // v0.5+
+		{ 0x24, 0xB5, 0x2F, 0xFD }, // v0.4+
+		{ 0x23, 0xB5, 0x2F, 0xFD }, // v0.3+
+		{ 0x22, 0xB5, 0x2F, 0xFD }, // v0.2+
+		{ 0x1E, 0xB5, 0x2F, 0xFD }  // v0.1
+	});
+
+	for(const std::array<uint8_t, 4> & magicNumber : ZSTANDARD_MAGIC_NUMBERS) {
+		if(data.getSize() < magicNumber.size()) {
+			continue;
+		}
+
+		if(std::memcmp(data.getRawData(), magicNumber.data(), magicNumber.size()) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::unique_ptr<TarZStandardArchive> TarZStandardArchive::readFrom(const std::string & filePath) {

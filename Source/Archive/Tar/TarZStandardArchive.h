@@ -13,6 +13,8 @@ public:
 
 	virtual std::string getDefaultFileExtension() const override;
 
+	static bool isTarZStandardArchive(const std::string & filePath);
+	static bool isTarZStandardArchive(const ByteBuffer & data);
 	static std::unique_ptr<TarZStandardArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<TarZStandardArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
