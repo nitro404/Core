@@ -72,6 +72,10 @@ std::string RarArchive::getFilePath() const {
 	return m_filePath;
 }
 
+void RarArchive::setFilePath(const std::string & filePath) {
+	m_filePath = filePath;
+}
+
 bool RarArchive::hasComment() const {
 	return dmc_unrar_get_archive_comment(m_archiveHandle.get(), nullptr, 0) != 0;
 }

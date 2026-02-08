@@ -164,6 +164,10 @@ std::string SevenZipArchive::getFilePath() const {
 	return m_filePath;
 }
 
+void SevenZipArchive::setFilePath(const std::string & filePath) {
+	m_filePath = filePath;
+}
+
 bool SevenZipArchive::hasComment() const {
 	return false;
 }

@@ -85,6 +85,10 @@ std::string TarArchive::getFilePath() const {
 	return m_filePath;
 }
 
+void TarArchive::setFilePath(const std::string & filePath) {
+	m_filePath = filePath;
+}
+
 bool TarArchive::hasComment() const {
 	return false;
 }
@@ -195,7 +199,7 @@ std::unique_ptr<TarArchive> TarArchive::readFrom(const std::string & filePath) {
 		return nullptr;
 	}
 
-	tarArchive->m_filePath = filePath;
+	tarArchive->setFilePath(filePath);
 
 	return tarArchive;
 }

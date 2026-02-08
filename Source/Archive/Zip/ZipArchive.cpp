@@ -98,6 +98,10 @@ std::string ZipArchive::getFilePath() const {
 	return m_filePath;
 }
 
+void ZipArchive::setFilePath(const std::string & filePath) {
+	m_filePath = filePath;
+}
+
 bool ZipArchive::hasPassword() const {
 	return !m_password.empty();
 }

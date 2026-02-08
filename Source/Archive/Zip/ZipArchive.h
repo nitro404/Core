@@ -174,6 +174,9 @@ public:
 	static const std::string DEFAULT_FILE_EXTENSION;
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
 
+protected:
+	virtual void setFilePath(const std::string & filePath) override;
+
 private:
 	class SourceBuffer final {
 		friend class ZipArchive;

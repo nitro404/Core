@@ -79,6 +79,10 @@ std::string NullsoftScriptableInstallSystemArchive::getFilePath() const {
 	return m_filePath;
 }
 
+void NullsoftScriptableInstallSystemArchive::setFilePath(const std::string & filePath) {
+	m_filePath = filePath;
+}
+
 bool NullsoftScriptableInstallSystemArchive::hasComment() const {
 	return false;
 }
@@ -252,7 +256,7 @@ std::unique_ptr<NullsoftScriptableInstallSystemArchive> NullsoftScriptableInstal
 		return nullptr;
 	}
 
-	nsisArchive->m_filePath = filePath;
+	nsisArchive->setFilePath(filePath);
 
 	return nsisArchive;
 }

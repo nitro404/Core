@@ -116,6 +116,8 @@ public:
 	static const std::string DEFAULT_FILE_EXTENSION;
 
 protected:
+	virtual void setFilePath(const std::string & filePath) override;
+
 	TarArchive(const std::string & filePath = {});
 
 	std::vector<std::shared_ptr<Entry>> m_entries;

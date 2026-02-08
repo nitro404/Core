@@ -76,6 +76,9 @@ public:
 
 	static const std::string DEFAULT_FILE_EXTENSION;
 
+protected:
+	virtual void setFilePath(const std::string & filePath) override;
+
 private:
 	NullsoftScriptableInstallSystemArchive(CMyComPtr<IInArchive> archiveHandle);
 

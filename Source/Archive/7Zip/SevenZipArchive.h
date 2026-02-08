@@ -69,6 +69,9 @@ public:
 
 	static const std::string DEFAULT_FILE_EXTENSION;
 
+protected:
+	virtual void setFilePath(const std::string & filePath) override;
+
 private:
 	using ArchiveStreamHandle = std::unique_ptr<CFileInStream, std::function<void (CFileInStream *)>>;
 	using LookStreamHandle = std::unique_ptr<CLookToRead2, std::function<void (CLookToRead2 *)>>;

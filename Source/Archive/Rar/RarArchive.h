@@ -69,6 +69,8 @@ public:
 	static std::unique_ptr<RarArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
 	static const std::string DEFAULT_FILE_EXTENSION;
+protected:
+	virtual void setFilePath(const std::string & filePath) override;
 
 private:
 	using ArchiveHandle = std::unique_ptr<dmc_unrar_archive, std::function<void (dmc_unrar_archive *)>>;

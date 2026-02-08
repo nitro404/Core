@@ -9,8 +9,11 @@
 #include <string>
 #include <vector>
 
+class ArchiveFactoryRegistry;
+
 class Archive {
 	friend class ArchiveEntry;
+	friend class ArchiveFactoryRegistry;
 
 public:
 	enum class Type {
@@ -58,6 +61,9 @@ public:
 	size_t extractAllEntriesInSubdirectory(const std::string & destionationDirectoryPath, const std::string & archiveSubdirectory, bool relativeToSubdirectory = true, bool includeSubdirectories = true, bool overwrite = false, bool caseSensitive = false);
 	void updateParentArchive();
 	virtual std::string toDebugString(bool includeDate = false) const = 0;
+
+protected:
+	virtual void setFilePath(const std::string & filePath) = 0;
 
 private:
 	Type m_type;
