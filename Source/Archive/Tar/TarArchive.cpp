@@ -7,6 +7,9 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
+
+static constexpr size_t TAR_MAGIC_NUMBER_OFFSET = 257u;
 
 const std::string TarArchive::DEFAULT_FILE_EXTENSION("tar");
 
@@ -129,6 +132,55 @@ std::string TarArchive::toDebugString(bool includeDate) const {
 	}
 
 	return stringStream.str();
+}
+
+bool TarArchive::isTarArchive(const std::string & filePath) {
+	static constexpr size_t MAX_TAR_MAGIC_NUMBER_LENGTH = 6u;
+	static constexpr size_t MIN_NUMBER_OF_BYTES_TO_READ = TAR_MAGIC_NUMBER_OFFSET + MAX_TAR_MAGIC_NUMBER_LENGTH;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MIN_NUMBER_OF_BYTES_TO_READ);
+	buffer.resize(MIN_NUMBER_OF_BYTES_TO_READ);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MIN_NUMBER_OF_BYTES_TO_READ);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarArchive(buffer);
+}
+
+bool TarArchive::isTarArchive(const ByteBuffer & data) {
+	static const std::array<std::array<uint8_t, 6>, 2> TAR_MAGIC_NUMBERS({
+		0x75, 0x73, 0x74, 0x61, 0x72, 0x00, // 'ustar\0'
+		0x75, 0x73, 0x74, 0x61, 0x72, 0x20  // 'ustar '
+	});
+
+	for(const std::array<uint8_t, 6> & magicNumber : TAR_MAGIC_NUMBERS) {
+		if(data.getSize() < TAR_MAGIC_NUMBER_OFFSET + magicNumber.size()) {
+			continue;
+		}
+
+		if(std::memcmp(data.getRawData() + TAR_MAGIC_NUMBER_OFFSET, magicNumber.data(), magicNumber.size()) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::unique_ptr<TarArchive> TarArchive::readFrom(const std::string & filePath) {

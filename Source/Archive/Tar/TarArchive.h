@@ -108,6 +108,8 @@ public:
 	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
 	virtual std::string toDebugString(bool includeDate = false) const override;
 
+	static bool isTarArchive(const std::string & filePath);
+	static bool isTarArchive(const ByteBuffer & data);
 	static std::unique_ptr<TarArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<TarArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 
