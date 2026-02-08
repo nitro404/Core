@@ -23,7 +23,7 @@ bool ArchiveFactoryRegistry::hasFactory(const std::string & fileExtension) const
 	return m_archiveFactories.find(ArchiveFactoryRegistry::formatFileExtension(fileExtension)) != m_archiveFactories.end();
 }
 
-bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
+bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::function<bool(const ByteBuffer &)> archiveFormatCheckFunction, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	if(fileExtension.empty() || createArchiveFunction == nullptr || readArchiveFunction == nullptr) {
@@ -37,6 +37,7 @@ bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::
 	}
 
 	m_archiveFactories.emplace(formattedFileExtension, ArchiveFactoryData{
+		archiveFormatCheckFunction,
 		createArchiveFunction,
 		readArchiveFunction
 	});
@@ -44,13 +45,13 @@ bool ArchiveFactoryRegistry::setFactory(const std::string & fileExtension, std::
 	return true;
 }
 
-size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileExtensions, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
+size_t ArchiveFactoryRegistry::setFactory(const std::vector<std::string> & fileExtensions, std::function<bool(const ByteBuffer &)> archiveFormatCheckFunction, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction) {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	size_t numberOfFactoriesSet = 0;
 
 	for(const std::string & fileExtension : fileExtensions) {
-		if(setFactory(fileExtension, createArchiveFunction, readArchiveFunction)) {
+		if(setFactory(fileExtension, archiveFormatCheckFunction, createArchiveFunction, readArchiveFunction)) {
 			numberOfFactoriesSet++;
 		}
 	}
@@ -110,58 +111,70 @@ void ArchiveFactoryRegistry::resetFactories() {
 void ArchiveFactoryRegistry::assignStandardFactories() {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	setFactory(RarArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(RarArchive::DEFAULT_FILE_EXTENSION, static_cast<bool(*)(const ByteBuffer &)>(&RarArchive::isRarArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return RarArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return RarArchive::readFrom(filePath);
 	});
 
-	setFactory(SevenZipArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(SevenZipArchive::DEFAULT_FILE_EXTENSION, static_cast<bool(*)(const ByteBuffer &)>(&SevenZipArchive::is7ZipArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return SevenZipArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return SevenZipArchive::readFrom(filePath);
 	});
 
-	setFactory(TarArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarArchive::DEFAULT_FILE_EXTENSION, static_cast<bool(*)(const ByteBuffer &)>(&TarArchive::isTarArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarArchive::readFrom(filePath);
 	});
 
-	setFactory(TarLZMAArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarLZMAArchive::FILE_EXTENSIONS, static_cast<bool(*)(const ByteBuffer &)>(&TarLZMAArchive::isTarLZMAArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarLZMAArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarLZMAArchive::readFrom(filePath);
 	});
 
-	setFactory(TarBZip2Archive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarBZip2Archive::FILE_EXTENSIONS, static_cast<bool(*)(const ByteBuffer &)>(&TarBZip2Archive::isTarBZip2Archive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarBZip2Archive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarBZip2Archive::readFrom(filePath);
 	});
 
-	setFactory(TarGZipArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarGZipArchive::FILE_EXTENSIONS, static_cast<bool(*)(const ByteBuffer &)>(&TarGZipArchive::isTarGZipArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarGZipArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarGZipArchive::readFrom(filePath);
 	});
 
-	setFactory(TarXZArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarXZArchive::FILE_EXTENSIONS, static_cast<bool(*)(const ByteBuffer &)>(&TarXZArchive::isTarXZArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarXZArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarXZArchive::readFrom(filePath);
 	});
 
-	setFactory(TarZStandardArchive::FILE_EXTENSIONS, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(TarZStandardArchive::FILE_EXTENSIONS, static_cast<bool(*)(const ByteBuffer &)>(&TarZStandardArchive::isTarZStandardArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return TarZStandardArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return TarZStandardArchive::readFrom(filePath);
 	});
 
-	setFactory(ZipArchive::DEFAULT_FILE_EXTENSION, [](std::unique_ptr<ByteBuffer> buffer) {
+	setFactory(ZipArchive::DEFAULT_FILE_EXTENSION, static_cast<bool(*)(const ByteBuffer &)>(&ZipArchive::isZipArchive), [](std::unique_ptr<ByteBuffer> buffer) {
 		return ZipArchive::createFrom(std::move(buffer));
 	}, [](const std::string & filePath) {
 		return ZipArchive::readFrom(filePath);
+	});
+}
+
+ArchiveFactoryRegistry::ArchiveFactoryMap::const_iterator ArchiveFactoryRegistry::getArchiveFactoryForData(const ByteBuffer & buffer) const {
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	if(buffer.isEmpty()) {
+		return m_archiveFactories.cend();
+	}
+
+	return std::find_if(m_archiveFactories.cbegin(), m_archiveFactories.cend(), [&buffer](const auto & archiveFactory) {
+		return archiveFactory.second.archiveFormatCheckFunction(buffer);
 	});
 }
 
@@ -195,7 +208,15 @@ std::unique_ptr<Archive> ArchiveFactoryRegistry::createArchiveFrom(std::unique_p
 	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePathOrExtension));
 
 	if(archiveFactoryIterator == m_archiveFactories.cend()) {
-		return nullptr;
+		if(buffer == nullptr) {
+			return nullptr;
+		}
+
+		archiveFactoryIterator = getArchiveFactoryForData(*buffer);
+
+		if(archiveFactoryIterator == m_archiveFactories.cend()) {
+			return nullptr;
+		}
 	}
 
 	return archiveFactoryIterator->second.createArchiveFunction(std::move(buffer));
@@ -207,7 +228,23 @@ std::unique_ptr<Archive> ArchiveFactoryRegistry::readArchiveFrom(const std::stri
 	ArchiveFactoryMap::const_iterator archiveFactoryIterator(getArchiveFactoryForFilePath(filePath));
 
 	if(archiveFactoryIterator == m_archiveFactories.cend()) {
-		return nullptr;
+		std::unique_ptr<ByteBuffer> buffer(ByteBuffer::readFrom(filePath));
+
+		if(buffer == nullptr) {
+			return nullptr;
+		}
+
+		if(archiveFactoryIterator == m_archiveFactories.cend()) {
+			std::unique_ptr<Archive> archive(archiveFactoryIterator->second.createArchiveFunction(std::move(buffer)));
+
+			if(!archive) {
+				return nullptr;
+			}
+
+			archive->setFilePath(filePath);
+
+			return archive;
+		}
 	}
 
 	return archiveFactoryIterator->second.readArchiveFunction(filePath);

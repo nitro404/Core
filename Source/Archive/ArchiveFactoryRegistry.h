@@ -17,18 +17,19 @@ public:
 	~ArchiveFactoryRegistry() override;
 
 	bool hasFactory(const std::string & fileExtension) const;
-	bool setFactory(const std::string & fileExtension, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
-	size_t setFactory(const std::vector<std::string> & fileExtensions, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
+	bool setFactory(const std::string & fileExtension, std::function<bool(const ByteBuffer &)> archiveFormatCheckFunction, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
+	size_t setFactory(const std::vector<std::string> & fileExtensions, std::function<bool(const ByteBuffer &)> archiveFormatCheckFunction, std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction, std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction);
 	bool removeFactory(const std::string & fileExtension);
 	void resetFactories();
 	bool areDefaultFactoriesAssigned() const;
 	void assignDefaultFactories();
 
-	std::unique_ptr<Archive> createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePathOrExtension);
+	std::unique_ptr<Archive> createArchiveFrom(std::unique_ptr<ByteBuffer> buffer, const std::string & filePathOrExtension = {});
 	std::unique_ptr<Archive> readArchiveFrom(const std::string & filePath);
 
 private:
 	struct ArchiveFactoryData {
+		std::function<bool(const ByteBuffer &)> archiveFormatCheckFunction;
 		std::function<std::unique_ptr<Archive>(std::unique_ptr<ByteBuffer> buffer)> createArchiveFunction;
 		std::function<std::unique_ptr<Archive>(const std::string & filePath)> readArchiveFunction;
 	};
@@ -40,6 +41,7 @@ private:
 	void assignStandardFactories();
 	void assignPlatformFactories();
 
+	ArchiveFactoryMap::const_iterator getArchiveFactoryForData(const ByteBuffer & buffer) const;
 	ArchiveFactoryMap::const_iterator getArchiveFactoryForFilePath(const std::string & filePathOrExtension) const;
 
 	static std::string formatFileExtension(const std::string & fileExtension);

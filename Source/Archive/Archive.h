@@ -16,7 +16,7 @@ class Archive {
 	friend class ArchiveFactoryRegistry;
 
 public:
-	enum class Type {
+	enum class Type : uint8_t {
 		NSIS,
 		Rar,
 		SevenZip,
