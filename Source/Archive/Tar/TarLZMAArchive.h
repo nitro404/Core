@@ -13,6 +13,8 @@ public:
 
 	virtual std::string getDefaultFileExtension() const override;
 
+	static bool isTarLZMAArchive(const std::string & filePath);
+	static bool isTarLZMAArchive(const ByteBuffer & data);
 	static std::unique_ptr<TarLZMAArchive> readFrom(const std::string & filePath);
 	static std::unique_ptr<TarLZMAArchive> createFrom(std::unique_ptr<ByteBuffer> data);
 

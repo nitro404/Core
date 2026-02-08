@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string TarLZMAArchive::DEFAULT_FILE_EXTENSION("tar.lzma");
 const std::string TarLZMAArchive::ALTERNATE_FILE_EXTENSION("tlz");
@@ -55,6 +56,45 @@ TarLZMAArchive::~TarLZMAArchive() { }
 
 std::string TarLZMAArchive::getDefaultFileExtension() const {
 	return DEFAULT_FILE_EXTENSION;
+}
+
+bool TarLZMAArchive::isTarLZMAArchive(const std::string & filePath) {
+	static constexpr size_t MAX_LZMA_MAGIC_NUMBER_LENGTH = 3;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_LZMA_MAGIC_NUMBER_LENGTH, Endianness::BigEndian);
+	buffer.resize(MAX_LZMA_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_LZMA_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarLZMAArchive(buffer);
+}
+
+bool TarLZMAArchive::isTarLZMAArchive(const ByteBuffer & data) {
+	static const std::array<uint8_t, 3> LZMA_MAGIC_NUMBER({ 0x5D, 0x00, 0x00 });
+
+	if(data.getSize() < LZMA_MAGIC_NUMBER.size()) {
+		return false;
+	}
+
+	return std::memcmp(data.getRawData(), LZMA_MAGIC_NUMBER.data(), LZMA_MAGIC_NUMBER.size()) == 0;
 }
 
 std::unique_ptr<TarLZMAArchive> TarLZMAArchive::readFrom(const std::string & filePath) {
