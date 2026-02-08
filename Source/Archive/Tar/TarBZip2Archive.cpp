@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <fstream>
 
 const std::string TarBZip2Archive::DEFAULT_FILE_EXTENSION("tar.bz2");
 const std::string TarBZip2Archive::ALTERNATE_FILE_EXTENSION("tbz2");
@@ -55,6 +56,54 @@ TarBZip2Archive::~TarBZip2Archive() { }
 
 std::string TarBZip2Archive::getDefaultFileExtension() const {
 	return DEFAULT_FILE_EXTENSION;
+}
+
+bool TarBZip2Archive::isTarBZip2Archive(const std::string & filePath) {
+	static constexpr size_t MAX_BZIP2_MAGIC_NUMBER_LENGTH = 3;
+
+	if(!std::filesystem::is_regular_file(std::filesystem::path(filePath))) {
+		return false;
+	}
+
+	std::ifstream fileStream(filePath, std::ios::binary);
+
+	if(!fileStream.is_open()) {
+		return false;
+	}
+
+	ByteBuffer buffer(MAX_BZIP2_MAGIC_NUMBER_LENGTH);
+	buffer.resize(MAX_BZIP2_MAGIC_NUMBER_LENGTH);
+
+	fileStream.read(reinterpret_cast<char *>(buffer.getData().data()), MAX_BZIP2_MAGIC_NUMBER_LENGTH);
+
+	const bool endOfFile = fileStream.eof();
+
+	fileStream.close();
+
+	if(endOfFile) {
+		return false;
+	}
+
+	return isTarBZip2Archive(buffer);
+}
+
+bool TarBZip2Archive::isTarBZip2Archive(const ByteBuffer & data) {
+	static const std::array<std::array<uint8_t, 3>, 2> BZIP2_MAGIC_NUMBERS({
+		{ 0x42, 0x5A, 0x68 },
+		{ 0x42, 0x5A, 0x30 }
+	});
+
+	for(const std::array<uint8_t, 3> & magicNumber : BZIP2_MAGIC_NUMBERS) {
+		if(data.getSize() < magicNumber.size()) {
+			continue;
+		}
+
+		if(std::memcmp(data.getRawData(), magicNumber.data(), magicNumber.size()) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 std::unique_ptr<TarBZip2Archive> TarBZip2Archive::readFrom(const std::string & filePath) {

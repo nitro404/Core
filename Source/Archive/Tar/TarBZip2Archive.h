@@ -13,6 +13,8 @@ public:
 
 	virtual std::string getDefaultFileExtension() const override;
 
+	static bool isTarBZip2Archive(const std::string & filePath);
+	static bool isTarBZip2Archive(const ByteBuffer & data);
 	static std::unique_ptr<TarBZip2Archive> readFrom(const std::string & filePath);
 	static std::unique_ptr<TarBZip2Archive> createFrom(std::unique_ptr<ByteBuffer> data);
 
