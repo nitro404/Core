@@ -16,8 +16,6 @@ class ProcessWindows final : public Process {
 public:
 	~ProcessWindows() override;
 
-	void onProcessTerminated(bool timedOut);
-
 	// Process Virtuals
 	virtual bool isRunning() const override;
 	virtual void wait() override;
@@ -30,13 +28,15 @@ public:
 	static Process::Priority getProcessPriority(DWORD priority);
 
 private:
-	ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_INFORMATION & processInfo);
+	ProcessWindows(HANDLE job, STARTUPINFO && startupInfo, PROCESS_INFORMATION && processInfo);
 
+	bool waitInternal(DWORD durationMs = INFINITE);
 	void cleanup();
 
+	HANDLE m_job;
+	HANDLE m_ioCompletionPort;
 	STARTUPINFO m_startupInfo;
 	PROCESS_INFORMATION m_processInfo;
-	HANDLE m_waitHandle;
 	std::atomic<bool> m_running;
 	std::atomic<uint64_t> m_exitCode;
 

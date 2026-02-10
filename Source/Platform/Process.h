@@ -11,7 +11,7 @@
 
 class Process {
 public:
-	enum class Priority {
+	enum class Priority : uint8_t {
 		Idle,
 		BelowNormal,
 		Normal,

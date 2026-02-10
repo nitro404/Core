@@ -14,6 +14,12 @@ ProcessCreatorWindows::ProcessCreatorWindows()
 ProcessCreatorWindows::~ProcessCreatorWindows() { }
 
 std::unique_ptr<Process> ProcessCreatorWindows::createProcess(const std::string & applicationCommand, const std::optional<std::string> & workingDirectory, Process::Priority priority, uint64_t * nativeErrorCode, std::string * nativeErrorMessage) {
+	HANDLE job = CreateJobObject(nullptr, nullptr);
+	JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobInfo;
+	std::memset(&jobInfo, 0, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+	jobInfo.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+	SetInformationJobObject(job, JobObjectExtendedLimitInformation, &jobInfo, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+
 	STARTUPINFO startupInfo;
 	PROCESS_INFORMATION processInfo;
 	std::memset(&startupInfo, 0, sizeof(STARTUPINFO));
@@ -34,7 +40,9 @@ std::unique_ptr<Process> ProcessCreatorWindows::createProcess(const std::string 
 		&startupInfo, // process startup information
 		&processInfo // process information
 	)) {
-		return std::unique_ptr<Process>(new ProcessWindows(std::move(startupInfo), std::move(processInfo)));
+		AssignProcessToJobObject(job, processInfo.hProcess);
+
+		return std::unique_ptr<Process>(new ProcessWindows(job, std::move(startupInfo), std::move(processInfo)));
 	}
 
 	DWORD errorCode = GetLastError();

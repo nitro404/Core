@@ -4,35 +4,27 @@
 
 #include <spdlog/spdlog.h>
 
-void CALLBACK onProcessExited(LPVOID context, BOOLEAN timedOut) {
-	static_cast<ProcessWindows *>(context)->onProcessTerminated(timedOut);
-}
+using namespace std::chrono_literals;
 
-ProcessWindows::ProcessWindows(const STARTUPINFO & startupInfo, const PROCESS_INFORMATION & processInfo)
+ProcessWindows::ProcessWindows(HANDLE job, STARTUPINFO && startupInfo, PROCESS_INFORMATION && processInfo)
 	: Process()
+	, m_job(job)
 	, m_startupInfo(startupInfo)
 	, m_processInfo(processInfo)
 	, m_running(true)
 	, m_exitCode(0) {
-	RegisterWaitForSingleObject(&m_waitHandle, m_processInfo.hProcess, onProcessExited, this, INFINITE, WT_EXECUTEONLYONCE);
+	m_ioCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 1);
+
+	JOBOBJECT_ASSOCIATE_COMPLETION_PORT jobAssociateCompletionPort;
+	std::memset(&jobAssociateCompletionPort, 0, sizeof(JOBOBJECT_ASSOCIATE_COMPLETION_PORT));
+	jobAssociateCompletionPort.CompletionKey = this;
+	jobAssociateCompletionPort.CompletionPort = m_ioCompletionPort;
+
+	SetInformationJobObject(m_job, JobObjectAssociateCompletionPortInformation, &jobAssociateCompletionPort, sizeof(JOBOBJECT_ASSOCIATE_COMPLETION_PORT));
 }
 
 ProcessWindows::~ProcessWindows() {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-	if(!UnregisterWaitEx(m_waitHandle, INVALID_HANDLE_VALUE)) {
-		spdlog::warn("Failed to cancel registered process wait operation with error: {}", WindowsUtilities::getLastErrorMessage());
-	}
-
-	if(m_running) {
-		TerminateProcess(m_processInfo.hProcess, 0);
-	}
-
-	cleanup();
-}
-
-void ProcessWindows::onProcessTerminated(bool timedOut) {
-	cleanup();
+	doTerminate();
 }
 
 bool ProcessWindows::isRunning() const {
@@ -41,74 +33,99 @@ bool ProcessWindows::isRunning() const {
 	return m_running;
 }
 
-void ProcessWindows::wait() {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
-
+bool ProcessWindows::waitInternal(DWORD durationMs) {
 	if(!m_running) {
-		return;
+		return false;
 	}
 
-	HANDLE processHandle = m_processInfo.hProcess;
+	DWORD message = 0;
+	ULONG_PTR completionKey = 0u;
+	LPOVERLAPPED overlapped = nullptr;
 
-	lock.unlock();
+	while(true) {
+		if(!GetQueuedCompletionStatus(m_ioCompletionPort, &message, &completionKey, &overlapped, durationMs)) {
+			if(overlapped == nullptr) {
+				return false;
+			}
 
-	WaitForSingleObject(processHandle, INFINITE);
+			DWORD errorCode = GetLastError();
 
-	cleanup();
+			switch(errorCode) {
+				case ERROR_ABANDONED_WAIT_0: {
+					cleanup();
+					return true;
+				}
+				case ERROR_INVALID_HANDLE: {
+					return true;
+				}
+				default: {
+					spdlog::error("Failed to wait for job to complete with error: {}", WindowsUtilities::getLastErrorMessage());
+					break;
+				}
+			}
+
+			return false;
+		}
+
+		if(reinterpret_cast<ProcessWindows *>(completionKey) != this) {
+			spdlog::error("Failed to wait for job to complete due to job associate completion key mismatch.");
+			return false;
+		}
+
+		switch(message) {
+			case JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO: {
+				cleanup();
+				return true;
+			}
+			case JOB_OBJECT_MSG_END_OF_JOB_TIME:
+			case JOB_OBJECT_MSG_ABNORMAL_EXIT_PROCESS:
+			case JOB_OBJECT_MSG_ACTIVE_PROCESS_LIMIT:
+			case JOB_OBJECT_MSG_END_OF_PROCESS_TIME:
+			case JOB_OBJECT_MSG_EXIT_PROCESS:
+			case JOB_OBJECT_MSG_JOB_MEMORY_LIMIT:
+			case JOB_OBJECT_MSG_NEW_PROCESS:
+			case JOB_OBJECT_MSG_NOTIFICATION_LIMIT:
+			case JOB_OBJECT_MSG_PROCESS_MEMORY_LIMIT: {
+				break;
+			}
+		}
+	}
+}
+
+void ProcessWindows::wait() {
+	waitInternal(INFINITE);
 }
 
 bool ProcessWindows::waitFor(std::chrono::milliseconds duration) {
-	std::unique_lock<std::recursive_mutex> lock(m_mutex);
-	
-	HANDLE processHandle = m_processInfo.hProcess;
-
-	lock.unlock();
-
-	DWORD waitResult = WaitForSingleObject(processHandle, duration.count());
-
-	switch(waitResult) {
-		case WAIT_OBJECT_0: {
-			cleanup();
-
-			return true;
-		}
-
-		case WAIT_ABANDONED:
-		case WAIT_TIMEOUT:
-		case WAIT_FAILED: {
-			break;
-		}
-	}
-
-	return false;
+	return waitInternal(static_cast<DWORD>(duration.count()));
 }
 
 void ProcessWindows::doTerminate() {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
 	if(m_running) {
-		TerminateProcess(m_processInfo.hProcess, 0);
+		TerminateJobObject(m_job, 0);
 	}
 
 	cleanup();
 }
 
 void ProcessWindows::cleanup() {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
 	if(!m_running) {
 		return;
 	}
 
 	m_running = false;
 
-	DWORD exitCode;
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+
+	DWORD exitCode = 0;
 	GetExitCodeProcess(m_processInfo.hProcess, &exitCode);
 
 	m_exitCode = static_cast<uint64_t>(exitCode);
 
 	CloseHandle(m_processInfo.hProcess);
 	CloseHandle(m_processInfo.hThread);
+	CloseHandle(m_ioCompletionPort);
+	CloseHandle(m_job);
 
 	notifyTerminated();
 }

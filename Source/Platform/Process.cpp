@@ -15,8 +15,6 @@ Process::~Process() {
 }
 
 void Process::terminate() {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
 	if(!isRunning()) {
 		return;
 	}
@@ -33,8 +31,6 @@ bool Process::wasForceTerminated() const {
 }
 
 bool Process::didExitNormally() const {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
 	if(isRunning()) {
 		return false;
 	}
