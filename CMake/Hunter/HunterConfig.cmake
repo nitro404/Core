@@ -141,6 +141,15 @@ hunter_config(GTest
 	SHA1 "c9cd451f89c5d5869ba7fa88efa3c9d91db628ad"
 )
 
+hunter_config(libcdio
+	URL "https://github.com/Telefrag-Software/libcdio/archive/refs/heads/hunter-2.3.0.1.zip"
+	VERSION "2.3.0.1"
+	SHA1 "4711714d852b5352c0ac7090eb6b23e1b8a22701"
+	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
+		LIBCDIO_BUILD_CXX_WRAPPER=ON
+)
+
 # XZ-Utils (LibLZMA) is used by LibZIP, LibTIFF, and wxWidgets.
 hunter_config(liblzma
 	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.2"

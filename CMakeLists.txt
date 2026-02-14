@@ -80,6 +80,8 @@ set(CORE_LIBRARIES
 	dmc_unrar::dmc_unrar
 	double-conversion::double-conversion
 	fmt::fmt
+	libcdio::cdio
+	libcdio::cdio++
 	LibLZMA::LibLZMA
 	Libssh2::libssh2
 	libzip::zip
