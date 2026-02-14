@@ -107,6 +107,8 @@ set(CORE_SOURCE_FILES
 	Location/GeoLocationService.cpp
 	Logging/LogSystem.h
 	Logging/LogSystem.cpp
+	Logging/Provider/LogProviderCDIO.h
+	Logging/Provider/LogProviderCDIO.cpp
 	Math/ExtendedMath.h
 	Math/ExtendedMath.cpp
 	Math/Matrix2x2.h
@@ -161,6 +163,8 @@ set(CORE_SOURCE_FILES
 	Singleton/Singleton.h
 	Singleton/SingletonManager.h
 	Singleton/SingletonManager.cpp
+	Utilities/CDIOUtilities.h
+	Utilities/CDIOUtilities.cpp
 	Utilities/FileUtilities.h
 	Utilities/FileUtilities.cpp
 	Utilities/NumberUtilities.h

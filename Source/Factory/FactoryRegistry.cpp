@@ -7,6 +7,7 @@
 #include "GitHub/GitHubService.h"
 #include "LibraryInformation.h"
 #include "Logging/LogSystem.h"
+#include "Logging/Provider/LogProviderCDIO.h"
 #include "Network/HTTPService.h"
 #include "Network/IpifyIPAddressService.h"
 #include "Platform/TimeZoneDataManager.h"
@@ -104,6 +105,10 @@ void FactoryRegistry::assignStandardFactories() {
 
 	setFactory<LibraryInformation>([]() {
 		return std::unique_ptr<LibraryInformation>(new LibraryInformation());
+	});
+
+	setFactory<LogProviderCDIO>([]() {
+		return std::unique_ptr<LogProviderCDIO>(new LogProviderCDIO());
 	});
 
 	setFactory<SegmentAnalytics>([]() {
