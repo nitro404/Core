@@ -1,5 +1,60 @@
 #include "CDIOUtilities.h"
 
+#include "Utilities/FileUtilities.h"
+#include "Utilities/StringUtilities.h"
+
+driver_id_t Utilities::getCDIODriverIDFromFileExtension(const std::string_view filePathOrExtension) {
+	if(filePathOrExtension.empty()) {
+		return DRIVER_UNKNOWN;
+	}
+
+	std::string_view fileExtension(Utilities::getFileExtension(filePathOrExtension));
+
+	if(fileExtension.empty()) {
+		return DRIVER_UNKNOWN;
+	}
+
+	if(Utilities::areStringsEqualIgnoreCase(fileExtension, "cue")) {
+		return DRIVER_BINCUE;
+	}
+	else if(Utilities::areStringsEqualIgnoreCase(fileExtension, "nrg")) {
+		return DRIVER_NRG;
+	}
+
+	return DRIVER_UNKNOWN;
+}
+
+std::string Utilities::cdioDriverIDToString(driver_id_t driverID) {
+	switch(driverID) {
+		case DRIVER_UNKNOWN:
+			return "Unknown";
+		case DRIVER_AIX:
+			return "AIX";
+		case DRIVER_FREEBSD:
+			return "FreeBSD";
+		case DRIVER_NETBSD:
+			return "NetBSD";
+		case DRIVER_LINUX:
+			return "Linux";
+		case DRIVER_SOLARIS:
+			return "Solaris";
+		case DRIVER_OSX:
+			return "OSX";
+		case DRIVER_WIN32:
+			return "Win32";
+		case DRIVER_CDRDAO:
+			return "CDRDAO";
+		case DRIVER_BINCUE:
+			return "BinCue";
+		case DRIVER_NRG:
+			return "NRG";
+		case DRIVER_DEVICE:
+			return "Device";
+	}
+
+	return "";
+}
+
 spdlog::level::level_enum Utilities::cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel) {
 	switch(logLevel) {
 		case CDIO_LOG_DEBUG:
@@ -38,7 +93,7 @@ cdio_log_level_t Utilities::spdlogLogLevelToCDIOLogLevel(spdlog::level::level_en
 	return CDIO_LOG_DEBUG;
 }
 
-std::string Utilities::logLevelToString(cdio_log_level_t logLevel) {
+std::string Utilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
 	switch(logLevel) {
 		case CDIO_LOG_DEBUG:
 			return "Debug";

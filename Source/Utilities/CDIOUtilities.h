@@ -8,9 +8,11 @@
 
 namespace Utilities {
 
+	driver_id_t getCDIODriverIDFromFileExtension(const std::string_view filePathOrExtension);
+	std::string cdioDriverIDToString(driver_id_t driverID);
 	spdlog::level::level_enum cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel);
 	cdio_log_level_t spdlogLogLevelToCDIOLogLevel(spdlog::level::level_enum logLevel);
-	std::string logLevelToString(cdio_log_level_t logLevel);
+	std::string cdioLogLevelToString(cdio_log_level_t logLevel);
 
 }
 

@@ -35,7 +35,7 @@ void LogProviderCDIO::initialize() {
 void LogProviderCDIO::onLogLevelChanged(spdlog::level::level_enum logLevel) {
 	cdio_log_level_t newLogLevel = Utilities::spdlogLogLevelToCDIOLogLevel(logLevel);
 
-	spdlog::debug("Updating CDIO log level from '{}' to '{}'.", Utilities::logLevelToString(cdio_loglevel_default), Utilities::logLevelToString(newLogLevel));
+	spdlog::debug("Updating CDIO log level from '{}' to '{}'.", Utilities::cdioLogLevelToString(cdio_loglevel_default), Utilities::cdioLogLevelToString(newLogLevel));
 
 	cdio_loglevel_default = newLogLevel;
 }
