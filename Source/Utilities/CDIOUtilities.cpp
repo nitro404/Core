@@ -3,7 +3,39 @@
 #include "Utilities/FileUtilities.h"
 #include "Utilities/StringUtilities.h"
 
-driver_id_t Utilities::getCDIODriverIDFromFileExtension(const std::string_view filePathOrExtension) {
+static std::string convertRawString(const char * rawData) {
+	if(rawData == nullptr) {
+		return {};
+	}
+
+	return rawData;
+}
+
+static std::string convertAndFreeRawString(char * rawData) {
+	if(rawData == nullptr) {
+		return {};
+	}
+
+	std::string data(rawData);
+
+	free(rawData);
+
+	return data;
+}
+
+static std::string convertAndDeleteRawString(char * rawData) {
+	if(rawData == nullptr) {
+		return {};
+	}
+
+	std::string data(rawData);
+
+	delete [] rawData;
+
+	return data;
+}
+
+driver_id_t CDIOUtilities::getDriverIDFromFileExtension(const std::string_view filePathOrExtension) {
 	if(filePathOrExtension.empty()) {
 		return DRIVER_UNKNOWN;
 	}
@@ -24,7 +56,7 @@ driver_id_t Utilities::getCDIODriverIDFromFileExtension(const std::string_view f
 	return DRIVER_UNKNOWN;
 }
 
-std::string Utilities::cdioDriverIDToString(driver_id_t driverID) {
+std::string CDIOUtilities::driverIDToString(driver_id_t driverID) {
 	switch(driverID) {
 		case DRIVER_UNKNOWN:
 			return "Unknown";
@@ -55,7 +87,7 @@ std::string Utilities::cdioDriverIDToString(driver_id_t driverID) {
 	return "";
 }
 
-spdlog::level::level_enum Utilities::cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel) {
+spdlog::level::level_enum CDIOUtilities::cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel) {
 	switch(logLevel) {
 		case CDIO_LOG_DEBUG:
 			return spdlog::level::level_enum::debug;
@@ -72,7 +104,7 @@ spdlog::level::level_enum Utilities::cdioLogLevelToSpdlogLogLevel(cdio_log_level
 	return spdlog::level::level_enum::debug;
 }
 
-cdio_log_level_t Utilities::spdlogLogLevelToCDIOLogLevel(spdlog::level::level_enum logLevel) {
+cdio_log_level_t CDIOUtilities::spdlogLogLevelToCDIOLogLevel(spdlog::level::level_enum logLevel) {
 	switch(logLevel) {
 		case spdlog::level::level_enum::trace:
 		case spdlog::level::level_enum::debug:
@@ -93,7 +125,7 @@ cdio_log_level_t Utilities::spdlogLogLevelToCDIOLogLevel(spdlog::level::level_en
 	return CDIO_LOG_DEBUG;
 }
 
-std::string Utilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
+std::string CDIOUtilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
 	switch(logLevel) {
 		case CDIO_LOG_DEBUG:
 			return "Debug";
@@ -108,4 +140,136 @@ std::string Utilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
 	}
 
 	return "";
+}
+
+std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::makeISOStatistics(const stat_vector_t & statistics) {
+	std::vector<std::unique_ptr<ISO9660::Stat>> newStatistics;
+
+	for(stat_vector_t::const_iterator statsVectorIterator = statistics.cbegin(); statsVectorIterator != statistics.cend(); ++statsVectorIterator) {
+		newStatistics.emplace_back(*statsVectorIterator);
+	}
+
+	return newStatistics;
+}
+
+std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error) {
+	stat_vector_t originalStatistics;
+
+	if(!isoFileSystem.readdir(directoryPath.data(), originalStatistics)) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	return makeISOStatistics(originalStatistics);
+}
+
+std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
+	bool error = false;
+
+	std::vector<std::unique_ptr<ISO9660::Stat>> statistics(readISODirectory(isoFileSystem, directoryPath, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return statistics;
+}
+
+std::string CDIOUtilities::getPVDApplicationID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_application_id());
+}
+
+std::string CDIOUtilities::getPVDPreparerID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_preparer_id());
+}
+
+std::string CDIOUtilities::getPVDPublisherID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_publisher_id());
+}
+
+std::string CDIOUtilities::getPVDID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertRawString(primaryVolumeDescriptor.get_pvd_id());
+}
+
+std::string CDIOUtilities::getPVDSystemID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_system_id());
+}
+
+std::string CDIOUtilities::getPVDVolumeID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_volume_id());
+}
+
+std::string CDIOUtilities::getPVDVolumeSetID(ISO9660::PVD & primaryVolumeDescriptor) {
+	return convertAndFreeRawString(primaryVolumeDescriptor.get_volumeset_id());
+}
+
+bool CDIOUtilities::isFile(const iso9660_stat_t & statistic) {
+	return statistic.type == iso9660_stat_s::_STAT_FILE;
+}
+
+bool CDIOUtilities::isFile(const ISO9660::Stat & statistic) {
+	if(statistic.p_stat == nullptr) {
+		return false;
+	}
+
+	return isFile(*statistic.p_stat);
+}
+
+bool CDIOUtilities::isDirectory(const iso9660_stat_t & statistic) {
+	return statistic.type == iso9660_stat_s::_STAT_DIR;
+}
+
+bool CDIOUtilities::isDirectory(const ISO9660::Stat & statistic) {
+	if(statistic.p_stat == nullptr) {
+		return false;
+	}
+
+	return isDirectory(*statistic.p_stat);
+}
+
+std::string CDIOUtilities::translateISOName(const std::string & originalName) {
+	char * newName = new char[originalName.length() + 1];
+
+	int newNameLength = iso9660_name_translate(originalName.data(), newName);
+
+	return convertAndDeleteRawString(newName);
+}
+
+std::string CDIOUtilities::getFileName(const iso9660_stat_t & statistic) {
+	return translateISOName(statistic.filename);
+}
+
+std::string CDIOUtilities::getFileName(const ISO9660::Stat & statistic) {
+	if(statistic.p_stat == nullptr) {
+		return {};
+	}
+
+	return getFileName(*statistic.p_stat);
+}
+
+uint32_t CDIOUtilities::getFileSize(const iso9660_stat_t & statistic) {
+	return statistic.size;
+}
+
+uint32_t CDIOUtilities::getFileSize(const ISO9660::Stat & statistic) {
+	if(statistic.p_stat == nullptr) {
+		return 0u;
+	}
+
+	return getFileSize(*statistic.p_stat);
+}
+
+lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(const iso9660_stat_t & statistic) {
+	return statistic.lsn;
+}
+
+lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(const ISO9660::Stat & statistic) {
+	if(statistic.p_stat == nullptr) {
+		return 0;
+	}
+
+	return getFileStartLogicalSectorNumber(*statistic.p_stat);
 }

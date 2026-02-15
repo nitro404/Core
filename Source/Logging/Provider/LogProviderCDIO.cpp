@@ -23,19 +23,19 @@ void LogProviderCDIO::initialize() {
 
 	m_logLevelChangedConnection = logSystem->logLevelChanged.connect(std::bind(&LogProviderCDIO::onLogLevelChanged, this, std::placeholders::_1));
 
-	cdio_loglevel_default = Utilities::spdlogLogLevelToCDIOLogLevel(logSystem->getLevel());
+	cdio_loglevel_default = CDIOUtilities::spdlogLogLevelToCDIOLogLevel(logSystem->getLevel());
 
 	cdio_log_set_handler([](cdio_log_level_t level, const char message[]) {
-		spdlog::log(Utilities::cdioLogLevelToSpdlogLogLevel(level), "CDIO: {}", message);
+		spdlog::log(CDIOUtilities::cdioLogLevelToSpdlogLogLevel(level), "CDIO: {}", message);
 	});
 
 	m_initialized = true;
 }
 
 void LogProviderCDIO::onLogLevelChanged(spdlog::level::level_enum logLevel) {
-	cdio_log_level_t newLogLevel = Utilities::spdlogLogLevelToCDIOLogLevel(logLevel);
+	cdio_log_level_t newLogLevel = CDIOUtilities::spdlogLogLevelToCDIOLogLevel(logLevel);
 
-	spdlog::debug("Updating CDIO log level from '{}' to '{}'.", Utilities::cdioLogLevelToString(cdio_loglevel_default), Utilities::cdioLogLevelToString(newLogLevel));
+	spdlog::debug("Updating CDIO log level from '{}' to '{}'.", CDIOUtilities::cdioLogLevelToString(cdio_loglevel_default), CDIOUtilities::cdioLogLevelToString(newLogLevel));
 
 	cdio_loglevel_default = newLogLevel;
 }
