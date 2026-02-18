@@ -167,31 +167,31 @@ std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::readIS
 	return statistics;
 }
 
-std::string CDIOUtilities::getPVDApplicationID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getApplication(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_application_id());
 }
 
-std::string CDIOUtilities::getPVDPreparerID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getPreparer(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_preparer_id());
 }
 
-std::string CDIOUtilities::getPVDPublisherID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getPublisher(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_publisher_id());
 }
 
-std::string CDIOUtilities::getPVDID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getID(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertRawString(primaryVolumeDescriptor.get_pvd_id());
 }
 
-std::string CDIOUtilities::getPVDSystemID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getSystem(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_system_id());
 }
 
-std::string CDIOUtilities::getPVDVolumeID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getVolume(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_volume_id());
 }
 
-std::string CDIOUtilities::getPVDVolumeSetID(ISO9660::PVD & primaryVolumeDescriptor) {
+std::string CDIOUtilities::getVolumeSet(ISO9660::PVD & primaryVolumeDescriptor) {
 	return convertAndFreeRawString(primaryVolumeDescriptor.get_volumeset_id());
 }
 
