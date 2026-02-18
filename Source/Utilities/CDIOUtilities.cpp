@@ -207,6 +207,16 @@ bool CDIOUtilities::isFile(const ISO9660::Stat & statistic) {
 	return isFile(*statistic.p_stat);
 }
 
+bool CDIOUtilities::isFile(ISO9660::FS & isoFileSystem, const std::string & filePath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(filePath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return isFile(*statistic);
+}
+
 bool CDIOUtilities::isDirectory(const iso9660_stat_t & statistic) {
 	return statistic.type == iso9660_stat_s::_STAT_DIR;
 }
@@ -217,6 +227,16 @@ bool CDIOUtilities::isDirectory(const ISO9660::Stat & statistic) {
 	}
 
 	return isDirectory(*statistic.p_stat);
+}
+
+bool CDIOUtilities::isDirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(directoryPath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return isDirectory(*statistic);
 }
 
 std::string CDIOUtilities::translateName(const std::string & originalName) {

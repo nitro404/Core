@@ -30,8 +30,10 @@ namespace CDIOUtilities {
 	std::string getVolumeSet(ISO9660::PVD & primaryVolumeDescriptor);
 	bool isFile(const iso9660_stat_t & statistic);
 	bool isFile(const ISO9660::Stat & statistic);
+	bool isFile(ISO9660::FS & isoFileSystem, const std::string & filePath);
 	bool isDirectory(const iso9660_stat_t & statistic);
 	bool isDirectory(const ISO9660::Stat & statistic);
+	bool isDirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
 	std::string translateName(const std::string & originalName);
 	std::string getFileName(const iso9660_stat_t & statistic);
 	std::string getFileName(const ISO9660::Stat & statistic);
