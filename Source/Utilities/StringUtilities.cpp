@@ -427,6 +427,15 @@ std::string Utilities::swapCase(std::string_view string) {
 	return swapped;
 }
 
+bool Utilities::areCharactersEqual(char a, char b, bool caseSensitive) {
+	if(caseSensitive) {
+		return a == b;
+	}
+	else {
+		return std::tolower(a) == std::tolower(b);
+	}
+}
+
 bool Utilities::areStringsEqual(std::string_view s1, std::string_view s2, bool caseSensitive, bool ignoreCarriageReturn) {
 	if(!ignoreCarriageReturn && s1.length() != s2.length()) {
 		return false;
