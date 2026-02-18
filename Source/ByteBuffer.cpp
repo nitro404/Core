@@ -1736,7 +1736,7 @@ bool ByteBuffer::putBytes(const uint8_t * data, size_t size, size_t offset) {
 	return true;
 }
 
-bool ByteBuffer::putBytes(const std::vector<uint8_t> data, size_t offset) {
+bool ByteBuffer::putBytes(const std::vector<uint8_t> & data, size_t offset) {
 	return putBytes(data.data(), data.size(), offset);
 }
 
@@ -1888,7 +1888,7 @@ bool ByteBuffer::insertBytes(const uint8_t * data, size_t size, size_t offset) {
 	return true;
 }
 
-bool ByteBuffer::insertBytes(const std::vector<uint8_t> data, size_t offset) {
+bool ByteBuffer::insertBytes(const std::vector<uint8_t> & data, size_t offset) {
 	return insertBytes(data.data(), data.size(), offset);
 }
 
@@ -2060,7 +2060,7 @@ bool ByteBuffer::writeBytes(const uint8_t * data, size_t size) {
 	return false;
 }
 
-bool ByteBuffer::writeBytes(const std::vector<uint8_t> data) {
+bool ByteBuffer::writeBytes(const std::vector<uint8_t> & data) {
 	if(putBytes(data, m_writeOffset)) {
 		m_writeOffset += data.size() * sizeof(uint8_t);
 

@@ -211,8 +211,8 @@ public:
 	bool putLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool putBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
-	bool putBytes(const std::array<uint8_t, N> data, size_t offset);
-	bool putBytes(const std::vector<uint8_t> data, size_t offset);
+	bool putBytes(const std::array<uint8_t, N> & data, size_t offset);
+	bool putBytes(const std::vector<uint8_t> & data, size_t offset);
 	bool putBytes(const ByteBuffer & buffer, size_t offset);
 
 	bool insertByte(int8_t value, size_t offset);
@@ -230,8 +230,8 @@ public:
 	bool insertLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
-	bool insertBytes(const std::array<uint8_t, N> data, size_t offset);
-	bool insertBytes(const std::vector<uint8_t> data, size_t offset);
+	bool insertBytes(const std::array<uint8_t, N> & data, size_t offset);
+	bool insertBytes(const std::vector<uint8_t> & data, size_t offset);
 	bool insertBytes(const ByteBuffer & buffer, size_t offset);
 
 	bool writeByte(int8_t value);
@@ -251,8 +251,8 @@ public:
 	bool writeLine(const std::string & value, const std::string & newLine = "\n");
 	bool writeBytes(const uint8_t * data, size_t size);
 	template <size_t N>
-	bool writeBytes(const std::array<uint8_t, N> data);
-	bool writeBytes(const std::vector<uint8_t> data);
+	bool writeBytes(const std::array<uint8_t, N> & data);
+	bool writeBytes(const std::vector<uint8_t> & data);
 	bool writeBytes(const ByteBuffer & buffer);
 
 	std::unique_ptr<ByteBuffer> clone() const;
@@ -377,17 +377,17 @@ std::unique_ptr<std::array<uint8_t, N>> ByteBuffer::readBytes() const {
 }
 
 template <size_t N>
-bool ByteBuffer::putBytes(const std::array<uint8_t, N> data, size_t offset) {
+bool ByteBuffer::putBytes(const std::array<uint8_t, N> & data, size_t offset) {
 	return putBytes(data.data(), data.size(), offset);
 }
 
 template <size_t N>
-bool ByteBuffer::insertBytes(const std::array<uint8_t, N> data, size_t offset) {
+bool ByteBuffer::insertBytes(const std::array<uint8_t, N> & data, size_t offset) {
 	return insertBytes(data.data(), data.size(), offset);
 }
 
 template <size_t N>
-bool ByteBuffer::writeBytes(const std::array<uint8_t, N> data) {
+bool ByteBuffer::writeBytes(const std::array<uint8_t, N> & data) {
 	if(putBytes<N>(data, m_writeOffset)) {
 		m_writeOffset += data.size() * sizeof(uint8_t);
 
