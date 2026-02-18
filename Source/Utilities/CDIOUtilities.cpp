@@ -23,6 +23,7 @@ static std::string convertAndFreeRawString(char * rawData) {
 	return data;
 }
 
+const std::string CDIOUtilities::rootDirectoryPath("/");
 
 driver_id_t CDIOUtilities::getDriverIDFromFileExtension(const std::string_view filePathOrExtension) {
 	if(filePathOrExtension.empty()) {
@@ -170,7 +171,7 @@ std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::makeStatistics(const 
 	return newStatistics;
 }
 
-std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error) {
+std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::getDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error) {
 	stat_vector_t originalStatistics;
 
 	if(!isoFileSystem.readdir(directoryPath.data(), originalStatistics)) {
@@ -184,16 +185,24 @@ std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::readISODirectory(ISO9
 	return makeStatistics(originalStatistics);
 }
 
-std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
+std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::getDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
 	bool error = false;
 
-	std::vector<std::unique_ptr<ISO9660::Stat>> statistics(readISODirectory(isoFileSystem, directoryPath, &error));
+	std::vector<std::unique_ptr<ISO9660::Stat>> statistics(getDirectoryContentsStatistics(isoFileSystem, directoryPath, &error));
 
 	if(error) {
 		return {};
 	}
 
 	return statistics;
+}
+
+std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::getRootDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, bool * error) {
+	return getDirectoryContentsStatistics(isoFileSystem, rootDirectoryPath, error);
+}
+
+std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::getRootDirectoryContentsStatistics(ISO9660::FS & isoFileSystem) {
+	return getDirectoryContentsStatistics(isoFileSystem, rootDirectoryPath);
 }
 
 std::string CDIOUtilities::getApplication(ISO9660::PVD & primaryVolumeDescriptor) {

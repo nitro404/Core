@@ -13,15 +13,19 @@
 
 namespace CDIOUtilities {
 
+	extern const std::string rootDirectoryPath;
+
 	driver_id_t getDriverIDFromFileExtension(const std::string_view filePathOrExtension);
 	std::string driverIDToString(driver_id_t driverID);
 	spdlog::level::level_enum cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel);
 	cdio_log_level_t spdlogLogLevelToCDIOLogLevel(spdlog::level::level_enum logLevel);
 	std::string cdioLogLevelToString(cdio_log_level_t logLevel);
 	std::vector<std::unique_ptr<ISO9660::Stat>> makeStatistics(const stat_vector_t & statVector, bool omitNagivationEntries = true);
-	std::vector<std::unique_ptr<ISO9660::Stat>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error);
-	std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
 	std::unique_ptr<ISO9660::FS> readDiscImage(const std::string & filePath);
+	std::vector<std::unique_ptr<ISO9660::Stat>> getDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error);
+	std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> getDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
+	std::vector<std::unique_ptr<ISO9660::Stat>> getRootDirectoryContentsStatistics(ISO9660::FS & isoFileSystem, bool * error);
+	std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> getRootDirectoryContentsStatistics(ISO9660::FS & isoFileSystem);
 	std::string getApplication(ISO9660::PVD & primaryVolumeDescriptor);
 	std::string getPreparer(ISO9660::PVD & primaryVolumeDescriptor);
 	std::string getPublisher(ISO9660::PVD & primaryVolumeDescriptor);
