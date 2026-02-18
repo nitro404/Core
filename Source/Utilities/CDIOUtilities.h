@@ -21,6 +21,7 @@ namespace CDIOUtilities {
 	std::vector<std::unique_ptr<ISO9660::Stat>> makeStatistics(const stat_vector_t & statVector, bool omitNagivationEntries = true);
 	std::vector<std::unique_ptr<ISO9660::Stat>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error);
 	std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
+	std::unique_ptr<ISO9660::FS> readDiscImage(const std::string & filePath);
 	std::string getApplication(ISO9660::PVD & primaryVolumeDescriptor);
 	std::string getPreparer(ISO9660::PVD & primaryVolumeDescriptor);
 	std::string getPublisher(ISO9660::PVD & primaryVolumeDescriptor);

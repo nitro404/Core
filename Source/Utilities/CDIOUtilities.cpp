@@ -131,6 +131,30 @@ std::string CDIOUtilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
 	return "";
 }
 
+std::unique_ptr<ISO9660::FS> CDIOUtilities::readDiscImage(const std::string & filePath) {
+	if(filePath.empty()) {
+		return nullptr;
+	}
+
+	std::unique_ptr<ISO9660::FS> isoFileSystem(std::make_unique<ISO9660::FS>());
+
+	driver_id_t driverID = CDIOUtilities::getDriverIDFromFileExtension(filePath);
+
+	if(driverID != DRIVER_UNKNOWN) {
+		spdlog::debug("Opening disc image using '{}' driver: '{}'.", CDIOUtilities::driverIDToString(driverID), filePath);
+	}
+	else {
+		spdlog::debug("Opening disc image: '{}'.", filePath);
+	}
+
+	if(!isoFileSystem->open(filePath.data(), CDIOUtilities::getDriverIDFromFileExtension(filePath))) {
+		spdlog::error("Failed to open disc image: {}.", filePath);
+		return nullptr;
+	}
+
+	return isoFileSystem;
+}
+
 std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::makeStatistics(const stat_vector_t & statistics, bool omitNagivationEntries) {
 	std::vector<std::unique_ptr<ISO9660::Stat>> newStatistics;
 
