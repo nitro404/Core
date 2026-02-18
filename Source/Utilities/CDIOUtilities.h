@@ -18,7 +18,7 @@ namespace CDIOUtilities {
 	spdlog::level::level_enum cdioLogLevelToSpdlogLogLevel(cdio_log_level_t logLevel);
 	cdio_log_level_t spdlogLogLevelToCDIOLogLevel(spdlog::level::level_enum logLevel);
 	std::string cdioLogLevelToString(cdio_log_level_t logLevel);
-	std::vector<std::unique_ptr<ISO9660::Stat>> makeISOStatistics(const stat_vector_t & statVector);
+	std::vector<std::unique_ptr<ISO9660::Stat>> makeStatistics(const stat_vector_t & statVector, bool omitNagivationEntries = true);
 	std::vector<std::unique_ptr<ISO9660::Stat>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error);
 	std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
 	std::string getApplication(ISO9660::PVD & primaryVolumeDescriptor);

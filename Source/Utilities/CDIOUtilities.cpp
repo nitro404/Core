@@ -131,10 +131,15 @@ std::string CDIOUtilities::cdioLogLevelToString(cdio_log_level_t logLevel) {
 	return "";
 }
 
-std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::makeISOStatistics(const stat_vector_t & statistics) {
+std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::makeStatistics(const stat_vector_t & statistics, bool omitNagivationEntries) {
 	std::vector<std::unique_ptr<ISO9660::Stat>> newStatistics;
 
 	for(stat_vector_t::const_iterator statsVectorIterator = statistics.cbegin(); statsVectorIterator != statistics.cend(); ++statsVectorIterator) {
+		if(Utilities::areStringsEqual((*statsVectorIterator)->p_stat->filename, ".") ||
+		   Utilities::areStringsEqual((*statsVectorIterator)->p_stat->filename, "..")) {
+			continue;
+		}
+
 		newStatistics.emplace_back(*statsVectorIterator);
 	}
 
@@ -152,7 +157,7 @@ std::vector<std::unique_ptr<ISO9660::Stat>> CDIOUtilities::readISODirectory(ISO9
 		return {};
 	}
 
-	return makeISOStatistics(originalStatistics);
+	return makeStatistics(originalStatistics);
 }
 
 std::optional<std::vector<std::unique_ptr<ISO9660::Stat>>> CDIOUtilities::readISODirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
