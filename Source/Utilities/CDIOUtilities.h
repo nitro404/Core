@@ -32,7 +32,7 @@ namespace CDIOUtilities {
 	bool isFile(const ISO9660::Stat & statistic);
 	bool isDirectory(const iso9660_stat_t & statistic);
 	bool isDirectory(const ISO9660::Stat & statistic);
-	std::string translateISOName(const std::string & originalName);
+	std::string translateName(const std::string & originalName);
 	std::string getFileName(const iso9660_stat_t & statistic);
 	std::string getFileName(const ISO9660::Stat & statistic);
 	uint32_t getFileSize(const iso9660_stat_t & statistic);

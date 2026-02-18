@@ -23,17 +23,6 @@ static std::string convertAndFreeRawString(char * rawData) {
 	return data;
 }
 
-static std::string convertAndDeleteRawString(char * rawData) {
-	if(rawData == nullptr) {
-		return {};
-	}
-
-	std::string data(rawData);
-
-	delete [] rawData;
-
-	return data;
-}
 
 driver_id_t CDIOUtilities::getDriverIDFromFileExtension(const std::string_view filePathOrExtension) {
 	if(filePathOrExtension.empty()) {
@@ -230,16 +219,17 @@ bool CDIOUtilities::isDirectory(const ISO9660::Stat & statistic) {
 	return isDirectory(*statistic.p_stat);
 }
 
-std::string CDIOUtilities::translateISOName(const std::string & originalName) {
-	char * newName = new char[originalName.length() + 1];
+std::string CDIOUtilities::translateName(const std::string & originalName) {
+	std::string newName(originalName.length() + 1, '\0');
 
-	int newNameLength = iso9660_name_translate(originalName.data(), newName);
+	int newNameLength = iso9660_name_translate(originalName.data(), newName.data());
+	newName.resize(newNameLength, '\0');
 
-	return convertAndDeleteRawString(newName);
+	return newName;
 }
 
 std::string CDIOUtilities::getFileName(const iso9660_stat_t & statistic) {
-	return translateISOName(statistic.filename);
+	return translateName(statistic.filename);
 }
 
 std::string CDIOUtilities::getFileName(const ISO9660::Stat & statistic) {
