@@ -2104,6 +2104,31 @@ bool ByteBuffer::writeBytes(const std::shared_ptr<const ByteBuffer> & buffer) {
 	return writeBytes(*buffer);
 }
 
+bool ByteBuffer::containsString(const std::string & value, bool caseSensitive) const {
+	if(m_data->size() < value.length()) {
+		return false;
+	}
+
+	bool match = false;
+
+	for(size_t i = 0; i < m_data->size() - value.length() + 1; i++) {
+		match = true;
+
+		for(size_t j = 0; j < value.length(); j++) {
+			if(Utilities::areCharactersEqual(m_data->at(i + j), value[j], caseSensitive)) {
+				match = false;
+				break;
+			}
+		}
+
+		if(match) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::unique_ptr<ByteBuffer> ByteBuffer::clone() const {
 	std::unique_ptr<ByteBuffer> copy(std::make_unique<ByteBuffer>(*m_data, m_endianness));
 	copy->m_readOffset = m_readOffset;
