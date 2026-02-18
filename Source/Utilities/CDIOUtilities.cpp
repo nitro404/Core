@@ -362,3 +362,45 @@ bool CDIOUtilities::hasDirectory(ISO9660::FS & isoFileSystem, const std::string 
 	return isDirectory(*statistic);
 }
 
+std::vector<std::string> CDIOUtilities::getDirectoryContents(ISO9660::FS & isoFileSystem, const std::string & directoryPath, bool * error) {
+	bool internalError = false;
+	std::vector<std::unique_ptr<ISO9660::Stat>> statistics(getDirectoryContentsStatistics(isoFileSystem, directoryPath, &internalError));
+
+	if(internalError) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	std::vector<std::string> directoryEntries;
+	directoryEntries.reserve(statistics.size());
+
+	for(const std::unique_ptr<ISO9660::Stat> & statistic : statistics) {
+		directoryEntries.emplace_back(Utilities::joinPaths(directoryPath, getFileName(*statistic)));
+	}
+
+	return directoryEntries;
+}
+
+std::optional<std::vector<std::string>> CDIOUtilities::getDirectoryContents(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
+	bool error = false;
+
+	std::vector<std::string> directoryContents(getDirectoryContents(isoFileSystem, directoryPath, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return directoryContents;
+}
+
+std::vector<std::string> CDIOUtilities::getRootDirectoryContents(ISO9660::FS & isoFileSystem, bool * error) {
+	return getDirectoryContents(isoFileSystem, rootDirectoryPath, error);
+}
+
+std::optional<std::vector<std::string>> CDIOUtilities::getRootDirectoryContents(ISO9660::FS & isoFileSystem) {
+	return getDirectoryContents(isoFileSystem, rootDirectoryPath);
+}
+
