@@ -48,6 +48,8 @@ namespace CDIOUtilities {
 	lsn_t getFileStartLogicalSectorNumber(const iso9660_stat_t & statistic);
 	lsn_t getFileStartLogicalSectorNumber(const ISO9660::Stat & statistic);
 	lsn_t getFileStartLogicalSectorNumber(ISO9660::FS & isoFileSystem, const std::string & filePath);
+	bool hasFile(ISO9660::FS & isoFileSystem, const std::string & filePath);
+	bool hasDirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
 
 }
 

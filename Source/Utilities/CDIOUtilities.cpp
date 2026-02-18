@@ -341,3 +341,24 @@ lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(ISO9660::FS & isoFileSystem
 
 	return getFileStartLogicalSectorNumber(*statistic);
 }
+
+bool CDIOUtilities::hasFile(ISO9660::FS & isoFileSystem, const std::string & filePath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(filePath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return isFile(*statistic);
+}
+
+bool CDIOUtilities::hasDirectory(ISO9660::FS & isoFileSystem, const std::string & directoryPath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(directoryPath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return isDirectory(*statistic);
+}
+
