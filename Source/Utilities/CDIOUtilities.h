@@ -39,8 +39,10 @@ namespace CDIOUtilities {
 	std::string getFileName(const ISO9660::Stat & statistic);
 	uint32_t getFileSize(const iso9660_stat_t & statistic);
 	uint32_t getFileSize(const ISO9660::Stat & statistic);
+	uint32_t getFileSize(ISO9660::FS & isoFileSystem, const std::string & filePath);
 	lsn_t getFileStartLogicalSectorNumber(const iso9660_stat_t & statistic);
 	lsn_t getFileStartLogicalSectorNumber(const ISO9660::Stat & statistic);
+	lsn_t getFileStartLogicalSectorNumber(ISO9660::FS & isoFileSystem, const std::string & filePath);
 
 }
 

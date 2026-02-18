@@ -272,6 +272,16 @@ uint32_t CDIOUtilities::getFileSize(const ISO9660::Stat & statistic) {
 	return getFileSize(*statistic.p_stat);
 }
 
+uint32_t CDIOUtilities::getFileSize(ISO9660::FS & isoFileSystem, const std::string & filePath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(filePath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return getFileSize(*statistic);
+}
+
 lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(const iso9660_stat_t & statistic) {
 	return statistic.lsn;
 }
@@ -282,4 +292,14 @@ lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(const ISO9660::Stat & stati
 	}
 
 	return getFileStartLogicalSectorNumber(*statistic.p_stat);
+}
+
+lsn_t CDIOUtilities::getFileStartLogicalSectorNumber(ISO9660::FS & isoFileSystem, const std::string & filePath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(filePath.data(), false));
+
+	if(statistic == nullptr) {
+		return false;
+	}
+
+	return getFileStartLogicalSectorNumber(*statistic);
 }
