@@ -1744,6 +1744,14 @@ bool ByteBuffer::putBytes(const ByteBuffer & buffer, size_t offset) {
 	return putBytes(buffer.m_data->data(), buffer.m_data->size(), offset);
 }
 
+bool ByteBuffer::putBytes(const std::shared_ptr<const ByteBuffer> & buffer, size_t offset) {
+	if(buffer == nullptr) {
+		return false;
+	}
+
+	return putBytes(buffer->m_data->data(), buffer->m_data->size(), offset);
+}
+
 bool ByteBuffer::insertByte(int8_t value, size_t offset) {
 	if(checkOverflow(m_data->size(), sizeof(int8_t))) {
 		return false;
@@ -1894,6 +1902,14 @@ bool ByteBuffer::insertBytes(const std::vector<uint8_t> & data, size_t offset) {
 
 bool ByteBuffer::insertBytes(const ByteBuffer & buffer, size_t offset) {
 	return insertBytes(buffer.m_data->data(), buffer.m_data->size(), offset);
+}
+
+bool ByteBuffer::insertBytes(const std::shared_ptr<const ByteBuffer> & buffer, size_t offset) {
+	if(buffer == nullptr) {
+		return false;
+	}
+
+	return insertBytes(buffer->m_data->data(), buffer->m_data->size(), offset);
 }
 
 bool ByteBuffer::writeByte(int8_t value) {
@@ -2078,6 +2094,14 @@ bool ByteBuffer::writeBytes(const ByteBuffer & buffer) {
 	}
 
 	return false;
+}
+
+bool ByteBuffer::writeBytes(const std::shared_ptr<const ByteBuffer> & buffer) {
+	if(buffer == nullptr) {
+		return false;
+	}
+
+	return writeBytes(*buffer);
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::clone() const {

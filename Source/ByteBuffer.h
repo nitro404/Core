@@ -214,6 +214,7 @@ public:
 	bool putBytes(const std::array<uint8_t, N> & data, size_t offset);
 	bool putBytes(const std::vector<uint8_t> & data, size_t offset);
 	bool putBytes(const ByteBuffer & buffer, size_t offset);
+	bool putBytes(const std::shared_ptr<const ByteBuffer> & buffer, size_t offset);
 
 	bool insertByte(int8_t value, size_t offset);
 	bool insertUnsignedByte(uint8_t value, size_t offset);
@@ -233,6 +234,7 @@ public:
 	bool insertBytes(const std::array<uint8_t, N> & data, size_t offset);
 	bool insertBytes(const std::vector<uint8_t> & data, size_t offset);
 	bool insertBytes(const ByteBuffer & buffer, size_t offset);
+	bool insertBytes(const std::shared_ptr<const ByteBuffer> & buffer, size_t offset);
 
 	bool writeByte(int8_t value);
 	bool writeUnsignedByte(uint8_t value);
@@ -254,6 +256,7 @@ public:
 	bool writeBytes(const std::array<uint8_t, N> & data);
 	bool writeBytes(const std::vector<uint8_t> & data);
 	bool writeBytes(const ByteBuffer & buffer);
+	bool writeBytes(const std::shared_ptr<const ByteBuffer> & buffer);
 
 	std::unique_ptr<ByteBuffer> clone() const;
 	std::unique_ptr<ByteBuffer> copyOfRange(size_t start, size_t end) const;
