@@ -404,3 +404,49 @@ std::optional<std::vector<std::string>> CDIOUtilities::getRootDirectoryContents(
 	return getDirectoryContents(isoFileSystem, rootDirectoryPath);
 }
 
+std::unique_ptr<ByteBuffer> CDIOUtilities::readFile(ISO9660::FS & isoFileSystem, lsn_t logicalSectorNumber, long int fileSize) {
+	if(fileSize < 0) {
+		return nullptr;
+	}
+
+	const unsigned int numberOfBlocks = ((fileSize + (ISO_BLOCKSIZE - 1)) / ISO_BLOCKSIZE);
+
+	std::unique_ptr<ByteBuffer> data(std::make_unique<ByteBuffer>(fileSize));
+	data->resize(numberOfBlocks * ISO_BLOCKSIZE, 0);
+
+	for(unsigned int currentBlockNumber = 0; currentBlockNumber < numberOfBlocks; currentBlockNumber++) {
+		const lsn_t currentLogicalSectorNumber = logicalSectorNumber + currentBlockNumber;
+
+		try {
+			isoFileSystem.readDataBlocks(data->getRawData() + (currentBlockNumber * ISO_BLOCKSIZE), currentLogicalSectorNumber, ISO_BLOCKSIZE);
+		}
+		catch (DriverOpException e) {
+			spdlog::error("Failed to read ISO9660 file at logical sector number {} with error: {}.", currentLogicalSectorNumber, e.get_msg());
+			return nullptr;
+		}
+	}
+
+	data->resize(fileSize, 0);
+
+	return data;
+}
+
+std::unique_ptr<ByteBuffer> CDIOUtilities::readFile(ISO9660::FS & isoFileSystem, ISO9660::Stat & statistic) {
+	if(!isFile(statistic)) {
+		spdlog::error("Failed to read file data, '{}' is not a file.", getFileName(statistic));
+		return nullptr;
+	}
+
+	return readFile(isoFileSystem, getFileStartLogicalSectorNumber(statistic), getFileSize(statistic));
+}
+
+std::unique_ptr<ByteBuffer> CDIOUtilities::readFile(ISO9660::FS & isoFileSystem, const std::string & filePath) {
+	std::unique_ptr<ISO9660::Stat> statistic(isoFileSystem.stat(filePath.data(), false));
+
+	if(statistic == nullptr) {
+		spdlog::error("File not found at path: '{}'.", filePath);
+		return nullptr;
+	}
+
+	return readFile(isoFileSystem, *statistic);
+}

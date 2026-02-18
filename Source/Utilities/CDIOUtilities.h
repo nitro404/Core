@@ -1,6 +1,7 @@
 #ifndef _CDIO_UTILITIES_H_
 #define _CDIO_UTILITIES_H_
 
+#include "ByteBuffer.h"
 #include <cdio/cdio.h>
 #include <cdio/logging.h>
 #include <cdio++/cdio.hpp>
@@ -54,6 +55,9 @@ namespace CDIOUtilities {
 	std::optional<std::vector<std::string>> getDirectoryContents(ISO9660::FS & isoFileSystem, const std::string & directoryPath);
 	std::vector<std::string> getRootDirectoryContents(ISO9660::FS & isoFileSystem, bool * error);
 	std::optional<std::vector<std::string>> getRootDirectoryContents(ISO9660::FS & isoFileSystem);
+	std::unique_ptr<ByteBuffer> readFile(ISO9660::FS & isoFileSystem, lsn_t logicalSectorNumber, long int fileSize);
+	std::unique_ptr<ByteBuffer> readFile(ISO9660::FS & isoFileSystem, ISO9660::Stat & statistic);
+	std::unique_ptr<ByteBuffer> readFile(ISO9660::FS & isoFileSystem, const std::string & filePath);
 
 }
 
