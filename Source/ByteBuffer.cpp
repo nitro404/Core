@@ -368,8 +368,8 @@ size_t ByteBuffer::numberOfLinesAfterOffset(size_t offset) const {
 	return lineCount;
 }
 
-bool ByteBuffer::skipToNextLine(size_t * endOfLineIndex) const {
-	size_t nextLineIndex = indexOfNextLine(endOfLineIndex);
+bool ByteBuffer::skipToNextLine(size_t * endOfLineIndex, size_t * endOfLineIndexIncludingNewline) const {
+	size_t nextLineIndex = indexOfNextLine(endOfLineIndex, endOfLineIndexIncludingNewline);
 
 	if(nextLineIndex == std::numeric_limits<size_t>::max()) {
 		return false;
@@ -380,11 +380,80 @@ bool ByteBuffer::skipToNextLine(size_t * endOfLineIndex) const {
 	return true;
 }
 
-size_t ByteBuffer::indexOfNextLine(size_t * endOfLineIndex) const {
-	return indexOfNextLineFrom(m_readOffset, endOfLineIndex);
+size_t ByteBuffer::indexOfLineNumber(size_t lineNumber, size_t * endOfLineIndex, size_t * endOfLineIndexIncludingNewline) const {
+	if(lineNumber == 0) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	size_t currentLineNumber = 1u;
+	// TODO: offset vs. index (copy pasta):
+	size_t currentOffset = 0u;
+	size_t endOfLineOffset = std::numeric_limits<size_t>::max();
+	size_t endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+	size_t nextLineOffset = std::numeric_limits<size_t>::max();
+	size_t lineLength = 0u;
+	size_t lineLengthIncludingNewline = 0u;
+	uint8_t currentByte = 0u;
+
+	while(true) {
+		endOfLineOffset = std::numeric_limits<size_t>::max();
+		endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+
+		nextLineOffset = indexOfNextLineFrom(currentOffset, &endOfLineOffset, &endOfLineOffsetIncludingNewline);
+
+		if(nextLineOffset != std::numeric_limits<size_t>::max()) {
+			if(endOfLineOffset == 0u) {
+				lineLength = 0u;
+			}
+			else {
+				lineLength = endOfLineOffset - currentOffset + 1;
+			}
+
+			lineLengthIncludingNewline = endOfLineOffsetIncludingNewline - currentOffset + 1;
+		}
+		else {
+			lineLengthIncludingNewline = m_data->size() - currentOffset;
+			lineLength = lineLengthIncludingNewline;
+
+			while(lineLength != 0u) {
+				currentByte = m_data->at(currentOffset + lineLength - 1);
+
+				if(currentByte != '\r' && currentByte != '\n') {
+					break;
+				}
+
+				lineLength--;
+			}
+		}
+
+		if(currentLineNumber == lineNumber) {
+			if(endOfLineIndex != nullptr) {
+				*endOfLineIndex = endOfLineOffset;
+			}
+
+			if(endOfLineIndexIncludingNewline != nullptr) {
+				*endOfLineIndexIncludingNewline = endOfLineOffsetIncludingNewline;
+			}
+
+			return currentOffset;
+		}
+
+		currentLineNumber++;
+		currentOffset += lineLengthIncludingNewline;
+
+		if(currentOffset >= m_data->size()) {
+			break;
+		}
+	}
+
+	return {};
 }
 
-size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) const {
+size_t ByteBuffer::indexOfNextLine(size_t * endOfLineIndex, size_t * endOfLineIndexIncludingNewline) const {
+	return indexOfNextLineFrom(m_readOffset, endOfLineIndex, endOfLineIndexIncludingNewline);
+}
+
+size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex, size_t * endOfLineIndexIncludingNewline) const {
 	bool foundCarriageReturn = false;
 	bool foundNewline = false;
 	size_t currentOffset = offset;
@@ -395,15 +464,23 @@ size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) c
 	}
 
 	while(currentOffset < m_data->size()) {
-		currentByte = (*m_data)[currentOffset];
+		currentByte = m_data->at(currentOffset);
 
 		if(currentByte == '\n') {
 			if(foundNewline) {
+				if(endOfLineIndexIncludingNewline != nullptr) {
+					*endOfLineIndexIncludingNewline = currentOffset - 1;
+				}
+
 				return currentOffset;
 			}
 			else if(!foundCarriageReturn) {
 				if(endOfLineIndex != nullptr) {
 					*endOfLineIndex = currentOffset == 0 ? 0 : currentOffset - 1;
+				}
+
+				if(endOfLineIndexIncludingNewline != nullptr) {
+					*endOfLineIndexIncludingNewline = currentOffset;
 				}
 			}
 
@@ -415,8 +492,16 @@ size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) c
 			if(endOfLineIndex != nullptr) {
 				*endOfLineIndex = currentOffset == 0 ? 0 : currentOffset - 1;
 			}
+
+			if(endOfLineIndexIncludingNewline != nullptr) {
+				*endOfLineIndexIncludingNewline = currentOffset - 1;
+			}
 		}
 		else if(foundCarriageReturn || foundNewline) {
+			if(endOfLineIndexIncludingNewline != nullptr) {
+				*endOfLineIndexIncludingNewline = currentOffset - 1;
+			}
+
 			return currentOffset;
 		}
 
@@ -425,11 +510,19 @@ size_t ByteBuffer::indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex) c
 
 	if(offset < m_data->size()) {
 		if(foundCarriageReturn || foundNewline) {
+			if(endOfLineIndexIncludingNewline != nullptr) {
+				*endOfLineIndexIncludingNewline = currentOffset;
+			}
+
 			return currentOffset;
 		}
 		else {
 			if(endOfLineIndex != nullptr) {
 				*endOfLineIndex = m_data->size() - 1;
+			}
+
+			if(endOfLineIndexIncludingNewline != nullptr) {
+				*endOfLineIndexIncludingNewline = m_data->size() - 1;
 			}
 
 			return m_data->size();
@@ -791,7 +884,87 @@ std::optional<std::string> ByteBuffer::getNullTerminatedString(size_t offset) co
 	return value;
 }
 
-std::string ByteBuffer::getLine(size_t offset, size_t * nextLineIndex, bool * error) const {
+std::string ByteBuffer::getLineByNumber(size_t lineNumber, size_t * nextLineIndex, bool * error) const {
+	if(lineNumber == 0u) {
+		if(error != nullptr) {
+			*error = true;
+		}
+
+		return {};
+	}
+
+	size_t currentLineNumber = 1u;
+	size_t currentOffset = 0u;
+	size_t endOfLineOffset = std::numeric_limits<size_t>::max();
+	size_t endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+	size_t nextLineOffset = std::numeric_limits<size_t>::max();
+	size_t lineLength = 0u;
+	size_t lineLengthIncludingNewline = 0u;
+	uint8_t currentByte = 0u;
+
+	while(true) {
+		endOfLineOffset = std::numeric_limits<size_t>::max();
+		endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+
+		nextLineOffset = indexOfNextLineFrom(currentOffset, &endOfLineOffset, &endOfLineOffsetIncludingNewline);
+
+		if(nextLineOffset != std::numeric_limits<size_t>::max()) {
+			if(endOfLineOffset == 0u) {
+				lineLength = 0u;
+			}
+			else {
+				lineLength = endOfLineOffset - currentOffset + 1;
+			}
+
+			lineLengthIncludingNewline = endOfLineOffsetIncludingNewline - currentOffset + 1;
+		}
+		else {
+			lineLengthIncludingNewline = m_data->size() - currentOffset;
+			lineLength = lineLengthIncludingNewline;
+
+			while(lineLength != 0u) {
+				currentByte = m_data->at(currentOffset + lineLength - 1);
+
+				if(currentByte != '\r' && currentByte != '\n') {
+					break;
+				}
+
+				lineLength--;
+			}
+		}
+
+		if(currentLineNumber == lineNumber) {
+			return std::string(reinterpret_cast<const char *>(m_data->data() + (currentOffset * sizeof(uint8_t))), lineLength);
+		}
+
+		currentLineNumber++;
+		currentOffset += lineLengthIncludingNewline;
+
+		if(currentOffset >= m_data->size()) {
+			break;
+		}
+	}
+
+	if(error != nullptr) {
+		*error = true;
+	}
+
+	return {};
+}
+
+std::optional<std::string> ByteBuffer::getLineByNumber(size_t lineNumber, size_t * nextLineIndex) const {
+	bool error = false;
+
+	std::string value(getLineByNumber(lineNumber, nextLineIndex, &error));
+
+	if(error) {
+		return {};
+	}
+
+	return value;
+}
+
+std::string ByteBuffer::getLineAtIndex(size_t offset, size_t * nextLineIndex, bool * error) const {
 	if(offset >= m_data->size()) {
 		if(error != nullptr) {
 			*error = true;
@@ -817,7 +990,8 @@ std::string ByteBuffer::getLine(size_t offset, size_t * nextLineIndex, bool * er
 		uint8_t currentByte = 0;
 
 		while(lineLength != 0) {
-			currentByte = (*m_data)[m_readOffset + lineLength - 1];
+			// TODO: fixme:
+			currentByte = m_data->at(offset + lineLength - 1);
 
 			if(currentByte != '\r' && currentByte != '\n') {
 				break;
@@ -831,13 +1005,14 @@ std::string ByteBuffer::getLine(size_t offset, size_t * nextLineIndex, bool * er
 		*nextLineIndex = nextLineIndexInternal;
 	}
 
-	return std::string(reinterpret_cast<const char *>(m_data->data() + (m_readOffset * sizeof(uint8_t))), lineLength);;
+	// TODO: fixme?:
+	return std::string(reinterpret_cast<const char *>(m_data->data() + (offset * sizeof(uint8_t))), lineLength);
 }
 
-std::optional<std::string> ByteBuffer::getLine(size_t offset, size_t * nextLineIndex) const {
+std::optional<std::string> ByteBuffer::getLineAtIndex(size_t offset, size_t * nextLineIndex) const {
 	bool error = false;
 
-	std::string value(getLine(offset, nextLineIndex, &error));
+	std::string value(getLineAtIndex(offset, nextLineIndex, &error));
 
 	if(error) {
 		return {};
@@ -1159,7 +1334,7 @@ std::optional<std::string> ByteBuffer::peekNullTerminatedString() const {
 std::string ByteBuffer::peekLine(bool * error) const {
 	bool e = false;
 	size_t nextLineIndex = std::numeric_limits<size_t>::max();
-	std::string line(getLine(m_readOffset, &nextLineIndex, &e));
+	std::string line(getLineAtIndex(m_readOffset, &nextLineIndex, &e));
 
 	if(e) {
 		if(error != nullptr) {
@@ -1568,7 +1743,7 @@ std::optional<std::string> ByteBuffer::readNullTerminatedString() const {
 std::string ByteBuffer::readLine(bool * error) const {
 	bool e = false;
 	size_t nextLineIndex = std::numeric_limits<size_t>::max();
-	std::string line(getLine(m_readOffset, &nextLineIndex, &e));
+	std::string line(getLineAtIndex(m_readOffset, &nextLineIndex, &e));
 
 	if(e) {
 		if(error != nullptr) {
@@ -1725,7 +1900,17 @@ bool ByteBuffer::putNullTerminatedString(const std::string & value, size_t offse
 	return putBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
-bool ByteBuffer::putLine(const std::string & value, size_t offset, const std::string & newLine) {
+bool ByteBuffer::putLineByNumber(const std::string & value, size_t lineNumber, const std::string & newLine) {
+	if(lineNumber == 0u) {
+		return false;
+	}
+
+	// TODO
+
+	return false;
+}
+
+bool ByteBuffer::putLineAtIndex(const std::string & value, size_t offset, const std::string & newLine) {
 	return putString(value + newLine, offset);
 }
 
@@ -1885,7 +2070,15 @@ bool ByteBuffer::insertNullTerminatedString(const std::string & value, size_t of
 	return insertBytes(reinterpret_cast<const uint8_t *>(value.c_str()), value.length() + 1, offset);
 }
 
-bool ByteBuffer::insertLine(const std::string & value, size_t offset, const std::string & newLine) {
+bool ByteBuffer::insertLineByNumber(const std::string & value, size_t lineNumber, const std::string & newLine) {
+	if(lineNumber == 0u) {
+		return false;
+	}
+
+	return insertString(value + newLine, indexOfLineNumber(lineNumber));
+}
+
+bool ByteBuffer::insertLineAtIndex(const std::string & value, size_t offset, const std::string & newLine) {
 	return insertString(value + newLine, offset);
 }
 
@@ -2128,6 +2321,275 @@ bool ByteBuffer::containsString(const std::string & value, bool caseSensitive) c
 			return true;
 		}
 	}
+
+	return false;
+}
+
+size_t ByteBuffer::indexOfInstanceOfStringFromStart(const std::string & value, bool caseSensitive, size_t instanceIndex, size_t startOffset) const {
+	if(value.empty() || m_data->size() < value.length()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	bool match = false;
+	size_t currentOffset = startOffset;
+	size_t currentInstanceIndex = 0u;
+	const size_t maxOffset = m_data->size() - value.length();
+
+	while(true) {
+		if(currentOffset > maxOffset) {
+			break;
+		}
+
+		match = true;
+
+		for(size_t i = 0; i < value.length(); i++) {
+			if(!Utilities::areCharactersEqual(m_data->at(currentOffset + i), value[i], caseSensitive)) {
+				match = false;
+				break;
+			}
+		}
+
+		if(match) {
+			if(currentInstanceIndex == instanceIndex) {
+				return currentOffset;
+			}
+
+			currentInstanceIndex++;
+		}
+
+		currentOffset++;
+	};
+
+	return std::numeric_limits<size_t>::max();
+}
+
+size_t ByteBuffer::indexOfInstanceOfStringFromEnd(const std::string & value, bool caseSensitive, size_t instanceIndex, size_t startOffset) const {
+	if(value.empty() || m_data->size() < value.length()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	bool match = false;
+	size_t currentOffset = std::min(m_data->size() - value.length() + 1, startOffset);
+	size_t currentInstanceIndex = 0u;
+
+	while(true) {
+		match = true;
+
+		for(size_t i = 0; i < value.length(); i++) {
+			if(!Utilities::areCharactersEqual(m_data->at(currentOffset + i), value[i], caseSensitive)) {
+				match = false;
+				break;
+			}
+		}
+
+		if(match) {
+			if(currentInstanceIndex == instanceIndex) {
+				return currentOffset;
+			}
+
+			currentInstanceIndex++;
+		}
+
+		if(currentOffset == 0u) {
+			break;
+		}
+
+		currentOffset--;
+	};
+
+	return std::numeric_limits<size_t>::max();
+}
+
+bool ByteBuffer::replaceInstanceOfStringFromStart(const std::string & oldValue, const std::string & newValue, bool caseSensitive, size_t instanceIndex, size_t startOffset, size_t * replacedInstanceOffset) {
+	size_t stringInstanceIndex = indexOfInstanceOfStringFromStart(oldValue, caseSensitive, instanceIndex, startOffset);
+
+	if(stringInstanceIndex == std::numeric_limits<size_t>::max()) {
+		return false;
+	}
+
+	const int64_t delta = newValue.length() - oldValue.length();
+
+	if(delta < 0) {
+		for(size_t i = stringInstanceIndex + newValue.length(); i < m_data->size() - std::abs(delta); i++) {
+			(*m_data)[i] = m_data->at(i + std::abs(delta));
+		}
+
+		m_data->resize(m_data->size() - std::abs(delta));
+	}
+	else if(delta > 0) {
+		m_data->resize(m_data->size() + delta);
+
+		for(size_t i = m_data->size() - 1; i > stringInstanceIndex + oldValue.length(); i--) {
+			(*m_data)[i] = m_data->at(i - delta);
+		}
+	}
+
+	return putString(newValue, stringInstanceIndex);
+}
+
+bool ByteBuffer::replaceInstanceOfStringFromEnd(const std::string & oldValue, const std::string & newValue, bool caseSensitive, size_t instanceIndex, size_t startOffset, size_t * replacedInstanceOffset) {
+	size_t stringInstanceIndex = indexOfInstanceOfStringFromEnd(oldValue, caseSensitive, instanceIndex, startOffset);
+
+	if(stringInstanceIndex == std::numeric_limits<size_t>::max()) {
+		return false;
+	}
+
+	const int64_t delta = newValue.length() - oldValue.length();
+
+	if(delta < 0) {
+		for(size_t i = stringInstanceIndex + newValue.length(); i < m_data->size() - std::abs(delta); i++) {
+			(*m_data)[i] = m_data->at(i + std::abs(delta));
+		}
+
+		m_data->resize(m_data->size() - std::abs(delta));
+	}
+	else if(delta > 0) {
+		m_data->resize(m_data->size() + delta);
+
+		for(size_t i = m_data->size() - 1; i > stringInstanceIndex + oldValue.length(); i--) {
+			(*m_data)[i] = m_data->at(i - delta);
+		}
+	}
+
+	return putString(newValue, stringInstanceIndex);
+}
+
+size_t ByteBuffer::replaceAllInstancesOfString(const std::string & oldValue, const std::string & newValue, bool caseSensitive, size_t replacementLimit) {
+	size_t numberOfReplacements = 0u;
+	size_t previousInstanceReplacementOffset = 0;
+
+	while(replaceInstanceOfStringFromStart(oldValue, newValue, caseSensitive, 0, previousInstanceReplacementOffset, &previousInstanceReplacementOffset)) {
+		numberOfReplacements++;
+		previousInstanceReplacementOffset += newValue.length();
+
+		if(numberOfReplacements >= replacementLimit) {
+			break;
+		}
+	}
+
+	return numberOfReplacements;
+}
+
+bool ByteBuffer::removeInstanceOfStringFromStart(const std::string & oldValue, bool caseSensitive, size_t instanceIndex, size_t startOffset, size_t * removedInstanceOffset) {
+	return replaceInstanceOfStringFromStart(oldValue, "", caseSensitive, instanceIndex, startOffset, removedInstanceOffset);
+}
+
+bool ByteBuffer::removeInstanceOfStringFromEnd(const std::string & oldValue, bool caseSensitive, size_t instanceIndex, size_t startOffset, size_t * removedInstanceOffset) {
+	return replaceInstanceOfStringFromEnd(oldValue, "", caseSensitive, instanceIndex, startOffset, removedInstanceOffset);
+}
+
+size_t ByteBuffer::removeAllInstancesOfString(const std::string & oldValue, bool caseSensitive, size_t removalLimit) {
+	return replaceAllInstancesOfString(oldValue, "", caseSensitive, removalLimit);
+}
+
+bool ByteBuffer::replaceLineByNumber(const std::string & newValue, size_t lineNumber, size_t * replacedInstanceOffset, const std::string & newLine) {
+	if(lineNumber == 0u) {
+		return false;
+	}
+
+	size_t removedInstanceOffsetInternal = std::numeric_limits<size_t>::max();
+
+	if(!removeLineByNumber(lineNumber, &removedInstanceOffsetInternal)) {
+		return false;
+	}
+
+	if(insertLineAtIndex(newValue, removedInstanceOffsetInternal, newLine)) {
+		if(replacedInstanceOffset != nullptr) {
+			*replacedInstanceOffset = removedInstanceOffsetInternal;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool ByteBuffer::removeLineByNumber(size_t lineNumber, size_t * removedInstanceOffset) {
+	if(lineNumber == 0u) {
+		return false;
+	}
+
+	size_t currentLineNumber = 1u;
+	size_t currentOffset = 0u;
+	size_t endOfLineOffset = std::numeric_limits<size_t>::max();
+	size_t endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+	size_t nextLineOffset = std::numeric_limits<size_t>::max();
+	size_t lineLength = 0u;
+	size_t lineLengthIncludingNewline = 0u;
+	uint8_t currentByte = 0u;
+
+	while(true) {
+		endOfLineOffset = std::numeric_limits<size_t>::max();
+		endOfLineOffsetIncludingNewline = std::numeric_limits<size_t>::max();
+
+		nextLineOffset = indexOfNextLineFrom(currentOffset, &endOfLineOffset, &endOfLineOffsetIncludingNewline);
+
+		spdlog::debug("nextLineOffset: {} (current: {}) endOfLineOffset: {} incNewline: {}", nextLineOffset, currentOffset, endOfLineOffset, endOfLineOffsetIncludingNewline); // TODO: temp
+
+		if(nextLineOffset != std::numeric_limits<size_t>::max()) {
+			if(endOfLineOffset == 0u) {
+				lineLength = 0u;
+			}
+			else {
+				lineLength = endOfLineOffset - currentOffset + 1;
+			}
+
+			lineLengthIncludingNewline = endOfLineOffsetIncludingNewline - currentOffset + 1;
+		}
+		else {
+			lineLengthIncludingNewline = m_data->size() - currentOffset;
+			lineLength = lineLengthIncludingNewline;
+
+			while(lineLength != 0u) {
+				currentByte = m_data->at(currentOffset + lineLength - 1);
+
+				if(currentByte != '\r' && currentByte != '\n') {
+					break;
+				}
+
+				lineLength--;
+			}
+		}
+
+		spdlog::debug("lineLength: {} incNewline: {}", lineLength, lineLengthIncludingNewline); // TODO: temp
+
+		if(currentLineNumber == lineNumber) {
+			spdlog::info("requestedLine: {} offset: {}", lineNumber, currentOffset);
+
+			for(size_t i = currentOffset; i < m_data->size() - lineLengthIncludingNewline; i++) {
+				if(i < currentOffset + lineLengthIncludingNewline + 5) {
+					spdlog::debug("data[{}({})] = data[{}({})] (LEN: {})", i, (char)m_data->at(i), i + lineLengthIncludingNewline, (char)m_data->at(i + lineLengthIncludingNewline), lineLengthIncludingNewline); // TODO: temp
+				}
+
+				(*m_data)[i] = m_data->at(i + lineLengthIncludingNewline);
+			}
+
+			m_data->resize(m_data->size() - lineLengthIncludingNewline);
+
+			if(removedInstanceOffset != nullptr) {
+				*removedInstanceOffset = currentOffset;
+			}
+
+			spdlog::debug("done"); // TODO: temp
+
+			return true;
+		}
+
+		spdlog::info("nextLine: {}", currentLineNumber + 1); // TODO: temp
+
+		currentLineNumber++;
+
+		spdlog::info("offset: {} -> {}", currentOffset, endOfLineOffset + 1); // TODO: temp
+
+		currentOffset += lineLengthIncludingNewline; // TODO: +1?
+
+		// TODO: other break condition:
+		if(currentOffset >= m_data->size()) {
+			break;
+		}
+	}
+
+	// TODO: removed line as optional?
 
 	return false;
 }
