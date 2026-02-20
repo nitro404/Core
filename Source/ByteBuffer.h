@@ -91,9 +91,10 @@ public:
 	size_t totalNumberOfLines() const;
 	size_t numberOfLinesRemaining() const;
 	size_t numberOfLinesAfterOffset(size_t offset) const;
-	bool skipToNextLine(size_t * endOfLineIndex = nullptr) const;
-	size_t indexOfNextLine(size_t * endOfLineIndex = nullptr) const;
-	size_t indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex = nullptr) const;
+	bool skipToNextLine(size_t * endOfLineIndex = nullptr, size_t * endOfLineIndexIncludingNewline = nullptr) const;
+	size_t indexOfLineNumber(size_t lineNumber, size_t * endOfLineIndex = nullptr, size_t * endOfLineIndexIncludingNewline = nullptr) const;
+	size_t indexOfNextLine(size_t * endOfLineIndex = nullptr, size_t * endOfLineIndexIncludingNewline = nullptr) const;
+	size_t indexOfNextLineFrom(size_t offset, size_t * endOfLineIndex = nullptr, size_t * endOfLineIndexIncludingNewline = nullptr) const;
 	size_t numberOfBytesRemaining() const;
 	std::unique_ptr<ByteBuffer> getRemainingBytes() const;
 	bool isEndOfBuffer() const;
@@ -128,8 +129,10 @@ public:
 	std::optional<std::string> getString(size_t length, size_t offset) const;
 	std::string getNullTerminatedString(size_t offset, bool * error) const;
 	std::optional<std::string> getNullTerminatedString(size_t offset) const;
-	std::string getLine(size_t offset, size_t * nextLineIndex, bool * error) const;
-	std::optional<std::string> getLine(size_t offset, size_t * nextLineIndex = nullptr) const;
+	std::string getLineByNumber(size_t lineNumber, size_t * nextLineIndex, bool * error) const;
+	std::optional<std::string> getLineByNumber(size_t lineNumber, size_t * nextLineIndex = nullptr) const;
+	std::string getLineAtIndex(size_t offset, size_t * nextLineIndex, bool * error) const;
+	std::optional<std::string> getLineAtIndex(size_t offset, size_t * nextLineIndex = nullptr) const;
 	template <size_t N>
 	std::unique_ptr<std::array<uint8_t, N>> getBytes(size_t offset) const;
 	std::unique_ptr<std::vector<uint8_t>> getBytes(size_t numberOfBytes, size_t offset) const;
@@ -208,7 +211,8 @@ public:
 	bool putDouble(double value, size_t offset);
 	bool putString(const std::string & value, size_t offset);
 	bool putNullTerminatedString(const std::string & value, size_t offset);
-	bool putLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
+	bool putLineByNumber(const std::string & value, size_t lineNumber, const std::string & newLine = "\n");
+	bool putLineAtIndex(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool putBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
 	bool putBytes(const std::array<uint8_t, N> & data, size_t offset);
@@ -228,7 +232,8 @@ public:
 	bool insertDouble(double value, size_t offset);
 	bool insertString(const std::string & value, size_t offset);
 	bool insertNullTerminatedString(const std::string & value, size_t offset);
-	bool insertLine(const std::string & value, size_t offset, const std::string & newLine = "\n");
+	bool insertLineByNumber(const std::string & value, size_t lineNumber, const std::string & newLine = "\n");
+	bool insertLineAtIndex(const std::string & value, size_t offset, const std::string & newLine = "\n");
 	bool insertBytes(const uint8_t * data, size_t size, size_t offset);
 	template <size_t N>
 	bool insertBytes(const std::array<uint8_t, N> & data, size_t offset);
@@ -259,6 +264,16 @@ public:
 	bool writeBytes(const std::shared_ptr<const ByteBuffer> & buffer);
 
 	bool containsString(const std::string & value, bool caseSensitive = true) const;
+	size_t indexOfInstanceOfStringFromStart(const std::string & value, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = 0) const;
+	size_t indexOfInstanceOfStringFromEnd(const std::string & value, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = std::numeric_limits<size_t>::max()) const;
+	bool replaceInstanceOfStringFromStart(const std::string & oldValue, const std::string & newValue, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = 0, size_t * replacedInstanceOffset = nullptr);
+	bool replaceInstanceOfStringFromEnd(const std::string & oldValue, const std::string & newValue, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = std::numeric_limits<size_t>::max(), size_t * replacedInstanceOffset = nullptr);
+	size_t replaceAllInstancesOfString(const std::string & oldValue, const std::string & newValue, bool caseSensitive = true, size_t replacementLimit = std::numeric_limits<size_t>::max());
+	bool removeInstanceOfStringFromStart(const std::string & oldValue, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = 0, size_t * removedInstanceOffset = nullptr);
+	bool removeInstanceOfStringFromEnd(const std::string & oldValue, bool caseSensitive = true, size_t instanceIndex = 0, size_t startOffset = std::numeric_limits<size_t>::max(), size_t * removedInstanceOffset = nullptr);
+	size_t removeAllInstancesOfString(const std::string & oldValue, bool caseSensitive = true, size_t removalLimit = std::numeric_limits<size_t>::max());
+	bool replaceLineByNumber(const std::string & newValue, size_t lineNumber, size_t * replacedInstanceOffset = nullptr, const std::string & newLine = "\n");
+	bool removeLineByNumber(size_t lineNumber, size_t * removedInstanceOffset = nullptr);
 
 	std::unique_ptr<ByteBuffer> diff(const ByteBuffer &targetData);
 	std::unique_ptr<ByteBuffer> patch(const ByteBuffer &diffData);
