@@ -332,6 +332,16 @@ hunter_config(tinyxml2
 		tinyxml2_INSTALL_PKGCONFIG=ON
 )
 
+# xxHash is used by HDiffPatch.
+hunter_config(xxHash
+	URL "https://codeload.github.com/Cyan4973/xxHash/zip/tags/v0.8.3"
+	VERSION "0.8.3"
+	SHA1 "98c8ffb8d67f8b94e3f4d64d4680e4c77c0bc200"
+	CMAKE_ARGS
+		BUILD_SHARED_LIBS=OFF
+		XXHASH_BUILD_XXHSUM=OFF
+)
+
 # ZLib is used by cURL, LibZIP, LibPNG, LibTIFF, PCRE2, and wxWidgets.
 hunter_config(ZLIB
 	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"

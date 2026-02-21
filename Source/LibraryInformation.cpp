@@ -25,6 +25,7 @@
 #include <spdlog/spdlog.h>
 #include <tidy/tidy.h>
 #include <tinyxml2.h>
+#include <xxh3.h>
 #include <zlib.h>
 #include <zstd.h>
 
@@ -56,6 +57,7 @@ LibraryInformation::LibraryInformation()
 		{ "spdlog", fmt::format("{}.{}.{}", SPDLOG_VERSION / 10000, (SPDLOG_VERSION % 10000) / 100, SPDLOG_VERSION % 100) },
 		{ "TidyHTML5", tidyLibraryVersion(), tidyReleaseDate() },
 		{ "TinyXML2", fmt::format("{}.{}.{}", TINYXML2_MAJOR_VERSION, TINYXML2_MINOR_VERSION, TINYXML2_PATCH_VERSION) },
+		{ "xxHash", fmt::format("{}.{}.{}", XXH_versionNumber() / 10000, (XXH_versionNumber() % 10000) / 100, XXH_versionNumber() % 100) },
 		{ "ZLib", zlibVersion() },
 		{ "Zstandard", ZSTD_versionString() }
 	}) { }
