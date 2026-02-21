@@ -197,6 +197,15 @@ hunter_config(liblzma
 		XZ_DOC=OFF
 )
 
+# LibMD5-RFC is used by HDifFPatch.
+hunter_config(LibMD5-RFC
+	URL "https://codeload.github.com/Telefrag-Software/LibMD5-RFC/zip/tags/2002.04.13"
+	VERSION "2002.04.13"
+	SHA1 "220c033a1d12d4337416e7025171234fd9feeb8f"
+	CMAKE_ARGS
+		BUILD_APPLICATION=OFF
+)
+
 hunter_config(libzip
 	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.11.4.1.zip"
 	VERSION "1.11.4.1"

@@ -18,6 +18,7 @@
 #include <zip.h>
 #include <lzma.h>
 #include <magic_enum/magic_enum.hpp>
+#include <md5.h>
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <rapidjson/rapidjson.h>
@@ -47,6 +48,7 @@ LibraryInformation::LibraryInformation()
 		{ "gflags", GFLAGS_VERSION },
 		{ "LibCDIO", fmt::format("{}.{}.{}", LIBCDIO_VERSION_NUM / 10000, (LIBCDIO_VERSION_NUM % 10000) / 100, LIBCDIO_VERSION_NUM % 100) },
 		{ "LibLZMA", lzma_version_string() },
+		{ "LibMD5-RFC", LIBMD5RFC_VERSION },
 		{ "LibSSH2", LIBSSH2_VERSION },
 		{ "LibZIP", zip_libzip_version() },
 		{ "Magic Enum C++", fmt::format("{}.{}.{}", MAGIC_ENUM_VERSION_MAJOR, MAGIC_ENUM_VERSION_MINOR, MAGIC_ENUM_VERSION_PATCH) },

@@ -86,6 +86,7 @@ set(CORE_LIBRARIES
 	libcdio::cdio
 	libcdio::cdio++
 	LibLZMA::LibLZMA
+	LibMD5-RFC::MD5
 	Libssh2::libssh2
 	libzip::zip
 	magic_enum::magic_enum
