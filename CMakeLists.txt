@@ -83,6 +83,11 @@ set(CORE_LIBRARIES
 	double-conversion::double-conversion
 	fmt::fmt
 	gflags_nothreads_static
+	HDiffPatch::libHDiffPatch
+	HDiffPatch::dirDiffPatch
+	HDiffPatch::libParallel
+	HDiffPatch::bsdiff_wrapper
+	HDiffPatch::vcdiff_wrapper
 	libcdio::cdio
 	libcdio::cdio++
 	LibLZMA::LibLZMA

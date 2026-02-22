@@ -14,6 +14,7 @@
 #include <fmt/core.h>
 #include <gflags/gflags.h>
 #include <cdio/version.h>
+#include <libHDiffPatch/HPatch/patch.h>
 #include <libssh2.h>
 #include <zip.h>
 #include <lzma.h>
@@ -45,6 +46,7 @@ LibraryInformation::LibraryInformation()
 		{ "Double Conversion", DOUBLE_CONVERSION_VERSION },
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
 		{ "gflags", GFLAGS_VERSION },
+		{ "HDiffPatch", HDIFFPATCH_VERSION_STRING },
 		{ "LibCDIO", fmt::format("{}.{}.{}", LIBCDIO_VERSION_NUM / 10000, (LIBCDIO_VERSION_NUM % 10000) / 100, LIBCDIO_VERSION_NUM % 100) },
 		{ "LibLZMA", lzma_version_string() },
 		{ "LibSSH2", LIBSSH2_VERSION },

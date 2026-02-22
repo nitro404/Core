@@ -161,6 +161,20 @@ hunter_config(GTest
 	SHA1 "c9cd451f89c5d5869ba7fa88efa3c9d91db628ad"
 )
 
+hunter_config(HDiffPatch
+	URL "https://codeload.github.com/Telefrag-Software/HDiffPatch/zip/tags/4.12.1.0"
+	VERSION "4.12.1.0"
+	SHA1 "0b755765fd8aa6a6cecf21c2f87d52a8fb3097e6"
+	CMAKE_ARGS
+		HUNTER_ENABLED=OFF
+		HDIFFPATCH_BUILD_DIRDIFFPATCH=ON
+		HDIFFPATCH_BUILD_LIBPARALLEL=ON
+		HDIFFPATCH_BUILD_BSDIFF_WRAPPER=ON
+		HDIFFPATCH_BUILD_VCDIFF_WRAPPER=ON
+		HDIFFPATCH_BUILD_LIBHSYNC=OFF
+		HDIFFPATCH_BUILD_UNIT_TESTS=OFF
+)
+
 hunter_config(libcdio
 	URL "https://github.com/Telefrag-Software/libcdio/archive/refs/heads/hunter-2.3.0.1.zip"
 	VERSION "2.3.0.1"
