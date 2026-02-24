@@ -74,6 +74,28 @@ set(CORE_SOURCE_FILES
 	Core.h
 	Date.h
 	Date.cpp
+	Utilities/HDiffPatchUtilities.h
+	Utilities/HDiffPatchUtilities.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginBZip2.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginBZip2.h
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginLZMA.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginLZMA.h
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginXz.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginXz.h
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginZLib.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginZLib.h
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginZStandard.cpp
+	HDiffPatch/Plugins/Compression/HDiffPatchCompressionPluginZStandard.h
+	HDiffPatch/Plugins/Decompression/HDiffPatchDececompressionPluginBZip2.cpp
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginBZip2.h
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginLZMA.cpp
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginLZMA.h
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginXz.cpp
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginXz.h
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginZLib.cpp
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginZLib.h
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginZStandard.cpp
+	HDiffPatch/Plugins/Decompression/HDiffPatchDecompressionPluginZStandard.h
 	Dimension.h
 	Dimension.cpp
 	Endianness.h
