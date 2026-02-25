@@ -12,6 +12,7 @@
 #include <curl/curl.h>
 #include <dmc_unrar/dmc_unrar.h>
 #include <fmt/core.h>
+#include <gflags/gflags.h>
 #include <cdio/version.h>
 #include <libssh2.h>
 #include <zip.h>
@@ -43,6 +44,7 @@ LibraryInformation::LibraryInformation()
 		{ "dmc_unrar", DMC_UNRAR_VERSION },
 		{ "Double Conversion", DOUBLE_CONVERSION_VERSION },
 		{ "fmt", fmt::format("{}.{}.{}", FMT_VERSION / 10000, (FMT_VERSION % 10000) / 100, FMT_VERSION % 100) },
+		{ "gflags", GFLAGS_VERSION },
 		{ "LibCDIO", fmt::format("{}.{}.{}", LIBCDIO_VERSION_NUM / 10000, (LIBCDIO_VERSION_NUM % 10000) / 100, LIBCDIO_VERSION_NUM % 100) },
 		{ "LibLZMA", lzma_version_string() },
 		{ "LibSSH2", LIBSSH2_VERSION },

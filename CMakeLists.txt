@@ -49,6 +49,7 @@ target_compile_definitions(${PROJECT_NAME}
 		BROTLI_VERSION="${brotli_VERSION}"
 		DATE_VERSION="${date_VERSION}"
 		DOUBLE_CONVERSION_VERSION="${double-conversion_VERSION}"
+		GFLAGS_VERSION="${gflags_VERSION}"
 )
 
 if(WIN32)
@@ -80,6 +81,7 @@ set(CORE_LIBRARIES
 	dmc_unrar::dmc_unrar
 	double-conversion::double-conversion
 	fmt::fmt
+	gflags_nothreads_static
 	libcdio::cdio
 	libcdio::cdio++
 	LibLZMA::LibLZMA
