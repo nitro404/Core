@@ -28,6 +28,10 @@ bool TimeZoneDataManagerWindows::platformInitialize(const std::string & dataDire
 	}
 
 	if(!HTTPService::getInstance()->checkForInternetConnectivity()) {
+		if(!windowsTimeZoneDataFileExists) {
+			spdlog::warn("No internet connection detected, and not all time zone data files exist locally!");
+		}
+
 		return windowsTimeZoneDataFileExists;
 	}
 

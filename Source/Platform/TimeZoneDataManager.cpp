@@ -63,10 +63,12 @@ bool TimeZoneDataManager::initialize(const std::string & dataDirectoryPath, std:
 	}
 
 	if(!platformInitialize(dataDirectoryPath, fileETags, shouldUpdate, forceUpdate, updated)) {
+		spdlog::warn("Platform specific time zone data manager initialization failed!");
 		return false;
 	}
 
 	if(!updateTimeZoneDatabase(dataDirectoryPath, fileETags, shouldUpdate, forceUpdate, updated)) {
+		spdlog::warn("Time zone data manager database update failed!");
 		return false;
 	}
 
@@ -187,6 +189,10 @@ bool TimeZoneDataManager::updateTimeZoneDatabase(const std::string & dataDirecto
 	}
 
 	if(!HTTPService::getInstance()->checkForInternetConnectivity()) {
+		if(!allTimeZoneDatabaseFilesExist) {
+			spdlog::warn("No internet connection detected while attempting to update time zone database, and not all time zone data files exist locally!");
+		}
+
 		return allTimeZoneDatabaseFilesExist;
 	}
 
