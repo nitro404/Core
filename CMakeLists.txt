@@ -50,6 +50,7 @@ target_compile_definitions(${PROJECT_NAME}
 		DATE_VERSION="${date_VERSION}"
 		DOUBLE_CONVERSION_VERSION="${double-conversion_VERSION}"
 		GFLAGS_VERSION="${gflags_VERSION}"
+		OPEN_VCDIFF_VERSION="${open-vcdiff_VERSION}"
 )
 
 if(WIN32)
@@ -88,6 +89,9 @@ set(CORE_LIBRARIES
 	Libssh2::libssh2
 	libzip::zip
 	magic_enum::magic_enum
+	open-vcdiff::vcdcom
+	open-vcdiff::vcddec
+	open-vcdiff::vcdenc
 	OpenSSL::SSL
 	OpenSSL::Crypto
 	RapidJSON::rapidjson

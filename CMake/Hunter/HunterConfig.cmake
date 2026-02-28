@@ -235,6 +235,16 @@ hunter_config(magic_enum
 		MAGIC_ENUM_OPT_INSTALL_PACKAGE_XML=OFF
 )
 
+hunter_config(open-vcdiff
+	URL "https://github.com/Telefrag-Software/open-vcdiff/archive/refs/heads/hunter-0.8.4.2.zip"
+	VERSION "0.8.4.2"
+	SHA1 "f03bc3de1caaa54bf7ecfa673152b83de1a11372"
+	CMAKE_ARGS
+		vcdiff_build_exec=OFF
+		BUILD_SHARED_LIBS=OFF
+		BUILD_TESTING=OFF
+)
+
 hunter_config(RapidJSON
 	URL "https://github.com/Telefrag-Software/rapidjson/archive/refs/heads/hunter-1.1.0.4.zip"
 	VERSION "1.1.0.4"
