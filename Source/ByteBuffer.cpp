@@ -3,6 +3,7 @@
 #include "Compression/BZip2Utilities.h"
 #include "Compression/LZMAUtilities.h"
 #include "Compression/ZLibUtilities.h"
+#include "Diff/OpenVCDiffByteBufferOutputStream.h"
 #include "Utilities/FileUtilities.h"
 #include "Utilities/NumberUtilities.h"
 #include "Utilities/StringUtilities.h"
@@ -11,6 +12,8 @@
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
 #include <double-conversion/ieee.h>
+#include <google/vcdecoder.h>
+#include <google/vcencoder.h>
 #include <magic_enum/magic_enum.hpp>
 #include <spdlog/spdlog.h>
 #include <zstd.h>
@@ -2127,6 +2130,54 @@ bool ByteBuffer::containsString(const std::string & value, bool caseSensitive) c
 	}
 
 	return false;
+}
+
+std::unique_ptr<ByteBuffer> ByteBuffer::diff(const ByteBuffer &targetData) {
+	open_vcdiff::HashedDictionary hashedDictionary(reinterpret_cast<const char *>(getRawData()), getSize(), false);
+
+	if(!hashedDictionary.Init()) {
+		spdlog::error("Failed to initialize Open-VCDiff hashed dictionary.");
+		return nullptr;
+	}
+
+	OpenVCDiffByteBufferOutputStream diffDataStream;
+	open_vcdiff::VCDiffStreamingEncoder encoder(&hashedDictionary, open_vcdiff::VCD_FORMAT_INTERLEAVED, true);
+
+	if(!encoder.StartEncoding(&diffDataStream)) {
+		spdlog::error("Failed to start Open-VCDiff encoding.");
+		return nullptr;
+	}
+
+	if(!encoder.EncodeChunk(reinterpret_cast<const char *>(targetData.getRawData()), targetData.getSize(), &diffDataStream)) {
+		spdlog::error("Failed to encode chunk using Open-VCDiff.");
+		return nullptr;
+	}
+
+	if(!encoder.FinishEncoding(&diffDataStream)) {
+		spdlog::error("Failed to finish Open-VCDiff encoding.");
+		return nullptr;
+	}
+
+	return diffDataStream.transferData();
+}
+
+std::unique_ptr<ByteBuffer> ByteBuffer::patch(const ByteBuffer &diffData) {
+	OpenVCDiffByteBufferOutputStream outputDataStream;
+	open_vcdiff::VCDiffStreamingDecoder decoder;
+
+	decoder.StartDecoding(reinterpret_cast<const char *>(getRawData()), getSize());
+
+	if(!decoder.DecodeChunk(reinterpret_cast<const char *>(diffData.getRawData()), diffData.getSize(), &outputDataStream)) {
+		spdlog::error("Failed to decode chunk using Open-VCDiff.");
+		return nullptr;
+	}
+
+	if(!decoder.FinishDecoding()) {
+		spdlog::error("Failed to finish Open-VCDiff decoding.");
+		return nullptr;
+	}
+
+	return outputDataStream.transferData();
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::clone() const {

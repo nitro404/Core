@@ -259,6 +259,10 @@ public:
 	bool writeBytes(const std::shared_ptr<const ByteBuffer> & buffer);
 
 	bool containsString(const std::string & value, bool caseSensitive = true) const;
+
+	std::unique_ptr<ByteBuffer> diff(const ByteBuffer &targetData);
+	std::unique_ptr<ByteBuffer> patch(const ByteBuffer &diffData);
+
 	std::unique_ptr<ByteBuffer> clone() const;
 	std::unique_ptr<ByteBuffer> copyOfRange(size_t start, size_t end) const;
 	std::unique_ptr<ByteBuffer> decompressed(CompressionMethod compressionMethod, size_t offset = std::numeric_limits<size_t>::max(), size_t size = std::numeric_limits<size_t>::max()) const;

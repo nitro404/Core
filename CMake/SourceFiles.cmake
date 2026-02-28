@@ -71,6 +71,8 @@ set(CORE_SOURCE_FILES
 	Compression/LZMAUtilities.cpp
 	Compression/ZLibUtilities.h
 	Compression/ZLibUtilities.cpp
+	Diff/OpenVCDiffByteBufferOutputStream.h
+	Diff/OpenVCDiffByteBufferOutputStream.cpp
 	Core.h
 	Date.h
 	Date.cpp
