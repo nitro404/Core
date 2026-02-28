@@ -273,12 +273,9 @@ public:
 	std::string toHexadecimal(bool uppercase = false) const;
 	std::string toBase64() const;
 
-	static ByteBuffer fromBinary(const std::string & binary, bool * error);
-	static std::optional<ByteBuffer> fromBinary(const std::string & binary);
-	static ByteBuffer fromHexadecimal(const std::string & hexadecimal, bool * error);
-	static std::optional<ByteBuffer> fromHexadecimal(const std::string & hexadecimal);
-	static ByteBuffer fromBase64(const std::string & base64, bool * error);
-	static std::optional<ByteBuffer> fromBase64(const std::string & base64);
+	static std::unique_ptr<ByteBuffer> fromBinary(const std::string & binary);
+	static std::unique_ptr<ByteBuffer> fromHexadecimal(const std::string & hexadecimal);
+	static std::unique_ptr<ByteBuffer> fromBase64(const std::string & base64);
 	static std::string binaryToHexadecimal(const std::string & binary);
 	static std::string binaryToBase64(const std::string & binary);
 	static std::string hexadecimalToBinary(const std::string & hexadecimal);

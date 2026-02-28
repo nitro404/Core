@@ -2616,45 +2616,25 @@ std::string ByteBuffer::toBase64() const {
 	return base64;
 }
 
-ByteBuffer ByteBuffer::fromBinary(const std::string & binary, bool * error) {
+std::unique_ptr<ByteBuffer> ByteBuffer::fromBinary(const std::string & binary) {
 	if(binary.length() % 8 != 0 || binary.find_first_not_of("01") != std::string::npos) {
-		if(error != nullptr) {
-			*error = true;
-		}
-
-		return ByteBuffer();
+		return nullptr;
 	}
 
 	size_t size = binary.length() / 8;
-	ByteBuffer buffer(size);
-	buffer.resize(size);
+	std::unique_ptr<ByteBuffer> buffer(std::make_unique<ByteBuffer>(size));
+	buffer->resize(size);
 
 	for(size_t i = 0; i < size; i++) {
-		(*buffer.m_data)[i] = static_cast<uint8_t>(std::bitset<8>(binary, i * 8, 8).to_ulong());
+		(*buffer->m_data)[i] = static_cast<uint8_t>(std::bitset<8>(binary, i * 8, 8).to_ulong());
 	}
 
 	return buffer;
 }
 
-std::optional<ByteBuffer> ByteBuffer::fromBinary(const std::string & binary) {
-	bool error = false;
-
-	ByteBuffer byteBuffer(ByteBuffer::fromBinary(binary, &error));
-
-	if(error) {
-		return {};
-	}
-
-	return byteBuffer;
-}
-
-ByteBuffer ByteBuffer::fromHexadecimal(const std::string & hexadecimal, bool * error) {
+std::unique_ptr<ByteBuffer> ByteBuffer::fromHexadecimal(const std::string & hexadecimal) {
 	if(hexadecimal.length() % 2 != 0) {
-		if(error != nullptr) {
-			*error = true;
-		}
-
-		return ByteBuffer();
+		return nullptr;
 	}
 
 	size_t size = hexadecimal.length() / 2;
@@ -2662,8 +2642,8 @@ ByteBuffer ByteBuffer::fromHexadecimal(const std::string & hexadecimal, bool * e
 	uint8_t part = 0;
 	uint8_t c = 0;
 	size_t offset = 0;
-	ByteBuffer buffer(size);
-	buffer.resize(size);
+	std::unique_ptr<ByteBuffer> buffer(std::make_unique<ByteBuffer>(size));
+	buffer->resize(size);
 
 	for(size_t i = 0; i < size; i += 2) {
 		for(int j = 0; j < 2; j++) {
@@ -2679,11 +2659,7 @@ ByteBuffer ByteBuffer::fromHexadecimal(const std::string & hexadecimal, bool * e
 				part = c - 'a' + 10;
 			}
 			else {
-				if(error != nullptr) {
-					*error = true;
-				}
-
-				return ByteBuffer();
+				return nullptr;
 			}
 
 			if(j == 0) {
@@ -2694,31 +2670,19 @@ ByteBuffer ByteBuffer::fromHexadecimal(const std::string & hexadecimal, bool * e
 			}
 		}
 
-		(*buffer.m_data)[offset++] = value;
+		(*buffer->m_data)[offset++] = value;
 	}
 
 	return buffer;
 }
 
-std::optional<ByteBuffer> ByteBuffer::fromHexadecimal(const std::string & hexadecimal) {
-	bool error = false;
-
-	ByteBuffer byteBuffer(ByteBuffer::fromHexadecimal(hexadecimal, &error));
-
-	if(error) {
-		return {};
-	}
-
-	return byteBuffer;
-}
-
-ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
+std::unique_ptr<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
 	char c = '\0';
 	uint8_t part = 0;
 	uint32_t value = 0;
 	uint8_t bitShift = 0;
 	size_t length = (base64.length() * 3) / 4;
-	ByteBuffer buffer(length);
+	std::unique_ptr<ByteBuffer> buffer(std::make_unique<ByteBuffer>(length));
 
 	for(size_t i = 0; i < base64.length(); i++) {
 		c = base64[i];
@@ -2739,11 +2703,7 @@ ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
 			part = 63;
 		}
 		else if(c != '=' || (c == '=' && i + 1 < base64.length() && base64[i + 1] != '=')) {
-			if(error != nullptr) {
-				*error = true;
-			}
-
-			return ByteBuffer();
+			return nullptr;
 		}
 
 		if(c != '=') {
@@ -2752,7 +2712,7 @@ ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
 
 			if(bitShift >= 8) {
 				bitShift -= 8;
-				buffer.writeByte(value >> bitShift);
+				buffer->writeByte(value >> bitShift);
 				value &= (1 << bitShift) - 1;
 			}
 		}
@@ -2762,39 +2722,63 @@ ByteBuffer ByteBuffer::fromBase64(const std::string & base64, bool * error) {
 }
 
 std::string ByteBuffer::binaryToHexadecimal(const std::string & binary) {
-	return fromBinary(binary).value_or(EMPTY_BYTE_BUFFER).toHexadecimal();
+	std::unique_ptr<ByteBuffer> buffer(fromBinary(binary));
+
+	if(buffer == nullptr) {
+		return nullptr;
+	}
+
+	return buffer->toHexadecimal();
 }
 
 std::string ByteBuffer::binaryToBase64(const std::string & binary) {
-	return fromBinary(binary).value_or(EMPTY_BYTE_BUFFER).toBase64();
+	std::unique_ptr<ByteBuffer> buffer(fromBinary(binary));
+
+	if(buffer == nullptr) {
+		return nullptr;
+	}
+
+	return buffer->toBase64();
 }
 
 std::string ByteBuffer::hexadecimalToBinary(const std::string & hexadecimal) {
-	return fromHexadecimal(hexadecimal).value_or(EMPTY_BYTE_BUFFER).toBinary();
+	std::unique_ptr<ByteBuffer> buffer(fromHexadecimal(hexadecimal));
+
+	if(buffer == nullptr) {
+		return nullptr;
+	}
+
+	return buffer->toBinary();
 }
 
 std::string ByteBuffer::hexadecimalToBase64(const std::string & hexadecimal) {
-	return fromHexadecimal(hexadecimal).value_or(EMPTY_BYTE_BUFFER).toBase64();
+	std::unique_ptr<ByteBuffer> buffer(fromHexadecimal(hexadecimal));
+
+	if(buffer == nullptr) {
+		return nullptr;
+	}
+
+	return buffer->toBase64();
 }
 
 std::string ByteBuffer::base64ToBinary(const std::string & base64) {
-	return fromBase64(base64).value_or(EMPTY_BYTE_BUFFER).toBinary();
+	std::unique_ptr<ByteBuffer> buffer(fromBase64(base64));
+
+	if(buffer == nullptr) {
+		return nullptr;
+	}
+
+	return buffer->toBinary();
 }
 
 std::string ByteBuffer::base64ToHexadecimal(const std::string & base64) {
-	return fromBase64(base64).value_or(EMPTY_BYTE_BUFFER).toHexadecimal();
-}
+	std::unique_ptr<ByteBuffer> buffer(fromBase64(base64));
 
-std::optional<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
-	bool error = false;
-
-	ByteBuffer byteBuffer(ByteBuffer::fromBase64(base64, &error));
-
-	if(error) {
-		return {};
+	if(buffer == nullptr) {
+		return nullptr;
 	}
 
-	return byteBuffer;
+	return buffer->toHexadecimal();
 }
 
 const ByteBuffer & ByteBuffer::emptyByteBuffer() {
