@@ -2677,14 +2677,25 @@ std::unique_ptr<ByteBuffer> ByteBuffer::fromHexadecimal(const std::string & hexa
 }
 
 std::unique_ptr<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
-	char c = '\0';
+	uint8_t c = '\0';
 	uint8_t part = 0;
 	uint32_t value = 0;
 	uint8_t bitShift = 0;
-	size_t length = (base64.length() * 3) / 4;
-	std::unique_ptr<ByteBuffer> buffer(std::make_unique<ByteBuffer>(length));
+	size_t paddingLength = 0;
 
-	for(size_t i = 0; i < base64.length(); i++) {
+	if(!base64.empty()) {
+		if(base64.back() == '=') {
+			paddingLength++;
+		}
+
+		if(base64.length() > 1 && base64[base64.length() - 2] == '=') {
+			paddingLength++;
+		}
+	}
+
+	std::unique_ptr<ByteBuffer> buffer(std::make_unique<ByteBuffer>((base64.length() * 3) / 4 - paddingLength));
+
+	for(size_t i = 0; i < base64.length() - paddingLength; i++) {
 		c = base64[i];
 
 		if(c >= 'A' && c <= 'Z') {
@@ -2702,20 +2713,24 @@ std::unique_ptr<ByteBuffer> ByteBuffer::fromBase64(const std::string & base64) {
 		else if(c == '/') {
 			part = 63;
 		}
-		else if(c != '=' || (c == '=' && i + 1 < base64.length() && base64[i + 1] != '=')) {
+		else {
+			spdlog::error("Invalid base 64 character '{}' at index {}.", static_cast<char>(c), i);
 			return nullptr;
 		}
 
-		if(c != '=') {
-			value = (value << 6) | part;
-			bitShift += 6;
+		value = (value << 6) | part;
+		bitShift += 6;
 
-			if(bitShift >= 8) {
-				bitShift -= 8;
-				buffer->writeByte(value >> bitShift);
-				value &= (1 << bitShift) - 1;
-			}
+		if(bitShift >= 8) {
+			bitShift -= 8;
+			buffer->writeByte(value >> bitShift);
+			value &= (1 << bitShift) - 1;
 		}
+	}
+
+	if(bitShift != paddingLength * 2) {
+		spdlog::error("Malformed base 64 data.");
+		return nullptr;
 	}
 
 	return buffer;
