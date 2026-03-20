@@ -1,7 +1,6 @@
 #include "Archive.h"
 
 #include "Utilities/FileUtilities.h"
-#include "Utilities/StringUtilities.h"
 
 #include <filesystem>
 
@@ -131,6 +130,14 @@ bool Archive::hasEntryWithName(const std::string & entryName, bool includeSubdir
 	return indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
 }
 
+bool Archive::hasEntryWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	return indexOfFirstEntryWithExtension(extension, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
+}
+
+bool Archive::hasEntryWithExtension(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	return indexOfFirstEntryWithExtension(extensions, includeSubdirectories, caseSensitive) != std::numeric_limits<size_t>::max();
+}
+
 size_t Archive::indexOfEntry(const std::string & entryPath, bool caseSensitive) const {
 	if(entryPath.empty()) {
 		return std::numeric_limits<size_t>::max();
@@ -175,6 +182,138 @@ size_t Archive::indexOfFirstEntryWithName(const std::string & entryName, bool in
 	return std::numeric_limits<size_t>::max();
 }
 
+size_t Archive::indexOfLastEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
+	if(entryName.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_reverse_iterator i = entries.crbegin(); i != entries.crend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqual(Utilities::trimTrailingPathSeparator((*i)->getName()), Utilities::trimTrailingPathSeparator(entryName), caseSensitive)) {
+			return entries.crend() - i - 1;
+		}
+	}
+
+	return std::numeric_limits<size_t>::max();
+}
+
+size_t Archive::indexOfFirstEntryWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	if(extension.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.cbegin(); i != entries.cend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqual((*i)->getFileExtension(), extension, caseSensitive)) {
+			return i - entries.cbegin();
+		}
+	}
+
+	return std::numeric_limits<size_t>::max();
+}
+
+size_t Archive::indexOfFirstEntryWithExtension(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	if(extensions.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_iterator i = entries.cbegin(); i != entries.cend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
+			continue;
+		}
+
+		for(const std::string & extension : extensions) {
+			if(extension.empty()) {
+				continue;
+			}
+
+			if(Utilities::areStringsEqual((*i)->getFileExtension(), extension, caseSensitive)) {
+				return i - entries.cbegin();
+			}
+		}
+	}
+
+	return std::numeric_limits<size_t>::max();
+}
+
+size_t Archive::indexOfLastEntryWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	if(extension.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_reverse_iterator i = entries.crbegin(); i != entries.crend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqual((*i)->getFileExtension(), extension, caseSensitive)) {
+			return entries.crend() - i - 1;
+		}
+	}
+
+	return std::numeric_limits<size_t>::max();
+}
+
+size_t Archive::indexOfLastEntryWithExtension(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	if(extensions.empty()) {
+		return std::numeric_limits<size_t>::max();
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+
+	for(std::vector<std::shared_ptr<ArchiveEntry>>::const_reverse_iterator i = entries.crbegin(); i != entries.crend(); ++i) {
+		if(*i == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && (*i)->isInSubdirectory()) {
+			continue;
+		}
+
+		for(const std::string & extension : extensions) {
+			if(extension.empty()) {
+				continue;
+			}
+
+			if(Utilities::areStringsEqual((*i)->getFileExtension(), extension, caseSensitive)) {
+				return entries.crend() - i - 1;
+			}
+		}
+	}
+
+	return std::numeric_limits<size_t>::max();
+}
+
 const std::shared_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, bool caseSensitive) const {
 	return getEntry(indexOfEntry(entryPath, caseSensitive));
 }
@@ -185,6 +324,26 @@ std::shared_ptr<ArchiveEntry> Archive::getEntry(const std::string & entryPath, b
 
 std::shared_ptr<ArchiveEntry> Archive::getFirstEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
 	return getEntry(indexOfFirstEntryWithName(entryName, includeSubdirectories, caseSensitive));
+}
+
+std::shared_ptr<ArchiveEntry> Archive::getLastEntryWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
+	return getEntry(indexOfLastEntryWithName(entryName, includeSubdirectories, caseSensitive));
+}
+
+std::shared_ptr<ArchiveEntry> Archive::getFirstEntryWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	return getEntry(indexOfFirstEntryWithExtension(extension, includeSubdirectories, caseSensitive));
+}
+
+std::shared_ptr<ArchiveEntry> Archive::getFirstEntryWithExtension(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	return getEntry(indexOfFirstEntryWithExtension(extensions, includeSubdirectories, caseSensitive));
+}
+
+std::shared_ptr<ArchiveEntry> Archive::getLastEntryWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	return getEntry(indexOfLastEntryWithExtension(extension, includeSubdirectories, caseSensitive));
+}
+
+std::shared_ptr<ArchiveEntry> Archive::getLastEntryWithExtension(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	return getEntry(indexOfLastEntryWithExtension(extensions, includeSubdirectories, caseSensitive));
 }
 
 const std::shared_ptr<ArchiveEntry> Archive::getEntry(size_t index) const {
@@ -224,7 +383,7 @@ std::vector<std::shared_ptr<ArchiveEntry>> Archive::getRootEntries() const {
 	return rootEntries;
 }
 
-std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithName(const std::string & entryName, bool caseSensitive) const {
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithName(const std::string & entryName, bool includeSubdirectories, bool caseSensitive) const {
 	if(entryName.empty()) {
 		return {};
 	}
@@ -237,12 +396,73 @@ std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithName(const std
 			continue;
 		}
 
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
+			continue;
+		}
+
 		if(Utilities::areStringsEqual(entry->getName(), entryName, caseSensitive)) {
 			entriesWithName.push_back(entry);
 		}
 	}
 
 	return entriesWithName;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithExtension(const std::string & extension, bool includeSubdirectories, bool caseSensitive) const {
+	if(extension.empty()) {
+		return {};
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesWithExtension;
+
+	for(std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqualIgnoreCase(entry->getFileExtension(), extension)) {
+			entriesWithExtension.push_back(entry);
+		}
+	}
+
+	return entriesWithExtension;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesWithExtensions(const std::vector<std::string> & extensions, bool includeSubdirectories, bool caseSensitive) const {
+	if(extensions.empty()) {
+		return {};
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesWithExtension;
+
+	for(std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
+			continue;
+		}
+
+		for(const std::string & extension : extensions) {
+			if(extension.empty()) {
+				continue;
+			}
+
+			if(Utilities::areStringsEqualIgnoreCase(entry->getFileExtension(), extension)) {
+				entriesWithExtension.push_back(entry);
+				break;
+			}
+		}
+	}
+
+	return entriesWithExtension;
 }
 
 std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesInDirectory(const std::string & directoryPath, bool includeSubdirectories, bool caseSensitive) const {
@@ -288,7 +508,111 @@ std::vector<std::shared_ptr<ArchiveEntry>> Archive::getEntriesInDirectory(const 
 	return entriesInDirectory;
 }
 
-size_t Archive::extractAllEntries(const std::string & destionationDirectoryPath, bool overwrite) {
+std::shared_ptr<ArchiveEntry> Archive::extractFirstEntryWithExtension(const std::string & extension, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	std::shared_ptr<ArchiveEntry> entry(getFirstEntryWithExtension(extension, includeSubdirectories, caseSensitive));
+
+	if(entry != nullptr && entry->writeToFile(directory, overwrite)) {
+		return entry;
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<ArchiveEntry> Archive::extractFirstEntryWithExtension(const std::vector<std::string> & extensions, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	std::shared_ptr<ArchiveEntry> entry(getFirstEntryWithExtension(extensions, includeSubdirectories, caseSensitive));
+
+	if(entry != nullptr && entry->writeToFile(directory, overwrite)) {
+		return entry;
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<ArchiveEntry> Archive::extractLastEntryWithExtension(const std::string & extension, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	std::shared_ptr<ArchiveEntry> entry(getLastEntryWithExtension(extension, includeSubdirectories, caseSensitive));
+
+	if(entry != nullptr && entry->writeToFile(directory, overwrite)) {
+		return entry;
+	}
+
+	return nullptr;
+}
+
+std::shared_ptr<ArchiveEntry> Archive::extractLastEntryWithExtension(const std::vector<std::string> & extensions, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	std::shared_ptr<ArchiveEntry> entry(getLastEntryWithExtension(extensions, includeSubdirectories, caseSensitive));
+
+	if(entry != nullptr && entry->writeToFile(directory, overwrite)) {
+		return entry;
+	}
+
+	return nullptr;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::extractAllEntriesWithExtension(const std::string & extension, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	if(extension.empty()) {
+		return {};
+	}
+
+	std::shared_ptr<ArchiveEntry> entry;
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> entriesWithExtension(getEntriesWithExtension(extension));
+	std::vector<std::shared_ptr<ArchiveEntry>> extractedFiles;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
+			continue;
+		}
+
+		if(Utilities::areStringsEqual(entry->getFileExtension(), extension, caseSensitive)) {
+			if(entry->writeToFile(directory, overwrite)) {
+				extractedFiles.push_back(entry);
+			}
+		}
+	}
+
+	return extractedFiles;
+}
+
+std::vector<std::shared_ptr<ArchiveEntry>> Archive::extractAllEntriesWithExtensions(const std::vector<std::string> & extensions, const std::string & directory, bool overwrite, bool includeSubdirectories, bool caseSensitive) const {
+	if(extensions.empty()) {
+		return {};
+	}
+
+	std::vector<std::shared_ptr<ArchiveEntry>> entries(getEntries());
+	std::vector<std::shared_ptr<ArchiveEntry>> extractedFiles;
+
+	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
+		if(entry == nullptr) {
+			continue;
+		}
+
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
+			continue;
+		}
+
+		for(const std::string & extension : extensions) {
+			if(extension.empty()) {
+				continue;
+			}
+
+			if(Utilities::areStringsEqual(entry->getFileExtension(), extension, caseSensitive)) {
+				if(entry->writeToFile(directory, overwrite)) {
+					extractedFiles.push_back(entry);
+				}
+
+				break;
+			}
+		}
+	}
+
+	return extractedFiles;
+}
+
+size_t Archive::extractAllEntries(const std::string & destionationDirectoryPath, bool includeSubdirectories, bool overwrite) {
 	if(!isOpen()) {
 		return 0;
 	}
@@ -313,6 +637,10 @@ size_t Archive::extractAllEntries(const std::string & destionationDirectoryPath,
 
 	for(const std::shared_ptr<ArchiveEntry> & entry : entries) {
 		if(entry == nullptr) {
+			continue;
+		}
+		
+		if(!includeSubdirectories && entry->isInSubdirectory()) {
 			continue;
 		}
 
