@@ -26,7 +26,7 @@ public:
 	FactoryFunction(const std::function<std::unique_ptr<T>()> & func);
 	FactoryFunction(FactoryFunction<T> && factoryFunction) noexcept;
 	FactoryFunction<T> & operator = (FactoryFunction<T> && factoryFunction) noexcept;
-	virtual ~FactoryFunction();
+	~FactoryFunction() override;
 
 	std::unique_ptr<T> callFunctionDirect() const;
 	const std::function<std::unique_ptr<T>()> & getFunctionDirect() const;

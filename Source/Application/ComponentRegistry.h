@@ -31,7 +31,7 @@ private:
 		RawComponent(T ** component);
 		RawComponent(RawComponent<T> && component) noexcept;
 		const RawComponent<T> & operator = (RawComponent<T> && component) noexcept;
-		virtual ~RawComponent();
+		~RawComponent() override;
 
 	private:
 		T ** m_component;
@@ -46,7 +46,7 @@ private:
 		OwnedUniqueComponent(std::unique_ptr<T> component);
 		OwnedUniqueComponent(OwnedUniqueComponent<T> && component) noexcept;
 		const OwnedUniqueComponent<T> & operator = (OwnedUniqueComponent<T> && component) noexcept;
-		virtual ~OwnedUniqueComponent();
+		~OwnedUniqueComponent() override;
 
 	private:
 		std::unique_ptr<T> m_component;
@@ -61,7 +61,7 @@ private:
 		ExternalUniqueComponent(std::unique_ptr<T> * component);
 		ExternalUniqueComponent(ExternalUniqueComponent<T> && component) noexcept;
 		const ExternalUniqueComponent<T> & operator = (ExternalUniqueComponent<T> && component) noexcept;
-		virtual ~ExternalUniqueComponent();
+		~ExternalUniqueComponent() override;
 
 	private:
 		std::unique_ptr<T> * m_component;
@@ -75,7 +75,7 @@ private:
 		GlobalComponent(std::function<void()> destroyFunction);
 		GlobalComponent(GlobalComponent && component) noexcept;
 		const GlobalComponent & operator = (GlobalComponent && component) noexcept;
-		virtual ~GlobalComponent();
+		~GlobalComponent() override;
 
 	private:
 		std::function<void()> m_destroyFunction;

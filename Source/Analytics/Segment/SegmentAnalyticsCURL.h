@@ -70,7 +70,7 @@ private:
 		SingleEventTransfer(std::shared_ptr<HTTPRequest> httpRequest, std::future<std::shared_ptr<HTTPResponse>> futureResponse, std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
 		SingleEventTransfer(SingleEventTransfer && eventTransfer) noexcept;
 		const SingleEventTransfer & operator = (SingleEventTransfer && eventTransfer) noexcept;
-		virtual ~SingleEventTransfer();
+		~SingleEventTransfer() override;
 
 		const std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent() const;
 		std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent();
@@ -87,7 +87,7 @@ private:
 		BatchEventTransfer(std::shared_ptr<HTTPRequest> httpRequest, std::future<std::shared_ptr<HTTPResponse>> futureResponse, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);
 		BatchEventTransfer(BatchEventTransfer && eventTransfer) noexcept;
 		const BatchEventTransfer & operator = (BatchEventTransfer && eventTransfer) noexcept;
-		virtual ~BatchEventTransfer();
+		~BatchEventTransfer() override;
 
 		const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents() const;
 		std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents();
@@ -124,7 +124,7 @@ private:
 		SingleFailedEvent(std::chrono::milliseconds retryTransferDelay, std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
 		SingleFailedEvent(SingleFailedEvent && failedEvent) noexcept;
 		const SingleFailedEvent & operator = (SingleFailedEvent && failedEvent) noexcept;
-		virtual ~SingleFailedEvent();
+		~SingleFailedEvent() override;
 
 		const std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent() const;
 		std::shared_ptr<SegmentAnalyticEvent> getAnalyticEvent();
@@ -142,7 +142,7 @@ private:
 		BatchFailedEvents(std::chrono::milliseconds retryTransferDelay, const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & analyticEvents);
 		BatchFailedEvents(BatchFailedEvents && failedEvent) noexcept;
 		const BatchFailedEvents & operator = (BatchFailedEvents && failedEvent) noexcept;
-		virtual ~BatchFailedEvents();
+		~BatchFailedEvents() override;
 
 		const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents() const;
 		std::vector<std::shared_ptr<SegmentAnalyticEvent>> & getAnalyticEvents();
