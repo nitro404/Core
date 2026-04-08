@@ -2,6 +2,7 @@ include_guard()
 
 set(BOOST_COMPONENTS
 	random
+	regex
 )
 
 hunter_add_package(ZLIB)
