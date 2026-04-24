@@ -7,9 +7,9 @@ else()
 endif()
 
 hunter_config(Boost
-	URL "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2"
-	VERSION "1.87"
-	SHA1 "acf19e9d53f0b6db8e85452978eb9c731ef8b865"
+	URL "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.tar.bz2"
+	VERSION "1.91"
+	SHA1 "9c34db516413241449b664c2e1b5add089515bd6"
 )
 
 # Brotli is used by cURL.
