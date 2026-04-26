@@ -332,7 +332,7 @@ hunter_config(tinyxml2
 		tinyxml2_INSTALL_PKGCONFIG=ON
 )
 
-# ZLib is used by cURL, LibZIP, LibPNG, LibTIFF, PCRE2, and wxWidgets.
+# ZLib is used by cURL, LibZIP, LibSSH2, LibPNG, LibTIFF, PCRE2, and wxWidgets.
 hunter_config(ZLIB
 	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"
 	VERSION "1.3.1.2"
@@ -384,9 +384,9 @@ hunter_config(c-ares
 
 # LibSSH2 is used by cURL.
 hunter_config(Libssh2
-	URL "https://codeload.github.com/libssh2/libssh2/zip/tags/libssh2-1.11.1"
-	VERSION "1.11.1"
-	SHA1 "9ce8506fed4742280730b15c7d9b64d0daef3955"
+	URL "https://github.com/Telefrag-Software/libssh2/archive/refs/heads/hunter-1.11.1.1.zip"
+	VERSION "1.11.1.1"
+	SHA1 "c959490d6145d3ba10a1c9dd6ec88d68087fbcf1"
 	CMAKE_ARGS
 		BUILD_STATIC_LIBS=ON
 		BUILD_SHARED_LIBS=OFF
@@ -400,9 +400,11 @@ hunter_config(Libssh2
 		ENABLE_ECDSA_WINCNG=OFF
 		LINT=OFF
 		LIBSSH2_BUILD_DOCS=OFF
+		CLEAR_MEMORY=ON
+		ENABLE_ZLIB_COMPRESSION=ON
 )
 
-# OpenSSL is used by cURL and LibZIP.
+# OpenSSL is used by cURL, LibZIP, and LibSSH2.
 hunter_config(OpenSSL
 	VERSION "3.5.1"
 )
