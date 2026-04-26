@@ -162,9 +162,9 @@ hunter_config(GTest
 )
 
 hunter_config(libcdio
-	URL "https://github.com/Telefrag-Software/libcdio/archive/refs/heads/hunter-2.3.0.1.zip"
-	VERSION "2.3.0.1"
-	SHA1 "4711714d852b5352c0ac7090eb6b23e1b8a22701"
+	URL "https://github.com/Telefrag-Software/libcdio/archive/refs/heads/hunter-2.3.0.2.zip"
+	VERSION "2.3.0.2"
+	SHA1 "7f1c7465c2d6cf65c6d49545c205be59f14a8683"
 	CMAKE_ARGS
 		BUILD_SHARED_LIBS=OFF
 		LIBCDIO_BUILD_CXX_WRAPPER=ON
