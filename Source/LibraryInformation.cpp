@@ -3,7 +3,11 @@
 #include "Core.h"
 #include "Utilities/StringUtilities.h"
 
+#if defined(WINDOWS)
+
 #include <winsock2.h>
+
+#endif // WINDOWS
 
 #include <ares_version.h>
 #include <boost/version.hpp>

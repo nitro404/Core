@@ -89,8 +89,8 @@ bool TarGZipArchive::isTarGZipArchive(const std::string & filePath) {
 
 bool TarGZipArchive::isTarGZipArchive(const ByteBuffer & data) {
 	static const std::array<std::array<uint8_t, 2>, 2> GZIP_MAGIC_NUMBERS({
-		{ 0x1F, 0x8B },
-		{ 0x1F, 0x9E }
+		{{ 0x1F, 0x8B }},
+		{{ 0x1F, 0x9E }}
 	});
 
 	for(const std::array<uint8_t, 2> & magicNumber : GZIP_MAGIC_NUMBERS) {

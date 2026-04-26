@@ -88,7 +88,7 @@ bool TarLZMAArchive::isTarLZMAArchive(const std::string & filePath) {
 }
 
 bool TarLZMAArchive::isTarLZMAArchive(const ByteBuffer & data) {
-	static const std::array<uint8_t, 3> LZMA_MAGIC_NUMBER({ 0x5D, 0x00, 0x00 });
+	static const std::array<uint8_t, 3> LZMA_MAGIC_NUMBER({{ 0x5D, 0x00, 0x00 }});
 
 	if(data.getSize() < LZMA_MAGIC_NUMBER.size()) {
 		return false;

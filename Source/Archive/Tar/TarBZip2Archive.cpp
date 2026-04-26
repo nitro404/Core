@@ -89,8 +89,8 @@ bool TarBZip2Archive::isTarBZip2Archive(const std::string & filePath) {
 
 bool TarBZip2Archive::isTarBZip2Archive(const ByteBuffer & data) {
 	static const std::array<std::array<uint8_t, 3>, 2> BZIP2_MAGIC_NUMBERS({
-		{ 0x42, 0x5A, 0x68 },
-		{ 0x42, 0x5A, 0x30 }
+		{{ 0x42, 0x5A, 0x68 }},
+		{{ 0x42, 0x5A, 0x30 }}
 	});
 
 	for(const std::array<uint8_t, 3> & magicNumber : BZIP2_MAGIC_NUMBERS) {

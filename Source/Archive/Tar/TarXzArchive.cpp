@@ -88,7 +88,7 @@ bool TarXZArchive::isTarXZArchive(const std::string & filePath) {
 }
 
 bool TarXZArchive::isTarXZArchive(const ByteBuffer & data) {
-	static const std::array<uint8_t, 6> XZ_MAGIC_NUMBER({ 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00 });
+	static const std::array<uint8_t, 6> XZ_MAGIC_NUMBER({{ 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00 }});
 
 	if(data.getSize() < XZ_MAGIC_NUMBER.size()) {
 		return false;
