@@ -86,7 +86,7 @@ namespace Utilities {
 	static std::chrono::time_point<std::chrono::system_clock> parseTimePointFromString(const std::string & time, const std::string & formatString, bool * error) {
 		std::chrono::time_point<std::chrono::system_clock> systemTime;
 		std::istringstream timeInput(time);
-		timeInput >> date::parse(formatString, systemTime);
+		date::from_stream(timeInput, formatString.c_str(), systemTime);
 
 		if(timeInput.fail() || timeInput.bad()) {
 			if(error != nullptr) {
