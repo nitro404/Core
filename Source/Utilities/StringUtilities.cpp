@@ -511,12 +511,12 @@ int32_t Utilities::compareStringsIgnoreCase(std::string_view s1, std::string_vie
 	return Utilities::compareStrings(s1, s2, false, ignoreCarriageReturn);
 }
 
-bool Utilities::startsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {
-	if(value.length() < suffix.length()) {
+bool Utilities::startsWith(std::string_view value, std::string_view prefix, bool caseSensitive) {
+	if(value.length() < prefix.length()) {
 		return false;
 	}
 
-	return Utilities::areStringsEqual(std::string_view(value.data(), suffix.length()), suffix, caseSensitive);
+	return Utilities::areStringsEqual(std::string_view(value.data(), prefix.length()), prefix, caseSensitive);
 }
 
 bool Utilities::endsWith(std::string_view value, std::string_view suffix, bool caseSensitive) {

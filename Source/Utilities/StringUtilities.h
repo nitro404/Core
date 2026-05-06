@@ -45,7 +45,7 @@ namespace Utilities {
 	int32_t compareStrings(std::string_view s1, std::string_view s2, bool caseSensitive = true, bool ignoreCarriageReturn = false);
 	bool areStringsEqualIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn = false);
 	int32_t compareStringsIgnoreCase(std::string_view s1, std::string_view s2, bool ignoreCarriageReturn = false);
-	bool startsWith(std::string_view value, std::string_view suffix, bool caseSensitive = true);
+	bool startsWith(std::string_view value, std::string_view prefix, bool caseSensitive = true);
 	bool endsWith(std::string_view value, std::string_view suffix, bool caseSensitive = true);
 	bool isComment(std::string_view data, std::string_view comment = "//");
 	bool isURL(const std::string & data);
