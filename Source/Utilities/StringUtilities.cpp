@@ -3,6 +3,7 @@
 #include "Utilities.h"
 
 #include <algorithm>
+#include <cctype>
 #include <codecvt>
 #include <cstring>
 #include <functional>
@@ -525,6 +526,28 @@ bool Utilities::endsWith(std::string_view value, std::string_view suffix, bool c
 	}
 
 	return Utilities::areStringsEqual(std::string_view(value.data() + value.length() - suffix.length(), suffix.length()), suffix, caseSensitive);
+}
+
+size_t Utilities::indexOf(std::string_view value, std::string_view query, bool caseSensitive) {
+	const std::string_view::const_iterator iterator(std::search(
+		value.begin(),
+		value.end(),
+		query.begin(),
+		query.end(),
+		[caseSensitive](char a, char b) {
+			if(caseSensitive) {
+				return a == b;
+			}
+
+			return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
+		}
+	));
+
+	return iterator != value.end() ? static_cast<size_t>(iterator - value.begin()) : std::numeric_limits<size_t>::max();
+}
+
+bool Utilities::contains(std::string_view value, std::string_view query, bool caseSensitive) {
+	return indexOf(value, query, caseSensitive) != std::numeric_limits<size_t>::max();
 }
 
 bool Utilities::isComment(std::string_view data, std::string_view comment) {
