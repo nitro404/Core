@@ -11,18 +11,6 @@ enum class Endianness {
 bool isBigEndian();
 bool isLittleEndian();
 Endianness getEndianness();
-int16_t littleToBigEndian(int16_t value);
-uint16_t littleToBigEndian(uint16_t value);
-int32_t littleToBigEndian(int32_t value);
-uint32_t littleToBigEndian(uint32_t value);
-int64_t littleToBigEndian(int64_t value);
-uint64_t littleToBigEndian(uint64_t value);
-int16_t bigToLittleEndian(int16_t value);
-uint16_t bigToLittleEndian(uint16_t value);
-int32_t bigToLittleEndian(int32_t value);
-uint32_t bigToLittleEndian(uint32_t value);
-int64_t bigToLittleEndian(int64_t value);
-uint64_t bigToLittleEndian(uint64_t value);
 int16_t fromBigEndian(int16_t value);
 uint16_t fromBigEndian(uint16_t value);
 int32_t fromBigEndian(int32_t value);
