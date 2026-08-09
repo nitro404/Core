@@ -11,7 +11,8 @@ public:
 	TarLZMAArchive & operator = (const TarLZMAArchive & t);
 	~TarLZMAArchive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
+	// CompressedTarArchive Virtuals
+	std::string getDefaultFileExtension() const override;
 
 	static bool isTarLZMAArchive(const std::string & filePath);
 	static bool isTarLZMAArchive(const ByteBuffer & data);

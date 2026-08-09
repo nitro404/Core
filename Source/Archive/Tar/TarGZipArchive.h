@@ -11,7 +11,8 @@ public:
 	TarGZipArchive & operator = (const TarGZipArchive & t);
 	~TarGZipArchive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
+	// CompressedTarArchive Virtuals
+	std::string getDefaultFileExtension() const override;
 
 	static bool isTarGZipArchive(const std::string & filePath);
 	static bool isTarGZipArchive(const ByteBuffer & data);

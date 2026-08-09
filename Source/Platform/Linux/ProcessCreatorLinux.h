@@ -9,7 +9,8 @@ class ProcessCreatorLinux : public ProcessCreator {
 public:
 	~ProcessCreatorLinux() override;
 
-	virtual std::unique_ptr<Process> createProcess(const std::string & applicationCommand, const std::optional<std::string> & workingDirectory = {}, Process::Priority = Process::DEFAULT_PRIORITY, uint64_t * nativeErrorCode = nullptr, std::string * nativeErrorMessage = nullptr) override;
+	// ProcessCreator Virtuals
+	std::unique_ptr<Process> createProcess(const std::string & applicationCommand, const std::optional<std::string> & workingDirectory = {}, Process::Priority = Process::DEFAULT_PRIORITY, uint64_t * nativeErrorCode = nullptr, std::string * nativeErrorMessage = nullptr) override;
 
 private:
 	ProcessCreatorLinux();

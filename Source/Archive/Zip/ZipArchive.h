@@ -70,31 +70,34 @@ public:
 		~Entry() override;
 
 		bool setName(const std::string & name);
-		virtual std::string getPath() const override;
 		bool move(const std::string & newBasePath, bool overwrite = false);
-		virtual uint64_t getIndex() const override;
-		virtual std::chrono::time_point<std::chrono::system_clock> getDate() const override;
-		virtual bool hasComment() const override;
-		virtual std::string getComment() const override;
 		bool setComment(const std::string & comment);
 		bool clearComment();
-		virtual uint64_t getCompressedSize() const override;
-		virtual uint64_t getUncompressedSize() const override;
 		bool hasUnsavedData() const;
-		virtual std::unique_ptr<ByteBuffer> getData() const override;
 		bool isCompressed() const;
 		CompressionMethod getCompressionMethod() const;
 		bool setCompressionMethod(CompressionMethod compressionMethod);
 		bool isEncrypted() const;
 		EncryptionMethod getEncryptionMethod() const;
 		bool setEncryptionMethod(EncryptionMethod encryptionMethod);
-		virtual uint32_t getCRC32() const override;
-		virtual bool writeToFile(const std::string & filePath, bool overwrite = false) override;
+
+		// ArchiveEntry Virtuals
+		std::string getPath() const override;
+		uint64_t getIndex() const override;
+		std::chrono::time_point<std::chrono::system_clock> getDate() const override;
+		bool hasComment() const override;
+		std::string getComment() const override;
+		uint64_t getCompressedSize() const override;
+		uint64_t getUncompressedSize() const override;
+		std::unique_ptr<ByteBuffer> getData() const override;
+		uint32_t getCRC32() const override;
+		bool writeToFile(const std::string & filePath, bool overwrite = false) override;
 
 	protected:
-		virtual bool isParentArchiveValid() const override;
-		virtual Archive * getParentArchive() const override;
-		virtual bool setParentArchive(Archive * archive) override;
+		// ArchiveEntry Virtuals
+		bool isParentArchiveValid() const override;
+		Archive * getParentArchive() const override;
+		bool setParentArchive(Archive * archive) override;
 
 	private:
 		using ZipFileHandle = std::unique_ptr<struct zip_file, std::function<void (struct zip_file *)>>;
@@ -124,10 +127,6 @@ public:
 	const ZipArchive & operator = (ZipArchive && archive) noexcept;
 	~ZipArchive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
-	virtual bool isOpen() const override;
-	virtual bool isModifiable() const override;
-	virtual std::string getFilePath() const override;
 	bool hasPassword() const;
 	const std::string & getPassword() const;
 	bool setPassword(const std::string & password);
@@ -141,15 +140,9 @@ public:
 	static bool isCompressionMethodSupported(CompressionMethod compressionMethod, CompressionType compressionType = CompressionType::Both);
 	static bool isEncryptionMethodSupported(EncryptionMethod encryptionMethod, EncryptionType encryptionType = EncryptionType::Both);
 	std::chrono::time_point<std::chrono::system_clock> getDate() const;
-	virtual bool hasComment() const override;
-	virtual std::string getComment() const override;
 	bool setComment(const std::string & comment);
 	bool clearComment();
-	virtual uint64_t getCompressedSize() const override;
 	const ByteBuffer * getData() const;
-	virtual size_t numberOfEntries() const override;
-	virtual size_t numberOfFiles() const override;
-	virtual size_t numberOfDirectories() const override;
 	std::shared_ptr<Entry> addFile(const std::string & filePath, const std::string & entryDirectoryPath = {}, bool overwrite = true);
 	std::shared_ptr<Entry> addData(std::unique_ptr<ByteBuffer> data, const std::string & entryFilePath, bool overwrite = true);
 	std::shared_ptr<Entry> addDirectory(const std::string & entryDirectoryPath);
@@ -168,14 +161,27 @@ public:
 	bool close(bool * saved = nullptr);
 	bool reopen(bool verifyConsistency = false);
 	bool save();
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
-	virtual std::string toDebugString(bool includeDate = false) const override;
+
+	// Archive Virtuals
+	std::string getDefaultFileExtension() const override;
+	bool isOpen() const override;
+	bool isModifiable() const override;
+	std::string getFilePath() const override;
+	bool hasComment() const override;
+	std::string getComment() const override;
+	uint64_t getCompressedSize() const override;
+	size_t numberOfEntries() const override;
+	size_t numberOfFiles() const override;
+	size_t numberOfDirectories() const override;
+	std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
+	std::string toDebugString(bool includeDate = false) const override;
 
 	static const std::string DEFAULT_FILE_EXTENSION;
 	static const EncryptionMethod DEFAULT_ENCRYPTION_METHOD;
 
 protected:
-	virtual void setFilePath(const std::string & filePath) override;
+	// Archive Virtuals
+	void setFilePath(const std::string & filePath) override;
 
 private:
 	class SourceBuffer final {

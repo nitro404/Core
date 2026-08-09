@@ -9,26 +9,27 @@ class DeviceInformationBridgeWindows final : public DeviceInformationBridge {
 public:
 	~DeviceInformationBridgeWindows() override;
 
-	virtual std::string getHostName() override;
-	virtual std::string getDeviceModel() override;
-	virtual std::string getDeviceModelIdentifier() override;
-	virtual std::string getDeviceType() override;
-	virtual std::string getDeviceManufacturerName() override;
-	virtual std::string getDeviceUniqueIdentifier() override;
-	virtual std::string getOperatingSystemName() override;
-	virtual std::string getOperatingSystemVersion() override;
-	virtual std::string getArchitectureName() override;
-	virtual std::string getProcessorName() override;
-	virtual std::string getMotherboardName() override;
-	virtual std::vector<std::string> getGraphicsCardNames() override;
-	virtual MemoryStatus getMemoryStatus() override;
-	virtual std::vector<std::string> getMemoryDetails() override;
-	virtual Dimension getScreenResolution() override;
-	virtual std::string getTimeZone() override;
-	virtual std::string getLocale() override;
-	virtual std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
-	virtual std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
-	virtual NetworkConnectionStatus getNetworkConnectionStatus() override;
+	// DeviceInformationBridge Virtuals
+	std::string getHostName() override;
+	std::string getDeviceModel() override;
+	std::string getDeviceModelIdentifier() override;
+	std::string getDeviceType() override;
+	std::string getDeviceManufacturerName() override;
+	std::string getDeviceUniqueIdentifier() override;
+	std::string getOperatingSystemName() override;
+	std::string getOperatingSystemVersion() override;
+	std::string getArchitectureName() override;
+	std::string getProcessorName() override;
+	std::string getMotherboardName() override;
+	std::vector<std::string> getGraphicsCardNames() override;
+	MemoryStatus getMemoryStatus() override;
+	std::vector<std::string> getMemoryDetails() override;
+	Dimension getScreenResolution() override;
+	std::string getTimeZone() override;
+	std::string getLocale() override;
+	std::string getMACAddress(NetworkConnectionType connectionType = NetworkConnectionType::Wired) override;
+	std::vector<NetworkAdapterInformation> getNetworkAdapterInformation() override;
+	NetworkConnectionStatus getNetworkConnectionStatus() override;
 
 private:
 	enum class WindowsMemoryType : uint8_t {

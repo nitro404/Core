@@ -12,8 +12,9 @@ public:
 	~LogSinkWindows() override;
 
 protected:
-	virtual void sink_it_(const spdlog::details::log_msg & logMessage) override;
-	virtual void flush_() override;
+	// spdlog::sinks::base_sink Virtuals
+	void sink_it_(const spdlog::details::log_msg & logMessage) override;
+	void flush_() override;
 
 private:
 	spdlog::memory_buf_t m_formatBuffer;

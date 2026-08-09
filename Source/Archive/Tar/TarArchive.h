@@ -19,16 +19,17 @@ public:
 		Entry & operator = (const Entry & t);
 		~Entry() override;
 
-		virtual std::string getPath() const override;
-		virtual uint64_t getIndex() const override;
-		virtual bool hasComment() const override;
-		virtual std::string getComment() const override;
-		virtual std::chrono::time_point<std::chrono::system_clock> getDate() const override;
-		virtual uint64_t getCompressedSize() const override;
-		virtual uint64_t getUncompressedSize() const override;
-		virtual std::unique_ptr<ByteBuffer> getData() const override;
-		virtual uint32_t getCRC32() const override;
-		virtual bool writeToFile(const std::string & filePath, bool overwrite = false) override;
+		// ArchiveEntry Virtuals
+		std::string getPath() const override;
+		uint64_t getIndex() const override;
+		bool hasComment() const override;
+		std::string getComment() const override;
+		std::chrono::time_point<std::chrono::system_clock> getDate() const override;
+		uint64_t getCompressedSize() const override;
+		uint64_t getUncompressedSize() const override;
+		std::unique_ptr<ByteBuffer> getData() const override;
+		uint32_t getCRC32() const override;
+		bool writeToFile(const std::string & filePath, bool overwrite = false) override;
 
 		uint32_t getFileMode() const;
 		uint32_t getUserID() const;
@@ -49,8 +50,9 @@ public:
 		static std::string fileTypeToString(uint8_t fileTypeFlag);
 
 	protected:
-		virtual Archive * getParentArchive() const override;
-		virtual bool setParentArchive(Archive * archive) override;
+		// ArchiveEntry Virtuals
+		Archive * getParentArchive() const override;
+		bool setParentArchive(Archive * archive) override;
 
 		static std::unique_ptr<Entry> parseFrom(const ByteBuffer & data);
 
@@ -98,15 +100,16 @@ public:
 	TarArchive & operator = (const TarArchive & t);
 	~TarArchive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
-	virtual std::string getFilePath() const override;
-	virtual bool hasComment() const override;
-	virtual std::string getComment() const override;
-	virtual size_t numberOfEntries() const override;
-	virtual size_t numberOfFiles() const override;
-	virtual size_t numberOfDirectories() const override;
-	virtual std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
-	virtual std::string toDebugString(bool includeDate = false) const override;
+	// Archive Virtuals
+	std::string getDefaultFileExtension() const override;
+	std::string getFilePath() const override;
+	bool hasComment() const override;
+	std::string getComment() const override;
+	size_t numberOfEntries() const override;
+	size_t numberOfFiles() const override;
+	size_t numberOfDirectories() const override;
+	std::vector<std::shared_ptr<ArchiveEntry>> getEntries() const override;
+	std::string toDebugString(bool includeDate = false) const override;
 
 	static bool isTarArchive(const std::string & filePath);
 	static bool isTarArchive(const ByteBuffer & data);
@@ -116,7 +119,8 @@ public:
 	static const std::string DEFAULT_FILE_EXTENSION;
 
 protected:
-	virtual void setFilePath(const std::string & filePath) override;
+	// Archive Virtuals
+	void setFilePath(const std::string & filePath) override;
 
 	TarArchive(const std::string & filePath = {});
 

@@ -17,12 +17,12 @@ public:
 	~ProcessWindows() override;
 
 	// Process Virtuals
-	virtual bool isRunning() const override;
-	virtual void wait() override;
-	virtual bool waitFor(std::chrono::milliseconds duration) override;
-	virtual void doTerminate() override;
-	virtual uint64_t getNativeExitCode() const override;
-	virtual std::optional<Priority> getPriority() const override;
+	bool isRunning() const override;
+	void wait() override;
+	bool waitFor(std::chrono::milliseconds duration) override;
+	void doTerminate() override;
+	uint64_t getNativeExitCode() const override;
+	std::optional<Priority> getPriority() const override;
 
 	static DWORD getWindowsProcessPriority(Process::Priority priority);
 	static Process::Priority getProcessPriority(DWORD priority);

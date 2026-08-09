@@ -11,7 +11,8 @@ public:
 	TarBZip2Archive & operator = (const TarBZip2Archive & t);
 	~TarBZip2Archive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
+	// CompressedTarArchive Virtuals
+	std::string getDefaultFileExtension() const override;
 
 	static bool isTarBZip2Archive(const std::string & filePath);
 	static bool isTarBZip2Archive(const ByteBuffer & data);

@@ -11,7 +11,8 @@ public:
 	CompressedTarArchive & operator = (const CompressedTarArchive & t);
 	~CompressedTarArchive() override;
 
-	virtual uint64_t getCompressedSize() const override;
+	// TarArchive Virtuals
+	uint64_t getCompressedSize() const override;
 
 	ByteBuffer::CompressionMethod getCompressionMethod() const;
 

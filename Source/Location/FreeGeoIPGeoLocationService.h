@@ -13,7 +13,8 @@ class FreeGeoIPGeoLocationService final : public GeoLocationService {
 public:
 	~FreeGeoIPGeoLocationService() override;
 
-	virtual std::optional<GeoLocation> getGeoLocation() override;
+	// GeoLocationService Virtuals
+	std::optional<GeoLocation> getGeoLocation() override;
 
 private:
 	FreeGeoIPGeoLocationService();

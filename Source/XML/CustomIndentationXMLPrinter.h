@@ -11,7 +11,8 @@ public:
 	~CustomIndentationXMLPrinter() override;
 
 protected:
-	virtual void PrintSpace(int depth) override;
+	// tinyxml2::XMLPrinter Virtuals
+	void PrintSpace(int depth) override;
 
 private:
 	std::string m_indentation;

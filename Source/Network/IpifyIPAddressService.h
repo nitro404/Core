@@ -11,7 +11,8 @@ class IpifyIPAddressService final : public IPAddressService {
 public:
 	~IpifyIPAddressService() override;
 
-	virtual std::string getIPAddress(IPAddressType type = IPAddressType::V4) override;
+	// IPAddressService Virtuals
+	std::string getIPAddress(IPAddressType type = IPAddressType::V4) override;
 
 private:
 	IpifyIPAddressService();

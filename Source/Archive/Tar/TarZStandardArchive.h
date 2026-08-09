@@ -11,7 +11,8 @@ public:
 	TarZStandardArchive & operator = (const TarZStandardArchive & t);
 	~TarZStandardArchive() override;
 
-	virtual std::string getDefaultFileExtension() const override;
+	// CompressedTarArchive Virtuals
+	std::string getDefaultFileExtension() const override;
 
 	static bool isTarZStandardArchive(const std::string & filePath);
 	static bool isTarZStandardArchive(const ByteBuffer & data);

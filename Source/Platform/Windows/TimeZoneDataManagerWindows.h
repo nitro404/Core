@@ -9,8 +9,9 @@ class TimeZoneDataManagerWindows final : public TimeZoneDataManager {
 public:
 	~TimeZoneDataManagerWindows() override;
 
-	virtual bool isSupported() const override;
-	virtual bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr) override;
+	// TimeZoneDataManager Virtuals
+	bool isSupported() const override;
+	bool platformInitialize(const std::string & dataDirectoryPath, std::map<std::string, std::string> & fileETags, bool shouldUpdate = true, bool forceUpdate = false, bool * updated = nullptr) override;
 
 private:
 	TimeZoneDataManagerWindows();

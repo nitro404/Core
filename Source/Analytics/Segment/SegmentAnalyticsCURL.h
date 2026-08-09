@@ -23,21 +23,22 @@ public:
 	bool isRunning() const;
 
 	// SegmentAnalytics Virtuals
-	virtual bool initialize(const Configuration & configuration) override;
-	virtual bool start() override;
-	virtual void stop() override;
-	virtual bool shouldTrackApplicationEvents() const override;
-	virtual bool flush(std::chrono::milliseconds waitForDuration = std::chrono::milliseconds(0)) override;
+	bool initialize(const Configuration & configuration) override;
+	bool start() override;
+	void stop() override;
+	bool shouldTrackApplicationEvents() const override;
+	bool flush(std::chrono::milliseconds waitForDuration = std::chrono::milliseconds(0)) override;
 
 	// LibraryInfoProvider Virtuals
-	virtual const std::string & getLibraryName() const override;
-	virtual const std::string & getLibraryVersion() const override;
+	const std::string & getLibraryName() const override;
+	const std::string & getLibraryVersion() const override;
 
 protected:
-	virtual const SegmentAnalytics::LibraryInfoProvider * getLibraryInfoProvider() const override;
+	// LibraryInfoProvider Virtuals
+	const SegmentAnalytics::LibraryInfoProvider * getLibraryInfoProvider() const override;
 
 	// SegmentAnalytics Virtuals
-	virtual bool queueEvent(std::unique_ptr<SegmentAnalyticEvent> analyticEvent) override;
+	bool queueEvent(std::unique_ptr<SegmentAnalyticEvent> analyticEvent) override;
 
 	bool sendSingleAnalyticEvent(std::shared_ptr<SegmentAnalyticEvent> analyticEvent);
 	bool sendAnalyticEventBatch(const std::vector<std::shared_ptr<SegmentAnalyticEvent>> & events);
