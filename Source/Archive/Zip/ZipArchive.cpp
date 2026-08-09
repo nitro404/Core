@@ -381,11 +381,13 @@ std::shared_ptr<ZipArchive::Entry> ZipArchive::addData(std::unique_ptr<ByteBuffe
 	}
 
 	if(!newFileEntry->setCompressionMethod(m_compressionMethod)) {
+		spdlog::error("Failed to set compression method to '{}' for new zip file entry: '{}'.", magic_enum::enum_name(m_compressionMethod), entryFilePath);
 		return nullptr;
 	}
 
 	if(!m_password.empty()) {
 		if(!newFileEntry->setEncryptionMethod(m_encryptionMethod)) {
+			spdlog::error("Failed to set encryption method to '{}' for new zip file entry: '{}'.", magic_enum::enum_name(m_encryptionMethod), entryFilePath);
 			return nullptr;
 		}
 	}
