@@ -2740,7 +2740,7 @@ std::string ByteBuffer::binaryToHexadecimal(const std::string & binary) {
 	std::unique_ptr<ByteBuffer> buffer(fromBinary(binary));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toHexadecimal();
@@ -2750,7 +2750,7 @@ std::string ByteBuffer::binaryToBase64(const std::string & binary) {
 	std::unique_ptr<ByteBuffer> buffer(fromBinary(binary));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toBase64();
@@ -2760,7 +2760,7 @@ std::string ByteBuffer::hexadecimalToBinary(const std::string & hexadecimal) {
 	std::unique_ptr<ByteBuffer> buffer(fromHexadecimal(hexadecimal));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toBinary();
@@ -2770,7 +2770,7 @@ std::string ByteBuffer::hexadecimalToBase64(const std::string & hexadecimal) {
 	std::unique_ptr<ByteBuffer> buffer(fromHexadecimal(hexadecimal));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toBase64();
@@ -2780,7 +2780,7 @@ std::string ByteBuffer::base64ToBinary(const std::string & base64) {
 	std::unique_ptr<ByteBuffer> buffer(fromBase64(base64));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toBinary();
@@ -2790,7 +2790,7 @@ std::string ByteBuffer::base64ToHexadecimal(const std::string & base64) {
 	std::unique_ptr<ByteBuffer> buffer(fromBase64(base64));
 
 	if(buffer == nullptr) {
-		return nullptr;
+		return {};
 	}
 
 	return buffer->toHexadecimal();
