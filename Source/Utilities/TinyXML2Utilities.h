@@ -29,8 +29,8 @@ namespace Utilities {
 	std::vector<const tinyxml2::XMLElement *> findXMLElementsWithClassNames(const tinyxml2::XMLElement * element, const std::vector<std::string> & classNames);
 	std::vector<const tinyxml2::XMLElement *> findXMLElementsWithFullText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive = false);
 	std::vector<const tinyxml2::XMLElement *> findXMLElementsContainingText(const tinyxml2::XMLElement * element, const std::string & text, bool caseSensitive = false);
-	std::string documentToString(const tinyxml2::XMLDocument * document);
-	std::string elementToString(const tinyxml2::XMLElement * element);
+	std::string documentToString(const tinyxml2::XMLDocument * document, bool compact = false, const std::string & indentation = "\t");
+	std::string elementToString(const tinyxml2::XMLElement * element, bool compact = false, int depth = 0, const std::string & indentation = "\t");
 	bool saveXMLDocumentToFile(const tinyxml2::XMLDocument * document, const std::string & filePath, bool overwrite = false, bool compact = false, const std::string & indentation = "\t");
 
 }

@@ -413,23 +413,23 @@ std::vector<const tinyxml2::XMLElement *> Utilities::findXMLElementsContainingTe
 	return matchingElements;
 }
 
-std::string Utilities::documentToString(const tinyxml2::XMLDocument * document) {
+std::string Utilities::documentToString(const tinyxml2::XMLDocument * document, bool compact, const std::string & indentation) {
 	if(document == nullptr) {
 		return {};
 	}
 
-	CustomIndentationXMLPrinter xmlPrinter;
+	CustomIndentationXMLPrinter xmlPrinter(nullptr, compact, 0, indentation);
 	document->Accept(&xmlPrinter);
 
 	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
 }
 
-std::string Utilities::elementToString(const tinyxml2::XMLElement * element) {
+std::string Utilities::elementToString(const tinyxml2::XMLElement * element, bool compact, int depth, const std::string & indentation) {
 	if(element == nullptr) {
 		return {};
 	}
 
-	CustomIndentationXMLPrinter xmlPrinter;
+	CustomIndentationXMLPrinter xmlPrinter(nullptr, compact, depth, indentation);
 	element->Accept(&xmlPrinter);
 
 	return std::string(xmlPrinter.CStr(), xmlPrinter.CStrSize() - 1);
