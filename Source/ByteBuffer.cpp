@@ -558,18 +558,10 @@ uint16_t ByteBuffer::getUnsignedShort(size_t offset, bool * error) const {
 		return 0;
 	}
 
-	if(m_endianness == Endianness::BigEndian) {
-		return fromBigEndian(static_cast<uint16_t>(
-			static_cast<uint16_t>((*m_data)[offset    ]       ) << 8 |
-			static_cast<uint16_t>((*m_data)[offset + 1] & 0xff)
-		));
-	}
-	else {
-		return fromBigEndian(static_cast<uint16_t>(
-			static_cast<uint16_t>((*m_data)[offset + 1]       ) << 8 |
-			static_cast<uint16_t>((*m_data)[offset    ] & 0xff)
-		));
-	}
+	uint16_t value = 0u;
+	std::memcpy(&value, m_data->data() + offset, sizeof(uint16_t));
+
+	return fromEndian(value, m_endianness);
 }
 
 std::optional<uint16_t> ByteBuffer::getUnsignedShort(size_t offset) const {
@@ -609,22 +601,10 @@ uint32_t ByteBuffer::getUnsignedInteger(size_t offset, bool * error) const {
 		return 0;
 	}
 
-	if(m_endianness == Endianness::BigEndian) {
-		return fromBigEndian(static_cast<uint32_t>(
-			static_cast<uint32_t>((*m_data)[offset    ]       ) << 24 |
-			static_cast<uint32_t>((*m_data)[offset + 1] & 0xff) << 16 |
-			static_cast<uint32_t>((*m_data)[offset + 2] & 0xff) << 8  |
-			static_cast<uint32_t>((*m_data)[offset + 3] & 0xff)
-		));
-	}
-	else {
-		return fromBigEndian(static_cast<uint32_t>(
-			static_cast<uint32_t>((*m_data)[offset + 3]       ) << 24 |
-			static_cast<uint32_t>((*m_data)[offset + 2] & 0xff) << 16 |
-			static_cast<uint32_t>((*m_data)[offset + 1] & 0xff) << 8  |
-			static_cast<uint32_t>((*m_data)[offset    ] & 0xff)
-		));
-	}
+	uint32_t value = 0u;
+	std::memcpy(&value, m_data->data() + offset, sizeof(uint32_t));
+
+	return fromEndian(value, m_endianness);
 }
 
 std::optional<uint32_t> ByteBuffer::getUnsignedInteger(size_t offset) const {
@@ -664,30 +644,10 @@ uint64_t ByteBuffer::getUnsignedLong(size_t offset, bool * error) const {
 		return 0L;
 	}
 
-	if(m_endianness == Endianness::BigEndian) {
-		return fromBigEndian(static_cast<uint64_t>(
-			static_cast<uint64_t>((*m_data)[offset    ]       ) << 56 |
-			static_cast<uint64_t>((*m_data)[offset + 1] & 0xff) << 48 |
-			static_cast<uint64_t>((*m_data)[offset + 2] & 0xff) << 40 |
-			static_cast<uint64_t>((*m_data)[offset + 3] & 0xff) << 32 |
-			static_cast<uint64_t>((*m_data)[offset + 4] & 0xff) << 24 |
-			static_cast<uint64_t>((*m_data)[offset + 5] & 0xff) << 16 |
-			static_cast<uint64_t>((*m_data)[offset + 6] & 0xff) << 8  |
-			static_cast<uint64_t>((*m_data)[offset + 7] & 0xff)
-		));
-	}
-	else {
-		return fromBigEndian(static_cast<uint64_t>(
-			static_cast<uint64_t>((*m_data)[offset + 7]       ) << 56 |
-			static_cast<uint64_t>((*m_data)[offset + 6] & 0xff) << 48 |
-			static_cast<uint64_t>((*m_data)[offset + 5] & 0xff) << 40 |
-			static_cast<uint64_t>((*m_data)[offset + 4] & 0xff) << 32 |
-			static_cast<uint64_t>((*m_data)[offset + 3] & 0xff) << 24 |
-			static_cast<uint64_t>((*m_data)[offset + 2] & 0xff) << 16 |
-			static_cast<uint64_t>((*m_data)[offset + 1] & 0xff) << 8  |
-			static_cast<uint64_t>((*m_data)[offset    ] & 0xff)
-		));
-	}
+	uint64_t value = 0u;
+	std::memcpy(&value, m_data->data() + offset, sizeof(uint64_t));
+
+	return fromEndian(value, m_endianness);
 }
 
 std::optional<uint64_t> ByteBuffer::getUnsignedLong(size_t offset) const {
@@ -1633,16 +1593,9 @@ bool ByteBuffer::putUnsignedShort(uint16_t value, size_t offset) {
 		return false;
 	}
 
-	uint16_t bigEndianValue = toBigEndian(value);
+	const uint16_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::memcpy(m_data->data() + offset, &formattedValue, sizeof(uint16_t));
 
 	return true;
 }
@@ -1656,20 +1609,9 @@ bool ByteBuffer::putUnsignedInteger(uint32_t value, size_t offset) {
 		return false;
 	}
 
-	uint32_t bigEndianValue = toBigEndian(value);
+	const uint32_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 24);
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 16);
-		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::memcpy(m_data->data() + offset, &formattedValue, sizeof(uint32_t));
 
 	return true;
 }
@@ -1683,28 +1625,9 @@ bool ByteBuffer::putUnsignedLong(uint64_t value, size_t offset) {
 		return false;
 	}
 
-	uint64_t bigEndianValue = toBigEndian(value);
+	const uint64_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue >> 56);
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 48);
-		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 40);
-		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 32);
-		(*m_data)[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 24);
-		(*m_data)[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 16);
-		(*m_data)[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset + 7] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		(*m_data)[offset + 7] = static_cast<uint8_t>(bigEndianValue >> 56);
-		(*m_data)[offset + 6] = static_cast<uint8_t>(bigEndianValue >> 48);
-		(*m_data)[offset + 5] = static_cast<uint8_t>(bigEndianValue >> 40);
-		(*m_data)[offset + 4] = static_cast<uint8_t>(bigEndianValue >> 32);
-		(*m_data)[offset + 3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		(*m_data)[offset + 2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		(*m_data)[offset + 1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		(*m_data)[offset    ] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::memcpy(m_data->data() + offset, &formattedValue, sizeof(uint64_t));
 
 	return true;
 }
@@ -1784,19 +1707,12 @@ bool ByteBuffer::insertUnsignedShort(uint16_t value, size_t offset) {
 		return false;
 	}
 
-	uint16_t bigEndianValue = toBigEndian(value);
-	uint8_t data[2];
+	const uint16_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		data[0] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[1] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		data[1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[0] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::array<uint8_t, sizeof(uint16_t)> data;
+	std::memcpy(data.data(), &value, sizeof(uint16_t));
 
-	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint16_t));
+	m_data->insert(m_data->begin() + offset, data.begin(), data.end());
 
 	return true;
 }
@@ -1810,23 +1726,12 @@ bool ByteBuffer::insertUnsignedInteger(uint32_t value, size_t offset) {
 		return false;
 	}
 
-	uint32_t bigEndianValue = toBigEndian(value);
-	uint8_t data[4];
+	const uint32_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		data[0] = static_cast<uint8_t>(bigEndianValue >> 24);
-		data[1] = static_cast<uint8_t>(bigEndianValue >> 16);
-		data[2] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[3] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		data[3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		data[2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		data[1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[0] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::array<uint8_t, sizeof(uint32_t)> data;
+	std::memcpy(data.data(), &value, sizeof(uint32_t));
 
-	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint32_t));
+	m_data->insert(m_data->begin() + offset, data.begin(), data.end());
 
 	return true;
 }
@@ -1840,31 +1745,12 @@ bool ByteBuffer::insertUnsignedLong(uint64_t value, size_t offset) {
 		return false;
 	}
 
-	uint64_t bigEndianValue = toBigEndian(value);
-	uint8_t data[8];
+	const uint64_t formattedValue = toEndian(value, m_endianness);
 
-	if(m_endianness == Endianness::BigEndian) {
-		data[0] = static_cast<uint8_t>(bigEndianValue >> 56);
-		data[1] = static_cast<uint8_t>(bigEndianValue >> 48);
-		data[2] = static_cast<uint8_t>(bigEndianValue >> 40);
-		data[3] = static_cast<uint8_t>(bigEndianValue >> 32);
-		data[4] = static_cast<uint8_t>(bigEndianValue >> 24);
-		data[5] = static_cast<uint8_t>(bigEndianValue >> 16);
-		data[6] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[7] = static_cast<uint8_t>(bigEndianValue);
-	}
-	else {
-		data[7] = static_cast<uint8_t>(bigEndianValue >> 56);
-		data[6] = static_cast<uint8_t>(bigEndianValue >> 48);
-		data[5] = static_cast<uint8_t>(bigEndianValue >> 40);
-		data[4] = static_cast<uint8_t>(bigEndianValue >> 32);
-		data[3] = static_cast<uint8_t>(bigEndianValue >> 24);
-		data[2] = static_cast<uint8_t>(bigEndianValue >> 16);
-		data[1] = static_cast<uint8_t>(bigEndianValue >> 8);
-		data[0] = static_cast<uint8_t>(bigEndianValue);
-	}
+	std::array<uint8_t, sizeof(uint64_t)> data;
+	std::memcpy(data.data(), &value, sizeof(uint64_t));
 
-	m_data->insert(m_data->begin() + offset, data, data + sizeof(uint64_t));
+	m_data->insert(m_data->begin() + offset, data.begin(), data.end());
 
 	return true;
 }
@@ -2883,8 +2769,8 @@ ByteBuffer ByteBuffer::operator + (const std::vector<uint8_t> & buffer) const {
 
 	ByteBuffer newBuffer(size);
 	newBuffer.resize(size, 0);
-	memcpy(newBuffer.m_data->data(), m_data->data(), m_data->size());
-	memcpy(newBuffer.m_data->data(), buffer.data(), buffer.size());
+	std::memcpy(newBuffer.m_data->data(), m_data->data(), m_data->size());
+	std::memcpy(newBuffer.m_data->data(), buffer.data(), buffer.size());
 
 	return newBuffer;
 }
