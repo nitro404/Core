@@ -11,7 +11,7 @@
 
 namespace Utilities {
 
-	const std::string emptyString;
+	extern const std::string emptyString;
 	bool isAlphaNumericUpperCase(char c);
 	bool isAlphaNumericLowerCase(char c);
 	bool isEmptyString(const char * s);

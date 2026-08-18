@@ -121,7 +121,7 @@ static std::string transformStringCase(std::string_view string, std::string_view
 	return formattedString.str();
 }
 
-extern const std::string Utilities::emptyString;
+const std::string Utilities::emptyString;
 
 bool Utilities::isAlphaNumericUpperCase(char c) {
 	return std::isdigit(c) || std::isupper(c);
