@@ -68,7 +68,7 @@ static const std::unordered_map<std::type_index, AnyToJSONConverterFunction> any
 		outputValue = rapidjson::Value(value);
 	}),
 	toAnyToJSONConverter<size_t> ([](size_t value, std::optional<rapidjson::Value> & outputValue, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
-		outputValue = rapidjson::Value(value);
+		outputValue = rapidjson::Value(static_cast<uint64_t>(value));
 	}),
 	toAnyToJSONConverter<float> ([](float value, std::optional<rapidjson::Value> & outputValue, rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> & allocator, bool allowNull) {
 		outputValue = rapidjson::Value(value);

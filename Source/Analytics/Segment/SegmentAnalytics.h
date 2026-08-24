@@ -40,6 +40,14 @@ public:
 		std::string userAgent;
 	};
 
+	class LibraryInfoProvider {
+	public:
+		virtual ~LibraryInfoProvider();
+
+		virtual const std::string & getLibraryName() const = 0;
+		virtual const std::string & getLibraryVersion() const = 0;
+	};
+
 	~SegmentAnalytics() override;
 
 	bool isInitialized() const;
@@ -73,14 +81,6 @@ public:
 	bool onApplicationClosed();
 
 protected:
-	class LibraryInfoProvider {
-	public:
-		virtual ~LibraryInfoProvider();
-
-		virtual const std::string & getLibraryName() const = 0;
-		virtual const std::string & getLibraryVersion() const = 0;
-	};
-
 	class DataStorage final {
 	public:
 		DataStorage();

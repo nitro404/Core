@@ -109,6 +109,8 @@ set(CORE_SOURCE_FILES
 	Location/GeoLocationService.cpp
 	Logging/LogSystem.h
 	Logging/LogSystem.cpp
+	Logging/LogSystemDefault.h
+	Logging/LogSystemDefault.cpp
 	Logging/Provider/LogProviderCDIO.h
 	Logging/Provider/LogProviderCDIO.cpp
 	Math/ExtendedMath.h
@@ -226,10 +228,7 @@ set(CORE_SOURCE_FILES_WINDOWS
 )
 
 set(CORE_SOURCE_FILES_LINUX
-	Archive/Linux/ArchiveFactoryRegistryLinux.cpp
 	Factory/Linux/FactoryRegistryLinux.cpp
-	Logging/Linux/LogSystemLinux.h
-	Logging/Linux/LogSystemLinux.cpp
 	Platform/Linux/DeviceInformationBridgeLinux.h
 	Platform/Linux/DeviceInformationBridgeLinux.cpp
 	Platform/Linux/LinuxUtilities.h
@@ -241,6 +240,23 @@ set(CORE_SOURCE_FILES_LINUX
 	Utilities/Linux/ThreadUtilitiesLinux.cpp
 )
 
+set(CORE_SOURCE_FILES_MACOS
+	Factory/MacOS/FactoryRegistryMacOS.cpp
+)
+
+if(NOT WINDOWS)
+	list(APPEND CORE_SOURCE_FILES_DEFAULT
+		Archive/ArchiveFactoryRegistryDefault.cpp
+	)
+endif()
+
+if(NOT WINDOWS AND NOT LINUX)
+	list(APPEND CORE_SOURCE_FILES_DEFAULT
+		Utilities/ThreadUtilitiesDefault.cpp
+	)
+endif()
+
+list(APPEND CORE_SOURCE_FILES ${CORE_SOURCE_FILES_DEFAULT})
 list(APPEND CORE_SOURCE_FILES ${CORE_SOURCE_FILES_${PLATFORM_UPPER}})
 
 list(TRANSFORM CORE_SOURCE_FILES PREPEND "${_SOURCE_DIRECTORY}/")

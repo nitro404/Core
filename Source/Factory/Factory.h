@@ -7,6 +7,8 @@
 class Factory {
 public:
 	Factory();
+    Factory(Factory && factory) noexcept;
+    Factory & operator = (Factory factory) noexcept;
 	virtual ~Factory();
 
 	template <class T>
