@@ -73,7 +73,7 @@ set(CORE_LIBRARIES
 	brotli::brotlicommon
 	brotli::brotlienc
 	brotli::brotlidec
-	BZip2::bz2_static
+	BZip2::bz2
 	c-ares::cares
 	cryptopp-static
 	CURL::libcurl
