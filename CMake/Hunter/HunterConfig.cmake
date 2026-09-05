@@ -196,9 +196,9 @@ hunter_config(liblzma
 )
 
 hunter_config(libzip
-	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.11.4.3.zip"
-	VERSION "1.11.4.3"
-	SHA1 "dd7a2fb086e4ba7706b89e144f4b4533dc75c164"
+	URL "https://github.com/Telefrag-Software/libzip/archive/refs/heads/hunter-1.11.4.4.zip"
+	VERSION "1.11.4.4"
+	SHA1 "4a8212101e8c8c14a47d60f690a8c8b75b926c2b"
 	CMAKE_ARGS
 		ENABLE_COMMONCRYPTO=ON
 		ENABLE_GNUTLS=ON
