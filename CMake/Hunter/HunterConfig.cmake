@@ -170,9 +170,9 @@ hunter_config(libcdio
 
 # XZ-Utils (LibLZMA) is used by LibZIP, LibTIFF, and wxWidgets.
 hunter_config(liblzma
-	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.2"
-	VERSION "5.8.2"
-	SHA1 "078a77cfee78937449a9f159c6d35fe81806f268"
+	URL "https://codeload.github.com/tukaani-project/xz/zip/tags/v5.8.3"
+	VERSION "5.8.3"
+	SHA1 "7be49b2412ff9df79e4b64229d94223136228534"
 	CMAKE_ARGS
 		BUILD_SHARED_LIBS=OFF
 		BUILD_TESTING=OFF
